@@ -207,3 +207,4 @@ GameData/
 8. **Update this file and relevant design docs** when a decision is made or a system changes.
 9. **Do not overengineer.** Build what is needed now, not what might be needed later.
 10. **Battle scenarios must be deterministic.** Same seed + same inputs = same result, always.
+11. **Run `dotnet format Everdawn.slnx` before every commit.** Do not wait for CI to catch formatting errors — format locally first. A pre-commit hook is installed at `.git/hooks/pre-commit` that does this automatically.
