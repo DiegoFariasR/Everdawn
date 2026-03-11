@@ -208,3 +208,16 @@ GameData/
 9. **Do not overengineer.** Build what is needed now, not what might be needed later.
 10. **Battle scenarios must be deterministic.** Same seed + same inputs = same result, always.
 11. **Run `dotnet format Everdawn.slnx` before every commit.** Do not wait for CI to catch formatting errors — format locally first. A pre-commit hook is installed at `.git/hooks/pre-commit` that does this automatically.
+
+---
+
+## Shorthand Dictionary
+
+These phrases have defined meanings when used in requests:
+
+| Phrase | Meaning |
+|---|---|
+| **"ship it"** | `dotnet format` → commit → new branch → push → create PR → squash-merge → sync local main → restart dev server on `http://localhost:5001` |
+| **"push fix"** | `dotnet format` → commit → push directly to `main` (for small hotfixes) |
+| **"start server"** | Kill port 5001 + `dotnet run --no-launch-profile --urls "http://localhost:5001"` in `BattleSandbox.Web/` |
+| **"debug production"** | Check recent GitHub Actions runs for failures (CI + Deploy) + verify `https://diegofariasr.github.io/Everdawn/` is reachable and returns HTTP 200 |
