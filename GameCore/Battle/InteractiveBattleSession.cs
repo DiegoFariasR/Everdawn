@@ -29,6 +29,11 @@ public class InteractiveBattleSession
         _hp        = _allUnits.ToDictionary(u => u.Id, u => u.MaxHp);
         _mp        = _allUnits.ToDictionary(u => u.Id, u => u.MaxMp);
         _rng       = new Random(seed);
+        // Apply initial cooldowns
+        foreach (var u in _allUnits)
+            foreach (var s in u.ResolvedSkills)
+                if (s.InitialCooldown > 0)
+                    _skillCooldowns[s.Id] = s.InitialCooldown;
     }
 
     /// <summary>

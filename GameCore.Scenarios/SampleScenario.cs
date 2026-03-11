@@ -28,7 +28,7 @@ public class SampleScenario : IBattleScenario
             [
                 new("mage-bolt",   "Magic Bolt",   MpCost: 0, Multiplier: 1.0),
                 new("mage-burst",  "Arcane Burst", MpCost: 0, Multiplier: 1.6, Cooldown: 3),
-                new("mage-meteor", "Meteor",        MpCost: 0, Multiplier: 2.0, IsAoe: true, Cooldown: 3),
+                new("mage-meteor", "Meteor",        MpCost: 0, Multiplier: 2.0, IsAoe: true, Cooldown: 3, InitialCooldown: 1),
             ]),
             new("rogue", "Rogue", "player", Level: 12, Str: 54, Wis:  0, Agi: 120, Skills:
             [
