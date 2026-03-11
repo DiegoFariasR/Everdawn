@@ -2,9 +2,16 @@
 
 ## Magic User
 - Has mana bar
-- Max mana based on WIS, starts at half and regens every round
+- Max mana based on WIS, starts at half and regens every start of round
 - Group by 10 mana as a slot
 - When available, spells can be empowered by 1 or more slots expended
+
+## Focus
+- Has focus bar
+- Fixed max 100, starts at 50
+- Each hit grants 10
+- Any damage reduces 10 focus
+- When full, the next non basic attack is empowered and set focus to 50
 
 ## Fury Control
 - Has fury bar
@@ -12,13 +19,6 @@
 - Any attack grants from 10 to 50 fury
 - Any damage grants 10 to 20 fury
 - When full, the next non basic attack is empowered and empties fury
-
-## Focus
-- Has focus bar
-- Fixed max 100, starts at 50
-- Any attack grants 10 to 20 focus
-- Any damage reduces 10 focus
-- When full, the next non basic attack is empowered and set focus to 50
 
 ## Divine
 - Has divine favors

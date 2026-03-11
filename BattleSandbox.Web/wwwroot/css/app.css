@@ -163,6 +163,10 @@ html, body {
 .btn-aoe { outline: 2px solid #ff9f1c; outline-offset: 1px; }
 .btn-aoe:not(:disabled):hover { outline-color: #ffcc70; }
 
+/* Selected skill highlight */
+.btn-selected { box-shadow: 0 0 0 2px #fff, 0 0 8px 1px rgba(255,255,255,0.35); }
+.btn-selected.btn-aoe { box-shadow: 0 0 0 2px #fff, 0 0 8px 1px rgba(255,255,255,0.35); outline: none; }
+
 .aoe-badge {
     display: inline-block;
     font-size: 0.55rem;
@@ -191,6 +195,19 @@ html, body {
     padding: 0 3px;
     margin-left: 4px;
     vertical-align: middle;
+}
+
+.cd-cost {
+    display: inline-block;
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #778899;
+    border-radius: 3px;
+    padding: 0 2px;
+    margin-left: 3px;
+    vertical-align: middle;
+    opacity: 0.75;
 }
 
 .action-hint {
@@ -255,6 +272,27 @@ html, body {
 
 .card-heal-target { border-color: #44cc88 !important; }
 .card-heal-target:hover { border-color: #88ffbb !important; }
+
+/* ── Floating damage / heal numbers ──────────────────── */
+@keyframes float-up {
+    0%   { transform: translateY(0);    opacity: 1; }
+    80%  { transform: translateY(-44px); opacity: 1; }
+    100% { transform: translateY(-56px); opacity: 0; }
+}
+
+.float-num {
+    position: absolute;
+    top: 6px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    animation: float-up 1.05s ease-out forwards;
+    z-index: 10;
+    text-shadow: 0 1px 3px #000;
+}
+.float-dmg  { color: #ff5555; }
+.float-heal { color: #55ee88; }
 .card-targeted {
     border-color: #ff4444 !important;
     box-shadow: 0 0 8px #ff444444;
@@ -507,6 +545,8 @@ html, body {
     line-height: 1.4;
 }
 .event-entry:hover { background: #161b22; color: #aaa; }
+.play-log .event-entry:not(.event-current):hover { background: #1c1200; color: #ddaa55; }
+.play-log .event-entry:not(.event-current):hover::before { content: "↩ "; opacity: 0.7; }
 .event-entry.event-current {
     background: #1e1f00;
     color: #ffd700;

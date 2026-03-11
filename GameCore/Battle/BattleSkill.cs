@@ -15,5 +15,7 @@ public record BattleSkill(
     BattleSkillTarget Target = BattleSkillTarget.Enemy,
     bool IsHeal = false,
     /// <summary>Turns this unit must wait before using this skill again. 0 = no cooldown.</summary>
-    int Cooldown = 0
+    int Cooldown = 0,
+    /// <summary>Cooldown this skill starts with at the beginning of battle.</summary>
+    int InitialCooldown = 0
 );

@@ -21,9 +21,9 @@
         <div class="picker-row">
             <label for="auto-speed">Speed</label>
             <select id="auto-speed" @bind="_autoDelay">
-                <option value="200">Fast</option>
-                <option value="600">Normal</option>
-                <option value="1200">Slow</option>
+                <option value="600">Fast</option>
+                <option value="1200">Normal</option>
+                <option value="2400">Slow</option>
             </select>
             <button class="btn-auto @(_autoMode ? "btn-auto-on" : "")" @onclick="ToggleAuto">
                 ⚡ Auto @(_autoMode ? "ON" : "OFF")
@@ -39,6 +39,7 @@
         var pending = _response.PendingInput;
         var pendingSkill = _pendingAction != null ? pending?.Skills.FirstOrDefault(s => s.Id == _pendingAction) : null;
         bool pendingTargetIsAlly = pendingSkill?.Target == BattleSkillTarget.Ally;
+        bool pendingIsAoe        = pendingSkill?.IsAoe ?? false;
         string? activeUnitId = pending?.Actor.Id ?? lastEv?.ActorId;
 
         <section class="portrait-strip">
@@ -75,12 +76,17 @@
                     int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
                     int mpPct = u.MaxMp > 0 ? st.CurrentMp * 100 / u.MaxMp : 0;
                     string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
-                    bool canHealTarget = pendingTargetIsAlly && _pendingAction != null && st.IsAlive && !_autoMode;
+                    bool canHealTarget = pendingTargetIsAlly && !pendingIsAoe && _pendingAction != null && st.IsAlive && !_autoMode;
                     <div class="unit-card
                         @(activeUnitId == u.Id ? "card-active" : "")
                         @(!st.IsAlive ? "card-dead" : "")
                         @(canHealTarget ? "card-targetable card-heal-target" : "")"
+                        style="position:relative"
                         @onclick="() => { if (canHealTarget) ConfirmTarget(u.Id); }">
+                        @foreach (var f in _floats.Where(f => f.UnitId == u.Id))
+                        {
+                            <span class="float-num @(f.IsHeal ? "float-heal" : "float-dmg")" style="left:@(f.OffsetPct)%" @key="f.Key">@(f.IsHeal ? "+" : "-")@f.Value</span>
+                        }
                         <div class="avatar player-avatar">@u.Name[0]</div>
                         <div class="unit-info">
                             <div class="unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
@@ -89,7 +95,7 @@
                             {
                                 <div class="bar-wrap"><div class="mp-bar" style="width:@mpPct%"></div></div>
                             }
-                            <div class="stat-text">@st.CurrentHp/@u.MaxHp HP  @st.CurrentMp/@u.MaxMp MP</div>
+                            <div class="stat-text">@st.CurrentHp/@u.MaxHp HP &nbsp;|&nbsp; STR @u.Str &nbsp;WIS @u.Wis &nbsp;AGI @u.Agi</div>
                         </div>
                     </div>
                 }
@@ -104,18 +110,23 @@
                     var st = state.First(s => s.UnitId == u.Id);
                     int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
                     string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
-                    bool canTarget = pending != null && _pendingAction != null && st.IsAlive && !_autoMode && !pendingTargetIsAlly;
+                    bool canTarget = pending != null && _pendingAction != null && !pendingIsAoe && st.IsAlive && !_autoMode && !pendingTargetIsAlly;
 
                     <div class="unit-card
                         @(activeUnitId == u.Id ? "card-active" : "")
                         @(!st.IsAlive ? "card-dead" : "")
                         @(canTarget ? "card-targetable" : "")"
+                        style="position:relative"
                         @onclick="() => { if (canTarget) ConfirmTarget(u.Id); }">
+                        @foreach (var f in _floats.Where(f => f.UnitId == u.Id))
+                        {
+                            <span class="float-num @(f.IsHeal ? "float-heal" : "float-dmg")" style="left:@(f.OffsetPct)%" @key="f.Key">@(f.IsHeal ? "+" : "-")@f.Value</span>
+                        }
                         <div class="avatar enemy-avatar">@u.Name[0]</div>
                         <div class="unit-info">
                             <div class="unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
                             <div class="bar-wrap"><div class="hp-bar" style="width:@hpPct%;background:@hpColor"></div></div>
-                            <div class="stat-text">@st.CurrentHp/@u.MaxHp HP</div>
+                            <div class="stat-text">@st.CurrentHp/@u.MaxHp HP &nbsp;|&nbsp; STR @u.Str &nbsp;WIS @u.Wis &nbsp;AGI @u.Agi</div>
                         </div>
                     </div>
                 }
@@ -134,19 +145,20 @@
                         <span style="opacity:0.6">⚡ Auto resolving…</span>
                     </div>
                 }
-                else if (_pendingAction == null)
+                else
                 {
                     <div class="action-buttons">
                         @for (int si = 0; si < pending.Skills.Count; si++)
                         {
                             var skill        = pending.Skills[si];
                             bool canUse      = pending.AvailableSkillIds.Contains(skill.Id);
+                            bool isSelected  = skill.Id == _pendingAction;
                             string btnClass  = si == 0 ? "btn-attack" : si == 1 ? "btn-skill" : "btn-soulburn";
                             string skillId   = skill.Id;
                             bool isAoe       = skill.IsAoe;
                             bool isAllySkill = skill.Target == BattleSkillTarget.Ally;
                             int  cdLeft      = pending.SkillCooldowns.GetValueOrDefault(skill.Id);
-                            <button class="btn-action @btnClass @(isAoe ? "btn-aoe" : "") @(isAllySkill ? "btn-heal" : "")"
+                            <button class="btn-action @btnClass @(isAoe ? "btn-aoe" : "") @(isAllySkill ? "btn-heal" : "") @(isSelected ? "btn-selected" : "")"
                                     disabled="@(!canUse)"
                                     @onclick="() => { if (isAoe) FireAoe(skillId); else _pendingAction = skillId; }">
                                 @skill.Name
@@ -154,16 +166,9 @@
                                 @if (isAllySkill) { <span class="ally-badge">ALLY</span> }
                                 @if (cdLeft > 0) { <span class="cd-badge">CD @cdLeft</span> }
                                 else if (skill.MpCost > 0) { <span class="mp-cost">@skill.MpCost MP</span> }
+                                @if (cdLeft == 0 && skill.Cooldown > 0) { <span class="cd-cost">→@skill.Cooldown</span> }
                             </button>
                         }
-                    </div>
-                }
-                else
-                {
-                    string pendingSkillName = pending.Skills.FirstOrDefault(s => s.Id == _pendingAction)?.Name ?? _pendingAction!;
-                    <div class="target-prompt">
-                        <span class="target-prompt-label">@pendingSkillName — pick a target</span>
-                        <button class="btn-cancel" @onclick="() => _pendingAction = null">✕ Cancel</button>
                     </div>
                 }
             </section>
@@ -176,10 +181,15 @@
             </section>
         }
 
-        <section class="event-log" id="play-log">
-            @foreach (var ev in _response.FullLog)
+        <section class="event-log play-log" id="play-log">
+            @for (int i = 0; i < _response.FullLog.Count; i++)
             {
-                <div class="event-entry @ev.Type @(_response.FullLog.Count > 0 && _response.FullLog[^1] == ev ? "event-current" : "")">
+                var ev  = _response.FullLog[i];
+                bool isLast = i == _response.FullLog.Count - 1;
+                int  idx = i;
+                <div class="event-entry @ev.Type @(isLast ? "event-current" : "")"
+                     title="@(!_autoMode ? "Click to undo to this point" : "")"
+                     @onclick="() => UndoToEvent(idx)">
                     @ev.Description
                 </div>
             }
@@ -286,6 +296,11 @@
     private bool _autoMode;
     private int _autoDelay = 600;
 
+    // ── Action history (for undo) ────────────────────────────────
+    private record ActionRecord(bool IsAuto, string? SkillId, string? TargetId, int LogCountBefore);
+    private List<ActionRecord> _actionHistory = [];
+    private BattleRequest? _startRequest;
+
     // ── Watch mode ───────────────────────────────────────────────
     private BattleResult? _result;
     private int _step;
@@ -308,8 +323,11 @@
 
         if (_playMode)
         {
+            _startRequest  = new StartBattleRequest();
+            _actionHistory = [];
             _session  = new InteractiveBattleSession(_setup, _currentScenario.Seed);
-            _response = _session.HandleRequest(new StartBattleRequest());
+            _response = _session.HandleRequest(_startRequest);
+            SelectDefaultSkill();
             if (_autoMode) _ = RunAutoAsync();
         }
         else
@@ -322,10 +340,12 @@
     private void TakeControlFromHere()
     {
         if (_result == null || _setup == null || _currentScenario == null) return;
-        var snap = _result.Snapshots[_step];
+        var snap   = _result.Snapshots[_step];
+        _startRequest  = new ResumeFromSnapshotRequest(snap.UnitStates, snap.Event.ActorId, _step + 1);
+        _actionHistory = [];
         _session  = new InteractiveBattleSession(_setup, _currentScenario.Seed);
-        _response = _session.HandleRequest(new ResumeFromSnapshotRequest(snap.UnitStates, snap.Event.ActorId, _step + 1));
-        _pendingAction = null;
+        _response = _session.HandleRequest(_startRequest);
+        SelectDefaultSkill();
         _playMode = true;
         _result   = null;
         if (_autoMode) _ = RunAutoAsync();
@@ -344,8 +364,10 @@
         {
             await Task.Delay(_autoDelay);
             if (!_autoMode || _session == null) break;
+            _actionHistory.Add(new ActionRecord(true, null, null, _response!.FullLog.Count));
             _response = _session.HandleRequest(new AutoPlayerActionRequest());
-            _pendingAction = null;
+            SpawnFloats(_response);
+            SelectDefaultSkill();
             StateHasChanged();
         }
     }
@@ -353,18 +375,70 @@
     private void FireAoe(string skillId)
     {
         if (_session is null) return;
-        string? noTarget = null;
-        _response = _session.HandleRequest(new PlayerActionRequest(skillId, noTarget));
-        _pendingAction = null;
+        _actionHistory.Add(new ActionRecord(false, skillId, null, _response!.FullLog.Count));
+        _response = _session.HandleRequest(new PlayerActionRequest(skillId, null));
+        SpawnFloats(_response);
+        SelectDefaultSkill();
     }
 
     private void ConfirmTarget(string targetId)
     {
         if (_session is null || _pendingAction is null) return;
+        _actionHistory.Add(new ActionRecord(false, _pendingAction, targetId, _response!.FullLog.Count));
         _response = _session.HandleRequest(new PlayerActionRequest(_pendingAction, targetId));
-        _pendingAction = null;
+        SpawnFloats(_response);
+        SelectDefaultSkill();
     }
 
+
+    // ── Undo ──────────────────────────────────────────────────────
+    private void UndoToEvent(int logIndex)
+    {
+        if (_session == null || _setup == null || _currentScenario == null || _startRequest == null) return;
+        if (_autoMode) return;
+
+        // Count how many actions to replay: action j is replayed only if ALL its
+        // produced events are strictly before logIndex (next action's LogCountBefore <= logIndex).
+        int actionsToReplay = 0;
+        for (int j = 0; j < _actionHistory.Count; j++)
+        {
+            int nextLogCount = j + 1 < _actionHistory.Count
+                ? _actionHistory[j + 1].LogCountBefore
+                : _response!.FullLog.Count;
+            if (nextLogCount <= logIndex)
+                actionsToReplay = j + 1;
+            else
+                break;
+        }
+
+        var newSession = new InteractiveBattleSession(_setup, _currentScenario.Seed);
+        BattleResponse resp = newSession.HandleRequest(_startRequest);
+        for (int j = 0; j < actionsToReplay; j++)
+        {
+            var a = _actionHistory[j];
+            BattleRequest req = a.IsAuto
+                ? new AutoPlayerActionRequest()
+                : new PlayerActionRequest(a.SkillId!, a.TargetId);
+            resp = newSession.HandleRequest(req);
+        }
+
+        _session       = newSession;
+        _response      = resp;
+        _actionHistory = _actionHistory.Take(actionsToReplay).ToList();
+        _floats.Clear();
+        SelectDefaultSkill();
+    }
+
+    // ── Default skill selection ───────────────────────────────────
+    /// <summary>Pre-selects the same skill the auto AI would pick (last available).
+    /// Called whenever _response changes in play mode.</summary>
+    private void SelectDefaultSkill()
+    {
+        var p = _response?.PendingInput;
+        if (p is null) { _pendingAction = null; return; }
+        var def = p.Skills.LastOrDefault(s => p.AvailableSkillIds.Contains(s.Id));
+        _pendingAction = def?.Id;
+    }
 
     // ── Watch mode helpers ────────────────────────────────────────
     private BattleSnapshot? CurrentSnapshot => _result?.Snapshots[_step];
@@ -372,4 +446,30 @@
     private void StepBack()    => _step = Math.Max(0, _step - 1);
     private void JumpToStart() => _step = 0;
     private void JumpToEnd()   => _step = (_result?.Snapshots.Count ?? 1) - 1;
+
+    // ── Floating numbers ─────────────────────────────────────────
+    private record FloatNumber(string UnitId, int Value, bool IsHeal, int OffsetPct, int Key);
+    private readonly List<FloatNumber> _floats = [];
+    private int _floatKey = 0;
+
+    private void SpawnFloats(BattleResponse? response)
+    {
+        if (response is null) return;
+        foreach (var ev in response.NewEvents)
+        {
+            if (ev.TargetId is null || ev.Value <= 0) continue;
+            bool isHeal = ev.Type == "skill" && ev.Description.Contains("heal", StringComparison.OrdinalIgnoreCase);
+            int offset  = 20 + (_floatKey % 5) * 12;   // spread horizontally so multi-hits don't stack
+            _floats.Add(new FloatNumber(ev.TargetId, ev.Value, isHeal, offset, _floatKey++));
+        }
+        if (_floats.Count > 0)
+            _ = ExpireFloatsAsync();
+    }
+
+    private async Task ExpireFloatsAsync()
+    {
+        await Task.Delay(1100);   // matches CSS animation duration
+        _floats.Clear();
+        StateHasChanged();
+    }
 }
