@@ -17,12 +17,12 @@ public class SampleScenario : IBattleScenario
     {
         PlayerUnits =
         [
-            new("knight", "Knight", "player", Level: 12, MaxHp: 8500, MaxMp: 80, Attack: 650, Initiative: 55, Skills:
+            new("paladin", "Paladin", "player", Level: 12, MaxHp: 8500, MaxMp: 0, Attack: 650, Initiative: 55, Skills:
             [
-                new("knight-strike",   "Strike",       MpCost:  0, Multiplier: 1.0),
-                new("knight-bash",     "Shield Bash",  MpCost: 30, Multiplier: 1.4),
-                new("knight-heal",     "Lay on Hands", MpCost: 60, Multiplier: 1.2,
-                    Target: BattleSkillTarget.Ally, IsHeal: true),
+                new("paladin-strike",  "Strike",       MpCost: 0, Multiplier: 1.0),
+                new("paladin-bash",    "Shield Bash",  MpCost: 0, Multiplier: 1.4, Cooldown: 3),
+                new("paladin-heal",    "Lay on Hands", MpCost: 0, Multiplier: 1.2,
+                    Target: BattleSkillTarget.Ally, IsHeal: true, Cooldown: 3),
             ]),
             new("mage", "Mage", "player", Level: 12, MaxHp: 6200, MaxMp: 120, Attack: 950, Initiative: 70, Skills:
             [

@@ -14,5 +14,7 @@ public record BattlePendingInput(
     /// <summary>Living enemy units — valid targets for damage/enemy-targeted skills.</summary>
     IReadOnlyList<BattleUnit> EnemyTargets,
     /// <summary>Living ally units including self — valid targets for heal/ally-targeted skills.</summary>
-    IReadOnlyList<BattleUnit> AllyTargets
+    IReadOnlyList<BattleUnit> AllyTargets,
+    /// <summary>Remaining cooldown turns per skill ID. Only contains entries where cooldown > 0.</summary>
+    IReadOnlyDictionary<string, int> SkillCooldowns
 );

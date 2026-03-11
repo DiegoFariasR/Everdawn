@@ -18,6 +18,7 @@ public class InteractiveBattleSession
     private int _turnIndex;
     private int _round = 1;
     private bool _started;
+    private readonly Dictionary<string, int> _skillCooldowns = new();
     private bool _isOver;
     private string? _winningTeam;
 
@@ -114,7 +115,7 @@ public class InteractiveBattleSession
             throw new InvalidOperationException("Not a player turn.");
 
         var actor   = _turnOrder[_turnIndex];
-        var skill   = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost).Last();
+        var skill   = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost && _skillCooldowns.GetValueOrDefault(s.Id) <= 0).Last();
         var targets = ResolveAutoTargets(actor, skill);
         if (targets.Count == 0) { CheckEnd(); return BuildResponse([]); }
 
@@ -136,9 +137,11 @@ public class InteractiveBattleSession
             pending = new BattlePendingInput(
                 Actor:             actor,
                 Skills:            skills,
-                AvailableSkillIds: skills.Where(s => _mp[actor.Id] >= s.MpCost).Select(s => s.Id).ToArray(),
+                AvailableSkillIds: skills.Where(s => _mp[actor.Id] >= s.MpCost && _skillCooldowns.GetValueOrDefault(s.Id) <= 0).Select(s => s.Id).ToArray(),
                 EnemyTargets:      _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToArray(),
-                AllyTargets:       _allUnits.Where(u => u.Team == actor.Team && _hp[u.Id] > 0).ToArray()
+                AllyTargets:       _allUnits.Where(u => u.Team == actor.Team && _hp[u.Id] > 0).ToArray(),
+                SkillCooldowns:    skills.Where(s => _skillCooldowns.GetValueOrDefault(s.Id) > 0)
+                                         .ToDictionary(s => s.Id, s => _skillCooldowns[s.Id])
             );
         }
 
@@ -161,7 +164,7 @@ public class InteractiveBattleSession
         while (!_isOver && _turnOrder[_turnIndex].Team != "player")
         {
             var actor   = _turnOrder[_turnIndex];
-            var skill   = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost).Last();
+            var skill   = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost && _skillCooldowns.GetValueOrDefault(s.Id) <= 0).Last();
             var targets = ResolveAutoTargets(actor, skill);
             if (targets.Count == 0) { CheckEnd(); break; }
 
@@ -198,6 +201,11 @@ public class InteractiveBattleSession
     private IReadOnlyList<BattleEvent> ExecuteAction(BattleUnit actor, List<BattleUnit> targets, BattleSkill skill)
     {
         var produced = new List<BattleEvent>();
+
+        // Tick down this actor's cooldowns (one turn has passed for them)
+        foreach (var s in actor.ResolvedSkills)
+            if (_skillCooldowns.TryGetValue(s.Id, out int cd) && cd > 0)
+                _skillCooldowns[s.Id] = cd - 1;
 
         // Consume MP once (skill[0] always has MpCost == 0)
         _mp[actor.Id] = Math.Max(0, _mp[actor.Id] - skill.MpCost);
@@ -239,6 +247,10 @@ public class InteractiveBattleSession
                     produced.Add(AddEvent(target.Id, $"{target.Name} is defeated!", "death"));
             }
         }
+
+        // Apply cooldown for the used skill
+        if (skill.Cooldown > 0)
+            _skillCooldowns[skill.Id] = skill.Cooldown;
 
         CheckEnd();
         return produced;

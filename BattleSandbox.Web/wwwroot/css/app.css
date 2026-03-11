@@ -179,6 +179,20 @@ html, body {
 
 .mp-cost { font-size: 0.6rem; font-weight: 400; opacity: 0.8; }
 
+.cd-badge {
+    display: inline-block;
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #ff7744;
+    background: #1a0a00;
+    border: 1px solid #ff7744;
+    border-radius: 3px;
+    padding: 0 3px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
 .action-hint {
     font-size: 0.72rem;
     color: #556677;
