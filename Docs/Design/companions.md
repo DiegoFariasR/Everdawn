@@ -25,6 +25,6 @@
 
 ### Mediocre Druid
 - Inferior complexity
-- Anedonia
+- Anhedonia
 
 ### Horned Assassin
