@@ -39,23 +39,23 @@ public class SampleScenario : IBattleScenario
         ],
         EnemyUnits =
         [
-            new("goblin-w", "Goblin Warrior", "enemy", Level: 11, MaxHp: 4500, MaxMp: 0, Attack: 580, Initiative: 50, Skills:
+            new("goblin-w", "Goblin Warrior", "enemy", Level: 14, MaxHp: 7000, MaxMp: 0, Attack: 820, Initiative: 50, Skills:
             [
                 new("gw-slash",   "Slash",   MpCost: 0, Multiplier: 1.0),
-                new("gw-warcry",  "War Cry", MpCost: 0, Multiplier: 1.3, Cooldown: 3),
-                new("gw-frenzy",  "Frenzy",  MpCost: 0, Multiplier: 1.8, Cooldown: 3),
+                new("gw-warcry",  "War Cry", MpCost: 0, Multiplier: 1.6, Cooldown: 3),
+                new("gw-frenzy",  "Frenzy",  MpCost: 0, Multiplier: 2.4, Cooldown: 3),
             ]),
-            new("goblin-a", "Goblin Archer", "enemy", Level: 11, MaxHp: 3500, MaxMp: 0, Attack: 520, Initiative: 80, Skills:
+            new("goblin-a", "Goblin Archer", "enemy", Level: 14, MaxHp: 5500, MaxMp: 0, Attack: 750, Initiative: 80, Skills:
             [
                 new("ga-shot",    "Arrow Shot",   MpCost: 0, Multiplier: 1.0),
-                new("ga-precise", "Precise Shot", MpCost: 0, Multiplier: 1.4, Cooldown: 3),
-                new("ga-volley",  "Volley",       MpCost: 0, Multiplier: 1.9, Cooldown: 3),
+                new("ga-precise", "Precise Shot", MpCost: 0, Multiplier: 1.8, Cooldown: 3),
+                new("ga-volley",  "Volley",       MpCost: 0, Multiplier: 2.2, Cooldown: 3),
             ]),
-            new("necro", "Necromancer", "enemy", Level: 12, MaxHp: 5500, MaxMp: 0, Attack: 750, Initiative: 65, Skills:
+            new("necro", "Necromancer", "enemy", Level: 15, MaxHp: 9000, MaxMp: 0, Attack: 1050, Initiative: 65, Skills:
             [
                 new("necro-bolt",  "Dark Bolt",   MpCost: 0, Multiplier: 1.0),
-                new("necro-drain", "Life Drain",  MpCost: 0, Multiplier: 1.5, Cooldown: 3),
-                new("necro-soul",  "Soul Siphon", MpCost: 0, Multiplier: 2.4, Cooldown: 3),
+                new("necro-drain", "Life Drain",  MpCost: 0, Multiplier: 1.8, Cooldown: 3),
+                new("necro-soul",  "Soul Siphon", MpCost: 0, Multiplier: 3.0, Cooldown: 3),
             ]),
         ],
     };
