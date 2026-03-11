@@ -1,0 +1,42 @@
+﻿@page "/"
+@using GameCore.Scenarios
+
+<PageTitle>Battle Sandbox</PageTitle>
+
+<section class="scenario-picker">
+    <label for="scenario">Scenario</label>
+    <select id="scenario" @bind="_selectedScenarioId">
+        @foreach (var s in _scenarios)
+        {
+            <option value="@s.Id">@s.Id (seed: @s.Seed)</option>
+        }
+    </select>
+    <button class="btn-run" @onclick="RunBattle">Run</button>
+</section>
+
+@if (_ran)
+{
+    <section class="battle-result">
+        <p>Scenario <strong>@_selectedScenarioId</strong> executed.</p>
+        <p>Battle engine not yet implemented — this is a placeholder.</p>
+    </section>
+}
+
+@code {
+    private List<SampleScenario> _scenarios = [];
+    private string _selectedScenarioId = "";
+    private bool _ran;
+
+    protected override void OnInitialized()
+    {
+        var sample = new SampleScenario();
+        _scenarios = [sample];
+        _selectedScenarioId = sample.Id;
+    }
+
+    private void RunBattle()
+    {
+        // TODO: run the selected scenario through GameCore's battle engine
+        _ran = true;
+    }
+}
