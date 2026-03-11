@@ -26,7 +26,13 @@ html, body {
 /* ── Scenario picker ──────────────────────────────── */
 .picker {
     display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.picker-row {
+    display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 0.5rem;
     align-items: center;
 }
@@ -63,6 +69,28 @@ html, body {
     letter-spacing: 0.02em;
 }
 .btn-run:active { background: #1559a0; }
+
+/* Auto toggle */
+.btn-auto {
+    padding: 0.45rem 1.1rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #aaa;
+    background: #21262d;
+    border: 1px solid #444;
+    border-radius: 6px;
+    cursor: pointer;
+    min-height: 40px;
+    letter-spacing: 0.02em;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.btn-auto:hover { border-color: #888; color: #fff; }
+.btn-auto-on {
+    color: #ffe44d;
+    background: #2a2200;
+    border-color: #c8a000;
+}
+.btn-auto-on:hover { background: #332900; }
 
 /* Mode toggle */
 .btn-mode {
@@ -131,7 +159,39 @@ html, body {
 .btn-soulburn { background: #6a1ac4; color: #fff; }
 .btn-soulburn:not(:disabled):active { background: #551097; }
 
+/* AoE modifier — layered on top of existing skill button colour */
+.btn-aoe { outline: 2px solid #ff9f1c; outline-offset: 1px; }
+.btn-aoe:not(:disabled):hover { outline-color: #ffcc70; }
+
+.aoe-badge {
+    display: inline-block;
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #ff9f1c;
+    background: #1a0f00;
+    border: 1px solid #ff9f1c;
+    border-radius: 3px;
+    padding: 0 3px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
 .mp-cost { font-size: 0.6rem; font-weight: 400; opacity: 0.8; }
+
+.cd-badge {
+    display: inline-block;
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #ff7744;
+    background: #1a0a00;
+    border: 1px solid #ff7744;
+    border-radius: 3px;
+    padding: 0 3px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
 
 .action-hint {
     font-size: 0.72rem;
@@ -174,6 +234,27 @@ html, body {
 /* ── Target selection ─────────────────────────────────────── */
 .card-targetable { cursor: pointer; }
 .card-targetable:hover { border-color: #888; }
+
+/* Heal/ally-target modifier */
+.btn-heal { outline: 2px solid #44cc88; outline-offset: 1px; }
+.btn-heal:not(:disabled):hover { outline-color: #88ffbb; }
+
+.ally-badge {
+    display: inline-block;
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #44cc88;
+    background: #001a0f;
+    border: 1px solid #44cc88;
+    border-radius: 3px;
+    padding: 0 3px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+.card-heal-target { border-color: #44cc88 !important; }
+.card-heal-target:hover { border-color: #88ffbb !important; }
 .card-targeted {
     border-color: #ff4444 !important;
     box-shadow: 0 0 8px #ff444444;
@@ -257,6 +338,7 @@ html, body {
 }
 .current-event.attack { color: #ffcc55; border-color: #5a4a00; background: #1e1800; }
 .current-event.death  { color: #ff6655; border-color: #5a1a1a; background: #1e0a0a; }
+.current-event.round  { color: #88aaff; border-color: #1a2a5a; background: #0a0e1e; }
 .current-event.start,
 .current-event.end    { color: #88ddaa; border-color: #1a4a2a; background: #0a1e14; }
 
@@ -432,6 +514,8 @@ html, body {
 }
 .event-entry.death.event-current { background: #1e0a0a; color: #ff6655; }
 .event-entry.end.event-current   { background: #0a1e14; color: #88ddaa; }
+.event-entry.round               { color: #4466bb; font-style: italic; }
+.event-entry.round.event-current { background: #0a0e1e; color: #88aaff; }
 .event-num { color: #334455; margin-right: 0.3rem; }
 
 /* ── Blazor infrastructure ────────────────────────── */
