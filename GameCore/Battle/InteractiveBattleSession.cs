@@ -8,9 +8,6 @@ namespace GameCore.Battle;
 /// </summary>
 public class InteractiveBattleSession
 {
-    private const int SkillMpCost    = 30;
-    private const int SoulBurnMpCost = 60;
-
     private readonly List<BattleUnit> _allUnits;
     private readonly List<BattleUnit> _turnOrder;
     private readonly Dictionary<string, int> _hp;
@@ -87,10 +84,12 @@ public class InteractiveBattleSession
             throw new InvalidOperationException("Not a player turn.");
 
         var actor  = _turnOrder[_turnIndex];
+        var skill  = actor.ResolvedSkills.FirstOrDefault(s => s.Id == r.SkillId)
+                     ?? throw new ArgumentException($"Unknown skill: {r.SkillId}");
         var target = _allUnits.FirstOrDefault(u => u.Id == r.TargetId)
                      ?? throw new ArgumentException($"Unknown target: {r.TargetId}");
 
-        var newEvents = new List<BattleEvent>(ExecuteAction(actor, target, r.Action));
+        var newEvents = new List<BattleEvent>(ExecuteAction(actor, target, skill));
         AdvanceTurn();
         newEvents.AddRange(AutoAdvance());
         return BuildResponse(newEvents);
@@ -108,11 +107,12 @@ public class InteractiveBattleSession
         if (targets.Count == 0) { CheckEnd(); return BuildResponse([]); }
 
         var target = targets[_rng.Next(targets.Count)];
-        var action = _mp[actor.Id] >= SoulBurnMpCost ? PlayerActionType.SoulBurn
-                   : _mp[actor.Id] >= SkillMpCost    ? PlayerActionType.Skill
-                   : PlayerActionType.Attack;
+        // Pick the most expensive affordable skill (last one the unit can use)
+        var skill = actor.ResolvedSkills
+            .Where(s => _mp[actor.Id] >= s.MpCost)
+            .Last();
 
-        var newEvents = new List<BattleEvent>(ExecuteAction(actor, target, action));
+        var newEvents = new List<BattleEvent>(ExecuteAction(actor, target, skill));
         AdvanceTurn();
         newEvents.AddRange(AutoAdvance());
         return BuildResponse(newEvents);
@@ -125,12 +125,13 @@ public class InteractiveBattleSession
         BattlePendingInput? pending = null;
         if (!_isOver && _turnOrder[_turnIndex].Team == "player")
         {
-            var actor = _turnOrder[_turnIndex];
+            var actor  = _turnOrder[_turnIndex];
+            var skills = actor.ResolvedSkills;
             pending = new BattlePendingInput(
-                Actor:          actor,
-                CanUseSkill:    _mp[actor.Id] >= SkillMpCost,
-                CanUseSoulBurn: _mp[actor.Id] >= SoulBurnMpCost,
-                ValidTargets:   _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToArray()
+                Actor:             actor,
+                Skills:            skills,
+                AvailableSkillIds: skills.Where(s => _mp[actor.Id] >= s.MpCost).Select(s => s.Id).ToArray(),
+                ValidTargets:      _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToArray()
             );
         }
 
@@ -157,46 +158,34 @@ public class InteractiveBattleSession
             if (targets.Count == 0) { CheckEnd(); break; }
 
             var target = targets[_rng.Next(targets.Count)];
-            produced.AddRange(ExecuteAction(actor, target, PlayerActionType.Attack));
+            // Enemies pick best affordable skill like the auto player action
+            var skill = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost).Last();
+            produced.AddRange(ExecuteAction(actor, target, skill));
             AdvanceTurn();
         }
         return produced;
     }
 
-    private IReadOnlyList<BattleEvent> ExecuteAction(BattleUnit actor, BattleUnit target, PlayerActionType action)
+    private IReadOnlyList<BattleEvent> ExecuteAction(BattleUnit actor, BattleUnit target, BattleSkill skill)
     {
         var produced = new List<BattleEvent>();
 
-        // Consume MP
-        if (action == PlayerActionType.Skill    && _mp[actor.Id] >= SkillMpCost)
-            _mp[actor.Id] -= SkillMpCost;
-        else if (action == PlayerActionType.SoulBurn && _mp[actor.Id] >= SoulBurnMpCost)
-            _mp[actor.Id] -= SoulBurnMpCost;
-        else
-            action = PlayerActionType.Attack; // fallback if MP drained
-
-        double multiplier = action switch
-        {
-            PlayerActionType.Skill    => 1.5,
-            PlayerActionType.SoulBurn => 2.5,
-            _                         => 1.0,
-        };
-
-        string actionLabel = action switch
-        {
-            PlayerActionType.Skill    => "uses Skill on",
-            PlayerActionType.SoulBurn => "Soul Burns",
-            _                         => "attacks",
-        };
+        // Consume MP (skill[0] always has MpCost == 0)
+        _mp[actor.Id] = Math.Max(0, _mp[actor.Id] - skill.MpCost);
 
         int variance = Math.Max(1, actor.Attack / 5);
-        int damage   = (int)(actor.Attack * multiplier) + _rng.Next(-variance, variance + 1);
+        int damage   = (int)(actor.Attack * skill.Multiplier) + _rng.Next(-variance, variance + 1);
         _hp[target.Id] = Math.Max(0, _hp[target.Id] - damage);
 
+        // Event type: index 0 = "attack", 1 = "skill", 2+ = "soulburn" (keeps CSS colours)
+        var skills    = actor.ResolvedSkills;
+        int skillIdx  = skills.ToList().IndexOf(skill);
+        if (skillIdx < 0) skillIdx = 0;
+        string evType = skillIdx == 0 ? "attack" : skillIdx == 1 ? "skill" : "soulburn";
+
         produced.Add(AddEvent(actor.Id,
-            $"{actor.Name} {actionLabel} {target.Name} for {damage} damage.",
-            action == PlayerActionType.SoulBurn ? "soulburn" : action == PlayerActionType.Skill ? "skill" : "attack",
-            target.Id, damage));
+            $"{actor.Name} uses {skill.Name} on {target.Name} for {damage} damage.",
+            evType, target.Id, damage));
 
         if (_hp[target.Id] <= 0)
             produced.Add(AddEvent(target.Id, $"{target.Name} is defeated!", "death"));

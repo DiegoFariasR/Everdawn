@@ -7,7 +7,9 @@ namespace GameCore.Battle;
 /// </summary>
 public record BattlePendingInput(
     BattleUnit Actor,
-    bool CanUseSkill,
-    bool CanUseSoulBurn,
+    /// <summary>All skills this unit has (always at least one — the free basic skill).</summary>
+    IReadOnlyList<BattleSkill> Skills,
+    /// <summary>IDs of skills the unit can currently afford (MP check). Index 0 is always included.</summary>
+    IReadOnlyList<string> AvailableSkillIds,
     IReadOnlyList<BattleUnit> ValidTargets
 );

@@ -26,6 +26,6 @@ public sealed record ResumeFromSnapshotRequest(
 
 /// <summary>Submit a player action targeting a specific unit.</summary>
 public sealed record PlayerActionRequest(
-    PlayerActionType Action,
+    string SkillId,
     string TargetId
 ) : BattleRequest;

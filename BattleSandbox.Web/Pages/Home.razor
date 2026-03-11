@@ -8,23 +8,27 @@
 
     <!-- ── Picker bar ─────────────────────────────────────────── -->
     <section class="picker">
-        <label for="scenario">Scenario</label>
-        <select id="scenario" @bind="_selectedScenarioId">
-            @foreach (var s in _scenarios)
-            {
-                <option value="@s.Id">@s.DisplayName @(s.IsPlayable ? "🎮" : "👁")</option>
-            }
-        </select>
-        <button class="btn-run" @onclick="StartSession">▶ Start</button>
-        <label for="auto-speed">Speed</label>
-        <select id="auto-speed" @bind="_autoDelay">
-            <option value="200">Fast</option>
-            <option value="600">Normal</option>
-            <option value="1200">Slow</option>
-        </select>
-        <button class="btn-auto @(_autoMode ? "btn-auto-on" : "")" @onclick="ToggleAuto">
-            ⚡ Auto @(_autoMode ? "ON" : "OFF")
-        </button>
+        <div class="picker-row">
+            <label for="scenario">Scenario</label>
+            <select id="scenario" @bind="_selectedScenarioId">
+                @foreach (var s in _scenarios)
+                {
+                    <option value="@s.Id">@s.DisplayName @(s.IsPlayable ? "🎮" : "👁")</option>
+                }
+            </select>
+            <button class="btn-run" @onclick="StartSession">▶ Start</button>
+        </div>
+        <div class="picker-row">
+            <label for="auto-speed">Speed</label>
+            <select id="auto-speed" @bind="_autoDelay">
+                <option value="200">Fast</option>
+                <option value="600">Normal</option>
+                <option value="1200">Slow</option>
+            </select>
+            <button class="btn-auto @(_autoMode ? "btn-auto-on" : "")" @onclick="ToggleAuto">
+                ⚡ Auto @(_autoMode ? "ON" : "OFF")
+            </button>
+        </div>
     </section>
 
     @if (_playMode && _response != null && _setup != null)
@@ -128,28 +132,29 @@
                 else if (_pendingAction == null)
                 {
                     <div class="action-buttons">
-                        <button class="btn-action btn-attack"
-                                @onclick="() => _pendingAction = PlayerActionType.Attack">
-                            ⚔ Attack
-                        </button>
-                        <button class="btn-action btn-skill"
-                                disabled="@(!pending.CanUseSkill)"
-                                @onclick="() => _pendingAction = PlayerActionType.Skill">
-                            ✦ Skill
-                            <span class="mp-cost">30 MP</span>
-                        </button>
-                        <button class="btn-action btn-soulburn"
-                                disabled="@(!pending.CanUseSoulBurn)"
-                                @onclick="() => _pendingAction = PlayerActionType.SoulBurn">
-                            🔥 Soul Burn
-                            <span class="mp-cost">60 MP</span>
-                        </button>
+                        @for (int si = 0; si < pending.Skills.Count; si++)
+                        {
+                            var skill   = pending.Skills[si];
+                            bool canUse = pending.AvailableSkillIds.Contains(skill.Id);
+                            string btnClass = si == 0 ? "btn-attack" : si == 1 ? "btn-skill" : "btn-soulburn";
+                            string skillId  = skill.Id;
+                            <button class="btn-action @btnClass"
+                                    disabled="@(!canUse)"
+                                    @onclick="() => _pendingAction = skillId">
+                                @skill.Name
+                                @if (skill.MpCost > 0)
+                                {
+                                    <span class="mp-cost">@skill.MpCost MP</span>
+                                }
+                            </button>
+                        }
                     </div>
                 }
                 else
                 {
+                    string pendingSkillName = pending.Skills.FirstOrDefault(s => s.Id == _pendingAction)?.Name ?? _pendingAction!;
                     <div class="target-prompt">
-                        <span class="target-prompt-label">@ActionLabel(_pendingAction.Value) — pick a target</span>
+                        <span class="target-prompt-label">@pendingSkillName — pick a target</span>
                         <button class="btn-cancel" @onclick="() => _pendingAction = null">✕ Cancel</button>
                     </div>
                 }
@@ -269,7 +274,7 @@
     // ── Play mode ────────────────────────────────────────────────
     private InteractiveBattleSession? _session;
     private BattleResponse? _response;
-    private PlayerActionType? _pendingAction;
+    private string? _pendingAction;   // skill ID selected, waiting for target
     private bool _autoMode;
     private int _autoDelay = 600;
 
@@ -340,16 +345,10 @@
     private void ConfirmTarget(string targetId)
     {
         if (_session is null || _pendingAction is null) return;
-        _response = _session.HandleRequest(new PlayerActionRequest(_pendingAction.Value, targetId));
+        _response = _session.HandleRequest(new PlayerActionRequest(_pendingAction, targetId));
         _pendingAction = null;
     }
 
-    private static string ActionLabel(PlayerActionType a) => a switch
-    {
-        PlayerActionType.Skill    => "✦ Skill",
-        PlayerActionType.SoulBurn => "🔥 Soul Burn",
-        _                         => "⚔ Attack",
-    };
 
     // ── Watch mode helpers ────────────────────────────────────────
     private BattleSnapshot? CurrentSnapshot => _result?.Snapshots[_step];
