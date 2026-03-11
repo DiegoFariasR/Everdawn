@@ -220,31 +220,39 @@ public class InteractiveBattleSession
         if (skill.IsAoe && targets.Count > 1)
             produced.Add(AddEvent(actor.Id, $"{actor.Name} unleashes {skill.Name} on all enemies!", evType));
 
+        int effectiveHits = skill.IsHeal ? 1 : actor.HitCount;
         foreach (var target in targets)
         {
-            int variance = Math.Max(1, actor.Attack / 5);
-            int amount   = (int)(actor.Attack * skill.Multiplier) + _rng.Next(-variance, variance + 1);
-
-            if (skill.IsHeal)
+            for (int hit = 0; hit < effectiveHits; hit++)
             {
-                var maxHp  = _allUnits.First(u => u.Id == target.Id).MaxHp;
-                int healed = Math.Min(amount, maxHp - _hp[target.Id]);
-                _hp[target.Id] = Math.Min(maxHp, _hp[target.Id] + amount);
-                produced.Add(AddEvent(actor.Id,
-                    $"{actor.Name} heals {target.Name} for {healed} HP.",
-                    evType, target.Id, healed));
-            }
-            else
-            {
-                _hp[target.Id] = Math.Max(0, _hp[target.Id] - amount);
-                produced.Add(AddEvent(actor.Id,
-                    skill.IsAoe
-                        ? $"  \u2192 {target.Name} takes {amount} damage."
-                        : $"{actor.Name} uses {skill.Name} on {target.Name} for {amount} damage.",
-                    evType, target.Id, amount));
+                int variance = Math.Max(1, actor.Attack / 5);
+                int amount   = (int)(actor.Attack * skill.Multiplier) + _rng.Next(-variance, variance + 1);
 
-                if (_hp[target.Id] <= 0)
-                    produced.Add(AddEvent(target.Id, $"{target.Name} is defeated!", "death"));
+                if (skill.IsHeal)
+                {
+                    var maxHp  = _allUnits.First(u => u.Id == target.Id).MaxHp;
+                    int healed = Math.Min(amount, maxHp - _hp[target.Id]);
+                    _hp[target.Id] = Math.Min(maxHp, _hp[target.Id] + amount);
+                    produced.Add(AddEvent(actor.Id,
+                        $"{actor.Name} heals {target.Name} for {healed} HP.",
+                        evType, target.Id, healed));
+                }
+                else
+                {
+                    _hp[target.Id] = Math.Max(0, _hp[target.Id] - amount);
+                    string hitLabel = effectiveHits > 1 ? $" (hit {hit + 1}/{effectiveHits})" : "";
+                    produced.Add(AddEvent(actor.Id,
+                        skill.IsAoe
+                            ? $"  \u2192 {target.Name} takes {amount} damage{hitLabel}."
+                            : $"{actor.Name} uses {skill.Name} on {target.Name} for {amount} damage{hitLabel}.",
+                        evType, target.Id, amount));
+
+                    if (_hp[target.Id] <= 0)
+                    {
+                        produced.Add(AddEvent(target.Id, $"{target.Name} is defeated!", "death"));
+                        break;
+                    }
+                }
             }
         }
 
