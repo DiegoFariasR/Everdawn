@@ -21,9 +21,9 @@
         <div class="picker-row">
             <label for="auto-speed">Speed</label>
             <select id="auto-speed" @bind="_autoDelay">
-                <option value="600">Fast</option>
-                <option value="1200">Normal</option>
-                <option value="2400">Slow</option>
+                <option value="1000">Fast</option>
+                <option value="2000">Normal</option>
+                <option value="3500">Slow</option>
             </select>
             <button class="btn-auto @(_autoMode ? "btn-auto-on" : "")" @onclick="ToggleAuto">
                 ⚡ Auto @(_autoMode ? "ON" : "OFF")
@@ -294,7 +294,7 @@
     private BattleResponse? _response;
     private string? _pendingAction;   // skill ID selected, waiting for target
     private bool _autoMode;
-    private int _autoDelay = 600;
+    private int _autoDelay = 3500;
 
     // ── Action history (for undo) ────────────────────────────────
     private record ActionRecord(bool IsAuto, string? SkillId, string? TargetId, int LogCountBefore);
