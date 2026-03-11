@@ -18,18 +18,20 @@
         <button class="btn-run" @onclick="StartSession">▶ Start</button>
     </section>
 
-    @if (_playMode && _session != null && _setup != null)
+    @if (_playMode && _response != null && _setup != null)
     {
-        var state   = _session.CurrentState;
-        var lastEv  = _session.Log.LastOrDefault();
+        var state   = _response.State;
+        var lastEv  = _response.FullLog.LastOrDefault();
         string evType = lastEv?.Type ?? "start";
+        var pending = _response.PendingInput;
+        string? activeUnitId = pending?.Actor.Id ?? lastEv?.ActorId;
 
         <section class="portrait-strip">
             @foreach (var u in _setup.PlayerUnits)
             {
                 var st = state.First(s => s.UnitId == u.Id);
                 <div class="portrait player-portrait
-                    @(_session.CurrentUnit?.Id == u.Id ? "portrait-active" : "")
+                    @(activeUnitId == u.Id ? "portrait-active" : "")
                     @(!st.IsAlive ? "portrait-dead" : "")">
                     @u.Name[0]
                 </div>
@@ -39,7 +41,7 @@
             {
                 var st = state.First(s => s.UnitId == u.Id);
                 <div class="portrait enemy-portrait
-                    @(_session.CurrentUnit?.Id == u.Id ? "portrait-active" : "")
+                    @(activeUnitId == u.Id ? "portrait-active" : "")
                     @(!st.IsAlive ? "portrait-dead" : "")">
                     @u.Name[0]
                 </div>
@@ -59,7 +61,7 @@
                     int mpPct = u.MaxMp > 0 ? st.CurrentMp * 100 / u.MaxMp : 0;
                     string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
                     <div class="unit-card
-                        @(_session.CurrentUnit?.Id == u.Id ? "card-active" : "")
+                        @(activeUnitId == u.Id ? "card-active" : "")
                         @(!st.IsAlive ? "card-dead" : "")">
                         <div class="avatar player-avatar">@u.Name[0]</div>
                         <div class="unit-info">
@@ -84,10 +86,10 @@
                     var st = state.First(s => s.UnitId == u.Id);
                     int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
                     string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
-                    bool canTarget = _session.IsPlayerTurn && st.IsAlive && !_session.IsOver && _pendingAction != null;
+                    bool canTarget = pending != null && _pendingAction != null && st.IsAlive;
 
                     <div class="unit-card
-                        @(_session.CurrentUnit?.Id == u.Id ? "card-active" : "")
+                        @(activeUnitId == u.Id ? "card-active" : "")
                         @(!st.IsAlive ? "card-dead" : "")
                         @(canTarget ? "card-targetable" : "")"
                         @onclick="() => { if (canTarget) ConfirmTarget(u.Id); }">
@@ -102,11 +104,11 @@
             </div>
         </section>
 
-        @if (_session.IsPlayerTurn && !_session.IsOver)
+        @if (pending != null)
         {
             <section class="action-bar">
                 <div class="acting-label">
-                    @(_session.CurrentUnit!.Name + "'s turn")
+                    @(pending.Actor.Name + "'s turn")
                 </div>
                 @if (_pendingAction == null)
                 {
@@ -116,13 +118,13 @@
                             ⚔ Attack
                         </button>
                         <button class="btn-action btn-skill"
-                                disabled="@(!_session.CanUseSkill)"
+                                disabled="@(!pending.CanUseSkill)"
                                 @onclick="() => _pendingAction = PlayerActionType.Skill">
                             ✦ Skill
                             <span class="mp-cost">30 MP</span>
                         </button>
                         <button class="btn-action btn-soulburn"
-                                disabled="@(!_session.CanUseSoulBurn)"
+                                disabled="@(!pending.CanUseSoulBurn)"
                                 @onclick="() => _pendingAction = PlayerActionType.SoulBurn">
                             🔥 Soul Burn
                             <span class="mp-cost">60 MP</span>
@@ -138,24 +140,18 @@
                 }
             </section>
         }
-        else if (_session.IsOver)
+        else if (_response.IsOver)
         {
-            <section class="battle-over @(_session.WinningTeam == "player" ? "over-win" : "over-lose")">
-                @(_session.WinningTeam == "player" ? "⚔ Victory!" : "💀 Defeat...")
+            <section class="battle-over @(_response.WinningTeam == "player" ? "over-win" : "over-lose")">
+                @(_response.WinningTeam == "player" ? "⚔ Victory!" : "💀 Defeat...")
                 <button class="btn-run" style="margin-left:1rem" @onclick="StartSession">Retry</button>
-            </section>
-        }
-        else
-        {
-            <section class="action-bar">
-                <div class="acting-label enemy-acting">Enemy turn — resolving…</div>
             </section>
         }
 
         <section class="event-log" id="play-log">
-            @foreach (var ev in _session.Log)
+            @foreach (var ev in _response.FullLog)
             {
-                <div class="event-entry @ev.Type @(_session.Log.Last() == ev ? "event-current" : "")">
+                <div class="event-entry @ev.Type @(_response.FullLog.Count > 0 && _response.FullLog[^1] == ev ? "event-current" : "")">
                     @ev.Description
                 </div>
             }
@@ -257,6 +253,7 @@
 
     // ── Play mode ────────────────────────────────────────────────
     private InteractiveBattleSession? _session;
+    private BattleResponse? _response;
     private PlayerActionType? _pendingAction;
 
     // ── Watch mode ───────────────────────────────────────────────
@@ -272,16 +269,17 @@
     private void StartSession()
     {
         _currentScenario = _scenarios.First(s => s.Id == _selectedScenarioId);
-        _setup        = _currentScenario.CreateSetup();
-        _playMode     = _currentScenario.IsPlayable;
-        _session      = null;
-        _result       = null;
+        _setup         = _currentScenario.CreateSetup();
+        _playMode      = _currentScenario.IsPlayable;
+        _session       = null;
+        _response      = null;
+        _result        = null;
         _pendingAction = null;
 
         if (_playMode)
         {
-            _session = new InteractiveBattleSession(_setup, _currentScenario.Seed);
-            _session.Start();
+            _session  = new InteractiveBattleSession(_setup, _currentScenario.Seed);
+            _response = _session.HandleRequest(new StartBattleRequest());
         }
         else
         {
@@ -294,17 +292,17 @@
     {
         if (_result == null || _setup == null || _currentScenario == null) return;
         var snap = _result.Snapshots[_step];
-        _session = new InteractiveBattleSession(_setup, _currentScenario.Seed, snap.UnitStates, snap.Event.ActorId);
+        _session  = new InteractiveBattleSession(_setup, _currentScenario.Seed);
+        _response = _session.HandleRequest(new ResumeFromSnapshotRequest(snap.UnitStates, snap.Event.ActorId, _step + 1));
         _pendingAction = null;
         _playMode = true;
         _result   = null;
-        _session.StartFromSnapshot(_step + 1);
     }
 
     private void ConfirmTarget(string targetId)
     {
         if (_session is null || _pendingAction is null) return;
-        _session.SubmitAction(_pendingAction.Value, targetId);
+        _response = _session.HandleRequest(new PlayerActionRequest(_pendingAction.Value, targetId));
         _pendingAction = null;
     }
 

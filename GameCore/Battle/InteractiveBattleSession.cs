@@ -1,8 +1,10 @@
 namespace GameCore.Battle;
 
 /// <summary>
-/// A stateful interactive battle session. Player units wait for input;
-/// enemy units resolve automatically. Call SubmitAction() on each player turn.
+/// A stateful interactive battle session. Exposes a single entry point:
+/// <see cref="HandleRequest"/>. Clients send <see cref="BattleRequest"/> messages
+/// and receive a <see cref="BattleResponse"/> — no direct session properties are
+/// ever queried. This mirrors how the UnityClient would talk to GameCore.
 /// </summary>
 public class InteractiveBattleSession
 {
@@ -18,26 +20,8 @@ public class InteractiveBattleSession
 
     private int _turnIndex;
     private bool _started;
-
-    public bool IsOver { get; private set; }
-    public string? WinningTeam { get; private set; }
-
-    /// <summary>The unit currently acting. Null when the battle is over.</summary>
-    public BattleUnit? CurrentUnit => IsOver ? null : _turnOrder[_turnIndex];
-
-    /// <summary>True when the current unit is a player unit and an action is required.</summary>
-    public bool IsPlayerTurn => !IsOver && CurrentUnit!.Team == "player";
-
-    public IReadOnlyList<BattleEvent> Log => _log;
-
-    public IReadOnlyList<UnitState> CurrentState =>
-        _allUnits.Select(u => new UnitState(u.Id, _hp[u.Id], _mp[u.Id], _hp[u.Id] > 0)).ToArray();
-
-    public bool CanUseSkill    => CurrentUnit is not null && _mp[CurrentUnit.Id] >= SkillMpCost;
-    public bool CanUseSoulBurn => CurrentUnit is not null && _mp[CurrentUnit.Id] >= SoulBurnMpCost;
-
-    public IReadOnlyList<BattleUnit> ValidTargets =>
-        IsOver ? [] : _allUnits.Where(u => u.Team != CurrentUnit!.Team && _hp[u.Id] > 0).ToArray();
+    private bool _isOver;
+    private string? _winningTeam;
 
     public InteractiveBattleSession(BattleSetup setup, int seed)
     {
@@ -49,88 +33,92 @@ public class InteractiveBattleSession
     }
 
     /// <summary>
-    /// Creates a session starting from a mid-battle snapshot.
-    /// HP/MP are taken from <paramref name="initialState"/>; turn order picks up
-    /// after the unit identified by <paramref name="lastActorId"/>.
+    /// Process a client request and return the resulting battle state.
+    /// The returned <see cref="BattleResponse"/> is the complete picture —
+    /// clients must not query session internals directly.
     /// </summary>
-    public InteractiveBattleSession(BattleSetup setup, int seed, IReadOnlyList<UnitState> initialState, string? lastActorId = null)
+    public BattleResponse HandleRequest(BattleRequest request) => request switch
     {
-        _allUnits  = [.. setup.PlayerUnits, .. setup.EnemyUnits];
-        _turnOrder = [.. _allUnits.OrderByDescending(u => u.Initiative)];
-        _hp        = _allUnits.ToDictionary(u => u.Id,
-            u => initialState.FirstOrDefault(s => s.UnitId == u.Id)?.CurrentHp ?? u.MaxHp);
-        _mp        = _allUnits.ToDictionary(u => u.Id,
-            u => initialState.FirstOrDefault(s => s.UnitId == u.Id)?.CurrentMp ?? u.MaxMp);
-        _rng       = new Random(seed);
-        _turnIndex = NextAliveIndexAfter(lastActorId);
-    }
+        StartBattleRequest        r => HandleStart(r),
+        ResumeFromSnapshotRequest r => HandleResume(r),
+        PlayerActionRequest       r => HandlePlayerAction(r),
+        _ => throw new ArgumentException($"Unknown request type: {request.GetType().Name}")
+    };
 
-    // Finds the first alive unit in initiative order starting after the given actor.
-    private int NextAliveIndexAfter(string? actorId)
-    {
-        int lastIdx = actorId != null ? _turnOrder.FindIndex(u => u.Id == actorId) : -1;
-        int start   = lastIdx >= 0 ? (lastIdx + 1) % _turnOrder.Count : 0;
-        for (int i = 0; i < _turnOrder.Count; i++)
-        {
-            int idx = (start + i) % _turnOrder.Count;
-            if (_hp[_turnOrder[idx].Id] > 0) return idx;
-        }
-        return 0;
-    }
+    // ── Request handlers ─────────────────────────────────────────────────
 
-    /// <summary>
-    /// Starts the session. Records the "Battle begins!" event and, if the
-    /// first unit is an enemy, auto-resolves until it is the player's turn.
-    /// Returns the events produced during startup.
-    /// </summary>
-    public IReadOnlyList<BattleEvent> Start()
+    private BattleResponse HandleStart(StartBattleRequest _)
     {
-        if (_started) throw new InvalidOperationException("Already started.");
+        if (_started) throw new InvalidOperationException("Session already started.");
         _started = true;
-
         AddEvent("system", "Battle begins!", "start");
-        return AutoAdvance();
+        return BuildResponse(AutoAdvance());
     }
 
-    /// <summary>
-    /// Resumes from a snapshot state. Adds a marker event then auto-resolves
-    /// any leading enemy turns until the first player turn (or battle end).
-    /// </summary>
-    public IReadOnlyList<BattleEvent> StartFromSnapshot(int step)
+    private BattleResponse HandleResume(ResumeFromSnapshotRequest r)
     {
-        if (_started) throw new InvalidOperationException("Already started.");
+        if (_started) throw new InvalidOperationException("Session already started.");
         _started = true;
+
+        foreach (var us in r.State)
+        {
+            if (_hp.ContainsKey(us.UnitId)) _hp[us.UnitId] = us.CurrentHp;
+            if (_mp.ContainsKey(us.UnitId)) _mp[us.UnitId] = us.CurrentMp;
+        }
+        _turnIndex = NextAliveIndexAfter(r.LastActorId);
 
         CheckEnd();
-        if (IsOver)
+        if (_isOver)
         {
             AddEvent("system", "The battle was already over at this point.", "takeover");
-            return _log;
+            return BuildResponse([]);
         }
 
-        AddEvent("system", $"You took control at step {step}.", "takeover");
-        return AutoAdvance();
+        AddEvent("system", $"You took control at step {r.AtStep}.", "takeover");
+        return BuildResponse(AutoAdvance());
     }
 
-    /// <summary>
-    /// Submit a player action. Returns all events from this action plus any
-    /// subsequent auto-resolved enemy turns, until the next player turn or
-    /// battle end.
-    /// </summary>
-    public IReadOnlyList<BattleEvent> SubmitAction(PlayerActionType action, string targetId)
+    private BattleResponse HandlePlayerAction(PlayerActionRequest r)
     {
-        if (IsOver)            throw new InvalidOperationException("Battle is over.");
-        if (!IsPlayerTurn)     throw new InvalidOperationException("Not a player turn.");
+        if (!_started) throw new InvalidOperationException("Session not started.");
+        if (_isOver)   throw new InvalidOperationException("Battle is over.");
+        if (_turnOrder[_turnIndex].Team != "player")
+            throw new InvalidOperationException("Not a player turn.");
 
-        var actor  = CurrentUnit!;
-        var target = _allUnits.FirstOrDefault(u => u.Id == targetId)
-                     ?? throw new ArgumentException($"Unknown target: {targetId}");
+        var actor  = _turnOrder[_turnIndex];
+        var target = _allUnits.FirstOrDefault(u => u.Id == r.TargetId)
+                     ?? throw new ArgumentException($"Unknown target: {r.TargetId}");
 
-        var newEvents = new List<BattleEvent>();
-        newEvents.AddRange(ExecuteAction(actor, target, action));
+        var newEvents = new List<BattleEvent>(ExecuteAction(actor, target, r.Action));
         AdvanceTurn();
         newEvents.AddRange(AutoAdvance());
-        return newEvents;
+        return BuildResponse(newEvents);
+    }
+
+    // ── Response builder ─────────────────────────────────────────────────
+
+    private BattleResponse BuildResponse(IReadOnlyList<BattleEvent> newEvents)
+    {
+        BattlePendingInput? pending = null;
+        if (!_isOver && _turnOrder[_turnIndex].Team == "player")
+        {
+            var actor = _turnOrder[_turnIndex];
+            pending = new BattlePendingInput(
+                Actor:          actor,
+                CanUseSkill:    _mp[actor.Id] >= SkillMpCost,
+                CanUseSoulBurn: _mp[actor.Id] >= SoulBurnMpCost,
+                ValidTargets:   _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToArray()
+            );
+        }
+
+        return new BattleResponse(
+            NewEvents:    newEvents,
+            FullLog:      _log,
+            State:        _allUnits.Select(u => new UnitState(u.Id, _hp[u.Id], _mp[u.Id], _hp[u.Id] > 0)).ToArray(),
+            PendingInput: pending,
+            IsOver:       _isOver,
+            WinningTeam:  _winningTeam
+        );
     }
 
     // ── Internals ────────────────────────────────────────────────────────
@@ -139,9 +127,9 @@ public class InteractiveBattleSession
     private IReadOnlyList<BattleEvent> AutoAdvance()
     {
         var produced = new List<BattleEvent>();
-        while (!IsOver && !IsPlayerTurn)
+        while (!_isOver && _turnOrder[_turnIndex].Team != "player")
         {
-            var actor   = CurrentUnit!;
+            var actor   = _turnOrder[_turnIndex];
             var targets = _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToList();
             if (targets.Count == 0) { CheckEnd(); break; }
 
@@ -196,8 +184,7 @@ public class InteractiveBattleSession
 
     private void AdvanceTurn()
     {
-        if (IsOver) return;
-        // Skip dead units
+        if (_isOver) return;
         for (int i = 0; i < _turnOrder.Count; i++)
         {
             _turnIndex = (_turnIndex + 1) % _turnOrder.Count;
@@ -208,15 +195,27 @@ public class InteractiveBattleSession
 
     private void CheckEnd()
     {
-        if (IsOver) return;
+        if (_isOver) return;
         bool playerAlive = _allUnits.Any(u => u.Team == "player" && _hp[u.Id] > 0);
         bool enemyAlive  = _allUnits.Any(u => u.Team == "enemy"  && _hp[u.Id] > 0);
         if (!playerAlive || !enemyAlive)
         {
-            IsOver      = true;
-            WinningTeam = playerAlive ? "player" : "enemy";
+            _isOver      = true;
+            _winningTeam = playerAlive ? "player" : "enemy";
             AddEvent("system", playerAlive ? "Victory!" : "Defeat...", "end");
         }
+    }
+
+    private int NextAliveIndexAfter(string? actorId)
+    {
+        int lastIdx = actorId != null ? _turnOrder.FindIndex(u => u.Id == actorId) : -1;
+        int start   = lastIdx >= 0 ? (lastIdx + 1) % _turnOrder.Count : 0;
+        for (int i = 0; i < _turnOrder.Count; i++)
+        {
+            int idx = (start + i) % _turnOrder.Count;
+            if (_hp[_turnOrder[idx].Id] > 0) return idx;
+        }
+        return 0;
     }
 
     private BattleEvent AddEvent(string actorId, string description, string type, string? targetId = null, int value = 0)
