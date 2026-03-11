@@ -31,6 +31,10 @@ jobs:
       - name: Publish Blazor WASM
         run: dotnet publish BattleSandbox.Web/BattleSandbox.Web.csproj -c Release -o output
 
+      - name: Fix base href for GitHub Pages subfolder
+        run: |
+          sed -i 's|<base href="/" />|<base href="/Everdawn/" />|g' output/wwwroot/index.html
+
       - name: Add .nojekyll
         run: touch output/wwwroot/.nojekyll
 

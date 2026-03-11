@@ -24,11 +24,11 @@ public class InteractiveBattleSession
 
     public InteractiveBattleSession(BattleSetup setup, int seed)
     {
-        _allUnits  = [.. setup.PlayerUnits, .. setup.EnemyUnits];
+        _allUnits = [.. setup.PlayerUnits, .. setup.EnemyUnits];
         _turnOrder = [.. _allUnits.OrderByDescending(u => u.Initiative)];
-        _hp        = _allUnits.ToDictionary(u => u.Id, u => u.MaxHp);
-        _mp        = _allUnits.ToDictionary(u => u.Id, u => u.MaxMp);
-        _rng       = new Random(seed);
+        _hp = _allUnits.ToDictionary(u => u.Id, u => u.MaxHp);
+        _mp = _allUnits.ToDictionary(u => u.Id, u => u.MaxMp);
+        _rng = new Random(seed);
         // Apply initial cooldowns
         foreach (var u in _allUnits)
             foreach (var s in u.ResolvedSkills)
@@ -43,10 +43,10 @@ public class InteractiveBattleSession
     /// </summary>
     public BattleResponse HandleRequest(BattleRequest request) => request switch
     {
-        StartBattleRequest        r => HandleStart(r),
+        StartBattleRequest r => HandleStart(r),
         ResumeFromSnapshotRequest r => HandleResume(r),
-        PlayerActionRequest       r => HandlePlayerAction(r),
-        AutoPlayerActionRequest   r => HandleAutoPlayerAction(r),
+        PlayerActionRequest r => HandlePlayerAction(r),
+        AutoPlayerActionRequest r => HandleAutoPlayerAction(r),
         _ => throw new ArgumentException($"Unknown request type: {request.GetType().Name}")
     };
 
@@ -86,12 +86,12 @@ public class InteractiveBattleSession
     private BattleResponse HandlePlayerAction(PlayerActionRequest r)
     {
         if (!_started) throw new InvalidOperationException("Session not started.");
-        if (_isOver)   throw new InvalidOperationException("Battle is over.");
+        if (_isOver) throw new InvalidOperationException("Battle is over.");
         if (_turnOrder[_turnIndex].Team != "player")
             throw new InvalidOperationException("Not a player turn.");
 
-        var actor  = _turnOrder[_turnIndex];
-        var skill  = actor.ResolvedSkills.FirstOrDefault(s => s.Id == r.SkillId)
+        var actor = _turnOrder[_turnIndex];
+        var skill = actor.ResolvedSkills.FirstOrDefault(s => s.Id == r.SkillId)
                      ?? throw new ArgumentException($"Unknown skill: {r.SkillId}");
 
         List<BattleUnit> targets;
@@ -115,12 +115,12 @@ public class InteractiveBattleSession
     private BattleResponse HandleAutoPlayerAction(AutoPlayerActionRequest _)
     {
         if (!_started) throw new InvalidOperationException("Session not started.");
-        if (_isOver)   throw new InvalidOperationException("Battle is over.");
+        if (_isOver) throw new InvalidOperationException("Battle is over.");
         if (_turnOrder[_turnIndex].Team != "player")
             throw new InvalidOperationException("Not a player turn.");
 
-        var actor   = _turnOrder[_turnIndex];
-        var skill   = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost && _skillCooldowns.GetValueOrDefault(s.Id) <= 0).Last();
+        var actor = _turnOrder[_turnIndex];
+        var skill = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost && _skillCooldowns.GetValueOrDefault(s.Id) <= 0).Last();
         var targets = ResolveAutoTargets(actor, skill);
         if (targets.Count == 0) { CheckEnd(); return BuildResponse([]); }
 
@@ -137,26 +137,26 @@ public class InteractiveBattleSession
         BattlePendingInput? pending = null;
         if (!_isOver && _turnOrder[_turnIndex].Team == "player")
         {
-            var actor  = _turnOrder[_turnIndex];
+            var actor = _turnOrder[_turnIndex];
             var skills = actor.ResolvedSkills;
             pending = new BattlePendingInput(
-                Actor:             actor,
-                Skills:            skills,
+                Actor: actor,
+                Skills: skills,
                 AvailableSkillIds: skills.Where(s => _mp[actor.Id] >= s.MpCost && _skillCooldowns.GetValueOrDefault(s.Id) <= 0).Select(s => s.Id).ToArray(),
-                EnemyTargets:      _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToArray(),
-                AllyTargets:       _allUnits.Where(u => u.Team == actor.Team && _hp[u.Id] > 0).ToArray(),
-                SkillCooldowns:    skills.Where(s => _skillCooldowns.GetValueOrDefault(s.Id) > 0)
+                EnemyTargets: _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToArray(),
+                AllyTargets: _allUnits.Where(u => u.Team == actor.Team && _hp[u.Id] > 0).ToArray(),
+                SkillCooldowns: skills.Where(s => _skillCooldowns.GetValueOrDefault(s.Id) > 0)
                                          .ToDictionary(s => s.Id, s => _skillCooldowns[s.Id])
             );
         }
 
         return new BattleResponse(
-            NewEvents:    newEvents,
-            FullLog:      _log,
-            State:        _allUnits.Select(u => new UnitState(u.Id, _hp[u.Id], _mp[u.Id], _hp[u.Id] > 0)).ToArray(),
+            NewEvents: newEvents,
+            FullLog: _log,
+            State: _allUnits.Select(u => new UnitState(u.Id, _hp[u.Id], _mp[u.Id], _hp[u.Id] > 0)).ToArray(),
             PendingInput: pending,
-            IsOver:       _isOver,
-            WinningTeam:  _winningTeam
+            IsOver: _isOver,
+            WinningTeam: _winningTeam
         );
     }
 
@@ -168,8 +168,8 @@ public class InteractiveBattleSession
         var produced = new List<BattleEvent>();
         while (!_isOver && _turnOrder[_turnIndex].Team != "player")
         {
-            var actor   = _turnOrder[_turnIndex];
-            var skill   = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost && _skillCooldowns.GetValueOrDefault(s.Id) <= 0).Last();
+            var actor = _turnOrder[_turnIndex];
+            var skill = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost && _skillCooldowns.GetValueOrDefault(s.Id) <= 0).Last();
             var targets = ResolveAutoTargets(actor, skill);
             if (targets.Count == 0) { CheckEnd(); break; }
 
@@ -216,7 +216,7 @@ public class InteractiveBattleSession
         _mp[actor.Id] = Math.Max(0, _mp[actor.Id] - skill.MpCost);
 
         // Determine event type from skill index for CSS colouring
-        var skills   = actor.ResolvedSkills;
+        var skills = actor.ResolvedSkills;
         int skillIdx = skills.ToList().IndexOf(skill);
         if (skillIdx < 0) skillIdx = 0;
         string evType = skill.IsHeal ? "skill"
@@ -231,11 +231,11 @@ public class InteractiveBattleSession
             for (int hit = 0; hit < effectiveHits; hit++)
             {
                 int variance = Math.Max(1, actor.Attack / 5);
-                int amount   = (int)(actor.Attack * skill.Multiplier) + _rng.Next(-variance, variance + 1);
+                int amount = (int)(actor.Attack * skill.Multiplier) + _rng.Next(-variance, variance + 1);
 
                 if (skill.IsHeal)
                 {
-                    var maxHp  = _allUnits.First(u => u.Id == target.Id).MaxHp;
+                    var maxHp = _allUnits.First(u => u.Id == target.Id).MaxHp;
                     int healed = Math.Min(amount, maxHp - _hp[target.Id]);
                     _hp[target.Id] = Math.Min(maxHp, _hp[target.Id] + amount);
                     produced.Add(AddEvent(actor.Id,
@@ -291,7 +291,7 @@ public class InteractiveBattleSession
         events.Add(AddEvent("system", $"\u2500\u2500 Round {_round} \u2500\u2500", "round"));
         foreach (var u in _allUnits.Where(u => u.MaxMp > 0 && _hp[u.Id] > 0))
         {
-            int regen  = Math.Max(1, u.MaxMp / 5);  // 20 % of MaxMp
+            int regen = Math.Max(1, u.MaxMp / 5);  // 20 % of MaxMp
             int gained = Math.Min(regen, u.MaxMp - _mp[u.Id]);
             if (gained > 0)
             {
@@ -306,10 +306,10 @@ public class InteractiveBattleSession
     {
         if (_isOver) return;
         bool playerAlive = _allUnits.Any(u => u.Team == "player" && _hp[u.Id] > 0);
-        bool enemyAlive  = _allUnits.Any(u => u.Team == "enemy"  && _hp[u.Id] > 0);
+        bool enemyAlive = _allUnits.Any(u => u.Team == "enemy" && _hp[u.Id] > 0);
         if (!playerAlive || !enemyAlive)
         {
-            _isOver      = true;
+            _isOver = true;
             _winningTeam = playerAlive ? "player" : "enemy";
             AddEvent("system", playerAlive ? "Victory!" : "Defeat...", "end");
         }
@@ -318,7 +318,7 @@ public class InteractiveBattleSession
     private int NextAliveIndexAfter(string? actorId)
     {
         int lastIdx = actorId != null ? _turnOrder.FindIndex(u => u.Id == actorId) : -1;
-        int start   = lastIdx >= 0 ? (lastIdx + 1) % _turnOrder.Count : 0;
+        int start = lastIdx >= 0 ? (lastIdx + 1) % _turnOrder.Count : 0;
         for (int i = 0; i < _turnOrder.Count; i++)
         {
             int idx = (start + i) % _turnOrder.Count;
