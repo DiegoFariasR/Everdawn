@@ -1,42 +1,324 @@
 ﻿@page "/"
+@using GameCore.Battle
 @using GameCore.Scenarios
 
 <PageTitle>Battle Sandbox</PageTitle>
 
-<section class="scenario-picker">
-    <label for="scenario">Scenario</label>
-    <select id="scenario" @bind="_selectedScenarioId">
-        @foreach (var s in _scenarios)
-        {
-            <option value="@s.Id">@s.Id (seed: @s.Seed)</option>
-        }
-    </select>
-    <button class="btn-run" @onclick="RunBattle">Run</button>
-</section>
+<div class="sandbox">
 
-@if (_ran)
-{
-    <section class="battle-result">
-        <p>Scenario <strong>@_selectedScenarioId</strong> executed.</p>
-        <p>Battle engine not yet implemented — this is a placeholder.</p>
+    <!-- ── Picker bar ─────────────────────────────────────────── -->
+    <section class="picker">
+        <label for="scenario">Scenario</label>
+        <select id="scenario" @bind="_selectedScenarioId">
+            @foreach (var s in _scenarios)
+            {
+                <option value="@s.Id">@s.DisplayName @(s.IsPlayable ? "🎮" : "👁")</option>
+            }
+        </select>
+        <button class="btn-run" @onclick="StartSession">▶ Start</button>
     </section>
-}
+
+    @if (_playMode && _session != null && _setup != null)
+    {
+        var state   = _session.CurrentState;
+        var lastEv  = _session.Log.LastOrDefault();
+        string evType = lastEv?.Type ?? "start";
+
+        <section class="portrait-strip">
+            @foreach (var u in _setup.PlayerUnits)
+            {
+                var st = state.First(s => s.UnitId == u.Id);
+                <div class="portrait player-portrait
+                    @(_session.CurrentUnit?.Id == u.Id ? "portrait-active" : "")
+                    @(!st.IsAlive ? "portrait-dead" : "")">
+                    @u.Name[0]
+                </div>
+            }
+            <div class="portrait-sep">⚔</div>
+            @foreach (var u in _setup.EnemyUnits)
+            {
+                var st = state.First(s => s.UnitId == u.Id);
+                <div class="portrait enemy-portrait
+                    @(_session.CurrentUnit?.Id == u.Id ? "portrait-active" : "")
+                    @(!st.IsAlive ? "portrait-dead" : "")">
+                    @u.Name[0]
+                </div>
+            }
+        </section>
+
+        <section class="current-event @evType">
+            @(lastEv?.Description ?? "Battle begins!")
+        </section>
+
+        <section class="arena">
+            <div class="team player-team">
+                @foreach (var u in _setup.PlayerUnits)
+                {
+                    var st = state.First(s => s.UnitId == u.Id);
+                    int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
+                    int mpPct = u.MaxMp > 0 ? st.CurrentMp * 100 / u.MaxMp : 0;
+                    string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
+                    <div class="unit-card
+                        @(_session.CurrentUnit?.Id == u.Id ? "card-active" : "")
+                        @(!st.IsAlive ? "card-dead" : "")">
+                        <div class="avatar player-avatar">@u.Name[0]</div>
+                        <div class="unit-info">
+                            <div class="unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
+                            <div class="bar-wrap"><div class="hp-bar" style="width:@hpPct%;background:@hpColor"></div></div>
+                            @if (u.MaxMp > 0)
+                            {
+                                <div class="bar-wrap"><div class="mp-bar" style="width:@mpPct%"></div></div>
+                            }
+                            <div class="stat-text">@st.CurrentHp/@u.MaxHp HP  @st.CurrentMp/@u.MaxMp MP</div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="vs-col">vs</div>
+
+            <!-- Enemy team — clickable for target selection -->
+            <div class="team enemy-team">
+                @foreach (var u in _setup.EnemyUnits)
+                {
+                    var st = state.First(s => s.UnitId == u.Id);
+                    int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
+                    string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
+                    bool canTarget = _session.IsPlayerTurn && st.IsAlive && !_session.IsOver && _pendingAction != null;
+
+                    <div class="unit-card
+                        @(_session.CurrentUnit?.Id == u.Id ? "card-active" : "")
+                        @(!st.IsAlive ? "card-dead" : "")
+                        @(canTarget ? "card-targetable" : "")"
+                        @onclick="() => { if (canTarget) ConfirmTarget(u.Id); }">
+                        <div class="avatar enemy-avatar">@u.Name[0]</div>
+                        <div class="unit-info">
+                            <div class="unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
+                            <div class="bar-wrap"><div class="hp-bar" style="width:@hpPct%;background:@hpColor"></div></div>
+                            <div class="stat-text">@st.CurrentHp/@u.MaxHp HP</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+
+        @if (_session.IsPlayerTurn && !_session.IsOver)
+        {
+            <section class="action-bar">
+                <div class="acting-label">
+                    @(_session.CurrentUnit!.Name + "'s turn")
+                </div>
+                @if (_pendingAction == null)
+                {
+                    <div class="action-buttons">
+                        <button class="btn-action btn-attack"
+                                @onclick="() => _pendingAction = PlayerActionType.Attack">
+                            ⚔ Attack
+                        </button>
+                        <button class="btn-action btn-skill"
+                                disabled="@(!_session.CanUseSkill)"
+                                @onclick="() => _pendingAction = PlayerActionType.Skill">
+                            ✦ Skill
+                            <span class="mp-cost">30 MP</span>
+                        </button>
+                        <button class="btn-action btn-soulburn"
+                                disabled="@(!_session.CanUseSoulBurn)"
+                                @onclick="() => _pendingAction = PlayerActionType.SoulBurn">
+                            🔥 Soul Burn
+                            <span class="mp-cost">60 MP</span>
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="target-prompt">
+                        <span class="target-prompt-label">@ActionLabel(_pendingAction.Value) — pick a target</span>
+                        <button class="btn-cancel" @onclick="() => _pendingAction = null">✕ Cancel</button>
+                    </div>
+                }
+            </section>
+        }
+        else if (_session.IsOver)
+        {
+            <section class="battle-over @(_session.WinningTeam == "player" ? "over-win" : "over-lose")">
+                @(_session.WinningTeam == "player" ? "⚔ Victory!" : "💀 Defeat...")
+                <button class="btn-run" style="margin-left:1rem" @onclick="StartSession">Retry</button>
+            </section>
+        }
+        else
+        {
+            <section class="action-bar">
+                <div class="acting-label enemy-acting">Enemy turn — resolving…</div>
+            </section>
+        }
+
+        <section class="event-log" id="play-log">
+            @foreach (var ev in _session.Log)
+            {
+                <div class="event-entry @ev.Type @(_session.Log.Last() == ev ? "event-current" : "")">
+                    @ev.Description
+                </div>
+            }
+        </section>
+    }
+
+    @if (!_playMode && _result != null && _setup != null)
+    {
+        var snap = CurrentSnapshot!;
+
+        <section class="portrait-strip">
+            @foreach (var u in _setup.PlayerUnits)
+            {
+                var st = snap.UnitStates.First(s => s.UnitId == u.Id);
+                <div class="portrait player-portrait @(snap.Event.ActorId == u.Id ? "portrait-active" : "") @(!st.IsAlive ? "portrait-dead" : "")">
+                    @u.Name[0]
+                </div>
+            }
+            <div class="portrait-sep">⚔</div>
+            @foreach (var u in _setup.EnemyUnits)
+            {
+                var st = snap.UnitStates.First(s => s.UnitId == u.Id);
+                <div class="portrait enemy-portrait @(snap.Event.ActorId == u.Id ? "portrait-active" : "") @(!st.IsAlive ? "portrait-dead" : "")">
+                    @u.Name[0]
+                </div>
+            }
+        </section>
+
+        <section class="current-event @snap.Event.Type">@snap.Event.Description</section>
+
+        <section class="arena">
+            <div class="team player-team">
+                @foreach (var u in _setup.PlayerUnits)
+                {
+                    var st = snap.UnitStates.First(s => s.UnitId == u.Id);
+                    int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
+                    int mpPct = u.MaxMp > 0 ? st.CurrentMp * 100 / u.MaxMp : 0;
+                    string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
+                    <div class="unit-card @(snap.Event.ActorId == u.Id ? "card-active" : "") @(!st.IsAlive ? "card-dead" : "")">
+                        <div class="avatar player-avatar">@u.Name[0]</div>
+                        <div class="unit-info">
+                            <div class="unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
+                            <div class="bar-wrap"><div class="hp-bar" style="width:@hpPct%;background:@hpColor"></div></div>
+                            @if (u.MaxMp > 0) { <div class="bar-wrap"><div class="mp-bar" style="width:@mpPct%"></div></div> }
+                            <div class="stat-text">@st.CurrentHp/@u.MaxHp HP</div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="vs-col">vs</div>
+            <div class="team enemy-team">
+                @foreach (var u in _setup.EnemyUnits)
+                {
+                    var st = snap.UnitStates.First(s => s.UnitId == u.Id);
+                    int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
+                    int mpPct = u.MaxMp > 0 ? st.CurrentMp * 100 / u.MaxMp : 0;
+                    string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
+                    <div class="unit-card @(snap.Event.ActorId == u.Id ? "card-active" : "") @(!st.IsAlive ? "card-dead" : "")">
+                        <div class="avatar enemy-avatar">@u.Name[0]</div>
+                        <div class="unit-info">
+                            <div class="unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
+                            <div class="bar-wrap"><div class="hp-bar" style="width:@hpPct%;background:@hpColor"></div></div>
+                            @if (u.MaxMp > 0) { <div class="bar-wrap"><div class="mp-bar" style="width:@mpPct%"></div></div> }
+                            <div class="stat-text">@st.CurrentHp/@u.MaxHp HP</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="step-controls">
+            <button @onclick="JumpToStart">◀◀</button>
+            <button @onclick="StepBack">◀</button>
+            <span class="step-label">@(_step + 1) / @_result.Snapshots.Count</span>
+            <button @onclick="StepForward">▶</button>
+            <button @onclick="JumpToEnd">▶▶</button>            <button class="btn-takeover" @onclick="TakeControlFromHere" title="Play from here">⚔ Take Control</button>        </section>
+
+        <section class="event-log">
+            @for (int i = 0; i < _result.Snapshots.Count; i++)
+            {
+                int idx = i;
+                var s = _result.Snapshots[i];
+                <div class="event-entry @(idx == _step ? "event-current" : "") @s.Event.Type" @onclick="() => _step = idx">
+                    <span class="event-num">@(i + 1).</span> @s.Event.Description
+                </div>
+            }
+        </section>
+    }
+
+</div>
 
 @code {
-    private List<SampleScenario> _scenarios = [];
+    // ── Shared ──────────────────────────────────────────────────
+    private List<IBattleScenario> _scenarios = [];
     private string _selectedScenarioId = "";
-    private bool _ran;
+    private IBattleScenario? _currentScenario;
+    private BattleSetup? _setup;
+    private bool _playMode;
+
+    // ── Play mode ────────────────────────────────────────────────
+    private InteractiveBattleSession? _session;
+    private PlayerActionType? _pendingAction;
+
+    // ── Watch mode ───────────────────────────────────────────────
+    private BattleResult? _result;
+    private int _step;
 
     protected override void OnInitialized()
     {
-        var sample = new SampleScenario();
-        _scenarios = [sample];
-        _selectedScenarioId = sample.Id;
+        _scenarios = [new SampleScenario(), new SampleScenarioWatch()];
+        _selectedScenarioId = _scenarios[0].Id;
     }
 
-    private void RunBattle()
+    private void StartSession()
     {
-        // TODO: run the selected scenario through GameCore's battle engine
-        _ran = true;
+        _currentScenario = _scenarios.First(s => s.Id == _selectedScenarioId);
+        _setup        = _currentScenario.CreateSetup();
+        _playMode     = _currentScenario.IsPlayable;
+        _session      = null;
+        _result       = null;
+        _pendingAction = null;
+
+        if (_playMode)
+        {
+            _session = new InteractiveBattleSession(_setup, _currentScenario.Seed);
+            _session.Start();
+        }
+        else
+        {
+            _result = BattleEngine.Run(_setup, _currentScenario.Seed);
+            _step   = 0;
+        }
     }
+
+    private void TakeControlFromHere()
+    {
+        if (_result == null || _setup == null || _currentScenario == null) return;
+        var snap = _result.Snapshots[_step];
+        _session = new InteractiveBattleSession(_setup, _currentScenario.Seed, snap.UnitStates, snap.Event.ActorId);
+        _pendingAction = null;
+        _playMode = true;
+        _result   = null;
+        _session.StartFromSnapshot(_step + 1);
+    }
+
+    private void ConfirmTarget(string targetId)
+    {
+        if (_session is null || _pendingAction is null) return;
+        _session.SubmitAction(_pendingAction.Value, targetId);
+        _pendingAction = null;
+    }
+
+    private static string ActionLabel(PlayerActionType a) => a switch
+    {
+        PlayerActionType.Skill    => "✦ Skill",
+        PlayerActionType.SoulBurn => "🔥 Soul Burn",
+        _                         => "⚔ Attack",
+    };
+
+    // ── Watch mode helpers ────────────────────────────────────────
+    private BattleSnapshot? CurrentSnapshot => _result?.Snapshots[_step];
+    private void StepForward() => _step = Math.Min(_step + 1, (_result?.Snapshots.Count ?? 1) - 1);
+    private void StepBack()    => _step = Math.Max(0, _step - 1);
+    private void JumpToStart() => _step = 0;
+    private void JumpToEnd()   => _step = (_result?.Snapshots.Count ?? 1) - 1;
 }

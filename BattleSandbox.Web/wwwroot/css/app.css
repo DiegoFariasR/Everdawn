@@ -1,75 +1,453 @@
+/* =====================================================
+   Everdawn — Battle Sandbox  |  Mobile-first dark theme
+   ===================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
 html, body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin: 0;
     padding: 0;
-    background: #f5f5f5;
-    color: #222;
+    background: #0d1117;
+    color: #cdd6e0;
+    min-height: 100dvh;
 }
 
-h1:focus {
-    outline: none;
+/* ── Layout container ─────────────────────────────── */
+.sandbox {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
 }
 
-/* Scenario picker */
-.scenario-picker {
+/* ── Scenario picker ──────────────────────────────── */
+.picker {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
     align-items: center;
-    margin-bottom: 1rem;
 }
 
-.scenario-picker label {
+.picker label {
+    font-size: 0.8rem;
     font-weight: 600;
+    color: #8899aa;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
-.scenario-picker select {
+.picker select {
     flex: 1;
     min-width: 0;
-    padding: 0.5rem;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.9rem;
+    background: #161b22;
+    color: #cdd6e0;
+    border: 1px solid #30363d;
+    border-radius: 6px;
 }
 
 .btn-run {
-    padding: 0.5rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 600;
+    padding: 0.45rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 700;
     color: #fff;
-    background: #1b6ec2;
+    background: #1a6fc4;
     border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    min-height: 40px;
+    letter-spacing: 0.02em;
+}
+.btn-run:active { background: #1559a0; }
+
+/* Mode toggle */
+.btn-mode {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #8899aa;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    cursor: pointer;
+    min-height: 40px;
+}
+.btn-mode-active { color: #ffd700; border-color: #554400; background: #1e1800; }
+.btn-mode:active { background: #21262d; }
+
+/* ── Action bar (play mode) ───────────────────────────────── */
+.action-bar {
+    background: #111820;
+    border: 1px solid #21262d;
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.acting-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #ffd700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+.enemy-acting { color: #ff9988; }
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-action {
+    flex: 1;
+    padding: 0.5rem 0.25rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-height: 48px;
+    letter-spacing: 0.02em;
+    transition: filter 0.1s, opacity 0.1s;
+}
+.btn-action:disabled { opacity: 0.35; cursor: not-allowed; filter: grayscale(0.5); }
+
+.btn-attack   { background: #c4501a; color: #fff; }
+.btn-attack:not(:disabled):active { background: #a04012; }
+
+.btn-skill    { background: #1a4fc4; color: #fff; }
+.btn-skill:not(:disabled):active { background: #1240a0; }
+
+.btn-soulburn { background: #6a1ac4; color: #fff; }
+.btn-soulburn:not(:disabled):active { background: #551097; }
+
+.mp-cost { font-size: 0.6rem; font-weight: 400; opacity: 0.8; }
+
+.action-hint {
+    font-size: 0.72rem;
+    color: #556677;
+    margin: 0;
+    text-align: center;
+}
+
+/* ── Target prompt (shown after action is chosen) ─────────── */
+.target-prompt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+}
+.target-prompt-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #ffd700;
+    animation: pulse 0.8s ease-in-out infinite alternate;
+}
+@keyframes pulse {
+    from { opacity: 0.7; }
+    to   { opacity: 1; }
+}
+.btn-cancel {
+    padding: 0.3rem 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #aaa;
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 5px;
+    cursor: pointer;
+    min-height: 32px;
+}
+.btn-cancel:active { background: #30363d; }
+
+/* ── Target selection ─────────────────────────────────────── */
+.card-targetable { cursor: pointer; }
+.card-targetable:hover { border-color: #888; }
+.card-targeted {
+    border-color: #ff4444 !important;
+    box-shadow: 0 0 8px #ff444444;
+    background: #1e0808 !important;
+}
+.target-pip {
+    color: #ff4444;
+    font-size: 0.75rem;
+    align-self: center;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* ── Battle over banner ───────────────────────────────────── */
+.battle-over {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.over-win  { background: #0a1e14; color: #44ee88; border: 1px solid #1a4a2a; }
+.over-lose { background: #1e0a0a; color: #ff6655; border: 1px solid #5a1a1a; }
+
+/* ── Event type extra colors ──────────────────────────────── */
+.event-entry.skill.event-current     { background: #0a0e1e; color: #88aaff; }
+.event-entry.soulburn.event-current  { background: #120a1e; color: #cc88ff; }
+.current-event.skill    { color: #88aaff; border-color: #1a2a5a; background: #080e1e; }
+.current-event.soulburn { color: #cc88ff; border-color: #2a1a5a; background: #10081e; }
+.current-event.takeover { color: #ffd700; border-color: #554400; background: #1e1800; }
+.event-entry.takeover.event-current { background: #1e1800; color: #ffd700; }
+
+/* ── Portrait strip ───────────────────────────────── */
+.portrait-strip {
+    display: flex;
+    gap: 0.35rem;
+    align-items: center;
+    background: #161b22;
+    border-radius: 8px;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid #21262d;
+}
+
+.portrait {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+    border: 2px solid transparent;
+    transition: border-color 0.15s, opacity 0.15s;
+    flex-shrink: 0;
+}
+.player-portrait  { background: #1e4080; color: #88bbff; }
+.enemy-portrait   { background: #5a1a1a; color: #ff9988; }
+.portrait-active  { border-color: #ffd700; box-shadow: 0 0 6px #ffd70066; }
+.portrait-dead    { opacity: 0.3; filter: grayscale(1); }
+.portrait-sep     { color: #445; font-size: 1rem; margin: 0 0.1rem; flex-shrink: 0; }
+
+/* ── Current event banner ─────────────────────────── */
+.current-event {
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    background: #161b22;
+    border: 1px solid #21262d;
+    color: #cdd6e0;
+    min-height: 2.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.current-event.attack { color: #ffcc55; border-color: #5a4a00; background: #1e1800; }
+.current-event.death  { color: #ff6655; border-color: #5a1a1a; background: #1e0a0a; }
+.current-event.start,
+.current-event.end    { color: #88ddaa; border-color: #1a4a2a; background: #0a1e14; }
+
+/* ── Arena ────────────────────────────────────────── */
+.arena {
+    display: flex;
+    gap: 0.5rem;
+    background: #111820;
+    border-radius: 8px;
+    padding: 0.625rem;
+    border: 1px solid #21262d;
+}
+
+.team {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+.vs-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #334;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    width: 1.5rem;
+}
+
+/* ── Unit card ────────────────────────────────────── */
+.unit-card {
+    display: flex;
+    gap: 0.45rem;
+    align-items: flex-start;
+    background: #161b22;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    padding: 0.4rem;
+    transition: border-color 0.15s, background 0.15s, opacity 0.2s;
+}
+
+.card-active {
+    border-color: #ffd700;
+    background: #1e1f00;
+    box-shadow: 0 0 8px #ffd70033;
+}
+.card-dead {
+    opacity: 0.35;
+    filter: grayscale(1);
+}
+
+.avatar {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+.player-avatar { background: #1e4080; color: #88bbff; }
+.enemy-avatar  { background: #5a1a1a; color: #ff9988; }
+
+.unit-info { flex: 1; min-width: 0; }
+
+.unit-name {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #cdd6e0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+}
+.unit-lv { color: #667; font-weight: 400; font-size: 0.65rem; }
+
+.bar-wrap {
+    height: 4px;
+    background: #21262d;
+    border-radius: 2px;
+    margin-bottom: 2px;
+    overflow: hidden;
+}
+.hp-bar, .mp-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.25s ease;
+}
+.mp-bar { background: #2266cc; }
+
+.stat-text {
+    font-size: 0.58rem;
+    color: #556;
+    margin-top: 1px;
+}
+
+/* ── Step controls ────────────────────────────────── */
+.step-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    background: #161b22;
+    border-radius: 8px;
+    padding: 0.5rem;
+    border: 1px solid #21262d;
+}
+.step-controls button {
+    background: #21262d;
+    color: #cdd6e0;
+    border: 1px solid #30363d;
+    border-radius: 5px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    min-height: 36px;
+    min-width: 40px;
+}
+.step-controls button:active { background: #30363d; }
+.step-label {
+    font-size: 0.8rem;
+    color: #8899aa;
+    min-width: 6rem;
+    text-align: center;
+}
+
+.btn-takeover {
+    padding: 0.3rem 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #ffd700;
+    background: #1e1800;
+    border: 1px solid #554400;
+    border-radius: 5px;
+    cursor: pointer;
+    min-height: 36px;
+    margin-left: auto;
+}
+.btn-takeover:active { background: #2a2000; }
+
+/* ── Event log ────────────────────────────────────── */
+.event-log {
+    background: #0d1117;
+    border: 1px solid #21262d;
+    border-radius: 8px;
+    padding: 0.4rem;
+    max-height: 180px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+.event-entry {
+    font-size: 0.75rem;
+    color: #556677;
+    padding: 0.2rem 0.4rem;
     border-radius: 4px;
     cursor: pointer;
-    min-height: 44px;
-    min-width: 44px;
+    line-height: 1.4;
 }
-
-.btn-run:active {
-    background: #155a9c;
+.event-entry:hover { background: #161b22; color: #aaa; }
+.event-entry.event-current {
+    background: #1e1f00;
+    color: #ffd700;
+    font-weight: 600;
 }
+.event-entry.death.event-current { background: #1e0a0a; color: #ff6655; }
+.event-entry.end.event-current   { background: #0a1e14; color: #88ddaa; }
+.event-num { color: #334455; margin-right: 0.3rem; }
 
-/* Battle result */
-.battle-result {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 1rem;
-}
-
-/* Error UI */
+/* ── Blazor infrastructure ────────────────────────── */
 #blazor-error-ui {
-    background: lightyellow;
+    background: #2d1a00;
+    color: #ffcc88;
     bottom: 0;
-    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 -1px 4px rgba(0,0,0,0.5);
     display: none;
     left: 0;
-    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    padding: 0.6rem 1.25rem 0.7rem;
     position: fixed;
     width: 100%;
     z-index: 1000;
+    font-size: 0.85rem;
 }
-
 #blazor-error-ui .dismiss {
     cursor: pointer;
     position: absolute;
@@ -77,7 +455,6 @@ h1:focus {
     top: 0.5rem;
 }
 
-/* Loading indicator */
 .loading-progress {
     position: absolute;
     display: block;
@@ -86,28 +463,25 @@ h1:focus {
     inset: 20vh 0 auto 0;
     margin: 0 auto;
 }
-
 .loading-progress circle {
     fill: none;
-    stroke: #e0e0e0;
+    stroke: #21262d;
     stroke-width: 0.6rem;
     transform-origin: 50% 50%;
     transform: rotate(-90deg);
 }
-
 .loading-progress circle:last-child {
-    stroke: #1b6ec2;
+    stroke: #1a6fc4;
     stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
     transition: stroke-dasharray 0.05s ease-in-out;
 }
-
 .loading-progress-text {
     position: absolute;
     text-align: center;
     font-weight: bold;
     inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
 }
-
 .loading-progress-text:after {
     content: var(--blazor-load-percentage-text, "Loading");
 }
+
