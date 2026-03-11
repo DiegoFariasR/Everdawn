@@ -16,6 +16,15 @@
             }
         </select>
         <button class="btn-run" @onclick="StartSession">▶ Start</button>
+        <label for="auto-speed">Speed</label>
+        <select id="auto-speed" @bind="_autoDelay">
+            <option value="200">Fast</option>
+            <option value="600">Normal</option>
+            <option value="1200">Slow</option>
+        </select>
+        <button class="btn-auto @(_autoMode ? "btn-auto-on" : "")" @onclick="ToggleAuto">
+            ⚡ Auto @(_autoMode ? "ON" : "OFF")
+        </button>
     </section>
 
     @if (_playMode && _response != null && _setup != null)
@@ -86,7 +95,7 @@
                     var st = state.First(s => s.UnitId == u.Id);
                     int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
                     string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
-                    bool canTarget = pending != null && _pendingAction != null && st.IsAlive;
+                    bool canTarget = pending != null && _pendingAction != null && st.IsAlive && !_autoMode;
 
                     <div class="unit-card
                         @(activeUnitId == u.Id ? "card-active" : "")
@@ -110,7 +119,13 @@
                 <div class="acting-label">
                     @(pending.Actor.Name + "'s turn")
                 </div>
-                @if (_pendingAction == null)
+                @if (_autoMode)
+                {
+                    <div class="action-buttons">
+                        <span style="opacity:0.6">⚡ Auto resolving…</span>
+                    </div>
+                }
+                else if (_pendingAction == null)
                 {
                     <div class="action-buttons">
                         <button class="btn-action btn-attack"
@@ -255,6 +270,8 @@
     private InteractiveBattleSession? _session;
     private BattleResponse? _response;
     private PlayerActionType? _pendingAction;
+    private bool _autoMode;
+    private int _autoDelay = 600;
 
     // ── Watch mode ───────────────────────────────────────────────
     private BattleResult? _result;
@@ -280,6 +297,7 @@
         {
             _session  = new InteractiveBattleSession(_setup, _currentScenario.Seed);
             _response = _session.HandleRequest(new StartBattleRequest());
+            if (_autoMode) _ = RunAutoAsync();
         }
         else
         {
@@ -297,6 +315,26 @@
         _pendingAction = null;
         _playMode = true;
         _result   = null;
+        if (_autoMode) _ = RunAutoAsync();
+    }
+
+    private void ToggleAuto()
+    {
+        _autoMode = !_autoMode;
+        if (_autoMode && _session != null && _response?.PendingInput != null && !(_response.IsOver))
+            _ = RunAutoAsync();
+    }
+
+    private async Task RunAutoAsync()
+    {
+        while (_autoMode && _session != null && _response?.PendingInput != null && !(_response?.IsOver ?? true))
+        {
+            await Task.Delay(_autoDelay);
+            if (!_autoMode || _session == null) break;
+            _response = _session.HandleRequest(new AutoPlayerActionRequest());
+            _pendingAction = null;
+            StateHasChanged();
+        }
     }
 
     private void ConfirmTarget(string targetId)

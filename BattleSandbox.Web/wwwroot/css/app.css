@@ -64,6 +64,28 @@ html, body {
 }
 .btn-run:active { background: #1559a0; }
 
+/* Auto toggle */
+.btn-auto {
+    padding: 0.45rem 1.1rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #aaa;
+    background: #21262d;
+    border: 1px solid #444;
+    border-radius: 6px;
+    cursor: pointer;
+    min-height: 40px;
+    letter-spacing: 0.02em;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.btn-auto:hover { border-color: #888; color: #fff; }
+.btn-auto-on {
+    color: #ffe44d;
+    background: #2a2200;
+    border-color: #c8a000;
+}
+.btn-auto-on:hover { background: #332900; }
+
 /* Mode toggle */
 .btn-mode {
     padding: 0.35rem 0.85rem;

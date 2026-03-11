@@ -42,6 +42,7 @@ public class InteractiveBattleSession
         StartBattleRequest        r => HandleStart(r),
         ResumeFromSnapshotRequest r => HandleResume(r),
         PlayerActionRequest       r => HandlePlayerAction(r),
+        AutoPlayerActionRequest   r => HandleAutoPlayerAction(r),
         _ => throw new ArgumentException($"Unknown request type: {request.GetType().Name}")
     };
 
@@ -90,6 +91,28 @@ public class InteractiveBattleSession
                      ?? throw new ArgumentException($"Unknown target: {r.TargetId}");
 
         var newEvents = new List<BattleEvent>(ExecuteAction(actor, target, r.Action));
+        AdvanceTurn();
+        newEvents.AddRange(AutoAdvance());
+        return BuildResponse(newEvents);
+    }
+
+    private BattleResponse HandleAutoPlayerAction(AutoPlayerActionRequest _)
+    {
+        if (!_started) throw new InvalidOperationException("Session not started.");
+        if (_isOver)   throw new InvalidOperationException("Battle is over.");
+        if (_turnOrder[_turnIndex].Team != "player")
+            throw new InvalidOperationException("Not a player turn.");
+
+        var actor   = _turnOrder[_turnIndex];
+        var targets = _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToList();
+        if (targets.Count == 0) { CheckEnd(); return BuildResponse([]); }
+
+        var target = targets[_rng.Next(targets.Count)];
+        var action = _mp[actor.Id] >= SoulBurnMpCost ? PlayerActionType.SoulBurn
+                   : _mp[actor.Id] >= SkillMpCost    ? PlayerActionType.Skill
+                   : PlayerActionType.Attack;
+
+        var newEvents = new List<BattleEvent>(ExecuteAction(actor, target, action));
         AdvanceTurn();
         newEvents.AddRange(AutoAdvance());
         return BuildResponse(newEvents);

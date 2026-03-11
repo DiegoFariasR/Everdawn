@@ -9,6 +9,12 @@ public abstract record BattleRequest;
 public sealed record StartBattleRequest : BattleRequest;
 
 /// <summary>
+/// GameCore picks the best available action (SoulBurn > Skill > Attack based on MP)
+/// and a random valid target for the current player unit.
+/// </summary>
+public sealed record AutoPlayerActionRequest : BattleRequest;
+
+/// <summary>
 /// Resume from a mid-battle snapshot. HP/MP come from the snapshot state;
 /// turn order picks up after <paramref name="LastActorId"/>.
 /// </summary>
