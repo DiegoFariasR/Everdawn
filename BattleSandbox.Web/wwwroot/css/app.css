@@ -324,6 +324,7 @@ html, body {
 }
 .current-event.attack { color: #ffcc55; border-color: #5a4a00; background: #1e1800; }
 .current-event.death  { color: #ff6655; border-color: #5a1a1a; background: #1e0a0a; }
+.current-event.round  { color: #88aaff; border-color: #1a2a5a; background: #0a0e1e; }
 .current-event.start,
 .current-event.end    { color: #88ddaa; border-color: #1a4a2a; background: #0a1e14; }
 
@@ -499,6 +500,8 @@ html, body {
 }
 .event-entry.death.event-current { background: #1e0a0a; color: #ff6655; }
 .event-entry.end.event-current   { background: #0a1e14; color: #88ddaa; }
+.event-entry.round               { color: #4466bb; font-style: italic; }
+.event-entry.round.event-current { background: #0a0e1e; color: #88aaff; }
 .event-num { color: #334455; margin-right: 0.3rem; }
 
 /* ── Blazor infrastructure ────────────────────────── */

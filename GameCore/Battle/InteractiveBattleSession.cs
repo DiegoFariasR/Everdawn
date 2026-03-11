@@ -16,6 +16,7 @@ public class InteractiveBattleSession
     private readonly List<BattleEvent> _log = [];
 
     private int _turnIndex;
+    private int _round = 1;
     private bool _started;
     private bool _isOver;
     private string? _winningTeam;
@@ -100,7 +101,7 @@ public class InteractiveBattleSession
         }
 
         var newEvents = new List<BattleEvent>(ExecuteAction(actor, targets, skill));
-        AdvanceTurn();
+        if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
         newEvents.AddRange(AutoAdvance());
         return BuildResponse(newEvents);
     }
@@ -118,7 +119,7 @@ public class InteractiveBattleSession
         if (targets.Count == 0) { CheckEnd(); return BuildResponse([]); }
 
         var newEvents = new List<BattleEvent>(ExecuteAction(actor, targets, skill));
-        AdvanceTurn();
+        if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
         newEvents.AddRange(AutoAdvance());
         return BuildResponse(newEvents);
     }
@@ -165,7 +166,7 @@ public class InteractiveBattleSession
             if (targets.Count == 0) { CheckEnd(); break; }
 
             produced.AddRange(ExecuteAction(actor, targets, skill));
-            AdvanceTurn();
+            if (AdvanceTurn()) produced.AddRange(StartOfRound());
         }
         return produced;
     }
@@ -243,15 +244,37 @@ public class InteractiveBattleSession
         return produced;
     }
 
-    private void AdvanceTurn()
+    private bool AdvanceTurn()
     {
-        if (_isOver) return;
+        if (_isOver) return false;
+        int prev = _turnIndex;
         for (int i = 0; i < _turnOrder.Count; i++)
         {
             _turnIndex = (_turnIndex + 1) % _turnOrder.Count;
-            if (_hp[_turnOrder[_turnIndex].Id] > 0) return;
+            if (_hp[_turnOrder[_turnIndex].Id] > 0)
+                return _turnIndex <= prev;  // wrapped = new round started
         }
         CheckEnd();
+        return false;
+    }
+
+    /// <summary>Called when the turn order wraps. Increments round, regenerates mana.</summary>
+    private IReadOnlyList<BattleEvent> StartOfRound()
+    {
+        _round++;
+        var events = new List<BattleEvent>();
+        events.Add(AddEvent("system", $"\u2500\u2500 Round {_round} \u2500\u2500", "round"));
+        foreach (var u in _allUnits.Where(u => u.MaxMp > 0 && _hp[u.Id] > 0))
+        {
+            int regen  = Math.Max(1, u.MaxMp / 5);  // 20 % of MaxMp
+            int gained = Math.Min(regen, u.MaxMp - _mp[u.Id]);
+            if (gained > 0)
+            {
+                _mp[u.Id] += gained;
+                events.Add(AddEvent(u.Id, $"{u.Name} recovers {gained} MP.", "round"));
+            }
+        }
+        return events;
     }
 
     private void CheckEnd()
