@@ -80,7 +80,12 @@
                         @(activeUnitId == u.Id ? "card-active" : "")
                         @(!st.IsAlive ? "card-dead" : "")
                         @(canHealTarget ? "card-targetable card-heal-target" : "")"
+                        style="position:relative"
                         @onclick="() => { if (canHealTarget) ConfirmTarget(u.Id); }">
+                        @foreach (var f in _floats.Where(f => f.UnitId == u.Id))
+                        {
+                            <span class="float-num @(f.IsHeal ? "float-heal" : "float-dmg")" style="left:@(f.OffsetPct)%" @key="f.Key">@(f.IsHeal ? "+" : "-")@f.Value</span>
+                        }
                         <div class="avatar player-avatar">@u.Name[0]</div>
                         <div class="unit-info">
                             <div class="unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
@@ -110,7 +115,12 @@
                         @(activeUnitId == u.Id ? "card-active" : "")
                         @(!st.IsAlive ? "card-dead" : "")
                         @(canTarget ? "card-targetable" : "")"
+                        style="position:relative"
                         @onclick="() => { if (canTarget) ConfirmTarget(u.Id); }">
+                        @foreach (var f in _floats.Where(f => f.UnitId == u.Id))
+                        {
+                            <span class="float-num @(f.IsHeal ? "float-heal" : "float-dmg")" style="left:@(f.OffsetPct)%" @key="f.Key">@(f.IsHeal ? "+" : "-")@f.Value</span>
+                        }
                         <div class="avatar enemy-avatar">@u.Name[0]</div>
                         <div class="unit-info">
                             <div class="unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
@@ -345,6 +355,7 @@
             await Task.Delay(_autoDelay);
             if (!_autoMode || _session == null) break;
             _response = _session.HandleRequest(new AutoPlayerActionRequest());
+            SpawnFloats(_response);
             _pendingAction = null;
             StateHasChanged();
         }
@@ -355,6 +366,7 @@
         if (_session is null) return;
         string? noTarget = null;
         _response = _session.HandleRequest(new PlayerActionRequest(skillId, noTarget));
+        SpawnFloats(_response);
         _pendingAction = null;
     }
 
@@ -362,6 +374,7 @@
     {
         if (_session is null || _pendingAction is null) return;
         _response = _session.HandleRequest(new PlayerActionRequest(_pendingAction, targetId));
+        SpawnFloats(_response);
         _pendingAction = null;
     }
 
@@ -372,4 +385,30 @@
     private void StepBack()    => _step = Math.Max(0, _step - 1);
     private void JumpToStart() => _step = 0;
     private void JumpToEnd()   => _step = (_result?.Snapshots.Count ?? 1) - 1;
+
+    // ── Floating numbers ─────────────────────────────────────────
+    private record FloatNumber(string UnitId, int Value, bool IsHeal, int OffsetPct, int Key);
+    private readonly List<FloatNumber> _floats = [];
+    private int _floatKey = 0;
+
+    private void SpawnFloats(BattleResponse? response)
+    {
+        if (response is null) return;
+        foreach (var ev in response.NewEvents)
+        {
+            if (ev.TargetId is null || ev.Value <= 0) continue;
+            bool isHeal = ev.Type == "skill" && ev.Description.Contains("heal", StringComparison.OrdinalIgnoreCase);
+            int offset  = 20 + (_floatKey % 5) * 12;   // spread horizontally so multi-hits don't stack
+            _floats.Add(new FloatNumber(ev.TargetId, ev.Value, isHeal, offset, _floatKey++));
+        }
+        if (_floats.Count > 0)
+            _ = ExpireFloatsAsync();
+    }
+
+    private async Task ExpireFloatsAsync()
+    {
+        await Task.Delay(1100);   // matches CSS animation duration
+        _floats.Clear();
+        StateHasChanged();
+    }
 }
