@@ -220,4 +220,4 @@ These phrases have defined meanings when used in requests:
 | **"ship it"** | `dotnet format` → commit → new branch → push → create PR → squash-merge → sync local main → restart dev server on `http://localhost:5001` |
 | **"push fix"** | `dotnet format` → commit → push directly to `main` (for small hotfixes) |
 | **"start server"** | Kill port 5001 + `dotnet run --no-launch-profile --urls "http://localhost:5001"` in `BattleSandbox.Web/` |
-| **"debug production"** | Check recent GitHub Actions runs for failures (CI + Deploy) + verify `https://diegofariasr.github.io/Everdawn/` is reachable and returns HTTP 200 |
+| **"debug prod"** | Check recent GitHub Actions runs for failures (CI + Deploy) + verify `https://diegofariasr.github.io/Everdawn/` is reachable and returns HTTP 200 |
