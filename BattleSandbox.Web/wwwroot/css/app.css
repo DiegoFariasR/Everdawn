@@ -159,6 +159,24 @@ html, body {
 .btn-soulburn { background: #6a1ac4; color: #fff; }
 .btn-soulburn:not(:disabled):active { background: #551097; }
 
+/* AoE modifier — layered on top of existing skill button colour */
+.btn-aoe { outline: 2px solid #ff9f1c; outline-offset: 1px; }
+.btn-aoe:not(:disabled):hover { outline-color: #ffcc70; }
+
+.aoe-badge {
+    display: inline-block;
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #ff9f1c;
+    background: #1a0f00;
+    border: 1px solid #ff9f1c;
+    border-radius: 3px;
+    padding: 0 3px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
 .mp-cost { font-size: 0.6rem; font-weight: 400; opacity: 0.8; }
 
 .action-hint {
@@ -202,6 +220,27 @@ html, body {
 /* ── Target selection ─────────────────────────────────────── */
 .card-targetable { cursor: pointer; }
 .card-targetable:hover { border-color: #888; }
+
+/* Heal/ally-target modifier */
+.btn-heal { outline: 2px solid #44cc88; outline-offset: 1px; }
+.btn-heal:not(:disabled):hover { outline-color: #88ffbb; }
+
+.ally-badge {
+    display: inline-block;
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #44cc88;
+    background: #001a0f;
+    border: 1px solid #44cc88;
+    border-radius: 3px;
+    padding: 0 3px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+.card-heal-target { border-color: #44cc88 !important; }
+.card-heal-target:hover { border-color: #88ffbb !important; }
 .card-targeted {
     border-color: #ff4444 !important;
     box-shadow: 0 0 8px #ff444444;

@@ -11,5 +11,8 @@ public record BattlePendingInput(
     IReadOnlyList<BattleSkill> Skills,
     /// <summary>IDs of skills the unit can currently afford (MP check). Index 0 is always included.</summary>
     IReadOnlyList<string> AvailableSkillIds,
-    IReadOnlyList<BattleUnit> ValidTargets
+    /// <summary>Living enemy units — valid targets for damage/enemy-targeted skills.</summary>
+    IReadOnlyList<BattleUnit> EnemyTargets,
+    /// <summary>Living ally units including self — valid targets for heal/ally-targeted skills.</summary>
+    IReadOnlyList<BattleUnit> AllyTargets
 );

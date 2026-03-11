@@ -37,6 +37,8 @@
         var lastEv  = _response.FullLog.LastOrDefault();
         string evType = lastEv?.Type ?? "start";
         var pending = _response.PendingInput;
+        var pendingSkill = _pendingAction != null ? pending?.Skills.FirstOrDefault(s => s.Id == _pendingAction) : null;
+        bool pendingTargetIsAlly = pendingSkill?.Target == BattleSkillTarget.Ally;
         string? activeUnitId = pending?.Actor.Id ?? lastEv?.ActorId;
 
         <section class="portrait-strip">
@@ -73,9 +75,12 @@
                     int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
                     int mpPct = u.MaxMp > 0 ? st.CurrentMp * 100 / u.MaxMp : 0;
                     string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
+                    bool canHealTarget = pendingTargetIsAlly && _pendingAction != null && st.IsAlive && !_autoMode;
                     <div class="unit-card
                         @(activeUnitId == u.Id ? "card-active" : "")
-                        @(!st.IsAlive ? "card-dead" : "")">
+                        @(!st.IsAlive ? "card-dead" : "")
+                        @(canHealTarget ? "card-targetable card-heal-target" : "")"
+                        @onclick="() => { if (canHealTarget) ConfirmTarget(u.Id); }">
                         <div class="avatar player-avatar">@u.Name[0]</div>
                         <div class="unit-info">
                             <div class="unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
@@ -99,7 +104,7 @@
                     var st = state.First(s => s.UnitId == u.Id);
                     int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
                     string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
-                    bool canTarget = pending != null && _pendingAction != null && st.IsAlive && !_autoMode;
+                    bool canTarget = pending != null && _pendingAction != null && st.IsAlive && !_autoMode && !pendingTargetIsAlly;
 
                     <div class="unit-card
                         @(activeUnitId == u.Id ? "card-active" : "")
@@ -134,14 +139,18 @@
                     <div class="action-buttons">
                         @for (int si = 0; si < pending.Skills.Count; si++)
                         {
-                            var skill   = pending.Skills[si];
-                            bool canUse = pending.AvailableSkillIds.Contains(skill.Id);
+                            var skill       = pending.Skills[si];
+                            bool canUse     = pending.AvailableSkillIds.Contains(skill.Id);
                             string btnClass = si == 0 ? "btn-attack" : si == 1 ? "btn-skill" : "btn-soulburn";
                             string skillId  = skill.Id;
-                            <button class="btn-action @btnClass"
+                            bool isAoe      = skill.IsAoe;
+                            bool isAllySkill = skill.Target == BattleSkillTarget.Ally;
+                            <button class="btn-action @btnClass @(isAoe ? "btn-aoe" : "") @(isAllySkill ? "btn-heal" : "")"
                                     disabled="@(!canUse)"
-                                    @onclick="() => _pendingAction = skillId">
+                                    @onclick="() => { if (isAoe) FireAoe(skillId); else _pendingAction = skillId; }">
                                 @skill.Name
+                                @if (isAoe) { <span class="aoe-badge">ALL</span> }
+                                @if (isAllySkill) { <span class="ally-badge">ALLY</span> }
                                 @if (skill.MpCost > 0)
                                 {
                                     <span class="mp-cost">@skill.MpCost MP</span>
@@ -340,6 +349,14 @@
             _pendingAction = null;
             StateHasChanged();
         }
+    }
+
+    private void FireAoe(string skillId)
+    {
+        if (_session is null) return;
+        string? noTarget = null;
+        _response = _session.HandleRequest(new PlayerActionRequest(skillId, noTarget));
+        _pendingAction = null;
     }
 
     private void ConfirmTarget(string targetId)

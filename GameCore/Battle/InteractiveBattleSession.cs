@@ -86,10 +86,20 @@ public class InteractiveBattleSession
         var actor  = _turnOrder[_turnIndex];
         var skill  = actor.ResolvedSkills.FirstOrDefault(s => s.Id == r.SkillId)
                      ?? throw new ArgumentException($"Unknown skill: {r.SkillId}");
-        var target = _allUnits.FirstOrDefault(u => u.Id == r.TargetId)
-                     ?? throw new ArgumentException($"Unknown target: {r.TargetId}");
 
-        var newEvents = new List<BattleEvent>(ExecuteAction(actor, target, skill));
+        List<BattleUnit> targets;
+        if (skill.IsAoe)
+        {
+            targets = _allUnits.Where(u => TargetSideMatch(u, actor, skill.Target) && _hp[u.Id] > 0).ToList();
+        }
+        else
+        {
+            var t = _allUnits.FirstOrDefault(u => u.Id == r.TargetId)
+                    ?? throw new ArgumentException($"Unknown target: {r.TargetId}");
+            targets = [t];
+        }
+
+        var newEvents = new List<BattleEvent>(ExecuteAction(actor, targets, skill));
         AdvanceTurn();
         newEvents.AddRange(AutoAdvance());
         return BuildResponse(newEvents);
@@ -103,16 +113,11 @@ public class InteractiveBattleSession
             throw new InvalidOperationException("Not a player turn.");
 
         var actor   = _turnOrder[_turnIndex];
-        var targets = _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToList();
+        var skill   = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost).Last();
+        var targets = ResolveAutoTargets(actor, skill);
         if (targets.Count == 0) { CheckEnd(); return BuildResponse([]); }
 
-        var target = targets[_rng.Next(targets.Count)];
-        // Pick the most expensive affordable skill (last one the unit can use)
-        var skill = actor.ResolvedSkills
-            .Where(s => _mp[actor.Id] >= s.MpCost)
-            .Last();
-
-        var newEvents = new List<BattleEvent>(ExecuteAction(actor, target, skill));
+        var newEvents = new List<BattleEvent>(ExecuteAction(actor, targets, skill));
         AdvanceTurn();
         newEvents.AddRange(AutoAdvance());
         return BuildResponse(newEvents);
@@ -131,7 +136,8 @@ public class InteractiveBattleSession
                 Actor:             actor,
                 Skills:            skills,
                 AvailableSkillIds: skills.Where(s => _mp[actor.Id] >= s.MpCost).Select(s => s.Id).ToArray(),
-                ValidTargets:      _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToArray()
+                EnemyTargets:      _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToArray(),
+                AllyTargets:       _allUnits.Where(u => u.Team == actor.Team && _hp[u.Id] > 0).ToArray()
             );
         }
 
@@ -154,41 +160,84 @@ public class InteractiveBattleSession
         while (!_isOver && _turnOrder[_turnIndex].Team != "player")
         {
             var actor   = _turnOrder[_turnIndex];
-            var targets = _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToList();
+            var skill   = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost).Last();
+            var targets = ResolveAutoTargets(actor, skill);
             if (targets.Count == 0) { CheckEnd(); break; }
 
-            var target = targets[_rng.Next(targets.Count)];
-            // Enemies pick best affordable skill like the auto player action
-            var skill = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost).Last();
-            produced.AddRange(ExecuteAction(actor, target, skill));
+            produced.AddRange(ExecuteAction(actor, targets, skill));
             AdvanceTurn();
         }
         return produced;
     }
 
-    private IReadOnlyList<BattleEvent> ExecuteAction(BattleUnit actor, BattleUnit target, BattleSkill skill)
+    /// <summary>Resolves the target list for auto actions (AI and auto mode).</summary>
+    private List<BattleUnit> ResolveAutoTargets(BattleUnit actor, BattleSkill skill)
+    {
+        if (skill.Target == BattleSkillTarget.Ally)
+        {
+            var allies = _allUnits.Where(u => u.Team == actor.Team && _hp[u.Id] > 0).ToList();
+            if (allies.Count == 0) return [];
+            // Heal the lowest HP ally
+            var target = skill.IsAoe ? null : allies.MinBy(u => _hp[u.Id]);
+            return skill.IsAoe ? allies : [target!];
+        }
+        else
+        {
+            var foes = _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToList();
+            if (foes.Count == 0) return [];
+            return skill.IsAoe ? foes : [foes[_rng.Next(foes.Count)]];
+        }
+    }
+
+    private static bool TargetSideMatch(BattleUnit u, BattleUnit actor, BattleSkillTarget side) =>
+        side == BattleSkillTarget.Ally
+            ? u.Team == actor.Team
+            : u.Team != actor.Team;
+
+    private IReadOnlyList<BattleEvent> ExecuteAction(BattleUnit actor, List<BattleUnit> targets, BattleSkill skill)
     {
         var produced = new List<BattleEvent>();
 
-        // Consume MP (skill[0] always has MpCost == 0)
+        // Consume MP once (skill[0] always has MpCost == 0)
         _mp[actor.Id] = Math.Max(0, _mp[actor.Id] - skill.MpCost);
 
-        int variance = Math.Max(1, actor.Attack / 5);
-        int damage   = (int)(actor.Attack * skill.Multiplier) + _rng.Next(-variance, variance + 1);
-        _hp[target.Id] = Math.Max(0, _hp[target.Id] - damage);
-
-        // Event type: index 0 = "attack", 1 = "skill", 2+ = "soulburn" (keeps CSS colours)
-        var skills    = actor.ResolvedSkills;
-        int skillIdx  = skills.ToList().IndexOf(skill);
+        // Determine event type from skill index for CSS colouring
+        var skills   = actor.ResolvedSkills;
+        int skillIdx = skills.ToList().IndexOf(skill);
         if (skillIdx < 0) skillIdx = 0;
-        string evType = skillIdx == 0 ? "attack" : skillIdx == 1 ? "skill" : "soulburn";
+        string evType = skill.IsHeal ? "skill"
+                       : skillIdx == 0 ? "attack" : skillIdx == 1 ? "skill" : "soulburn";
 
-        produced.Add(AddEvent(actor.Id,
-            $"{actor.Name} uses {skill.Name} on {target.Name} for {damage} damage.",
-            evType, target.Id, damage));
+        if (skill.IsAoe && targets.Count > 1)
+            produced.Add(AddEvent(actor.Id, $"{actor.Name} unleashes {skill.Name} on all enemies!", evType));
 
-        if (_hp[target.Id] <= 0)
-            produced.Add(AddEvent(target.Id, $"{target.Name} is defeated!", "death"));
+        foreach (var target in targets)
+        {
+            int variance = Math.Max(1, actor.Attack / 5);
+            int amount   = (int)(actor.Attack * skill.Multiplier) + _rng.Next(-variance, variance + 1);
+
+            if (skill.IsHeal)
+            {
+                var maxHp  = _allUnits.First(u => u.Id == target.Id).MaxHp;
+                int healed = Math.Min(amount, maxHp - _hp[target.Id]);
+                _hp[target.Id] = Math.Min(maxHp, _hp[target.Id] + amount);
+                produced.Add(AddEvent(actor.Id,
+                    $"{actor.Name} heals {target.Name} for {healed} HP.",
+                    evType, target.Id, healed));
+            }
+            else
+            {
+                _hp[target.Id] = Math.Max(0, _hp[target.Id] - amount);
+                produced.Add(AddEvent(actor.Id,
+                    skill.IsAoe
+                        ? $"  \u2192 {target.Name} takes {amount} damage."
+                        : $"{actor.Name} uses {skill.Name} on {target.Name} for {amount} damage.",
+                    evType, target.Id, amount));
+
+                if (_hp[target.Id] <= 0)
+                    produced.Add(AddEvent(target.Id, $"{target.Name} is defeated!", "death"));
+            }
+        }
 
         CheckEnd();
         return produced;

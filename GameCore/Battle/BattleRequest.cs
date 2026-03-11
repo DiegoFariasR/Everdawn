@@ -24,8 +24,8 @@ public sealed record ResumeFromSnapshotRequest(
     int AtStep
 ) : BattleRequest;
 
-/// <summary>Submit a player action targeting a specific unit.</summary>
+/// <summary>Submit a player action targeting a specific unit. TargetId is null for AoE skills.</summary>
 public sealed record PlayerActionRequest(
     string SkillId,
-    string TargetId
+    string? TargetId
 ) : BattleRequest;

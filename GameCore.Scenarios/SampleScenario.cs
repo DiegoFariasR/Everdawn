@@ -19,15 +19,16 @@ public class SampleScenario : IBattleScenario
         [
             new("knight", "Knight", "player", Level: 12, MaxHp: 8500, MaxMp: 80, Attack: 650, Initiative: 55, Skills:
             [
-                new("knight-strike",    "Strike",    MpCost:  0, Multiplier: 1.0),
-                new("knight-bash",      "Shield Bash", MpCost: 30, Multiplier: 1.4),
-                new("knight-smite",     "Holy Smite", MpCost: 60, Multiplier: 2.2),
+                new("knight-strike",   "Strike",       MpCost:  0, Multiplier: 1.0),
+                new("knight-bash",     "Shield Bash",  MpCost: 30, Multiplier: 1.4),
+                new("knight-heal",     "Lay on Hands", MpCost: 60, Multiplier: 1.2,
+                    Target: BattleSkillTarget.Ally, IsHeal: true),
             ]),
             new("mage", "Mage", "player", Level: 12, MaxHp: 6200, MaxMp: 120, Attack: 950, Initiative: 70, Skills:
             [
-                new("mage-bolt",        "Magic Bolt",    MpCost:  0, Multiplier: 1.0),
-                new("mage-burst",       "Arcane Burst",  MpCost: 30, Multiplier: 1.6),
-                new("mage-meteor",      "Meteor",        MpCost: 60, Multiplier: 2.8),
+                new("mage-bolt",   "Magic Bolt",   MpCost:  0, Multiplier: 1.0),
+                new("mage-burst",  "Arcane Burst", MpCost: 30, Multiplier: 1.6),
+                new("mage-meteor", "Meteor",        MpCost: 60, Multiplier: 2.0, IsAoe: true),
             ]),
             new("rogue", "Rogue", "player", Level: 12, MaxHp: 5400, MaxMp: 65, Attack: 780, Initiative: 90, Skills:
             [
