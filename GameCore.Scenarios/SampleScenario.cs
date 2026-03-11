@@ -8,7 +8,7 @@ namespace GameCore.Scenarios;
 /// </summary>
 public class SampleScenario : IBattleScenario
 {
-    public string Id => "sample-scenario-play";
+    public string Id => "sample-scenario";
     public string DisplayName => "Sample Battle";
     public int Seed => 42;
     public bool IsPlayable => true;
