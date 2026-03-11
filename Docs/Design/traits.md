@@ -22,17 +22,17 @@
 
 ## Divine
 - Has divine favors
-- Fixed max 5, recovers all on rest/pray
-- Deal less non holy damage
-- Abilities costs favors optionally to:
+- Fixed max 5, recover all on rest/pray
+- Deal less non-holy damage
+- Abilities cost favors optionally to:
   - Deal extra damage as holy
   - Heals more
 
 ## Profane
 - Has profane favors
-- Fixed max 5, recovers all on rest/pray
-- Deal less non void damage
-- Abilities costs favors optionally to:
+- Fixed max 5, recover all on rest/pray
+- Deal less non-void damage
+- Abilities cost favors optionally to:
   - Deal extra damage as void
   - Heals more
 

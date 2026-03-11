@@ -1,10 +1,10 @@
 # Game Mechanics
 
-- On a tavern, starts with a budget, contract your heroes, go to adventure
+- On a tavern, start with a budget, hire your heroes, go on an adventure
 - World map to navigate to the POI and start a battle or sequence of battles
 - Battle can be set to auto, or a route on map
 - Besides battles, PoI can have challenges which can be overcome by specific talents
-- Cooldowns applies every start of round not turn
+- Cooldowns apply at the start of each round, not turn
 - CC bar, hard and low thresholds
 
 ## Abilities
@@ -56,9 +56,9 @@ Crystal can be attached to your character.
 
 ## Main Attributes
 
-- **Strength** — Physical base damage, HP
-- **Intelligence** — Magic base damage, Mana
-- **Dexterity** — Number of hits increase
+- **Strength - STR** — Physical base damage, HP
+- **Wisdom - WIS** — Magic base damage, Mana
+- **Agility - AGI** — Number of hits increase
   - Each 100% increase adds an extra hit instead
   - Each weapon and spell have a base attack speed
   - Initiative
