@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="GameCore.Scenarios/GameCore.Scenarios.csproj" />
+  <Project Path="GameCore.Tests/GameCore.Tests.csproj" />
+  <Project Path="GameCore/GameCore.csproj" />
+</Solution>
