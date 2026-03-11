@@ -12,12 +12,14 @@ Asset[Ss]tore[Tt]ools/
 
 # Visual Studio / Rider
 .vs/
-*.csproj
-*.sln
 *.suo
 *.user
 *.pidb
 *.booproj
+
+# Unity auto-generated project files (only inside UnityClient)
+UnityClient/**/*.csproj
+UnityClient/**/*.sln
 *.svd
 *.pdb
 *.mdb
