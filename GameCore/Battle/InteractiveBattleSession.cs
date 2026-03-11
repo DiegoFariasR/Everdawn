@@ -47,6 +47,7 @@ public class InteractiveBattleSession
         ResumeFromSnapshotRequest r => HandleResume(r),
         PlayerActionRequest r => HandlePlayerAction(r),
         AutoPlayerActionRequest r => HandleAutoPlayerAction(r),
+        AdvanceOneTurnRequest r => HandleAdvanceOneTurn(r),
         _ => throw new ArgumentException($"Unknown request type: {request.GetType().Name}")
     };
 
@@ -127,6 +128,21 @@ public class InteractiveBattleSession
         var newEvents = new List<BattleEvent>(ExecuteAction(actor, targets, skill));
         if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
         newEvents.AddRange(AutoAdvance());
+        return BuildResponse(newEvents);
+    }
+
+    private BattleResponse HandleAdvanceOneTurn(AdvanceOneTurnRequest _)
+    {
+        if (!_started) throw new InvalidOperationException("Session not started.");
+        if (_isOver) return BuildResponse([]);
+
+        var actor = _turnOrder[_turnIndex];
+        var skill = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost && _skillCooldowns.GetValueOrDefault(s.Id) <= 0).Last();
+        var targets = ResolveAutoTargets(actor, skill);
+        if (targets.Count == 0) { CheckEnd(); return BuildResponse([]); }
+
+        var newEvents = new List<BattleEvent>(ExecuteAction(actor, targets, skill));
+        if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
         return BuildResponse(newEvents);
     }
 

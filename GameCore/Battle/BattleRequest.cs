@@ -29,3 +29,9 @@ public sealed record PlayerActionRequest(
     string SkillId,
     string? TargetId
 ) : BattleRequest;
+
+/// <summary>
+/// Auto-resolves exactly one actor's turn (player or enemy) without chaining further turns.
+/// Used by the sandbox to pace every turn individually with a delay.
+/// </summary>
+public sealed record AdvanceOneTurnRequest : BattleRequest;

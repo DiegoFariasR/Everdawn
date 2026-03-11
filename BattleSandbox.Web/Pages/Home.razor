@@ -21,9 +21,9 @@
         <div class="picker-row">
             <label for="auto-speed">Speed</label>
             <select id="auto-speed" @bind="_autoDelay">
-                <option value="1000">Fast</option>
-                <option value="2000">Normal</option>
-                <option value="3500">Slow</option>
+                <option value="500">Fast</option>
+                <option value="1000">Normal</option>
+                <option value="1750">Slow</option>
             </select>
             <button class="btn-auto @(_autoMode ? "btn-auto-on" : "")" @onclick="ToggleAuto">
                 ⚡ Auto @(_autoMode ? "ON" : "OFF")
@@ -294,10 +294,10 @@
     private BattleResponse? _response;
     private string? _pendingAction;   // skill ID selected, waiting for target
     private bool _autoMode;
-    private int _autoDelay = 3500;
+    private int _autoDelay = 1750;
 
     // ── Action history (for undo) ────────────────────────────────
-    private record ActionRecord(bool IsAuto, string? SkillId, string? TargetId, int LogCountBefore);
+    private record ActionRecord(BattleRequest Req, int LogCountBefore);
     private List<ActionRecord> _actionHistory = [];
     private BattleRequest? _startRequest;
 
@@ -360,12 +360,13 @@
 
     private async Task RunAutoAsync()
     {
-        while (_autoMode && _session != null && _response?.PendingInput != null && !(_response?.IsOver ?? true))
+        while (_autoMode && _session != null && !(_response?.IsOver ?? true))
         {
             await Task.Delay(_autoDelay);
             if (!_autoMode || _session == null) break;
-            _actionHistory.Add(new ActionRecord(true, null, null, _response!.FullLog.Count));
-            _response = _session.HandleRequest(new AutoPlayerActionRequest());
+            var req = new AdvanceOneTurnRequest();
+            _actionHistory.Add(new ActionRecord(req, _response!.FullLog.Count));
+            _response = _session.HandleRequest(req);
             SpawnFloats(_response);
             SelectDefaultSkill();
             StateHasChanged();
@@ -375,8 +376,9 @@
     private void FireAoe(string skillId)
     {
         if (_session is null) return;
-        _actionHistory.Add(new ActionRecord(false, skillId, null, _response!.FullLog.Count));
-        _response = _session.HandleRequest(new PlayerActionRequest(skillId, null));
+        var req = new PlayerActionRequest(skillId, null);
+        _actionHistory.Add(new ActionRecord(req, _response!.FullLog.Count));
+        _response = _session.HandleRequest(req);
         SpawnFloats(_response);
         SelectDefaultSkill();
     }
@@ -384,8 +386,9 @@
     private void ConfirmTarget(string targetId)
     {
         if (_session is null || _pendingAction is null) return;
-        _actionHistory.Add(new ActionRecord(false, _pendingAction, targetId, _response!.FullLog.Count));
-        _response = _session.HandleRequest(new PlayerActionRequest(_pendingAction, targetId));
+        var req = new PlayerActionRequest(_pendingAction, targetId);
+        _actionHistory.Add(new ActionRecord(req, _response!.FullLog.Count));
+        _response = _session.HandleRequest(req);
         SpawnFloats(_response);
         SelectDefaultSkill();
     }
@@ -415,11 +418,7 @@
         BattleResponse resp = newSession.HandleRequest(_startRequest);
         for (int j = 0; j < actionsToReplay; j++)
         {
-            var a = _actionHistory[j];
-            BattleRequest req = a.IsAuto
-                ? new AutoPlayerActionRequest()
-                : new PlayerActionRequest(a.SkillId!, a.TargetId);
-            resp = newSession.HandleRequest(req);
+            resp = newSession.HandleRequest(_actionHistory[j].Req);
         }
 
         _session       = newSession;
