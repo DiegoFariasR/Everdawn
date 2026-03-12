@@ -266,19 +266,6 @@
                             }
                             <div class="stat-text">@st.CurrentHp/@u.MaxHp HP &nbsp;|&nbsp; STR @u.Str &nbsp;WIS @u.Wis &nbsp;AGI @u.Agi</div>
                         </div>
-                        <div class="action-buttons card-skills">
-                            @for (int si = 0; si < u.ResolvedSkills.Count; si++)
-                            {
-                                var sk = u.ResolvedSkills[si];
-                                string btnClass = si == 0 ? "btn-attack" : si == 1 ? "btn-skill" : "btn-soulburn";
-                                <button class="btn-action @btnClass @(sk.IsAoe ? "btn-aoe" : "") btn-enemy-info" disabled="disabled">
-                                    @sk.Name
-                                    @if (sk.IsAoe) { <span class="aoe-badge">ALL</span> }
-                                    @if (sk.MpCost > 0) { <span class="mp-cost">@sk.MpCost MP</span> }
-                                    @if (sk.Cooldown > 0) { <span class="cd-cost">→@sk.Cooldown</span> }
-                                </button>
-                            }
-                        </div>
                     </div>
                 }
             </div>
@@ -324,7 +311,30 @@
                 }
             </section>
         }
-        else if (_view.IsOver)
+        else if (!_view.IsOver)
+        {
+            var activeEnemy = _setup.EnemyUnits.FirstOrDefault(u => u.Id == activeUnitId);
+            @if (activeEnemy != null)
+            {
+                <section class="action-bar">
+                    <div class="acting-label">@(activeEnemy.Name + "'s turn")</div>
+                    <div class="action-buttons">
+                        @for (int si = 0; si < activeEnemy.ResolvedSkills.Count; si++)
+                        {
+                            var sk = activeEnemy.ResolvedSkills[si];
+                            string btnClass = si == 0 ? "btn-attack" : si == 1 ? "btn-skill" : "btn-soulburn";
+                            <button class="btn-action @btnClass @(sk.IsAoe ? "btn-aoe" : "") btn-enemy-info" disabled="disabled">
+                                @sk.Name
+                                @if (sk.IsAoe) { <span class="aoe-badge">ALL</span> }
+                                @if (sk.MpCost > 0) { <span class="mp-cost">@sk.MpCost MP</span> }
+                                @if (sk.Cooldown > 0) { <span class="cd-cost">→@sk.Cooldown</span> }
+                            </button>
+                        }
+                    </div>
+                </section>
+            }
+        }
+        else
         {
             <section class="battle-over @(_view.WinningTeam == "player" ? "over-win" : "over-lose")">
                 @(_view.WinningTeam == "player" ? "⚔ Victory!" : "💀 Defeat...")
