@@ -31,13 +31,30 @@ public static class ContentPipeline
     /// <param name="basePath">Path to the <c>GameData/Base</c> directory.</param>
     public static ContentDatabase Load(string basePath)
     {
-        var units = LoadUnits(Path.Combine(basePath, "units"));
-        return new ContentDatabase(units);
+        var skills = LoadSkills(Path.Combine(basePath, "skills")).ToDictionary(s => s.Id);
+        var units = LoadUnits(Path.Combine(basePath, "units"), skills);
+        return new ContentDatabase(units, skills.Values);
+    }
+
+    // ── Skills ────────────────────────────────────────────────────────────
+
+    private static IEnumerable<BattleSkill> LoadSkills(string skillsPath)
+    {
+        if (!Directory.Exists(skillsPath))
+            yield break;
+
+        foreach (var file in Directory.EnumerateFiles(skillsPath, "*.yml"))
+        {
+            var list = ParseYaml<List<RawSkill>>(file);
+            foreach (var raw in list)
+                yield return CompileSkill(raw);
+        }
     }
 
     // ── Units ─────────────────────────────────────────────────────────────
 
-    private static IEnumerable<BattleUnit> LoadUnits(string unitsPath)
+    private static IEnumerable<BattleUnit> LoadUnits(
+        string unitsPath, IReadOnlyDictionary<string, BattleSkill> skillDict)
     {
         if (!Directory.Exists(unitsPath))
             yield break;
@@ -45,18 +62,20 @@ public static class ContentPipeline
         foreach (var file in Directory.EnumerateFiles(unitsPath, "*.yml"))
         {
             var raw = ParseYaml<RawUnit>(file);
-            yield return CompileUnit(raw);
+            yield return CompileUnit(raw, skillDict);
         }
     }
 
-    private static BattleUnit CompileUnit(RawUnit raw)
+    private static BattleUnit CompileUnit(RawUnit raw, IReadOnlyDictionary<string, BattleSkill> skillDict)
     {
         var traits = raw.Traits
             .Select(t => Enum.Parse<BattleTrait>(t, ignoreCase: true))
             .ToArray();
 
         var skills = raw.Skills
-            .Select(CompileSkill)
+            .Select(id => skillDict.TryGetValue(id, out var sk)
+                ? sk
+                : throw new KeyNotFoundException($"Unit '{raw.Id}' references unknown skill '{id}'."))
             .ToArray();
 
         IReadOnlyDictionary<EffectType, int>? resistances = null;

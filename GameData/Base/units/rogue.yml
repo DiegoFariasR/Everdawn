@@ -5,17 +5,4 @@ str: 54
 wis: 0
 agi: 120
 traits: [Focus]
-skills:
-  - id: rogue-strike
-    name: Quick Strike
-    multiplier: 1.0
-    modifiers: [Basic]
-  - id: rogue-poison
-    name: Poison Blade
-    multiplier: 1.5
-    cooldown: 3
-  - id: rogue-mark
-    name: Death Mark
-    multiplier: 2.5
-    cooldown: 3
-    modifiers: [Ultimate]
+skills: [rogue-strike, rogue-poison, rogue-mark]

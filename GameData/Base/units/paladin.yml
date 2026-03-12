@@ -5,18 +5,4 @@ str: 85
 wis: 55
 agi: 55
 traits: [MagicUser, Fury]
-skills:
-  - id: paladin-strike
-    name: Strike
-    multiplier: 1.0
-    modifiers: [Basic]
-  - id: paladin-bash
-    name: Shield Bash
-    multiplier: 1.4
-    cooldown: 3
-  - id: paladin-heal
-    name: Lay on Hands
-    multiplier: 1.2
-    target: Ally
-    kind: Heal
-    cooldown: 3
+skills: [paladin-strike, paladin-bash, paladin-heal]

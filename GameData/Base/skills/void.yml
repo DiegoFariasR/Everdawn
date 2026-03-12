@@ -1,0 +1,38 @@
+- id: mage-bolt
+  name: Magic Bolt
+  effectType: Void
+  multiplier: 1.0
+  modifiers: [Basic]
+
+- id: mage-burst
+  name: Arcane Burst
+  effectType: Void
+  multiplier: 1.6
+  cooldown: 3
+
+- id: mage-meteor
+  name: Meteor
+  effectType: Void
+  multiplier: 2.0
+  isAoe: true
+  cooldown: 3
+  modifiers: [Ultimate]
+
+- id: necro-bolt
+  name: Dark Bolt
+  effectType: Void
+  multiplier: 1.0
+  modifiers: [Basic]
+
+- id: necro-drain
+  name: Life Drain
+  effectType: Void
+  multiplier: 1.8
+  cooldown: 3
+
+- id: necro-soul
+  name: Soul Siphon
+  effectType: Void
+  multiplier: 3.0
+  cooldown: 3
+  modifiers: [Ultimate]
