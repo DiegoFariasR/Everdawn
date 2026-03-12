@@ -13,7 +13,7 @@ public class InteractiveBattleSession
     private readonly Dictionary<string, int> _hp;
     private readonly Dictionary<string, int> _mp;
     private readonly Random _rng;
-    private readonly List<BattleEvent> _log = [];
+    private readonly List<BattleEvent> _log = new List<BattleEvent>();
 
     private int _turnIndex;
     private int _round = 1;
@@ -24,8 +24,8 @@ public class InteractiveBattleSession
 
     public InteractiveBattleSession(BattleSetup setup, int seed)
     {
-        _allUnits = [.. setup.PlayerUnits, .. setup.EnemyUnits];
-        _turnOrder = [.. _allUnits.OrderByDescending(u => u.Initiative)];
+        _allUnits = new List<BattleUnit>(setup.PlayerUnits.Concat(setup.EnemyUnits));
+        _turnOrder = new List<BattleUnit>(_allUnits.OrderByDescending(u => u.Initiative));
         _hp = _allUnits.ToDictionary(u => u.Id, u => u.MaxHp);
         _mp = _allUnits.ToDictionary(u => u.Id, u => u.MaxMp);
         _rng = new Random(seed);
@@ -77,7 +77,7 @@ public class InteractiveBattleSession
         if (_isOver)
         {
             AddEvent("system", "The battle was already over at this point.", "takeover");
-            return BuildResponse([]);
+            return BuildResponse(Array.Empty<BattleEvent>());
         }
 
         AddEvent("system", $"You took control at step {r.AtStep}.", "takeover");
@@ -104,7 +104,7 @@ public class InteractiveBattleSession
         {
             var t = _allUnits.FirstOrDefault(u => u.Id == r.TargetId)
                     ?? throw new ArgumentException($"Unknown target: {r.TargetId}");
-            targets = [t];
+            targets = new List<BattleUnit> { t };
         }
 
         var newEvents = new List<BattleEvent>(ExecuteAction(actor, targets, skill));
@@ -121,9 +121,9 @@ public class InteractiveBattleSession
             throw new InvalidOperationException("Not a player turn.");
 
         var actor = _turnOrder[_turnIndex];
-        var skill = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost && _skillCooldowns.GetValueOrDefault(s.Id) <= 0).Last();
+        var skill = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost && GetCooldown(s.Id) <= 0).Last();
         var targets = ResolveAutoTargets(actor, skill);
-        if (targets.Count == 0) { CheckEnd(); return BuildResponse([]); }
+        if (targets.Count == 0) { CheckEnd(); return BuildResponse(Array.Empty<BattleEvent>()); }
 
         var newEvents = new List<BattleEvent>(ExecuteAction(actor, targets, skill));
         if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
@@ -134,12 +134,12 @@ public class InteractiveBattleSession
     private BattleResponse HandleAdvanceOneTurn(AdvanceOneTurnRequest _)
     {
         if (!_started) throw new InvalidOperationException("Session not started.");
-        if (_isOver) return BuildResponse([]);
+        if (_isOver) return BuildResponse(Array.Empty<BattleEvent>());
 
         var actor = _turnOrder[_turnIndex];
-        var skill = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost && _skillCooldowns.GetValueOrDefault(s.Id) <= 0).Last();
+        var skill = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost && GetCooldown(s.Id) <= 0).Last();
         var targets = ResolveAutoTargets(actor, skill);
-        if (targets.Count == 0) { CheckEnd(); return BuildResponse([]); }
+        if (targets.Count == 0) { CheckEnd(); return BuildResponse(Array.Empty<BattleEvent>()); }
 
         var newEvents = new List<BattleEvent>(ExecuteAction(actor, targets, skill));
         if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
@@ -158,10 +158,10 @@ public class InteractiveBattleSession
             pending = new BattlePendingInput(
                 Actor: actor,
                 Skills: skills,
-                AvailableSkillIds: skills.Where(s => _mp[actor.Id] >= s.MpCost && _skillCooldowns.GetValueOrDefault(s.Id) <= 0).Select(s => s.Id).ToArray(),
+                AvailableSkillIds: skills.Where(s => _mp[actor.Id] >= s.MpCost && GetCooldown(s.Id) <= 0).Select(s => s.Id).ToArray(),
                 EnemyTargets: _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToArray(),
                 AllyTargets: _allUnits.Where(u => u.Team == actor.Team && _hp[u.Id] > 0).ToArray(),
-                SkillCooldowns: skills.Where(s => _skillCooldowns.GetValueOrDefault(s.Id) > 0)
+                SkillCooldowns: skills.Where(s => GetCooldown(s.Id) > 0)
                                          .ToDictionary(s => s.Id, s => _skillCooldowns[s.Id])
             );
         }
@@ -185,7 +185,7 @@ public class InteractiveBattleSession
         while (!_isOver && _turnOrder[_turnIndex].Team != "player")
         {
             var actor = _turnOrder[_turnIndex];
-            var skill = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost && _skillCooldowns.GetValueOrDefault(s.Id) <= 0).Last();
+            var skill = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost && GetCooldown(s.Id) <= 0).Last();
             var targets = ResolveAutoTargets(actor, skill);
             if (targets.Count == 0) { CheckEnd(); break; }
 
@@ -201,16 +201,16 @@ public class InteractiveBattleSession
         if (skill.Target == BattleSkillTarget.Ally)
         {
             var allies = _allUnits.Where(u => u.Team == actor.Team && _hp[u.Id] > 0).ToList();
-            if (allies.Count == 0) return [];
+            if (allies.Count == 0) return new List<BattleUnit>();
             // Heal the lowest HP ally
-            var target = skill.IsAoe ? null : allies.MinBy(u => _hp[u.Id]);
-            return skill.IsAoe ? allies : [target!];
+            var target = skill.IsAoe ? null : allies.OrderBy(u => _hp[u.Id]).FirstOrDefault();
+            return skill.IsAoe ? allies : new List<BattleUnit> { target! };
         }
         else
         {
             var foes = _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToList();
-            if (foes.Count == 0) return [];
-            return skill.IsAoe ? foes : [foes[_rng.Next(foes.Count)]];
+            if (foes.Count == 0) return new List<BattleUnit>();
+            return skill.IsAoe ? foes : new List<BattleUnit> { foes[_rng.Next(foes.Count)] };
         }
     }
 
@@ -218,6 +218,13 @@ public class InteractiveBattleSession
         side == BattleSkillTarget.Ally
             ? u.Team == actor.Team
             : u.Team != actor.Team;
+
+    /// <summary>
+    /// Returns the remaining cooldown for a skill, or 0 if not on cooldown.
+    /// Replaces Dictionary.GetValueOrDefault() which is not available in netstandard2.1.
+    /// </summary>
+    private int GetCooldown(string skillId) =>
+        _skillCooldowns.TryGetValue(skillId, out int cd) ? cd : 0;
 
     private IReadOnlyList<BattleEvent> ExecuteAction(BattleUnit actor, List<BattleUnit> targets, BattleSkill skill)
     {
