@@ -3,6 +3,7 @@
 @using GameCore.Content
 @using GameCore.Scenarios
 @inject IJSRuntime JS
+@inject IContentSource ContentSource
 @implements IAsyncDisposable
 
 <PageTitle>Battle Sandbox</PageTitle>
@@ -401,7 +402,7 @@
     private void StartSession()
     {
         _currentScenario = _scenarios.First(s => s.Id == _selectedScenarioId);
-        _setup         = _currentScenario.CreateSetup(SandboxContentSource.Default);
+        _setup         = _currentScenario.CreateSetup(ContentSource);
         _playMode      = _currentScenario.IsPlayable;
         _engine        = null;
         _view          = null;

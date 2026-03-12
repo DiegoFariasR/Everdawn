@@ -33,7 +33,10 @@ jobs:
 
       # Validates that GameCore stays compilable under a Unity-safe C# language level.
       # Unity 6 (6000.x) compiles GameCore via its Roslyn toolchain at approximately C# 10.
-      # This step catches accidental use of C# 11+ features (e.g. required members,
-      # raw string literals) that would break Unity package compilation.
-      - name: Unity compat check (LangVersion 10)
-        run: dotnet build GameCore/GameCore.csproj --no-restore --configuration Release -p:LangVersion=10
+      # ImplicitUsings is disabled to simulate Unity's direct .cs compilation: Unity never
+      # reads the SDK-generated implicit-usings file in obj/, so every namespace must be
+      # declared explicitly in GlobalUsings.cs.  Catching both constraints here means a
+      # contributor cannot accidentally introduce C# 11+ syntax or an undeclared namespace
+      # without CI failing before the code reaches the Unity package.
+      - name: Unity compat check (LangVersion 10, no implicit usings)
+        run: dotnet build GameCore/GameCore.csproj --no-restore --configuration Release -p:LangVersion=10 -p:ImplicitUsings=disable
