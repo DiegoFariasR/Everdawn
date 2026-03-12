@@ -16,7 +16,7 @@ public sealed class WorldMap
         _activities = activities.ToDictionary(a => a.Id);
     }
 
-    public IReadOnlyList<Location> Locations => [.. _locations.Values];
+    public IReadOnlyList<Location> Locations => _locations.Values.ToArray();
 
     public Location GetLocation(string id) =>
         _locations.TryGetValue(id, out var loc) ? loc
@@ -28,5 +28,5 @@ public sealed class WorldMap
 
     /// <summary>Resolves the Activity objects for a given Location, in definition order.</summary>
     public IReadOnlyList<Activity> GetActivitiesFor(Location location) =>
-        [.. location.ActivityIds.Select(GetActivity)];
+        location.ActivityIds.Select(GetActivity).ToArray();
 }

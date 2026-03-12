@@ -72,7 +72,7 @@ public class BattleScenarioTests
     [Theory, MemberData(nameof(AllScenarios))]
     public void AllScenarios_HavePlayerAndEnemyUnits(IBattleScenario scenario)
     {
-        var setup = scenario.CreateSetup();
+        var setup = scenario.CreateSetup(TestContentSource.Default);
         Assert.NotEmpty(setup.PlayerUnits);
         Assert.NotEmpty(setup.EnemyUnits);
     }
@@ -80,7 +80,7 @@ public class BattleScenarioTests
     [Theory, MemberData(nameof(AllScenarios))]
     public void AllScenarios_AllUnitsHavePositiveMaxHp(IBattleScenario scenario)
     {
-        var setup = scenario.CreateSetup();
+        var setup = scenario.CreateSetup(TestContentSource.Default);
         foreach (var unit in setup.PlayerUnits.Concat(setup.EnemyUnits))
             Assert.True(unit.MaxHp > 0, $"Unit '{unit.Id}' has MaxHp <= 0");
     }
@@ -88,7 +88,7 @@ public class BattleScenarioTests
     [Theory, MemberData(nameof(AllScenarios))]
     public void AllScenarios_AllUnitsHaveAtLeastOneSkill(IBattleScenario scenario)
     {
-        var setup = scenario.CreateSetup();
+        var setup = scenario.CreateSetup(TestContentSource.Default);
         foreach (var unit in setup.PlayerUnits.Concat(setup.EnemyUnits))
             Assert.NotEmpty(unit.ResolvedSkills);
     }
@@ -97,7 +97,7 @@ public class BattleScenarioTests
     public void AllScenarios_FirstSkillOfEveryUnitIsFree(IBattleScenario scenario)
     {
         // Rule: index 0 is always the free basic skill (Cost == 0).
-        var setup = scenario.CreateSetup();
+        var setup = scenario.CreateSetup(TestContentSource.Default);
         foreach (var unit in setup.PlayerUnits.Concat(setup.EnemyUnits))
             Assert.Equal(0, unit.ResolvedSkills[0].Cost);
     }
@@ -105,7 +105,7 @@ public class BattleScenarioTests
     [Theory, MemberData(nameof(AllScenarios))]
     public void AllScenarios_AllUnitIdsAreUnique(IBattleScenario scenario)
     {
-        var setup = scenario.CreateSetup();
+        var setup = scenario.CreateSetup(TestContentSource.Default);
         var ids = setup.PlayerUnits.Concat(setup.EnemyUnits).Select(u => u.Id).ToList();
         Assert.Equal(ids.Count, ids.Distinct().Count());
     }
@@ -113,7 +113,7 @@ public class BattleScenarioTests
     [Theory, MemberData(nameof(AllScenarios))]
     public void AllScenarios_RunCompletesWithoutException(IBattleScenario scenario)
     {
-        var ex = Record.Exception(() => BattleEngine.Run(scenario.CreateSetup(), scenario.Seed));
+        var ex = Record.Exception(() => BattleEngine.Run(scenario.CreateSetup(TestContentSource.Default), scenario.Seed));
         Assert.Null(ex);
     }
 
@@ -131,8 +131,8 @@ public class BattleScenarioTests
         var source = new SampleScenario();
         var watch = new WatchScenario(source);
         Assert.Equal(source.Seed, watch.Seed);
-        var r1 = BattleEngine.Run(source.CreateSetup(), source.Seed);
-        var r2 = BattleEngine.Run(watch.CreateSetup(), watch.Seed);
+        var r1 = BattleEngine.Run(source.CreateSetup(TestContentSource.Default), source.Seed);
+        var r2 = BattleEngine.Run(watch.CreateSetup(TestContentSource.Default), watch.Seed);
         Assert.Equal(r1.WinningTeam, r2.WinningTeam);
         Assert.Equal(r1.Snapshots.Count, r2.Snapshots.Count);
     }
@@ -144,14 +144,14 @@ public class BattleScenarioTests
     [Theory, MemberData(nameof(AllRegressionScenarios))]
     public void AllRegressionScenarios_MatchExpectedWinner(IRegressionScenario scenario)
     {
-        var result = BattleEngine.Run(scenario.CreateSetup(), scenario.Seed);
+        var result = BattleEngine.Run(scenario.CreateSetup(TestContentSource.Default), scenario.Seed);
         Assert.Equal(scenario.ExpectedWinner, result.WinningTeam);
     }
 
     [Theory, MemberData(nameof(AllRegressionScenarios))]
     public void AllRegressionScenarios_MatchExpectedSnapshotCount(IRegressionScenario scenario)
     {
-        var result = BattleEngine.Run(scenario.CreateSetup(), scenario.Seed);
+        var result = BattleEngine.Run(scenario.CreateSetup(TestContentSource.Default), scenario.Seed);
         Assert.Equal(scenario.ExpectedSnapshotCount, result.Snapshots.Count);
     }
 }

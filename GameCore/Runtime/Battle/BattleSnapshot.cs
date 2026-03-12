@@ -34,7 +34,7 @@ public record UnitState(
 /// </summary>
 public class BattleSnapshot
 {
-    public required int Step { get; init; }
-    public required BattleEvent Event { get; init; }
-    public required IReadOnlyList<UnitState> UnitStates { get; init; }
+    public int Step { get; init; }
+    public BattleEvent Event { get; init; } = null!;
+    public IReadOnlyList<UnitState> UnitStates { get; init; } = Array.Empty<UnitState>();
 }

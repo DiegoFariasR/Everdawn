@@ -30,3 +30,10 @@ jobs:
 
       - name: Format check
         run: dotnet format Everdawn.slnx --verify-no-changes --verbosity diagnostic
+
+      # Validates that GameCore stays compilable under a Unity-safe C# language level.
+      # Unity 6 (6000.x) compiles GameCore via its Roslyn toolchain at approximately C# 10.
+      # This step catches accidental use of C# 11+ features (e.g. required members,
+      # raw string literals) that would break Unity package compilation.
+      - name: Unity compat check (LangVersion 10)
+        run: dotnet build GameCore/GameCore.csproj --no-restore --configuration Release -p:LangVersion=10

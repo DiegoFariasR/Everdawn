@@ -81,11 +81,14 @@ public record BattleUnit(
         }
     }
 
+    private static readonly IReadOnlyList<BattleSkill> _defaultSkills =
+        new BattleSkill[] { new BattleSkill("attack", "Attack", Cost: 0, DamageMultiplier: 1.0, Modifiers: new string[] { "basic" }) };
+
     /// <summary>
     /// The unit's skill list. Always has at least one skill (the free basic action).
     /// If none were provided, a default "Attack" skill is used.
     /// </summary>
     public IReadOnlyList<BattleSkill> ResolvedSkills => Skills is { Count: > 0 }
         ? Skills
-        : new BattleSkill[] { new BattleSkill("attack", "Attack", Cost: 0, DamageMultiplier: 1.0, Modifiers: ["basic"]) };
+        : _defaultSkills;
 }

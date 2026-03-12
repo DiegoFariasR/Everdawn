@@ -20,6 +20,6 @@ namespace GameCore.Battle;
 /// </summary>
 public class BattleSetup
 {
-    public required IReadOnlyList<BattleUnit> PlayerUnits { get; init; }
-    public required IReadOnlyList<BattleUnit> EnemyUnits { get; init; }
+    public IReadOnlyList<BattleUnit> PlayerUnits { get; init; } = Array.Empty<BattleUnit>();
+    public IReadOnlyList<BattleUnit> EnemyUnits { get; init; } = Array.Empty<BattleUnit>();
 }

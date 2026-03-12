@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using GameCore.Battle
+@using GameCore.Content
 @using GameCore.Scenarios
 @inject IJSRuntime JS
 @implements IAsyncDisposable
@@ -400,7 +401,7 @@
     private void StartSession()
     {
         _currentScenario = _scenarios.First(s => s.Id == _selectedScenarioId);
-        _setup         = _currentScenario.CreateSetup();
+        _setup         = _currentScenario.CreateSetup(SandboxContentSource.Default);
         _playMode      = _currentScenario.IsPlayable;
         _engine        = null;
         _view          = null;
