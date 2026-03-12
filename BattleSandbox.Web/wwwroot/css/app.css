@@ -176,12 +176,6 @@ html, body {
 .btn-enemy-info { opacity: 0.75 !important; cursor: default !important; filter: none !important; }
 .btn-enemy-info:disabled { opacity: 0.75; cursor: default; filter: none; }
 
-/* Skill buttons rendered inside a unit card */
-.card-skills {
-    margin-top: 0.4rem;
-    flex-wrap: wrap;
-}
-
 .btn-attack   { background: #c4501a; color: #fff; }
 .btn-attack:not(:disabled):active { background: #a04012; }
 
