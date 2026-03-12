@@ -13,7 +13,13 @@ public sealed record SkillView(
     bool IsAoe,
     bool IsHeal,
     int Cooldown,
-    BattleSkillTarget Target
+    BattleSkillTarget Target,
+    DamageType DamageType,
+    bool IsBasic,
+    bool IsUltimate,
+    int EffectiveInitialCooldown,
+    /// <summary>Estimated damage = actor base attack × multiplier, for display purposes.</summary>
+    int BaseDmg
 );
 
 /// <summary>
