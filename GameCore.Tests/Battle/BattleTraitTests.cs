@@ -72,7 +72,52 @@ public class BattleTraitTests
         var necro = MakeUnit(wis: 105, traits: [BattleTrait.MagicUser]);
         Assert.Equal(1050, necro.MaxMp);
     }
+    // ── Multiple traits ────────────────────────────────────────────────────
 
+    [Fact]
+    public void Unit_WithMultipleTraits_HasTraitReturnsTrue_ForEach()
+    {
+        var unit = MakeUnit(traits: [BattleTrait.MagicUser, BattleTrait.Focus]);
+        Assert.True(unit.HasTrait(BattleTrait.MagicUser));
+        Assert.True(unit.HasTrait(BattleTrait.Focus));
+    }
+
+    [Fact]
+    public void Unit_WithMultipleTraits_BothDerivedStatsAreActive()
+    {
+        // MagicUser → MaxMp = WIS × 10. Focus → MaxFocus = 100, InitialFocus = 50.
+        var unit = MakeUnit(wis: 100, traits: [BattleTrait.MagicUser, BattleTrait.Focus]);
+        Assert.Equal(1000, unit.MaxMp);
+        Assert.Equal(100, unit.MaxFocus);
+        Assert.Equal(50, unit.InitialFocus);
+    }
+
+    [Fact]
+    public void Unit_WithMultipleTraits_InBattle_BothBarsInitialise()
+    {
+        // A unit with both MagicUser and Focus must start with both mana and focus.
+        var setup = new BattleSetup
+        {
+            PlayerUnits =
+            [
+                new("hero", "Hero", "player", Level: 1, Str: 200, Wis: 100, Agi: 50,
+                    Skills: [new("basic", "Strike", MpCost: 0, Multiplier: 1.0)],
+                    Traits: [BattleTrait.MagicUser, BattleTrait.Focus]),
+            ],
+            EnemyUnits =
+            [
+                new("dummy", "Dummy", "enemy", Level: 1, Str: 1, Wis: 0, Agi: 1,
+                    Skills: [new("e-basic", "Hit", MpCost: 0, Multiplier: 1.0)]),
+            ],
+        };
+        var session = new BattleSession(seed: 0);
+        session.Start(setup);
+        var state = session.GetView().Units.First(u => u.UnitId == "hero");
+        // MagicUser → MaxMp = WIS × 10 = 1000; starts at full
+        Assert.Equal(1000, state.CurrentMp);
+        // Focus → starts at 50
+        Assert.Equal(50, state.CurrentFocus);
+    }
     // ── Helpers ───────────────────────────────────────────────────────────
 
     private static BattleUnit MakeUnit(

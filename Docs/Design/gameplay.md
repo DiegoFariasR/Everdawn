@@ -11,7 +11,7 @@
 ## Abilities
 
 - Characters can have:
-  - [ ] N passive traits
+  - [x] N passive traits
   - [ ] 1 passive ability
   - [x] 1 basic attack/cantrip
     - [x] 50% base effect
