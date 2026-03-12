@@ -251,7 +251,8 @@ namespace GameCore.Battle
 
         private static SkillView ToSkillView(BattleSkill s, BattleUnit actor) =>
             new SkillView(s.Id, s.Name, s.Cost, s.DamageMultiplier, s.IsAoe, s.IsHeal, s.Cooldown, s.Target,
-                s.EffectType, s.IsBasic, s.IsUltimate, s.EffectiveInitialCooldown,
-                (int)(actor.GetBaseAttack(s.EffectType) * s.DamageMultiplier));
+                s.PrimaryEffectType, s.IsBasic, s.IsUltimate, s.EffectiveInitialCooldown,
+                s.EstimateBaseDmg(actor),
+                s.NumberOfHits);
     }
 }

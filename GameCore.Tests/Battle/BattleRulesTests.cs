@@ -98,7 +98,9 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void ResolvedSkills_UsesProvidedSkills_WhenGiven()
         {
-            var skills = new[] { new BattleSkill("custom", "Custom", Cost: 0, DamageMultiplier: 1.5) };
+            var effects = new[] { new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
+                new[] { new DamageComponent(EffectType.Physical, new[] { new DamageScaling("str", 1.0) }) }) };
+            var skills = new[] { new BattleSkill("custom", "Custom", Cost: 0, DamageMultiplier: 1.5, Effects: effects) };
             var unit = new BattleUnit("u1", "Test", "player", Level: 1, Str: 70, Wis: 0, Agi: 50, Skills: skills);
             Assert.Single(unit.ResolvedSkills);
             Assert.Equal("custom", unit.ResolvedSkills[0].Id);

@@ -1,17 +1,47 @@
+using System.Collections.Generic;
 namespace GameCore.Content.Raw
 {
+    /// <summary>Raw stat-to-damage scaling entry as parsed from YAML.</summary>
+    public class RawDamageScaling
+    {
+        public string Stat { get; set; } = "str";
+        public double Multiplier { get; set; } = 1.0;
+    }
+
+    /// <summary>
+    /// Raw damage component within a hit — one damage type with one or more stat contributions.
+    /// <see cref="DamageType"/> is null for heal components (no resistance applied).
+    /// </summary>
+    public class RawDamageComponent
+    {
+        public string? DamageType { get; set; }
+        public List<RawDamageScaling> Scaling { get; set; } = new List<RawDamageScaling>();
+    }
+
+    /// <summary>Raw skill effect as parsed from YAML.</summary>
+    public class RawEffect
+    {
+        public string Kind { get; set; } = "Damage";
+        public string Target { get; set; } = "Enemy";
+        public List<RawDamageComponent> DamagePerHit { get; set; } = new List<RawDamageComponent>();
+    }
+
     /// <summary>Raw skill data as parsed directly from YAML. No validation or compilation yet.</summary>
     public class RawSkill
     {
         public string Id { get; set; } = "";
         public string Name { get; set; } = "";
         public int Cost { get; set; }
+        /// <summary>Modifier hook: multiplies overall skill output. Default 1.0 = identity.</summary>
         public double DamageMultiplier { get; set; } = 1.0;
+        /// <summary>
+        /// Number of hits this skill fires. Floor(n) hits, each dealing DamageMultiplier × (n / floor(n)) of base damage.
+        /// Total damage = DamageMultiplier × numberOfHits × base. Defaults to 1.0 (single hit, no split).
+        /// </summary>
+        public double NumberOfHits { get; set; } = 1.0;
         public bool IsAoe { get; set; }
-        public string Target { get; set; } = "Enemy";
-        public string Kind { get; set; } = "Damage";
         public int Cooldown { get; set; }
         public int InitialCooldown { get; set; }
-        public string EffectType { get; set; } = "Physical";
+        public List<RawEffect> Effects { get; set; } = new List<RawEffect>();
     }
 }

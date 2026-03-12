@@ -5,6 +5,20 @@ namespace GameCore.Battle
 {
     public enum BattleSkillTarget { Enemy, Ally }
 
+    /// <summary>One stat-to-damage scaling entry within a damage component.</summary>
+    public record DamageScaling(string Stat, double Multiplier);
+
+    /// <summary>
+    /// One damage type component within a hit.
+    /// <see cref="DamageType"/> is null for heal components (no resistance applied).
+    /// </summary>
+    public record DamageComponent(EffectType? DamageType, IReadOnlyList<DamageScaling> Scaling);
+
+    /// <summary>
+    /// One effect produced by a skill: its kind (damage/heal), intended target side, and per-hit formula.
+    /// </summary>
+    public record SkillEffect(EffectKind Kind, BattleSkillTarget Target, IReadOnlyList<DamageComponent> DamagePerHit);
+
     /// <summary>
     /// A skill that a BattleUnit can use in combat.
     /// </summary>
@@ -12,18 +26,21 @@ namespace GameCore.Battle
         string Id,
         string Name,
         int Cost,
+        /// <summary>Modifier hook: multiplies the entire skill output. Default 1.0 = identity.</summary>
         double DamageMultiplier,
+        IReadOnlyList<SkillEffect> Effects,
         bool IsAoe = false,
-        BattleSkillTarget Target = BattleSkillTarget.Enemy,
-        EffectKind Kind = EffectKind.Damage,
         /// <summary>Turns this unit must wait before using this skill again. 0 = no cooldown.</summary>
         int Cooldown = 0,
         /// <summary>Cooldown this skill starts with at the beginning of battle (explicit override).</summary>
         int InitialCooldown = 0,
-        /// <summary>The elemental type this skill deals. Physical uses STR; all other types use WIS.</summary>
-        EffectType EffectType = EffectType.Physical,
         /// <summary>Optional modifiers that change how this skill behaves.</summary>
-        IReadOnlyList<string>? Modifiers = null
+        IReadOnlyList<string>? Modifiers = null,
+        /// <summary>
+        /// Number of hits this skill fires. Floor(n) hits, each dealing DamageMultiplier × (n / floor(n)) of base.
+        /// Total damage = DamageMultiplier × NumberOfHits × base. When 1.0 (default), the unit's HitCount applies instead.
+        /// </summary>
+        double NumberOfHits = 1.0
     )
     {
         /// <summary>Returns true if this skill carries the given modifier (case-insensitive).</summary>
@@ -31,7 +48,16 @@ namespace GameCore.Battle
             Modifiers?.Any(m => string.Equals(m, id, StringComparison.OrdinalIgnoreCase)) ?? false;
 
         /// <summary>True if this skill heals rather than damages.</summary>
-        public bool IsHeal => Kind == EffectKind.Heal;
+        public bool IsHeal => Effects.Count > 0 && Effects[0].Kind == EffectKind.Heal;
+
+        /// <summary>Target side of the first effect. Defaults to Enemy if Effects is empty.</summary>
+        public BattleSkillTarget Target => Effects.Count > 0 ? Effects[0].Target : BattleSkillTarget.Enemy;
+
+        /// <summary>Primary damage type — first damage component's type. Null for heals.</summary>
+        public EffectType? PrimaryEffectType =>
+            Effects.Count > 0 && Effects[0].DamagePerHit.Count > 0
+                ? Effects[0].DamagePerHit[0].DamageType
+                : null;
 
         /// <summary>The skill is the unit's basic action (never triggers Focus empowerment).</summary>
         public bool IsBasic => HasModifier("basic");
@@ -44,5 +70,19 @@ namespace GameCore.Battle
         /// Ultimate skills automatically start with at least 1 round of cooldown.
         /// </summary>
         public int EffectiveInitialCooldown => IsUltimate ? Math.Max(1, InitialCooldown) : InitialCooldown;
+
+        /// <summary>
+        /// Estimates total base damage for this skill from the given actor's stats.
+        /// Sums all scaling entries in the first effect, then applies DamageMultiplier and NumberOfHits.
+        /// </summary>
+        public int EstimateBaseDmg(BattleUnit actor)
+        {
+            if (Effects.Count == 0) return 0;
+            double total = 0;
+            foreach (var comp in Effects[0].DamagePerHit)
+                foreach (var s in comp.Scaling)
+                    total += actor.GetStat(s.Stat) * s.Multiplier;
+            return (int)(total * DamageMultiplier * NumberOfHits);
+        }
     }
 }

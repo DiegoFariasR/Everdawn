@@ -1,34 +1,70 @@
 - id: mage-bolt
   name: Magic Bolt
-  effectType: Void
-  damageMultiplier: 1.0
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: void
+          scaling:
+            - stat: wis
+              multiplier: 1.0
 
 - id: mage-burst
   name: Arcane Burst
-  effectType: Void
-  damageMultiplier: 1.6
   cooldown: 3
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: void
+          scaling:
+            - stat: wis
+              multiplier: 1.6
 
 - id: mage-meteor
   name: Meteor
-  effectType: Void
-  damageMultiplier: 2.0
   isAoe: true
   cooldown: 3
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: void
+          scaling:
+            - stat: wis
+              multiplier: 2.0
 
 - id: necro-bolt
   name: Dark Bolt
-  effectType: Void
-  damageMultiplier: 1.0
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: void
+          scaling:
+            - stat: wis
+              multiplier: 1.0
 
 - id: necro-drain
   name: Life Drain
-  effectType: Void
-  damageMultiplier: 1.8
   cooldown: 3
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: void
+          scaling:
+            - stat: wis
+              multiplier: 1.8
 
 - id: necro-soul
   name: Soul Siphon
-  effectType: Void
-  damageMultiplier: 3.0
   cooldown: 3
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: void
+          scaling:
+            - stat: wis
+              multiplier: 3.0

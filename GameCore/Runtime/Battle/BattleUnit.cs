@@ -45,6 +45,17 @@ namespace GameCore.Battle
         /// <summary>Returns the base attack stat for the given effect type. Physical uses STR; all other types use WIS.</summary>
         public int GetBaseAttack(EffectType type) =>
             type == EffectType.Physical ? PhysAttack : MagicAttack;
+        /// <summary>
+        /// Returns the derived attack value for a named stat.
+        /// str → PhysAttack (Str × 8), wis → MagicAttack (Wis × 8), agi → Agi.
+        /// </summary>
+        public int GetStat(string stat) => stat.ToLowerInvariant() switch
+        {
+            "str" => PhysAttack,
+            "wis" => MagicAttack,
+            "agi" => Agi,
+            _ => throw new System.ArgumentException($"Unknown stat: '{stat}'"),
+        };
         /// <summary>The effect type that maps to this unit's highest attack stat.</summary>
         public EffectType NaturalEffectType =>
             MagicAttack > PhysAttack ? EffectType.Void : EffectType.Physical;
@@ -85,7 +96,20 @@ namespace GameCore.Battle
         }
 
         private static readonly IReadOnlyList<BattleSkill> _defaultSkills =
-            new BattleSkill[] { new BattleSkill("attack", "Attack", Cost: 0, DamageMultiplier: 1.0, Modifiers: new string[] { "basic" }) };
+            new BattleSkill[]
+            {
+                new BattleSkill(
+                    "attack", "Attack", Cost: 0, DamageMultiplier: 1.0,
+                    Effects: new SkillEffect[]
+                    {
+                        new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
+                            new DamageComponent[]
+                            {
+                                new DamageComponent(EffectType.Physical, new DamageScaling[] { new DamageScaling("str", 1.0) })
+                            })
+                    },
+                    Modifiers: new string[] { "basic" })
+            };
 
         /// <summary>
         /// The unit's skill list. Always has at least one skill (the free basic action).

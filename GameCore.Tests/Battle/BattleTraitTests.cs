@@ -101,13 +101,13 @@ namespace GameCore.Tests.Battle
                 PlayerUnits =
                 [
                     new("hero", "Hero", "player", Level: 1, Str: 200, Wis: 100, Agi: 50,
-                        Skills: [new("basic", "Strike", Cost: 0, DamageMultiplier: 1.0)],
+                        Skills: [new("basic", "Strike", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect())],
                         Traits: [BattleTrait.MagicUser, BattleTrait.Focus]),
                 ],
                 EnemyUnits =
                 [
                     new("dummy", "Dummy", "enemy", Level: 1, Str: 1, Wis: 0, Agi: 1,
-                        Skills: [new("e-basic", "Hit", Cost: 0, DamageMultiplier: 1.0)]),
+                        Skills: [new("e-basic", "Hit", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect())]),
                 ],
             };
             var session = new BattleSession(seed: 0);
@@ -119,6 +119,11 @@ namespace GameCore.Tests.Battle
             Assert.Equal(50, state.GetBar("focus"));
         }
         // ── Helpers ───────────────────────────────────────────────────────────
+
+        /// <summary>Minimal physical/str effect list for test skill construction.</summary>
+        private static SkillEffect[] PhysEffect(double mult = 1.0) =>
+            [new(EffectKind.Damage, BattleSkillTarget.Enemy,
+                [new(EffectType.Physical, [new DamageScaling("str", mult)])])];
 
         private static BattleUnit MakeUnit(
             int wis = 50,

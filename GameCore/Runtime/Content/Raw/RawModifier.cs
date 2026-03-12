@@ -11,10 +11,7 @@ namespace GameCore.Content.Raw
         public int? SetCost { get; set; }
         public double? SetDamageMultiplier { get; set; }
         public bool? SetIsAoe { get; set; }
-        public string? SetTarget { get; set; }
-        public string? SetKind { get; set; }
         public int? SetCooldown { get; set; }
         public int? SetInitialCooldown { get; set; }
-        public string? SetEffectType { get; set; }
     }
 }

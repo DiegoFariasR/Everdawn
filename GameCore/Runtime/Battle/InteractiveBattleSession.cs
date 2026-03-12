@@ -277,15 +277,40 @@ namespace GameCore.Battle
             if (skill.IsAoe && targets.Count > 1)
                 produced.Add(AddEvent(actor.Id, $"{actor.Name} unleashes {skill.Name} on all enemies!", evType));
 
-            int effectiveHits = skill.IsHeal ? 1 : actor.HitCount;
+            // Determine effective hit count and per-hit damage multiplier.
+            // When skill.NumberOfHits != 1.0, the skill controls hit count:
+            //   floor(n) hits, each dealing DamageMultiplier × (n / floor(n)) × base.
+            //   Total damage = DamageMultiplier × n × base, regardless of how hits are split.
+            // When NumberOfHits is 1.0 (default), the unit's HitCount (derived from AGI) applies.
+            int effectiveHits;
+            double perHitHitsMult;
+            if (!skill.IsHeal && skill.NumberOfHits != 1.0)
+            {
+                effectiveHits = Math.Max(1, (int)Math.Floor(skill.NumberOfHits));
+                perHitHitsMult = skill.NumberOfHits / effectiveHits;
+            }
+            else
+            {
+                effectiveHits = skill.IsHeal ? 1 : actor.HitCount;
+                perHitHitsMult = 1.0;
+            }
+
+            var effect = skill.Effects.Count > 0 ? skill.Effects[0] : null;
+
             foreach (var target in targets)
             {
                 for (int i = 0; i < effectiveHits; i++)
                 {
-                    if (skill.IsHeal)
+                    if (effect?.Kind == EffectKind.Heal)
                     {
-                        int variance = Math.Max(1, actor.Attack / 5);
-                        int amount = (int)(actor.Attack * skill.DamageMultiplier * empowerMult) + _rng.Next(-variance, variance + 1);
+                        // Heal: sum scaling contributions from all components, apply damageMultiplier + empowerMult.
+                        double healRaw = 0;
+                        foreach (var comp in effect.DamagePerHit)
+                            foreach (var s in comp.Scaling)
+                                healRaw += actor.GetStat(s.Stat) * s.Multiplier;
+                        healRaw *= skill.DamageMultiplier * empowerMult;
+                        int healVariance = Math.Max(1, (int)healRaw / 5);
+                        int amount = Math.Max(0, (int)healRaw + _rng.Next(-healVariance, healVariance + 1));
                         var maxHp = _allUnits.First(u => u.Id == target.Id).MaxHp;
                         int healed = Math.Min(amount, maxHp - _hp[target.Id]);
                         _hp[target.Id] = Math.Min(maxHp, _hp[target.Id] + amount);
@@ -296,15 +321,19 @@ namespace GameCore.Battle
                     }
                     else
                     {
-                        var hitData = DamageCalc.Compute(actor, target, skill.EffectType, skill.DamageMultiplier, empowerMult, _rng);
-                        _hp[target.Id] = Math.Max(0, _hp[target.Id] - hitData.FinalDamage);
+                        var components = effect?.DamagePerHit ?? System.Array.Empty<DamageComponent>();
+                        var hitResults = DamageCalc.Compute(actor, target, components, skill.DamageMultiplier, empowerMult * perHitHitsMult, _rng);
+                        int totalDamage = 0;
+                        foreach (var r in hitResults) totalDamage += r.FinalDamage;
+                        var primaryType = skill.PrimaryEffectType;
+                        _hp[target.Id] = Math.Max(0, _hp[target.Id] - totalDamage);
                         string hitLabel = effectiveHits > 1 ? $" (hit {i + 1}/{effectiveHits})" : "";
                         produced.Add(AddEvent(actor.Id,
                             skill.IsAoe
-                                ? $"  \u2192 {target.Name} takes {hitData.FinalDamage} damage{hitLabel}."
-                                : $"{actor.Name} uses {skill.Name} on {target.Name} for {hitData.FinalDamage} damage{hitLabel}.",
-                            evType, target.Id, hitData.FinalDamage,
-                            skillId: skill.Id, effectType: skill.EffectType,
+                                ? $"  \u2192 {target.Name} takes {totalDamage} damage{hitLabel}."
+                                : $"{actor.Name} uses {skill.Name} on {target.Name} for {totalDamage} damage{hitLabel}.",
+                            evType, target.Id, totalDamage,
+                            skillId: skill.Id, effectType: primaryType,
                             hitIndex: i, totalHits: effectiveHits));
 
                         // Focus: actor gains 10 per offensive hit; target loses 10 per incoming hit

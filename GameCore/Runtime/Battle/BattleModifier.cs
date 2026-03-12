@@ -13,10 +13,7 @@ namespace GameCore.Battle
         int? SetCost = null,
         double? SetDamageMultiplier = null,
         bool? SetIsAoe = null,
-        BattleSkillTarget? SetTarget = null,
-        EffectKind? SetKind = null,
         int? SetCooldown = null,
-        int? SetInitialCooldown = null,
-        EffectType? SetEffectType = null
+        int? SetInitialCooldown = null
     );
 }

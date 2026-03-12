@@ -15,12 +15,15 @@ namespace GameCore.Battle
         bool IsHeal,
         int Cooldown,
         BattleSkillTarget Target,
-        EffectType EffectType,
+        /// <summary>Primary damage type (first component). Null for heals.</summary>
+        EffectType? PrimaryEffectType,
         bool IsBasic,
         bool IsUltimate,
         int EffectiveInitialCooldown,
-        /// <summary>Estimated damage = actor base attack × multiplier, for display purposes.</summary>
-        int BaseDmg
+        /// <summary>Estimated total damage across all hits = Σ(actor stat × scaling) × DamageMultiplier × NumberOfHits.</summary>
+        int BaseDmg,
+        /// <summary>Number of hits this skill fires (see <see cref="BattleSkill.NumberOfHits"/>).</summary>
+        double NumberOfHits
     );
 
     /// <summary>

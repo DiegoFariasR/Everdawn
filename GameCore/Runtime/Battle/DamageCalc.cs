@@ -54,5 +54,51 @@ namespace GameCore.Battle
 
             return new DamageResult(effectType, steps);
         }
+
+        /// <summary>
+        /// Runs the damage pipeline for each component in <paramref name="components"/> and returns
+        /// one <see cref="DamageResult"/> per component.
+        /// Components with a null <see cref="DamageComponent.DamageType"/> are skipped (heal-only components).
+        /// </summary>
+        public static IReadOnlyList<DamageResult> Compute(
+            BattleUnit actor,
+            BattleUnit target,
+            IReadOnlyList<DamageComponent> components,
+            double damageMultiplier,
+            double extraMultiplier,
+            Random rng)
+        {
+            var results = new List<DamageResult>();
+            foreach (var component in components)
+            {
+                if (!component.DamageType.HasValue) continue;
+
+                var steps = new List<DamageStep>();
+
+                // ── Layer 1: Base ────────────────────────────────────────────────
+                // Sum each stat contribution, apply damageMultiplier + extraMultiplier, add variance.
+                double statBase = 0;
+                foreach (var s in component.Scaling)
+                    statBase += actor.GetStat(s.Stat) * s.Multiplier;
+                int baseValue = (int)statBase;
+                int variance = Math.Max(1, baseValue / 5);
+                int rolled = Math.Max(
+                    0,
+                    (int)(statBase * damageMultiplier * extraMultiplier) + rng.Next(-variance, variance + 1)
+                );
+                steps.Add(new DamageStep("Base", baseValue, rolled));
+                int value = rolled;
+
+                // ── Layer 2: Resistance ──────────────────────────────────────────
+                int resistance = target.GetResistance(component.DamageType.Value);
+                int afterResistance = Math.Max(0, (int)(value * (1.0 - resistance / 100.0)));
+                steps.Add(new DamageStep("Resistance", value, afterResistance));
+
+                // ── Add future layers here ───────────────────────────────────────
+
+                results.Add(new DamageResult(component.DamageType.Value, steps));
+            }
+            return results;
+        }
     }
 }

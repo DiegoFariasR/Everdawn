@@ -67,11 +67,8 @@ namespace GameCore.Content
                     SetCost: raw.SetCost,
                     SetDamageMultiplier: raw.SetDamageMultiplier,
                     SetIsAoe: raw.SetIsAoe,
-                    SetTarget: raw.SetTarget != null ? Enum.Parse<BattleSkillTarget>(raw.SetTarget, ignoreCase: true) : null,
-                    SetKind: raw.SetKind != null ? Enum.Parse<EffectKind>(raw.SetKind, ignoreCase: true) : null,
                     SetCooldown: raw.SetCooldown,
-                    SetInitialCooldown: raw.SetInitialCooldown,
-                    SetEffectType: raw.SetEffectType != null ? Enum.Parse<EffectType>(raw.SetEffectType, ignoreCase: true) : null);
+                    SetInitialCooldown: raw.SetInitialCooldown);
         }
 
         // ── Skills ────────────────────────────────────────────────────────────
@@ -137,11 +134,8 @@ namespace GameCore.Content
                         Cost = compiledMods.LastOrDefault(m => m.SetCost != null)?.SetCost ?? sk.Cost,
                         DamageMultiplier = compiledMods.LastOrDefault(m => m.SetDamageMultiplier != null)?.SetDamageMultiplier ?? sk.DamageMultiplier,
                         IsAoe = compiledMods.LastOrDefault(m => m.SetIsAoe != null)?.SetIsAoe ?? sk.IsAoe,
-                        Target = compiledMods.LastOrDefault(m => m.SetTarget != null)?.SetTarget ?? sk.Target,
-                        Kind = compiledMods.LastOrDefault(m => m.SetKind != null)?.SetKind ?? sk.Kind,
                         Cooldown = compiledMods.LastOrDefault(m => m.SetCooldown != null)?.SetCooldown ?? sk.Cooldown,
                         InitialCooldown = compiledMods.LastOrDefault(m => m.SetInitialCooldown != null)?.SetInitialCooldown ?? sk.InitialCooldown,
-                        EffectType = compiledMods.LastOrDefault(m => m.SetEffectType != null)?.SetEffectType ?? sk.EffectType,
                     };
                 })
                 .ToArray();
@@ -168,20 +162,34 @@ namespace GameCore.Content
 
         private static BattleSkill CompileSkill(RawSkill raw)
         {
-            var kind = Enum.Parse<EffectKind>(raw.Kind, ignoreCase: true);
-            var effectType = Enum.Parse<EffectType>(raw.EffectType, ignoreCase: true);
-            var target = Enum.Parse<BattleSkillTarget>(raw.Target, ignoreCase: true);
+            var effects = new List<SkillEffect>();
+            foreach (var rawEffect in raw.Effects)
+            {
+                var kind = Enum.Parse<EffectKind>(rawEffect.Kind, ignoreCase: true);
+                var target = Enum.Parse<BattleSkillTarget>(rawEffect.Target, ignoreCase: true);
+                var components = new List<DamageComponent>();
+                foreach (var rawComp in rawEffect.DamagePerHit)
+                {
+                    EffectType? damageType = rawComp.DamageType != null
+                        ? Enum.Parse<EffectType>(rawComp.DamageType, ignoreCase: true)
+                        : null;
+                    var scaling = rawComp.Scaling
+                        .Select(s => new DamageScaling(s.Stat, s.Multiplier))
+                        .ToArray();
+                    components.Add(new DamageComponent(damageType, scaling));
+                }
+                effects.Add(new SkillEffect(kind, target, components));
+            }
 
             return new BattleSkill(
                 raw.Id, raw.Name,
                 Cost: raw.Cost,
                 DamageMultiplier: raw.DamageMultiplier,
+                Effects: effects,
                 IsAoe: raw.IsAoe,
-                Target: target,
-                Kind: kind,
                 Cooldown: raw.Cooldown,
                 InitialCooldown: raw.InitialCooldown,
-                EffectType: effectType);
+                NumberOfHits: raw.NumberOfHits);
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────
