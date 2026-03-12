@@ -467,12 +467,13 @@ html, body {
     margin-bottom: 2px;
     overflow: hidden;
 }
-.hp-bar, .mp-bar {
+.hp-bar, .mp-bar, .focus-bar {
     height: 100%;
     border-radius: 2px;
     transition: width 0.25s ease;
 }
-.mp-bar { background: #2266cc; }
+.mp-bar    { background: #2266cc; }
+.focus-bar { background: #cc8800; }
 
 .stat-text {
     font-size: 0.58rem;
