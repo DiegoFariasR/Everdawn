@@ -5,7 +5,7 @@ namespace GameCore.Battle;
 /// </summary>
 public class BattleResult
 {
-    public required IReadOnlyList<BattleSnapshot> Snapshots { get; init; }
-    public required string WinningTeam { get; init; }
-    public required int Seed { get; init; }
+    public IReadOnlyList<BattleSnapshot> Snapshots { get; init; } = Array.Empty<BattleSnapshot>();
+    public string WinningTeam { get; init; } = string.Empty;
+    public int Seed { get; init; }
 }

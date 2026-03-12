@@ -1,4 +1,5 @@
 using GameCore.Battle;
+using GameCore.Content;
 
 namespace GameCore.Scenarios;
 
@@ -17,7 +18,7 @@ public sealed class WatchScenario : IBattleScenario
     public string DisplayName => _source.DisplayName + " (Watch)";
     public int Seed => _source.Seed;
     public bool IsPlayable => false;
-    public BattleSetup CreateSetup() => _source.CreateSetup();
+    public BattleSetup CreateSetup(IContentSource source) => _source.CreateSetup(source);
 
     public override string ToString() => $"{DisplayName} [{Id}]";
 }

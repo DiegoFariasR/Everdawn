@@ -13,7 +13,7 @@ public class BattleSessionTests
     {
         var scenario = new SampleScenario();
         var engine = new BattleSession(scenario.Seed);
-        var result = engine.Start(scenario.CreateSetup());
+        var result = engine.Start(scenario.CreateSetup(TestContentSource.Default));
         return (engine, result.View);
     }
 
@@ -24,7 +24,7 @@ public class BattleSessionTests
     {
         var scenario = new SampleScenario();
         var engine = new BattleSession(scenario.Seed);
-        var result = engine.Start(scenario.CreateSetup());
+        var result = engine.Start(scenario.CreateSetup(TestContentSource.Default));
         Assert.True(result.Success);
         Assert.Null(result.Error);
     }
@@ -40,7 +40,7 @@ public class BattleSessionTests
     public void Start_ViewContainsAllUnits()
     {
         var scenario = new SampleScenario();
-        var setup = scenario.CreateSetup();
+        var setup = scenario.CreateSetup(TestContentSource.Default);
         var engine = new BattleSession(scenario.Seed);
         var result = engine.Start(setup);
         Assert.Equal(setup.PlayerUnits.Count + setup.EnemyUnits.Count, result.View.Units.Count);
@@ -57,7 +57,7 @@ public class BattleSessionTests
     public void Start_AllUnitsBeginAtFullHp()
     {
         var scenario = new SampleScenario();
-        var setup = scenario.CreateSetup();
+        var setup = scenario.CreateSetup(TestContentSource.Default);
         var maxHp = setup.PlayerUnits.Concat(setup.EnemyUnits)
                         .ToDictionary(u => u.Id, u => u.MaxHp);
         var engine = new BattleSession(scenario.Seed);
@@ -99,8 +99,8 @@ public class BattleSessionTests
     {
         var scenario = new SampleScenario();
         var engine = new BattleSession(scenario.Seed);
-        engine.Start(scenario.CreateSetup());
-        var second = engine.Start(scenario.CreateSetup());
+        engine.Start(scenario.CreateSetup(TestContentSource.Default));
+        var second = engine.Start(scenario.CreateSetup(TestContentSource.Default));
         Assert.False(second.Success);
         Assert.NotNull(second.Error);
         Assert.Equal(ValidationErrorCode.SessionAlreadyStarted, second.Error!.Code);
@@ -128,10 +128,10 @@ public class BattleSessionTests
         // Both BattleEngine.Run and BattleSession with the same seed must agree on who wins.
         var scenario = new SampleScenario();
 
-        var engineResult = BattleEngine.Run(scenario.CreateSetup(), scenario.Seed);
+        var engineResult = BattleEngine.Run(scenario.CreateSetup(TestContentSource.Default), scenario.Seed);
 
         var engine = new BattleSession(scenario.Seed);
-        engine.Start(scenario.CreateSetup());
+        engine.Start(scenario.CreateSetup(TestContentSource.Default));
         BattleStepResult last = null!;
         for (int i = 0; i < 500; i++)
         {
@@ -148,7 +148,7 @@ public class BattleSessionTests
         static BattleView RunToEnd(IBattleScenario scenario)
         {
             var engine = new BattleSession(scenario.Seed);
-            engine.Start(scenario.CreateSetup());
+            engine.Start(scenario.CreateSetup(TestContentSource.Default));
             BattleStepResult last = null!;
             for (int i = 0; i < 500; i++)
             {
@@ -223,7 +223,7 @@ public class BattleSessionTests
     public void Response_NoUnitHpExceedsMax()
     {
         var scenario = new SampleScenario();
-        var setup = scenario.CreateSetup();
+        var setup = scenario.CreateSetup(TestContentSource.Default);
         var maxHp = setup.PlayerUnits.Concat(setup.EnemyUnits)
                         .ToDictionary(u => u.Id, u => u.MaxHp);
 

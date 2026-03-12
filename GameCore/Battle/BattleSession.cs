@@ -63,26 +63,35 @@ public sealed class BattleSession : IBattleEngine
     }
 
     /// <summary>
-    /// Runs a complete battle with AI controlling all units (same logic as auto mode in the sandbox)
-    /// and returns a <see cref="BattleResult"/> with one snapshot per event — suitable for watch-mode replay.
+    /// Runs a complete battle with AI controlling all units and returns a <see cref="BattleResult"/>
+    /// with one snapshot per event — suitable for watch-mode replay.
+    /// This is the single authoritative execution path; <see cref="BattleEngine"/> delegates here.
     /// </summary>
     public static BattleResult RunFull(BattleSetup setup, int seed)
     {
         var session = new BattleSession(seed);
         var snapshots = new List<BattleSnapshot>();
         int step = 0;
+        int logOffset = 0;
 
-        var start = session.Start(setup);
-        var unitStates = start.View.Units;
-        foreach (var ev in start.Events)
-            snapshots.Add(new BattleSnapshot { Step = step++, Event = ev, UnitStates = unitStates });
+        var startResult = session.Start(setup);
+        // Use FullLog to capture the "start" event, which is added to the log inside
+        // InteractiveBattleSession.HandleStart() but is NOT included in NewEvents.
+        var initialStates = startResult.View.Units;
+        foreach (var ev in startResult.View.FullLog)
+            snapshots.Add(new BattleSnapshot { Step = step++, Event = ev, UnitStates = initialStates });
+        logOffset = startResult.View.FullLog.Count;
 
         while (!session.GetView().IsOver)
         {
             var result = session.TryExecute(new AdvanceTurnCommand());
-            unitStates = result.View.Units;
-            foreach (var ev in result.Events)
-                snapshots.Add(new BattleSnapshot { Step = step++, Event = ev, UnitStates = unitStates });
+            var unitStates = result.View.Units;
+            // Slice new events from FullLog so we capture the "end" event produced by
+            // CheckEnd(), which is also not in NewEvents.
+            var fullLog = result.View.FullLog;
+            for (int i = logOffset; i < fullLog.Count; i++)
+                snapshots.Add(new BattleSnapshot { Step = step++, Event = fullLog[i], UnitStates = unitStates });
+            logOffset = fullLog.Count;
         }
 
         var view = session.GetView();

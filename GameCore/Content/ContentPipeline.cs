@@ -6,16 +6,20 @@ using YamlDotNet.Serialization.NamingConventions;
 namespace GameCore.Content;
 
 /// <summary>
-/// Reads YAML files from <c>GameData/Base/</c>, compiles them into domain objects,
+/// Reads YAML files via an <see cref="IContentSource"/>, compiles them into domain objects,
 /// and returns a ready-to-use <see cref="ContentDatabase"/>.
 /// <para>
 /// Pipeline steps (Reader → Raw → Compile → Database):
 /// <list type="number">
-///   <item>Discover all .yml files under <c>basePath/units/</c></item>
-///   <item>Parse each file into a <see cref="RawUnit"/> (no logic)</item>
-///   <item>Compile each <see cref="RawUnit"/> into a <see cref="BattleUnit"/></item>
+///   <item>Discover all .yml files under <c>units/</c> and <c>skills/</c> via the source</item>
+///   <item>Parse each file into raw objects (no logic)</item>
+///   <item>Compile raw objects into domain types</item>
 ///   <item>Return a <see cref="ContentDatabase"/> keyed by unit ID</item>
 /// </list>
+/// </para>
+/// <para>
+/// <b>Architecture note:</b> The pipeline never discovers paths on its own. Callers must
+/// provide an <see cref="IContentSource"/> that already points at the right content root.
 /// </para>
 /// </summary>
 public static class ContentPipeline
@@ -26,25 +30,33 @@ public static class ContentPipeline
         .Build();
 
     /// <summary>
-    /// Loads and compiles all content from <paramref name="basePath"/>.
+    /// Loads and compiles all content accessed through <paramref name="source"/>.
     /// </summary>
-    /// <param name="basePath">Path to the <c>GameData/Base</c> directory.</param>
-    public static ContentDatabase Load(string basePath)
+    public static ContentDatabase Load(IContentSource source)
     {
-        var modifiers = LoadModifiers(Path.Combine(basePath, "modifiers.yml")).ToDictionary(m => m.Id, StringComparer.OrdinalIgnoreCase);
-        var skills = LoadSkills(Path.Combine(basePath, "skills")).ToDictionary(s => s.Id);
-        var units = LoadUnits(Path.Combine(basePath, "units"), skills, modifiers);
+        var modifiers = LoadModifiers(source).ToDictionary(m => m.Id, StringComparer.OrdinalIgnoreCase);
+        var skills = LoadSkills(source).ToDictionary(s => s.Id);
+        var units = LoadUnits(source, skills, modifiers);
         return new ContentDatabase(units, skills.Values, modifiers.Values);
     }
 
+    /// <summary>
+    /// Convenience overload: wraps <paramref name="basePath"/> in a
+    /// <see cref="FileSystemContentSource"/> and calls <see cref="Load(IContentSource)"/>.
+    /// </summary>
+    /// <param name="basePath">Absolute path to the <c>GameData/Base</c> directory.</param>
+    public static ContentDatabase Load(string basePath) =>
+        Load(new FileSystemContentSource(basePath));
+
     // ── Modifiers ─────────────────────────────────────────────────────────
 
-    private static IEnumerable<BattleModifier> LoadModifiers(string filePath)
+    private static IEnumerable<BattleModifier> LoadModifiers(IContentSource source)
     {
-        if (!File.Exists(filePath))
+        const string path = "modifiers.yml";
+        if (!source.FileExists(path))
             yield break;
 
-        var list = ParseYaml<List<RawModifier>>(filePath);
+        var list = ParseYaml<List<RawModifier>>(source.ReadAllText(path));
         foreach (var raw in list)
             yield return new BattleModifier(
                 raw.Id, raw.Name, raw.Description,
@@ -60,14 +72,15 @@ public static class ContentPipeline
 
     // ── Skills ────────────────────────────────────────────────────────────
 
-    private static IEnumerable<BattleSkill> LoadSkills(string skillsPath)
+    private static IEnumerable<BattleSkill> LoadSkills(IContentSource source)
     {
-        if (!Directory.Exists(skillsPath))
+        const string dir = "skills";
+        if (!source.DirectoryExists(dir))
             yield break;
 
-        foreach (var file in Directory.EnumerateFiles(skillsPath, "*.yml"))
+        foreach (var file in source.ListFiles(dir, "*.yml"))
         {
-            var list = ParseYaml<List<RawSkill>>(file);
+            var list = ParseYaml<List<RawSkill>>(source.ReadAllText(file));
             foreach (var raw in list)
                 yield return CompileSkill(raw);
         }
@@ -76,14 +89,15 @@ public static class ContentPipeline
     // ── Units ─────────────────────────────────────────────────────────────
 
     private static IEnumerable<BattleUnit> LoadUnits(
-        string unitsPath, IReadOnlyDictionary<string, BattleSkill> skillDict, IReadOnlyDictionary<string, BattleModifier> modifierDict)
+        IContentSource source, IReadOnlyDictionary<string, BattleSkill> skillDict, IReadOnlyDictionary<string, BattleModifier> modifierDict)
     {
-        if (!Directory.Exists(unitsPath))
+        const string dir = "units";
+        if (!source.DirectoryExists(dir))
             yield break;
 
-        foreach (var file in Directory.EnumerateFiles(unitsPath, "*.yml"))
+        foreach (var file in source.ListFiles(dir, "*.yml"))
         {
-            var raw = ParseYaml<RawUnit>(file);
+            var raw = ParseYaml<RawUnit>(source.ReadAllText(file));
             yield return CompileUnit(raw, skillDict, modifierDict);
         }
     }
@@ -168,9 +182,9 @@ public static class ContentPipeline
 
     // ── Helpers ───────────────────────────────────────────────────────────
 
-    private static T ParseYaml<T>(string filePath)
+    private static T ParseYaml<T>(string yamlText)
     {
-        using var reader = new StreamReader(filePath);
+        using var reader = new StringReader(yamlText);
         return _deserializer.Deserialize<T>(reader);
     }
 }
