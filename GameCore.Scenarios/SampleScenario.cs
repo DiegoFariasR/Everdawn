@@ -25,14 +25,17 @@ public class SampleScenario : IBattleScenario, IRegressionScenario
 
     public override string ToString() => $"{DisplayName} [{Id}]";
 
+    private static readonly string[] PlayerUnitIds = { "paladin", "mage", "rogue" };
+    private static readonly string[] EnemyUnitIds = { "goblin-w", "goblin-a", "necro" };
+
     public BattleSetup CreateSetup(IContentSource source)
     {
         var db = ContentPipeline.Load(source);
         return new BattleSetup
         {
-            PlayerUnits = db.GetUnits(new[] { "paladin", "mage", "rogue" })
+            PlayerUnits = db.GetUnits(PlayerUnitIds)
                             .Select(u => u with { Team = "player" }).ToList(),
-            EnemyUnits = db.GetUnits(new[] { "goblin-w", "goblin-a", "necro" })
+            EnemyUnits = db.GetUnits(EnemyUnitIds)
                            .Select(u => u with { Team = "enemy" }).ToList(),
         };
     }
