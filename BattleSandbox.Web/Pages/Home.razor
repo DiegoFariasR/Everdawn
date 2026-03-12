@@ -266,6 +266,19 @@
                             }
                             <div class="stat-text">@st.CurrentHp/@u.MaxHp HP &nbsp;|&nbsp; STR @u.Str &nbsp;WIS @u.Wis &nbsp;AGI @u.Agi</div>
                         </div>
+                        <div class="action-buttons card-skills">
+                            @for (int si = 0; si < u.ResolvedSkills.Count; si++)
+                            {
+                                var sk = u.ResolvedSkills[si];
+                                string btnClass = si == 0 ? "btn-attack" : si == 1 ? "btn-skill" : "btn-soulburn";
+                                <button class="btn-action @btnClass @(sk.IsAoe ? "btn-aoe" : "") btn-enemy-info" disabled="disabled">
+                                    @sk.Name
+                                    @if (sk.IsAoe) { <span class="aoe-badge">ALL</span> }
+                                    @if (sk.MpCost > 0) { <span class="mp-cost">@sk.MpCost MP</span> }
+                                    @if (sk.Cooldown > 0) { <span class="cd-cost">→@sk.Cooldown</span> }
+                                </button>
+                            }
+                        </div>
                     </div>
                 }
             </div>
@@ -316,34 +329,6 @@
             <section class="battle-over @(_view.WinningTeam == "player" ? "over-win" : "over-lose")">
                 @(_view.WinningTeam == "player" ? "⚔ Victory!" : "💀 Defeat...")
                 <button class="btn-run" style="margin-left:1rem" @onclick="StartSession">Retry</button>
-            </section>
-        }
-
-        @if (!_view.IsOver)
-        {
-            <section class="enemy-skills-bar">
-                <div class="acting-label enemy-acting">Enemy Skills</div>
-                @foreach (var eu in _setup.EnemyUnits)
-                {
-                    var est = state.First(s => s.UnitId == eu.Id);
-                    if (!est.IsAlive) continue;
-                    <div class="enemy-skills-unit">
-                        <span class="enemy-skills-name @(activeUnitId == eu.Id ? "enemy-skills-active" : "")">@eu.Name</span>
-                        <div class="action-buttons">
-                            @for (int si = 0; si < eu.ResolvedSkills.Count; si++)
-                            {
-                                var sk = eu.ResolvedSkills[si];
-                                string btnClass = si == 0 ? "btn-attack" : si == 1 ? "btn-skill" : "btn-soulburn";
-                                <button class="btn-action @btnClass @(sk.IsAoe ? "btn-aoe" : "") btn-enemy-info" disabled="disabled">
-                                    @sk.Name
-                                    @if (sk.IsAoe) { <span class="aoe-badge">ALL</span> }
-                                    @if (sk.MpCost > 0) { <span class="mp-cost">@sk.MpCost MP</span> }
-                                    @if (sk.Cooldown > 0) { <span class="cd-cost">→@sk.Cooldown</span> }
-                                </button>
-                            }
-                        </div>
-                    </div>
-                }
             </section>
         }
 
