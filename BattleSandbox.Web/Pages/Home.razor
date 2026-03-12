@@ -35,6 +35,11 @@
         </div>
     </section>
 
+    @if (_startError != null)
+    {
+        <div class="error-banner">Error: @_startError</div>
+    }
+
     @if (_setup != null)
     {
         <div class="info-toggle-row">
@@ -399,7 +404,22 @@
         _selectedScenarioId = _scenarios[0].Id;
     }
 
+    private string? _startError;
+
     private void StartSession()
+    {
+        _startError = null;
+        try
+        {
+        StartSessionInner();
+        }
+        catch (Exception ex)
+        {
+            _startError = ex.Message + (ex.InnerException != null ? " → " + ex.InnerException.Message : "");
+        }
+    }
+
+    private void StartSessionInner()
     {
         _currentScenario = _scenarios.First(s => s.Id == _selectedScenarioId);
         _setup         = _currentScenario.CreateSetup(ContentSource);

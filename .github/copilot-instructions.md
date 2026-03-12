@@ -211,19 +211,6 @@ GameData/
 
 ---
 
-## Shorthand Dictionary
-
-These phrases have defined meanings when used in requests:
-
-| Phrase | Meaning |
-|---|---|
-| **"ship it"** | `dotnet format` → commit → new branch → push → create PR → squash-merge → sync local main → restart dev server on `http://localhost:5001` |
-| **"push fix"** | `dotnet format` → commit → push directly to `main` (for small hotfixes) |
-| **"start server"** | Kill port 5001 + `dotnet run --no-launch-profile --urls "http://localhost:5001"` in `BattleSandbox.Web/` |
-| **"debug prod"** | Check recent GitHub Actions runs for failures (CI + Deploy) + verify `https://diegofariasr.github.io/Everdawn/` is reachable and returns HTTP 200 |
-
----
-
 ## Gameplay Quality Warnings
 
 Treat the following as development warnings. Apply them during design, implementation, playtesting, and content production — not just at launch. These are relevant once the game is large enough to evaluate end-to-end.
@@ -290,3 +277,16 @@ Treat the following as development warnings. Apply them during design, implement
 - If a scene does not improve character, stakes, or clarity, rewrite or cut it.
 - If a mechanic only works because the player has not solved it yet, it is not strong enough.
 - If the game respects the player's time, the player will forgive lower production value more easily.
+
+---
+
+## Shorthand Dictionary
+
+These phrases have defined meanings when used in requests:
+
+| Phrase | Meaning |
+|---|---|
+| **"ship it"** | `dotnet format` → commit → new branch → push → create PR → squash-merge → sync local main → restart dev server on `http://localhost:5001` |
+| **"push fix"** | `dotnet format` → commit → push directly to `main` (for small hotfixes) |
+| **"start server"** | Kill port 5001 + `dotnet run --no-launch-profile --urls "http://localhost:5001"` in `BattleSandbox.Web/` |
+| **"debug prod"** | Check recent GitHub Actions runs for failures (CI + Deploy) + verify `https://diegofariasr.github.io/Everdawn/` is reachable and returns HTTP 200 |
