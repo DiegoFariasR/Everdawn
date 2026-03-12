@@ -44,7 +44,7 @@
 - id: multi-strike
   name: Poison Blade
   cooldown: 3
-  numberOfHits: 1.5
+  numberOfHits: 3
   effects:
     - kind: damage
       target: enemy
@@ -52,6 +52,7 @@
         - damageType: physical
           scaling:
             - stat: agi
+              scale: 0.5
 
 - id: rogue-mark
   name: Death Mark
