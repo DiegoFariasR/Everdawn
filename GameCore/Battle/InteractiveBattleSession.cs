@@ -14,6 +14,7 @@ internal sealed class InteractiveBattleSession
     private int _round = 1;
     private bool _started;
     private readonly Dictionary<string, int> _skillCooldowns = new();
+    private readonly Dictionary<string, int> _focus = new();
     private bool _isOver;
     private string? _winningTeam;
 
@@ -29,6 +30,9 @@ internal sealed class InteractiveBattleSession
             foreach (var s in u.ResolvedSkills)
                 if (s.InitialCooldown > 0)
                     _skillCooldowns[s.Id] = s.InitialCooldown;
+        // Initialize focus for Focus-trait units
+        foreach (var u in _allUnits.Where(u => u.HasTrait(BattleTrait.Focus)))
+            _focus[u.Id] = u.InitialFocus;
     }
 
     /// <summary>
@@ -65,6 +69,7 @@ internal sealed class InteractiveBattleSession
         {
             if (_hp.ContainsKey(us.UnitId)) _hp[us.UnitId] = us.CurrentHp;
             if (_mp.ContainsKey(us.UnitId)) _mp[us.UnitId] = us.CurrentMp;
+            if (_focus.ContainsKey(us.UnitId)) _focus[us.UnitId] = us.CurrentFocus;
         }
         _turnIndex = NextAliveIndexAfter(r.LastActorId);
 
@@ -164,7 +169,7 @@ internal sealed class InteractiveBattleSession
         return new BattleResponse(
             NewEvents: newEvents,
             FullLog: _log,
-            State: _allUnits.Select(u => new UnitState(u.Id, _hp[u.Id], _mp[u.Id], _hp[u.Id] > 0)).ToArray(),
+            State: _allUnits.Select(u => new UnitState(u.Id, _hp[u.Id], _mp[u.Id], _hp[u.Id] > 0, GetFocus(u.Id))).ToArray(),
             PendingInput: pending,
             IsOver: _isOver,
             WinningTeam: _winningTeam
@@ -221,6 +226,9 @@ internal sealed class InteractiveBattleSession
     private int GetCooldown(string skillId) =>
         _skillCooldowns.TryGetValue(skillId, out int cd) ? cd : 0;
 
+    private int GetFocus(string unitId) =>
+        _focus.TryGetValue(unitId, out int f) ? f : 0;
+
     private IReadOnlyList<BattleEvent> ExecuteAction(BattleUnit actor, List<BattleUnit> targets, BattleSkill skill)
     {
         var produced = new List<BattleEvent>();
@@ -240,6 +248,18 @@ internal sealed class InteractiveBattleSession
         string evType = skill.IsHeal ? "skill"
                        : skillIdx == 0 ? "attack" : skillIdx == 1 ? "skill" : "soulburn";
 
+        // Focus empowerment: fires when focus is full and the actor uses a non-basic offensive skill
+        bool isFocusEmpowered = actor.HasTrait(BattleTrait.Focus)
+            && GetFocus(actor.Id) == 100
+            && skillIdx > 0
+            && !skill.IsHeal;
+        if (isFocusEmpowered)
+        {
+            _focus[actor.Id] = 50;
+            produced.Add(AddEvent(actor.Id, $"{actor.Name}'s Focus empowers their attack!", "skill"));
+        }
+        double empowerMult = isFocusEmpowered ? 1.5 : 1.0;
+
         if (skill.IsAoe && targets.Count > 1)
             produced.Add(AddEvent(actor.Id, $"{actor.Name} unleashes {skill.Name} on all enemies!", evType));
 
@@ -249,7 +269,7 @@ internal sealed class InteractiveBattleSession
             for (int hit = 0; hit < effectiveHits; hit++)
             {
                 int variance = Math.Max(1, actor.Attack / 5);
-                int amount = (int)(actor.Attack * skill.Multiplier) + _rng.Next(-variance, variance + 1);
+                int amount = (int)(actor.Attack * skill.Multiplier * empowerMult) + _rng.Next(-variance, variance + 1);
 
                 if (skill.IsHeal)
                 {
@@ -269,6 +289,12 @@ internal sealed class InteractiveBattleSession
                             ? $"  \u2192 {target.Name} takes {amount} damage{hitLabel}."
                             : $"{actor.Name} uses {skill.Name} on {target.Name} for {amount} damage{hitLabel}.",
                         evType, target.Id, amount));
+
+                    // Focus: actor gains 10 per offensive hit; target loses 10 per incoming hit
+                    if (actor.HasTrait(BattleTrait.Focus))
+                        _focus[actor.Id] = Math.Min(100, GetFocus(actor.Id) + 10);
+                    if (target.HasTrait(BattleTrait.Focus))
+                        _focus[target.Id] = Math.Max(0, GetFocus(target.Id) - 10);
 
                     if (_hp[target.Id] <= 0)
                     {
