@@ -58,6 +58,10 @@ public record BattleUnit(
     public int MaxFocus => HasTrait(BattleTrait.Focus) ? 100 : 0;
     /// <summary>Starting focus. Fixed at 50 for Focus-trait units, 0 otherwise.</summary>
     public int InitialFocus => HasTrait(BattleTrait.Focus) ? 50 : 0;
+    /// <summary>Max fury. Fixed at 100 for Fury-trait units, 0 otherwise.</summary>
+    public int MaxFury => HasTrait(BattleTrait.Fury) ? 100 : 0;
+    /// <summary>Starting fury. Always 0 — fury must be earned in battle.</summary>
+    public int InitialFury => 0;
 
     /// <summary>
     /// The unit's skill list. Always has at least one skill (the free basic action).

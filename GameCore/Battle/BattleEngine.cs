@@ -17,10 +17,14 @@ public static class BattleEngine
         var focus = allUnits
             .Where(u => u.HasTrait(BattleTrait.Focus))
             .ToDictionary(u => u.Id, u => u.InitialFocus);
+        var fury = allUnits
+            .Where(u => u.HasTrait(BattleTrait.Fury))
+            .ToDictionary(u => u.Id, u => u.InitialFury);
         int GetFocus(string id) => focus.TryGetValue(id, out int f) ? f : 0;
+        int GetFury(string id) => fury.TryGetValue(id, out int f) ? f : 0;
 
         IReadOnlyList<UnitState> TakeSnapshot() =>
-            allUnits.Select(u => new UnitState(u.Id, hp[u.Id], mp[u.Id], hp[u.Id] > 0, GetFocus(u.Id))).ToArray();
+            allUnits.Select(u => new UnitState(u.Id, hp[u.Id], mp[u.Id], hp[u.Id] > 0, GetFocus(u.Id), GetFury(u.Id))).ToArray();
 
         var snapshots = new List<BattleSnapshot>();
         int step = 0;
@@ -52,6 +56,11 @@ public static class BattleEngine
                     focus[actor.Id] = Math.Min(100, GetFocus(actor.Id) + 10);
                 if (target.HasTrait(BattleTrait.Focus))
                     focus[target.Id] = Math.Max(0, GetFocus(target.Id) - 10);
+                // Fury: actor gains 10–50 per action; target gains 10–20 per hit received
+                if (actor.HasTrait(BattleTrait.Fury))
+                    fury[actor.Id] = Math.Min(100, GetFury(actor.Id) + rng.Next(10, 51));
+                if (target.HasTrait(BattleTrait.Fury))
+                    fury[target.Id] = Math.Min(100, GetFury(target.Id) + rng.Next(10, 21));
 
                 snapshots.Add(new BattleSnapshot
                 {

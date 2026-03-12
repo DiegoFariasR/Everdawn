@@ -19,4 +19,12 @@ public enum BattleTrait
     /// and focus resets to 50.
     /// </summary>
     Focus,
+
+    /// <summary>
+    /// The unit has a fury bar (max 100, starts at 0).
+    /// Gains 10–50 fury per attack action. Gains 10–20 fury per incoming hit.
+    /// When full, the next non-basic offensive skill is empowered (×1.5 damage)
+    /// and fury resets to 0.
+    /// </summary>
+    Fury,
 }
