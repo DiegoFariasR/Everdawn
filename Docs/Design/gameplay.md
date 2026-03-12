@@ -49,9 +49,9 @@
 - [ ] Physical
 
 ### Ability Types
-- [ ] Attack
-- [ ] Spell (can be silenced)
-- [ ] Passive
+- [x] Attack
+- [x] Spell (can be silenced)
+- [x] Passive
 
 ## Open Questions
 

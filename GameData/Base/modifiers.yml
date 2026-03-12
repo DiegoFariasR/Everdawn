@@ -13,4 +13,5 @@
     The unit's strongest action.
     Automatically starts every battle with at least 1 round of cooldown.
     Produces a "soulburn" event type.
-  setInitialCooldown: 1
+  addCooldown: 1
+  addInitialCooldown: 1
