@@ -172,7 +172,8 @@ internal sealed class InteractiveBattleSession
                 _bars[u.Id].Count > 0 ? new Dictionary<string, int>(_bars[u.Id]) : null)).ToArray(),
             PendingInput: pending,
             IsOver: _isOver,
-            WinningTeam: _winningTeam
+            WinningTeam: _winningTeam,
+            Round: _round
         );
     }
 
@@ -287,7 +288,8 @@ internal sealed class InteractiveBattleSession
                     _hp[target.Id] = Math.Min(maxHp, _hp[target.Id] + amount);
                     produced.Add(AddEvent(actor.Id,
                         $"{actor.Name} heals {target.Name} for {healed} HP.",
-                        evType, target.Id, healed));
+                        evType, target.Id, healed,
+                        skillId: skill.Id));
                 }
                 else
                 {
@@ -298,7 +300,9 @@ internal sealed class InteractiveBattleSession
                         skill.IsAoe
                             ? $"  \u2192 {target.Name} takes {hitData.FinalDamage} damage{hitLabel}."
                             : $"{actor.Name} uses {skill.Name} on {target.Name} for {hitData.FinalDamage} damage{hitLabel}.",
-                        evType, target.Id, hitData.FinalDamage));
+                        evType, target.Id, hitData.FinalDamage,
+                        skillId: skill.Id, damageType: skill.DamageType,
+                        hitIndex: i, totalHits: effectiveHits));
 
                     // Focus: actor gains 10 per offensive hit; target loses 10 per incoming hit
                     if (actor.HasTrait(BattleTrait.Focus))
@@ -388,9 +392,11 @@ internal sealed class InteractiveBattleSession
         return 0;
     }
 
-    private BattleEvent AddEvent(string actorId, string description, string type, string? targetId = null, int value = 0)
+    private BattleEvent AddEvent(string actorId, string description, string type,
+        string? targetId = null, int value = 0,
+        string? skillId = null, DamageType? damageType = null, int hitIndex = 0, int totalHits = 1)
     {
-        var ev = new BattleEvent(actorId, description, type, targetId, value);
+        var ev = new BattleEvent(actorId, description, type, targetId, value, skillId, damageType, hitIndex, totalHits);
         _log.Add(ev);
         return ev;
     }

@@ -90,6 +90,7 @@
         </section>
 
         <section class="current-event @evType">
+            <span class="round-badge">R@_view.Round</span>
             @(lastEv?.Description ?? "Battle begins!")
         </section>
 
@@ -183,11 +184,19 @@
             {
                 var ev  = _view.FullLog[i];
                 bool isLast = i == _view.FullLog.Count - 1;
+                bool isNew  = i >= _lastActionEventStart;
                 int  idx = i;
-                <div class="event-entry @ev.Type @(isLast ? "event-current" : "")"
+                <div class="event-entry @ev.Type @(isNew ? "event-new" : "") @(isLast ? "event-current" : "")"
                      title="@(!_autoMode ? "Click to undo to this point" : "")"
                      @onclick="() => UndoToEvent(idx)">
                     @ev.Description
+                    @if (ev.DamageType.HasValue || ev.TotalHits > 1)
+                    {
+                        <span class="ev-meta">
+                            @if (ev.DamageType.HasValue) { <span class="info-badge @DmgTypeCss(ev.DamageType.Value) ev-meta-badge">@ev.DamageType</span> }
+                            @if (ev.TotalHits > 1) { <span class="ev-hit">@(ev.HitIndex + 1)/@ev.TotalHits</span> }
+                        </span>
+                    }
                 </div>
             }
         </section>
@@ -254,6 +263,13 @@
                 var s = _result.Snapshots[i];
                 <div class="event-entry @(idx == _step ? "event-current" : "") @s.Event.Type" @onclick="() => _step = idx">
                     <span class="event-num">@(i + 1).</span> @s.Event.Description
+                    @if (s.Event.DamageType.HasValue || s.Event.TotalHits > 1)
+                    {
+                        <span class="ev-meta">
+                            @if (s.Event.DamageType.HasValue) { <span class="info-badge @DmgTypeCss(s.Event.DamageType.Value) ev-meta-badge">@s.Event.DamageType</span> }
+                            @if (s.Event.TotalHits > 1) { <span class="ev-hit">@(s.Event.HitIndex + 1)/@s.Event.TotalHits</span> }
+                        </span>
+                    }
                 </div>
             }
         </section>
@@ -362,6 +378,8 @@
     private string? _pendingAction;   // skill ID selected, waiting for target
     private bool _autoMode;
     private int _autoDelay = 1750;
+    // Index into FullLog where the last player action's events begin — used to highlight new events.
+    private int _lastActionEventStart;
 
     //  Command history (for undo) 
     private record CommandRecord(BattleCommand Cmd, int LogCountBefore);
@@ -448,6 +466,7 @@
         if (_engine is null) return;
         var cmd = new PlayerActionCommand(skillId, null);
         _commandHistory.Add(new CommandRecord(cmd, _view!.FullLog.Count));
+        _lastActionEventStart = _view!.FullLog.Count;
         var result = _engine.TryExecute(cmd);
         _view = result.View;
         SpawnFloats(result.Events);
@@ -460,6 +479,7 @@
         if (_engine is null || _pendingAction is null) return;
         var cmd = new PlayerActionCommand(_pendingAction, targetId);
         _commandHistory.Add(new CommandRecord(cmd, _view!.FullLog.Count));
+        _lastActionEventStart = _view!.FullLog.Count;
         var result = _engine.TryExecute(cmd);
         _view = result.View;
         SpawnFloats(result.Events);
@@ -514,6 +534,7 @@
         _engine         = newEngine;
         _view           = currentView;
         _commandHistory = _commandHistory.Take(actionsToReplay).ToList();
+        _lastActionEventStart = 0;
         _floats.Clear();
         SelectDefaultSkill();
     }
@@ -547,7 +568,8 @@
         foreach (var ev in events)
         {
             if (ev.TargetId is null || ev.Value <= 0) continue;
-            bool isHeal = ev.Type == "skill" && ev.Description.Contains("heal", StringComparison.OrdinalIgnoreCase);
+            // Heal: has a skillId but no damage type. Damage: has both.
+            bool isHeal = ev.SkillId != null && ev.DamageType == null;
             int offset  = 20 + (_floatKey % 5) * 12;   // spread horizontally so multi-hits don't stack
             _floats.Add(new FloatNumber(ev.TargetId, ev.Value, isHeal, offset, _floatKey++));
         }
@@ -633,6 +655,12 @@
             {
                 int barPct = bar.Value > 0 ? st.GetBar(bar.Key) * 100 / bar.Value : 0;
                 <div class="bar-wrap"><div class="@(bar.Key)-bar" style="width:@barPct%"></div></div>
+            }
+            @if (st.StatusEffects is { Count: > 0 })
+            {
+                <div class="status-effects">
+                    @foreach (var eff in st.StatusEffects) { <span class="status-badge">@eff</span> }
+                </div>
             }
             <div class="stat-text">@st.CurrentHp/@u.MaxHp HP</div>
         </div>

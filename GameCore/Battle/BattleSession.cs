@@ -232,7 +232,8 @@ public sealed class BattleSession : IBattleEngine
             PendingInput: inputView,
             FullLog: response.FullLog,
             IsOver: response.IsOver,
-            WinningTeam: response.WinningTeam
+            WinningTeam: response.WinningTeam,
+            Round: response.Round
         );
     }
 
