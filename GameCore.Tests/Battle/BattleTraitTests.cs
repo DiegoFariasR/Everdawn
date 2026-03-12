@@ -33,28 +33,28 @@ public class BattleTraitTests
     public void MagicUser_MaxMp_IsDerivedFromWis()
     {
         var unit = MakeUnit(wis: 100, traits: [BattleTrait.MagicUser]);
-        Assert.Equal(1000, unit.MaxMp);
+        Assert.Equal(1000, unit.MaxBars.TryGetValue("mp", out int v) ? v : 0);
     }
 
     [Fact]
     public void MagicUser_MaxMp_IgnoresMaxMpOverride()
     {
         var unit = MakeUnit(wis: 100, maxMpOverride: 999, traits: [BattleTrait.MagicUser]);
-        Assert.Equal(1000, unit.MaxMp);  // WIS * 10, not the override
+        Assert.Equal(1000, unit.MaxBars.TryGetValue("mp", out int v) ? v : 0);  // WIS * 10, not the override
     }
 
     [Fact]
     public void NoTrait_MaxMp_UsesMaxMpOverride()
     {
         var unit = MakeUnit(wis: 100, maxMpOverride: 50, traits: null);
-        Assert.Equal(50, unit.MaxMp);
+        Assert.Equal(50, unit.MaxBars.TryGetValue("mp", out int v) ? v : 0);
     }
 
     [Fact]
     public void NoTrait_NoOverride_MaxMpIsZero()
     {
         var unit = MakeUnit(wis: 100, traits: null);
-        Assert.Equal(0, unit.MaxMp);
+        Assert.False(unit.MaxBars.ContainsKey("mp"));
     }
 
     // ── Sample scenario units ─────────────────────────────────────────────
@@ -63,14 +63,14 @@ public class BattleTraitTests
     public void Mage_WithMagicUserTrait_HasPositiveMaxMp()
     {
         var mage = MakeUnit(wis: 110, traits: [BattleTrait.MagicUser]);
-        Assert.Equal(1100, mage.MaxMp);
+        Assert.Equal(1100, mage.MaxBars.TryGetValue("mp", out int v) ? v : 0);
     }
 
     [Fact]
     public void Necromancer_WithMagicUserTrait_HasPositiveMaxMp()
     {
         var necro = MakeUnit(wis: 105, traits: [BattleTrait.MagicUser]);
-        Assert.Equal(1050, necro.MaxMp);
+        Assert.Equal(1050, necro.MaxBars.TryGetValue("mp", out int v) ? v : 0);
     }
     // ── Multiple traits ────────────────────────────────────────────────────
 
@@ -87,9 +87,9 @@ public class BattleTraitTests
     {
         // MagicUser → MaxMp = WIS × 10. Focus → MaxFocus = 100, InitialFocus = 50.
         var unit = MakeUnit(wis: 100, traits: [BattleTrait.MagicUser, BattleTrait.Focus]);
-        Assert.Equal(1000, unit.MaxMp);
-        Assert.Equal(100, unit.MaxFocus);
-        Assert.Equal(50, unit.InitialFocus);
+        Assert.Equal(1000, unit.MaxBars.TryGetValue("mp", out int mp) ? mp : 0);
+        Assert.Equal(100, unit.MaxBars.TryGetValue("focus", out int maxF) ? maxF : 0);
+        Assert.Equal(50, unit.InitialBars.TryGetValue("focus", out int initF) ? initF : 0);
     }
 
     [Fact]
@@ -114,9 +114,9 @@ public class BattleTraitTests
         session.Start(setup);
         var state = session.GetView().Units.First(u => u.UnitId == "hero");
         // MagicUser → MaxMp = WIS × 10 = 1000; starts at full
-        Assert.Equal(1000, state.CurrentMp);
+        Assert.Equal(1000, state.GetBar("mp"));
         // Focus → starts at 50
-        Assert.Equal(50, state.CurrentFocus);
+        Assert.Equal(50, state.GetBar("focus"));
     }
     // ── Helpers ───────────────────────────────────────────────────────────
 

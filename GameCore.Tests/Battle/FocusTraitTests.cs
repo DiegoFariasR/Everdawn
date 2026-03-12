@@ -10,28 +10,28 @@ public class FocusTraitTests
     public void Focus_MaxFocus_IsOneHundred()
     {
         var unit = MakeUnit(traits: [BattleTrait.Focus]);
-        Assert.Equal(100, unit.MaxFocus);
+        Assert.Equal(100, unit.MaxBars.TryGetValue("focus", out int v) ? v : 0);
     }
 
     [Fact]
     public void Focus_InitialFocus_IsFifty()
     {
         var unit = MakeUnit(traits: [BattleTrait.Focus]);
-        Assert.Equal(50, unit.InitialFocus);
+        Assert.Equal(50, unit.InitialBars.TryGetValue("focus", out int v) ? v : 0);
     }
 
     [Fact]
     public void NoTrait_MaxFocus_IsZero()
     {
         var unit = MakeUnit(traits: null);
-        Assert.Equal(0, unit.MaxFocus);
+        Assert.False(unit.MaxBars.ContainsKey("focus"));
     }
 
     [Fact]
     public void NoTrait_InitialFocus_IsZero()
     {
         var unit = MakeUnit(traits: null);
-        Assert.Equal(0, unit.InitialFocus);
+        Assert.False(unit.InitialBars.ContainsKey("focus"));
     }
 
     // ── Focus starts at 50 ────────────────────────────────────────────────
@@ -42,7 +42,7 @@ public class FocusTraitTests
         // Player goes first (Agi 50 > enemy Agi 1) — enemy never acts before the initial view.
         var session = StartSimpleFocusBattle(playerAgi: 50);
         var focusUnit = session.GetView().Units.First(u => u.UnitId == "focus-unit");
-        Assert.Equal(50, focusUnit.CurrentFocus);
+        Assert.Equal(50, focusUnit.GetBar("focus"));
     }
 
     // ── Focus gain per hit ────────────────────────────────────────────────
@@ -56,7 +56,7 @@ public class FocusTraitTests
         session.TryExecute(new PlayerActionCommand("basic", "target"));
         var focusUnit = session.GetView().Units.First(u => u.UnitId == "focus-unit");
         // Started at 50, gained 10 from 1 hit, no retaliation (enemy dead) → 60
-        Assert.Equal(60, focusUnit.CurrentFocus);
+        Assert.Equal(60, focusUnit.GetBar("focus"));
     }
 
     [Fact]
@@ -69,7 +69,7 @@ public class FocusTraitTests
         session.TryExecute(new PlayerActionCommand("basic", "target"));
         var focusUnit = session.GetView().Units.First(u => u.UnitId == "focus-unit");
         // Started at 50, gained 20 from 2 hits, no retaliation (enemy dead) → 70
-        Assert.Equal(70, focusUnit.CurrentFocus);
+        Assert.Equal(70, focusUnit.GetBar("focus"));
     }
 
     // ── Focus empowerment ─────────────────────────────────────────────────
@@ -90,7 +90,7 @@ public class FocusTraitTests
         var session = StartFocusBattleAt100();
         session.TryExecute(new PlayerActionCommand("special", "target"));
         var focusUnit = session.GetView().Units.First(u => u.UnitId == "focus-unit");
-        Assert.Equal(60, focusUnit.CurrentFocus);
+        Assert.Equal(60, focusUnit.GetBar("focus"));
     }
 
     [Fact]
@@ -102,7 +102,7 @@ public class FocusTraitTests
         Assert.DoesNotContain(result.Events, e => e.Description.Contains("empowers"));
         // Focus stays at 100 (was 100, +10 from hit but capped at 100).
         var focusUnit = session.GetView().Units.First(u => u.UnitId == "focus-unit");
-        Assert.Equal(100, focusUnit.CurrentFocus);
+        Assert.Equal(100, focusUnit.GetBar("focus"));
     }
 
     // ── Focus loss on incoming damage ─────────────────────────────────────
@@ -131,7 +131,7 @@ public class FocusTraitTests
         session.Start(setup);
         // Enemy acted first → player focus: 50 → 40.
         var focusUnit = session.GetView().Units.First(u => u.UnitId == "focus-unit");
-        Assert.Equal(40, focusUnit.CurrentFocus);
+        Assert.Equal(40, focusUnit.GetBar("focus"));
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────
@@ -197,8 +197,8 @@ public class FocusTraitTests
         // Inject full-focus state: player at max HP with focus 100, enemy at max HP.
         UnitState[] state =
         [
-            new("focus-unit", playerStr * 100, 0, true, 100),
-            new("target",     enemyStr  * 100, 0, true, 0),
+            new("focus-unit", playerStr * 100, true, new Dictionary<string, int> { ["focus"] = 100 }),
+            new("target",     enemyStr  * 100, true, null),
         ];
         // Resume as if the enemy (last in turn order by Agi) just acted → player goes next.
         session.TryExecute(new ResumeFromSnapshotCommand(state, LastActorId: "target", AtStep: 0));

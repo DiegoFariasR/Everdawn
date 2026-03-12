@@ -50,18 +50,36 @@ public record BattleUnit(
     /// <summary>Hits per action: 1 base + 1 per 100 AGI.</summary>
     public int HitCount => 1 + Agi / 100;
     /// <summary>
-    /// Max mana. MagicUser trait derives this from WIS (WIS × 10).
-    /// Use MaxMpOverride for a manual value when no trait applies.
+    /// All secondary bars this unit has (MP, Focus, Fury, …), keyed by bar name.
+    /// HP is excluded — it is always tracked separately via <see cref="MaxHp"/>.
+    /// Adding a new bar type only requires updating this property.
     /// </summary>
-    public int MaxMp => HasTrait(BattleTrait.MagicUser) ? Wis * 10 : MaxMpOverride;
-    /// <summary>Max focus. Fixed at 100 for Focus-trait units, 0 otherwise.</summary>
-    public int MaxFocus => HasTrait(BattleTrait.Focus) ? 100 : 0;
-    /// <summary>Starting focus. Fixed at 50 for Focus-trait units, 0 otherwise.</summary>
-    public int InitialFocus => HasTrait(BattleTrait.Focus) ? 50 : 0;
-    /// <summary>Max fury. Fixed at 100 for Fury-trait units, 0 otherwise.</summary>
-    public int MaxFury => HasTrait(BattleTrait.Fury) ? 100 : 0;
-    /// <summary>Starting fury. Always 0 — fury must be earned in battle.</summary>
-    public int InitialFury => 0;
+    public IReadOnlyDictionary<string, int> MaxBars
+    {
+        get
+        {
+            var d = new Dictionary<string, int>();
+            int mp = HasTrait(BattleTrait.MagicUser) ? Wis * 10 : MaxMpOverride;
+            if (mp > 0) d["mp"] = mp;
+            if (HasTrait(BattleTrait.Focus)) d["focus"] = 100;
+            if (HasTrait(BattleTrait.Fury)) d["fury"] = 100;
+            return d;
+        }
+    }
+
+    /// <summary>Starting values for each secondary bar (same keys as <see cref="MaxBars"/>).</summary>
+    public IReadOnlyDictionary<string, int> InitialBars
+    {
+        get
+        {
+            var d = new Dictionary<string, int>();
+            int mp = HasTrait(BattleTrait.MagicUser) ? Wis * 10 : MaxMpOverride;
+            if (mp > 0) d["mp"] = mp;                      // mana starts full
+            if (HasTrait(BattleTrait.Focus)) d["focus"] = 50;  // focus starts half
+            if (HasTrait(BattleTrait.Fury)) d["fury"] = 0;  // fury starts empty
+            return d;
+        }
+    }
 
     /// <summary>
     /// The unit's skill list. Always has at least one skill (the free basic action).

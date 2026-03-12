@@ -6,7 +6,8 @@ internal sealed class InteractiveBattleSession
     private readonly List<BattleUnit> _allUnits;
     private readonly List<BattleUnit> _turnOrder;
     private readonly Dictionary<string, int> _hp;
-    private readonly Dictionary<string, int> _mp;
+    // _bars[unitId][barKey] = current value — unified store for MP, Focus, Fury, and any future bars.
+    private readonly Dictionary<string, Dictionary<string, int>> _bars;
     private readonly Random _rng;
     private readonly List<BattleEvent> _log = new List<BattleEvent>();
 
@@ -14,8 +15,6 @@ internal sealed class InteractiveBattleSession
     private int _round = 1;
     private bool _started;
     private readonly Dictionary<string, int> _skillCooldowns = new();
-    private readonly Dictionary<string, int> _focus = new();
-    private readonly Dictionary<string, int> _fury = new();
     private bool _isOver;
     private string? _winningTeam;
 
@@ -24,19 +23,13 @@ internal sealed class InteractiveBattleSession
         _allUnits = new List<BattleUnit>(setup.PlayerUnits.Concat(setup.EnemyUnits));
         _turnOrder = new List<BattleUnit>(_allUnits.OrderByDescending(u => u.Initiative));
         _hp = _allUnits.ToDictionary(u => u.Id, u => u.MaxHp);
-        _mp = _allUnits.ToDictionary(u => u.Id, u => u.MaxMp);
+        _bars = _allUnits.ToDictionary(u => u.Id, u => new Dictionary<string, int>(u.InitialBars));
         _rng = new Random(seed);
         // Apply initial cooldowns (Ultimate modifier auto-supplies 1 round if not set higher)
         foreach (var u in _allUnits)
             foreach (var s in u.ResolvedSkills)
                 if (s.EffectiveInitialCooldown > 0)
                     _skillCooldowns[s.Id] = s.EffectiveInitialCooldown;
-        // Initialize focus for Focus-trait units
-        foreach (var u in _allUnits.Where(u => u.HasTrait(BattleTrait.Focus)))
-            _focus[u.Id] = u.InitialFocus;
-        // Initialize fury for Fury-trait units (starts at 0)
-        foreach (var u in _allUnits.Where(u => u.HasTrait(BattleTrait.Fury)))
-            _fury[u.Id] = u.InitialFury;
     }
 
     /// <summary>
@@ -72,9 +65,10 @@ internal sealed class InteractiveBattleSession
         foreach (var us in r.State)
         {
             if (_hp.ContainsKey(us.UnitId)) _hp[us.UnitId] = us.CurrentHp;
-            if (_mp.ContainsKey(us.UnitId)) _mp[us.UnitId] = us.CurrentMp;
-            if (_focus.ContainsKey(us.UnitId)) _focus[us.UnitId] = us.CurrentFocus;
-            if (_fury.ContainsKey(us.UnitId)) _fury[us.UnitId] = us.CurrentFury;
+            if (us.Bars != null && _bars.ContainsKey(us.UnitId))
+                foreach (var kvp in us.Bars)
+                    if (_bars[us.UnitId].ContainsKey(kvp.Key))
+                        _bars[us.UnitId][kvp.Key] = kvp.Value;
         }
         _turnIndex = NextAliveIndexAfter(r.LastActorId);
 
@@ -126,7 +120,7 @@ internal sealed class InteractiveBattleSession
             throw new InvalidOperationException("Not a player turn.");
 
         var actor = _turnOrder[_turnIndex];
-        var skill = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost && GetCooldown(s.Id) <= 0).Last();
+        var skill = actor.ResolvedSkills.Where(s => GetBar(actor.Id, "mp") >= s.MpCost && GetCooldown(s.Id) <= 0).Last();
         var targets = ResolveAutoTargets(actor, skill);
         if (targets.Count == 0) { CheckEnd(); return BuildResponse(Array.Empty<BattleEvent>()); }
 
@@ -142,7 +136,7 @@ internal sealed class InteractiveBattleSession
         if (_isOver) return BuildResponse(Array.Empty<BattleEvent>());
 
         var actor = _turnOrder[_turnIndex];
-        var skill = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost && GetCooldown(s.Id) <= 0).Last();
+        var skill = actor.ResolvedSkills.Where(s => GetBar(actor.Id, "mp") >= s.MpCost && GetCooldown(s.Id) <= 0).Last();
         var targets = ResolveAutoTargets(actor, skill);
         if (targets.Count == 0) { CheckEnd(); return BuildResponse(Array.Empty<BattleEvent>()); }
 
@@ -163,7 +157,7 @@ internal sealed class InteractiveBattleSession
             pending = new BattlePendingInput(
                 Actor: actor,
                 Skills: skills,
-                AvailableSkillIds: skills.Where(s => _mp[actor.Id] >= s.MpCost && GetCooldown(s.Id) <= 0).Select(s => s.Id).ToArray(),
+                AvailableSkillIds: skills.Where(s => GetBar(actor.Id, "mp") >= s.MpCost && GetCooldown(s.Id) <= 0).Select(s => s.Id).ToArray(),
                 EnemyTargets: _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToArray(),
                 AllyTargets: _allUnits.Where(u => u.Team == actor.Team && _hp[u.Id] > 0).ToArray(),
                 SkillCooldowns: skills.Where(s => GetCooldown(s.Id) > 0)
@@ -174,7 +168,8 @@ internal sealed class InteractiveBattleSession
         return new BattleResponse(
             NewEvents: newEvents,
             FullLog: _log,
-            State: _allUnits.Select(u => new UnitState(u.Id, _hp[u.Id], _mp[u.Id], _hp[u.Id] > 0, GetFocus(u.Id), GetFury(u.Id))).ToArray(),
+            State: _allUnits.Select(u => new UnitState(u.Id, _hp[u.Id], _hp[u.Id] > 0,
+                _bars[u.Id].Count > 0 ? new Dictionary<string, int>(_bars[u.Id]) : null)).ToArray(),
             PendingInput: pending,
             IsOver: _isOver,
             WinningTeam: _winningTeam
@@ -190,7 +185,7 @@ internal sealed class InteractiveBattleSession
         while (!_isOver && _turnOrder[_turnIndex].Team != "player")
         {
             var actor = _turnOrder[_turnIndex];
-            var skill = actor.ResolvedSkills.Where(s => _mp[actor.Id] >= s.MpCost && GetCooldown(s.Id) <= 0).Last();
+            var skill = actor.ResolvedSkills.Where(s => GetBar(actor.Id, "mp") >= s.MpCost && GetCooldown(s.Id) <= 0).Last();
             var targets = ResolveAutoTargets(actor, skill);
             if (targets.Count == 0) { CheckEnd(); break; }
 
@@ -231,11 +226,8 @@ internal sealed class InteractiveBattleSession
     private int GetCooldown(string skillId) =>
         _skillCooldowns.TryGetValue(skillId, out int cd) ? cd : 0;
 
-    private int GetFocus(string unitId) =>
-        _focus.TryGetValue(unitId, out int f) ? f : 0;
-
-    private int GetFury(string unitId) =>
-        _fury.TryGetValue(unitId, out int f) ? f : 0;
+    private int GetBar(string unitId, string key) =>
+        _bars[unitId].TryGetValue(key, out int v) ? v : 0;
 
     private IReadOnlyList<BattleEvent> ExecuteAction(BattleUnit actor, List<BattleUnit> targets, BattleSkill skill)
     {
@@ -247,7 +239,8 @@ internal sealed class InteractiveBattleSession
                 _skillCooldowns[s.Id] = cd - 1;
 
         // Consume MP once (skill[0] always has MpCost == 0)
-        _mp[actor.Id] = Math.Max(0, _mp[actor.Id] - skill.MpCost);
+        if (_bars[actor.Id].ContainsKey("mp"))
+            _bars[actor.Id]["mp"] = Math.Max(0, _bars[actor.Id]["mp"] - skill.MpCost);
 
         // Determine event type from skill modifier
         string evType = skill.IsHeal ? "skill"
@@ -255,22 +248,22 @@ internal sealed class InteractiveBattleSession
 
         // Focus empowerment: fires when focus is full and the actor uses a non-basic offensive skill
         bool isFocusEmpowered = actor.HasTrait(BattleTrait.Focus)
-            && GetFocus(actor.Id) == 100
+            && GetBar(actor.Id, "focus") == 100
             && !skill.IsBasic
             && !skill.IsHeal;
         if (isFocusEmpowered)
         {
-            _focus[actor.Id] = 50;
+            _bars[actor.Id]["focus"] = 50;
             produced.Add(AddEvent(actor.Id, $"{actor.Name}'s Focus empowers their attack!", "skill"));
         }
         // Fury empowerment: fires when fury is full and the actor uses a non-basic offensive skill
         bool isFuryEmpowered = actor.HasTrait(BattleTrait.Fury)
-            && GetFury(actor.Id) == 100
+            && GetBar(actor.Id, "fury") == 100
             && !skill.IsBasic
             && !skill.IsHeal;
         if (isFuryEmpowered)
         {
-            _fury[actor.Id] = 0;
+            _bars[actor.Id]["fury"] = 0;
             produced.Add(AddEvent(actor.Id, $"{actor.Name}'s Fury empowers their attack!", "skill"));
         }
         double empowerMult = 1.0;
@@ -309,12 +302,12 @@ internal sealed class InteractiveBattleSession
 
                     // Focus: actor gains 10 per offensive hit; target loses 10 per incoming hit
                     if (actor.HasTrait(BattleTrait.Focus))
-                        _focus[actor.Id] = Math.Min(100, GetFocus(actor.Id) + 10);
+                        _bars[actor.Id]["focus"] = Math.Min(100, GetBar(actor.Id, "focus") + 10);
                     if (target.HasTrait(BattleTrait.Focus))
-                        _focus[target.Id] = Math.Max(0, GetFocus(target.Id) - 10);
+                        _bars[target.Id]["focus"] = Math.Max(0, GetBar(target.Id, "focus") - 10);
                     // Fury: target gains 10–20 per incoming hit
                     if (target.HasTrait(BattleTrait.Fury))
-                        _fury[target.Id] = Math.Min(100, GetFury(target.Id) + _rng.Next(10, 21));
+                        _bars[target.Id]["fury"] = Math.Min(100, GetBar(target.Id, "fury") + _rng.Next(10, 21));
 
                     if (_hp[target.Id] <= 0)
                     {
@@ -330,7 +323,7 @@ internal sealed class InteractiveBattleSession
             _skillCooldowns[skill.Id] = skill.Cooldown;
         // Fury: actor gains 10–50 per action (excludes heals)
         if (actor.HasTrait(BattleTrait.Fury) && !skill.IsHeal)
-            _fury[actor.Id] = Math.Min(100, GetFury(actor.Id) + _rng.Next(10, 51));
+            _bars[actor.Id]["fury"] = Math.Min(100, GetBar(actor.Id, "fury") + _rng.Next(10, 51));
 
         CheckEnd();
         return produced;
@@ -356,13 +349,14 @@ internal sealed class InteractiveBattleSession
         _round++;
         var events = new List<BattleEvent>();
         events.Add(AddEvent("system", $"\u2500\u2500 Round {_round} \u2500\u2500", "round"));
-        foreach (var u in _allUnits.Where(u => u.MaxMp > 0 && _hp[u.Id] > 0))
+        foreach (var u in _allUnits.Where(u => _bars[u.Id].ContainsKey("mp") && _hp[u.Id] > 0))
         {
-            int regen = Math.Max(1, u.MaxMp / 5);  // 20 % of MaxMp
-            int gained = Math.Min(regen, u.MaxMp - _mp[u.Id]);
+            int maxMp = u.MaxBars["mp"];
+            int regen = Math.Max(1, maxMp / 5);  // 20 % of MaxMp
+            int gained = Math.Min(regen, maxMp - _bars[u.Id]["mp"]);
             if (gained > 0)
             {
-                _mp[u.Id] += gained;
+                _bars[u.Id]["mp"] += gained;
                 events.Add(AddEvent(u.Id, $"{u.Name} recovers {gained} MP.", "round"));
             }
         }

@@ -13,18 +13,15 @@ public static class BattleEngine
         var rng = new Random(seed);
         var allUnits = setup.PlayerUnits.Concat(setup.EnemyUnits).ToList();
         var hp = allUnits.ToDictionary(u => u.Id, u => u.MaxHp);
-        var mp = allUnits.ToDictionary(u => u.Id, u => u.MaxMp);
-        var focus = allUnits
-            .Where(u => u.HasTrait(BattleTrait.Focus))
-            .ToDictionary(u => u.Id, u => u.InitialFocus);
-        var fury = allUnits
-            .Where(u => u.HasTrait(BattleTrait.Fury))
-            .ToDictionary(u => u.Id, u => u.InitialFury);
-        int GetFocus(string id) => focus.TryGetValue(id, out int f) ? f : 0;
-        int GetFury(string id) => fury.TryGetValue(id, out int f) ? f : 0;
+        // bars[unitId][barKey] = current value — replaces individual mp/focus/fury dicts
+        var bars = allUnits.ToDictionary(
+            u => u.Id,
+            u => new Dictionary<string, int>(u.InitialBars));
+        int GetBar(string id, string key) => bars[id].TryGetValue(key, out int v) ? v : 0;
 
         IReadOnlyList<UnitState> TakeSnapshot() =>
-            allUnits.Select(u => new UnitState(u.Id, hp[u.Id], mp[u.Id], hp[u.Id] > 0, GetFocus(u.Id), GetFury(u.Id))).ToArray();
+            allUnits.Select(u => new UnitState(u.Id, hp[u.Id], hp[u.Id] > 0,
+                bars[u.Id].Count > 0 ? new Dictionary<string, int>(bars[u.Id]) : null)).ToArray();
 
         var snapshots = new List<BattleSnapshot>();
         int step = 0;
@@ -53,14 +50,14 @@ public static class BattleEngine
                 int damage = hitData.FinalDamage;
                 hp[target.Id] = Math.Max(0, hp[target.Id] - damage);
                 if (actor.HasTrait(BattleTrait.Focus))
-                    focus[actor.Id] = Math.Min(100, GetFocus(actor.Id) + 10);
+                    bars[actor.Id]["focus"] = Math.Min(100, GetBar(actor.Id, "focus") + 10);
                 if (target.HasTrait(BattleTrait.Focus))
-                    focus[target.Id] = Math.Max(0, GetFocus(target.Id) - 10);
+                    bars[target.Id]["focus"] = Math.Max(0, GetBar(target.Id, "focus") - 10);
                 // Fury: actor gains 10–50 per action; target gains 10–20 per hit received
                 if (actor.HasTrait(BattleTrait.Fury))
-                    fury[actor.Id] = Math.Min(100, GetFury(actor.Id) + rng.Next(10, 51));
+                    bars[actor.Id]["fury"] = Math.Min(100, GetBar(actor.Id, "fury") + rng.Next(10, 51));
                 if (target.HasTrait(BattleTrait.Fury))
-                    fury[target.Id] = Math.Min(100, GetFury(target.Id) + rng.Next(10, 21));
+                    bars[target.Id]["fury"] = Math.Min(100, GetBar(target.Id, "fury") + rng.Next(10, 21));
 
                 snapshots.Add(new BattleSnapshot
                 {
