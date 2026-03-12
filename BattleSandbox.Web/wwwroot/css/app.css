@@ -609,3 +609,148 @@ html, body {
     content: var(--blazor-load-percentage-text, "Loading");
 }
 
+/* ── Info panel (unit details) ────────────────────── */
+.info-toggle-row {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-info-toggle {
+    padding: 0.3rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #8899aa;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    cursor: pointer;
+    min-height: 32px;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.btn-info-toggle:active { background: #21262d; }
+.btn-info-on {
+    color: #ffd700;
+    border-color: #554400;
+    background: #1e1800;
+}
+
+.info-panel {
+    background: #111820;
+    border: 1px solid #21262d;
+    border-radius: 8px;
+    padding: 0.625rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.info-team-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #667788;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 0.25rem;
+}
+.info-team-enemies { margin-top: 0.5rem; }
+
+.info-unit {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 6px;
+    padding: 0.45rem 0.5rem;
+    margin-bottom: 0.3rem;
+}
+.info-unit:last-child { margin-bottom: 0; }
+
+.info-unit-name {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #cdd6e0;
+    margin-bottom: 0.35rem;
+}
+
+.info-attrs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px 4px;
+    margin-bottom: 0.35rem;
+}
+
+.info-attr {
+    display: flex;
+    gap: 0.2rem;
+    align-items: baseline;
+}
+
+.info-attr-key {
+    font-size: 0.58rem;
+    font-weight: 600;
+    color: #556677;
+    min-width: 2.6rem;
+}
+
+.info-attr-val {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #aabbcc;
+}
+
+.info-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-bottom: 0.3rem;
+}
+
+.info-badge {
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    border-radius: 3px;
+    padding: 1px 4px;
+    border: 1px solid;
+    text-transform: uppercase;
+}
+
+.badge-trait  { color: #88ddaa; border-color: #1a4a2a; background: #0a1e14; }
+.badge-resist { color: #44bbff; border-color: #1a3a5a; background: #0a141e; }
+.badge-weak   { color: #ff8866; border-color: #5a2a1a; background: #1e0e0a; }
+.badge-basic  { color: #ffcc55; border-color: #554400; background: #1e1800; }
+.badge-ult    { color: #cc88ff; border-color: #441a5a; background: #12081e; }
+.badge-phys   { color: #ff9955; border-color: #5a3010; background: #1a0e00; }
+.badge-mag    { color: #88aaff; border-color: #1a2a6a; background: #080e1e; }
+.badge-aoe    { color: #ff9f1c; border-color: #5a3a00; background: #1a0f00; }
+
+.info-skills {
+    border-top: 1px solid #21262d;
+    padding-top: 0.3rem;
+    margin-top: 0.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.info-skill-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px;
+}
+
+.info-skill-name {
+    font-size: 0.67rem;
+    font-weight: 700;
+    color: #cdd6e0;
+    min-width: 4.5rem;
+    margin-right: 1px;
+}
+
+.info-skill-stat {
+    font-size: 0.58rem;
+    color: #8899aa;
+    background: #21262d;
+    border-radius: 3px;
+    padding: 1px 4px;
+}
+

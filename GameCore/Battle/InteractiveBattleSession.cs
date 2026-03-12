@@ -25,11 +25,11 @@ internal sealed class InteractiveBattleSession
         _hp = _allUnits.ToDictionary(u => u.Id, u => u.MaxHp);
         _mp = _allUnits.ToDictionary(u => u.Id, u => u.MaxMp);
         _rng = new Random(seed);
-        // Apply initial cooldowns
+        // Apply initial cooldowns (Ultimate modifier auto-supplies 1 round if not set higher)
         foreach (var u in _allUnits)
             foreach (var s in u.ResolvedSkills)
-                if (s.InitialCooldown > 0)
-                    _skillCooldowns[s.Id] = s.InitialCooldown;
+                if (s.EffectiveInitialCooldown > 0)
+                    _skillCooldowns[s.Id] = s.EffectiveInitialCooldown;
         // Initialize focus for Focus-trait units
         foreach (var u in _allUnits.Where(u => u.HasTrait(BattleTrait.Focus)))
             _focus[u.Id] = u.InitialFocus;
@@ -241,17 +241,14 @@ internal sealed class InteractiveBattleSession
         // Consume MP once (skill[0] always has MpCost == 0)
         _mp[actor.Id] = Math.Max(0, _mp[actor.Id] - skill.MpCost);
 
-        // Determine event type from skill index for CSS colouring
-        var skills = actor.ResolvedSkills;
-        int skillIdx = skills.ToList().IndexOf(skill);
-        if (skillIdx < 0) skillIdx = 0;
+        // Determine event type from skill modifier
         string evType = skill.IsHeal ? "skill"
-                       : skillIdx == 0 ? "attack" : skillIdx == 1 ? "skill" : "soulburn";
+                       : skill.IsBasic ? "attack" : skill.IsUltimate ? "soulburn" : "skill";
 
         // Focus empowerment: fires when focus is full and the actor uses a non-basic offensive skill
         bool isFocusEmpowered = actor.HasTrait(BattleTrait.Focus)
             && GetFocus(actor.Id) == 100
-            && skillIdx > 0
+            && !skill.IsBasic
             && !skill.IsHeal;
         if (isFocusEmpowered)
         {

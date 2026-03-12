@@ -65,5 +65,5 @@ public record BattleUnit(
     /// </summary>
     public IReadOnlyList<BattleSkill> ResolvedSkills => Skills is { Count: > 0 }
         ? Skills
-        : new BattleSkill[] { new BattleSkill("attack", "Attack", MpCost: 0, Multiplier: 1.0) };
+        : new BattleSkill[] { new BattleSkill("attack", "Attack", MpCost: 0, Multiplier: 1.0, Modifiers: [SkillModifier.Basic]) };
 }
