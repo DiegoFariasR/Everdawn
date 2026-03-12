@@ -25,7 +25,11 @@ namespace GameCore.Battle
         /// <summary>Fixed base hit count (see <see cref="BattleSkill.NumberOfHits"/>).</summary>
         double NumberOfHits,
         /// <summary>Stat-based bonus to hit count (see <see cref="BattleSkill.HitsScaling"/>). Empty when not used.</summary>
-        IReadOnlyList<DamageScaling> HitsScaling
+        IReadOnlyList<DamageScaling> HitsScaling,
+        /// <summary>How the skill is delivered to its target.</summary>
+        SkillRange Range,
+        /// <summary>Ability category for silencing and UI tagging.</summary>
+        SkillCategory Category
     );
 
     /// <summary>

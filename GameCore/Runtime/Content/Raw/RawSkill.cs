@@ -45,6 +45,10 @@ namespace GameCore.Content.Raw
         /// Effective hits = floor(NumberOfHits + Σ(actor.GetStat(stat) × scale)), min 1.
         /// </summary>
         public List<RawDamageScaling> HitsScaling { get; set; } = new List<RawDamageScaling>();
+        /// <summary>How the skill is delivered: Melee, Ranged, or Self. Defaults to Melee.</summary>
+        public string Range { get; set; } = "Melee";
+        /// <summary>Ability category: Attack, Spell (can be silenced), or Passive. Defaults to Attack.</summary>
+        public string Category { get; set; } = "Attack";
         public bool IsAoe { get; set; }
         public int Cooldown { get; set; }
         public int InitialCooldown { get; set; }

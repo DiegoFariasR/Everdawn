@@ -53,11 +53,6 @@
 - [ ] Spell (can be silenced)
 - [ ] Passive
 
-### Ability Level
-- [ ] Basic
-- [ ] Base (no extra text)
-- [ ] Ultimate
-
 ## Open Questions
 
 ### Damage of multiple types/elements on the same attack

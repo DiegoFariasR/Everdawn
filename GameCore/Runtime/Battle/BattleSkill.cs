@@ -45,7 +45,11 @@ namespace GameCore.Battle
         /// Optional stat-based bonus to hit count. Effective hits = floor(NumberOfHits + Σ(stat × scale)), min 1.
         /// When empty and NumberOfHits == 1.0, the unit's HitCount (AGI-derived) is used instead.
         /// </summary>
-        IReadOnlyList<DamageScaling>? HitsScaling = null
+        IReadOnlyList<DamageScaling>? HitsScaling = null,
+        /// <summary>How the skill is delivered to its target.</summary>
+        SkillRange Range = SkillRange.Melee,
+        /// <summary>Ability category used for silencing and UI tagging.</summary>
+        SkillCategory Category = SkillCategory.Attack
     )
     {
         /// <summary>Returns true if this skill carries the given modifier (case-insensitive).</summary>
@@ -91,6 +95,7 @@ namespace GameCore.Battle
             if (HitsScaling != null)
                 foreach (var s in HitsScaling)
                     hits += actor.GetStat(s.Stat) * s.Scale;
+            hits = Math.Max(0.5, hits);
             return (int)(total * DamageMultiplier * hits);
         }
     }

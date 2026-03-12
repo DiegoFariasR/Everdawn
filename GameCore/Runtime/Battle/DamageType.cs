@@ -27,4 +27,23 @@ namespace GameCore.Battle
         Holy,
         Void,
     }
+
+    /// <summary>How a skill is delivered to its target.</summary>
+    public enum SkillRange
+    {
+        Melee,
+        Ranged,
+        Self,
+    }
+
+    /// <summary>
+    /// High-level ability category.
+    /// Drives silencing, UI tagging, and future mechanic hooks.
+    /// </summary>
+    public enum SkillCategory
+    {
+        Attack,
+        Spell,
+        Passive,
+    }
 }

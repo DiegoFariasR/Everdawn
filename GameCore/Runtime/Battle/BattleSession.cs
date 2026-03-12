@@ -254,6 +254,8 @@ namespace GameCore.Battle
                 s.PrimaryEffectType, s.IsBasic, s.IsUltimate, s.EffectiveInitialCooldown,
                 s.EstimateBaseDmg(actor),
                 s.NumberOfHits,
-                s.HitsScaling ?? System.Array.Empty<DamageScaling>());
+                s.HitsScaling ?? System.Array.Empty<DamageScaling>(),
+                s.Range,
+                s.Category);
     }
 }

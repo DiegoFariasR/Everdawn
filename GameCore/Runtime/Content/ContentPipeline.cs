@@ -192,7 +192,9 @@ namespace GameCore.Content
                 NumberOfHits: raw.NumberOfHits,
                 HitsScaling: raw.HitsScaling.Count == 0
                     ? null
-                    : raw.HitsScaling.Select(s => new DamageScaling(s.Stat, s.Scale)).ToArray<DamageScaling>());
+                    : raw.HitsScaling.Select(s => new DamageScaling(s.Stat, s.Scale)).ToArray<DamageScaling>(),
+                Range: Enum.Parse<SkillRange>(raw.Range, ignoreCase: true),
+                Category: Enum.Parse<SkillCategory>(raw.Category, ignoreCase: true));
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────
