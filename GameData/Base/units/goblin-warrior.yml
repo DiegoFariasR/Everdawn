@@ -1,0 +1,21 @@
+id: goblin-w
+name: Goblin Warrior
+level: 14
+str: 70
+wis: 0
+agi: 50
+traits: [Fury]
+skills:
+  - id: gw-slash
+    name: Slash
+    multiplier: 1.0
+    modifiers: [Basic]
+  - id: gw-warcry
+    name: War Cry
+    multiplier: 1.6
+    cooldown: 3
+  - id: gw-frenzy
+    name: Frenzy
+    multiplier: 2.4
+    cooldown: 3
+    modifiers: [Ultimate]

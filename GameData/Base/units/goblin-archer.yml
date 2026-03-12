@@ -1,0 +1,21 @@
+id: goblin-a
+name: Goblin Archer
+level: 14
+str: 55
+wis: 0
+agi: 100
+traits: [Focus]
+skills:
+  - id: ga-shot
+    name: Arrow Shot
+    multiplier: 1.0
+    modifiers: [Basic]
+  - id: ga-precise
+    name: Precise Shot
+    multiplier: 1.8
+    cooldown: 3
+  - id: ga-volley
+    name: Volley
+    multiplier: 2.2
+    cooldown: 3
+    modifiers: [Ultimate]

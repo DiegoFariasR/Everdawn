@@ -1,0 +1,25 @@
+id: mage
+name: Mage
+level: 12
+str: 62
+wis: 110
+agi: 70
+traits: [MagicUser]
+skills:
+  - id: mage-bolt
+    name: Magic Bolt
+    multiplier: 1.0
+    effectType: Void
+    modifiers: [Basic]
+  - id: mage-burst
+    name: Arcane Burst
+    multiplier: 1.6
+    cooldown: 3
+    effectType: Void
+  - id: mage-meteor
+    name: Meteor
+    multiplier: 2.0
+    isAoe: true
+    cooldown: 3
+    effectType: Void
+    modifiers: [Ultimate]

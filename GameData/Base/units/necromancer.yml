@@ -1,0 +1,24 @@
+id: necro
+name: Necromancer
+level: 15
+str: 80
+wis: 105
+agi: 65
+traits: [MagicUser]
+skills:
+  - id: necro-bolt
+    name: Dark Bolt
+    multiplier: 1.0
+    effectType: Void
+    modifiers: [Basic]
+  - id: necro-drain
+    name: Life Drain
+    multiplier: 1.8
+    cooldown: 3
+    effectType: Void
+  - id: necro-soul
+    name: Soul Siphon
+    multiplier: 3.0
+    cooldown: 3
+    effectType: Void
+    modifiers: [Ultimate]
