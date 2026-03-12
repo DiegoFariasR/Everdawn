@@ -8,7 +8,7 @@ namespace GameCore.Battle;
 public sealed record SkillView(
     string Id,
     string Name,
-    int MpCost,
+    int Cost,
     double Multiplier,
     bool IsAoe,
     bool IsHeal,

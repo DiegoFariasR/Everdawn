@@ -1,0 +1,16 @@
+- id: basic
+  name: Basic
+  description: >
+    The unit's basic action. Always available, costs no MP, never on cooldown.
+    Does not trigger Focus or Fury empowerment.
+    Produces an "attack" event type.
+  cost: 0
+  cooldown: 0
+
+- id: ultimate
+  name: Ultimate
+  description: >
+    The unit's strongest action.
+    Automatically starts every battle with at least 1 round of cooldown.
+    Produces a "soulburn" event type.
+  initialCooldown: 1

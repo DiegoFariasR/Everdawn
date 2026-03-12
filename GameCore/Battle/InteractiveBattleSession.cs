@@ -120,7 +120,7 @@ internal sealed class InteractiveBattleSession
             throw new InvalidOperationException("Not a player turn.");
 
         var actor = _turnOrder[_turnIndex];
-        var skill = actor.ResolvedSkills.Where(s => GetBar(actor.Id, "mp") >= s.MpCost && GetCooldown(s.Id) <= 0).Last();
+        var skill = actor.ResolvedSkills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Last();
         var targets = ResolveAutoTargets(actor, skill);
         if (targets.Count == 0) { CheckEnd(); return BuildResponse(Array.Empty<BattleEvent>()); }
 
@@ -136,7 +136,7 @@ internal sealed class InteractiveBattleSession
         if (_isOver) return BuildResponse(Array.Empty<BattleEvent>());
 
         var actor = _turnOrder[_turnIndex];
-        var skill = actor.ResolvedSkills.Where(s => GetBar(actor.Id, "mp") >= s.MpCost && GetCooldown(s.Id) <= 0).Last();
+        var skill = actor.ResolvedSkills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Last();
         var targets = ResolveAutoTargets(actor, skill);
         if (targets.Count == 0) { CheckEnd(); return BuildResponse(Array.Empty<BattleEvent>()); }
 
@@ -157,7 +157,7 @@ internal sealed class InteractiveBattleSession
             pending = new BattlePendingInput(
                 Actor: actor,
                 Skills: skills,
-                AvailableSkillIds: skills.Where(s => GetBar(actor.Id, "mp") >= s.MpCost && GetCooldown(s.Id) <= 0).Select(s => s.Id).ToArray(),
+                AvailableSkillIds: skills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Select(s => s.Id).ToArray(),
                 EnemyTargets: _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToArray(),
                 AllyTargets: _allUnits.Where(u => u.Team == actor.Team && _hp[u.Id] > 0).ToArray(),
                 SkillCooldowns: skills.Where(s => GetCooldown(s.Id) > 0)
@@ -186,7 +186,7 @@ internal sealed class InteractiveBattleSession
         while (!_isOver && _turnOrder[_turnIndex].Team != "player")
         {
             var actor = _turnOrder[_turnIndex];
-            var skill = actor.ResolvedSkills.Where(s => GetBar(actor.Id, "mp") >= s.MpCost && GetCooldown(s.Id) <= 0).Last();
+            var skill = actor.ResolvedSkills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Last();
             var targets = ResolveAutoTargets(actor, skill);
             if (targets.Count == 0) { CheckEnd(); break; }
 
@@ -239,9 +239,9 @@ internal sealed class InteractiveBattleSession
             if (_skillCooldowns.TryGetValue(s.Id, out int cd) && cd > 0)
                 _skillCooldowns[s.Id] = cd - 1;
 
-        // Consume MP once (skill[0] always has MpCost == 0)
+        // Consume the skill's cost from the unit's mana bar, if they have one.
         if (_bars[actor.Id].ContainsKey("mp"))
-            _bars[actor.Id]["mp"] = Math.Max(0, _bars[actor.Id]["mp"] - skill.MpCost);
+            _bars[actor.Id]["mp"] = Math.Max(0, _bars[actor.Id]["mp"] - skill.Cost);
 
         // Determine event type from skill modifier
         string evType = skill.IsHeal ? "skill"

@@ -8,7 +8,7 @@ public enum BattleSkillTarget { Enemy, Ally }
 public record BattleSkill(
     string Id,
     string Name,
-    int MpCost,
+    int Cost,
     double Multiplier,
     bool IsAoe = false,
     BattleSkillTarget Target = BattleSkillTarget.Enemy,
@@ -20,20 +20,21 @@ public record BattleSkill(
     /// <summary>The elemental type this skill deals. Physical uses STR; all other types use WIS.</summary>
     EffectType EffectType = EffectType.Physical,
     /// <summary>Optional modifiers that change how this skill behaves.</summary>
-    IReadOnlyList<SkillModifier>? Modifiers = null
+    IReadOnlyList<string>? Modifiers = null
 )
 {
-    /// <summary>Returns true if this skill carries the given modifier.</summary>
-    public bool HasModifier(SkillModifier m) => Modifiers?.Contains(m) ?? false;
+    /// <summary>Returns true if this skill carries the given modifier (case-insensitive).</summary>
+    public bool HasModifier(string id) =>
+        Modifiers?.Any(m => string.Equals(m, id, StringComparison.OrdinalIgnoreCase)) ?? false;
 
     /// <summary>True if this skill heals rather than damages.</summary>
     public bool IsHeal => Kind == EffectKind.Heal;
 
     /// <summary>The skill is the unit's basic action (never triggers Focus empowerment).</summary>
-    public bool IsBasic => HasModifier(SkillModifier.Basic);
+    public bool IsBasic => HasModifier("basic");
 
     /// <summary>The skill is the unit's ultimate action.</summary>
-    public bool IsUltimate => HasModifier(SkillModifier.Ultimate);
+    public bool IsUltimate => HasModifier("ultimate");
 
     /// <summary>
     /// The cooldown this skill enters battle with.

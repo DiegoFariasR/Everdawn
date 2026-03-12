@@ -83,7 +83,7 @@ public class BattleRulesTests
         var unit = new BattleUnit("u1", "Test", "player", Level: 1, Str: 70, Wis: 0, Agi: 50);
         Assert.Single(unit.ResolvedSkills);
         Assert.Equal("attack", unit.ResolvedSkills[0].Id);
-        Assert.Equal(0, unit.ResolvedSkills[0].MpCost);
+        Assert.Equal(0, unit.ResolvedSkills[0].Cost);
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public class BattleRulesTests
     [Fact]
     public void ResolvedSkills_UsesProvidedSkills_WhenGiven()
     {
-        var skills = new[] { new BattleSkill("custom", "Custom", MpCost: 0, Multiplier: 1.5) };
+        var skills = new[] { new BattleSkill("custom", "Custom", Cost: 0, Multiplier: 1.5) };
         var unit = new BattleUnit("u1", "Test", "player", Level: 1, Str: 70, Wis: 0, Agi: 50, Skills: skills);
         Assert.Single(unit.ResolvedSkills);
         Assert.Equal("custom", unit.ResolvedSkills[0].Id);

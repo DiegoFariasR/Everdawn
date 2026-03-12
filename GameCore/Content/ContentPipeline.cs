@@ -31,9 +31,31 @@ public static class ContentPipeline
     /// <param name="basePath">Path to the <c>GameData/Base</c> directory.</param>
     public static ContentDatabase Load(string basePath)
     {
+        var modifiers = LoadModifiers(Path.Combine(basePath, "modifiers.yml")).ToDictionary(m => m.Id, StringComparer.OrdinalIgnoreCase);
         var skills = LoadSkills(Path.Combine(basePath, "skills")).ToDictionary(s => s.Id);
-        var units = LoadUnits(Path.Combine(basePath, "units"), skills);
-        return new ContentDatabase(units, skills.Values);
+        var units = LoadUnits(Path.Combine(basePath, "units"), skills, modifiers);
+        return new ContentDatabase(units, skills.Values, modifiers.Values);
+    }
+
+    // ── Modifiers ─────────────────────────────────────────────────────────
+
+    private static IEnumerable<BattleModifier> LoadModifiers(string filePath)
+    {
+        if (!File.Exists(filePath))
+            yield break;
+
+        var list = ParseYaml<List<RawModifier>>(filePath);
+        foreach (var raw in list)
+            yield return new BattleModifier(
+                raw.Id, raw.Name, raw.Description,
+                Cost: raw.Cost,
+                Multiplier: raw.Multiplier,
+                IsAoe: raw.IsAoe,
+                Target: raw.Target != null ? Enum.Parse<BattleSkillTarget>(raw.Target, ignoreCase: true) : null,
+                Kind: raw.Kind != null ? Enum.Parse<EffectKind>(raw.Kind, ignoreCase: true) : null,
+                Cooldown: raw.Cooldown,
+                InitialCooldown: raw.InitialCooldown,
+                EffectType: raw.EffectType != null ? Enum.Parse<EffectType>(raw.EffectType, ignoreCase: true) : null);
     }
 
     // ── Skills ────────────────────────────────────────────────────────────
@@ -54,7 +76,7 @@ public static class ContentPipeline
     // ── Units ─────────────────────────────────────────────────────────────
 
     private static IEnumerable<BattleUnit> LoadUnits(
-        string unitsPath, IReadOnlyDictionary<string, BattleSkill> skillDict)
+        string unitsPath, IReadOnlyDictionary<string, BattleSkill> skillDict, IReadOnlyDictionary<string, BattleModifier> modifierDict)
     {
         if (!Directory.Exists(unitsPath))
             yield break;
@@ -62,20 +84,48 @@ public static class ContentPipeline
         foreach (var file in Directory.EnumerateFiles(unitsPath, "*.yml"))
         {
             var raw = ParseYaml<RawUnit>(file);
-            yield return CompileUnit(raw, skillDict);
+            yield return CompileUnit(raw, skillDict, modifierDict);
         }
     }
 
-    private static BattleUnit CompileUnit(RawUnit raw, IReadOnlyDictionary<string, BattleSkill> skillDict)
+    private static BattleUnit CompileUnit(RawUnit raw, IReadOnlyDictionary<string, BattleSkill> skillDict, IReadOnlyDictionary<string, BattleModifier> modifierDict)
     {
         var traits = raw.Traits
             .Select(t => Enum.Parse<BattleTrait>(t, ignoreCase: true))
             .ToArray();
 
         var skills = raw.Skills
-            .Select(id => skillDict.TryGetValue(id, out var sk)
-                ? sk
-                : throw new KeyNotFoundException($"Unit '{raw.Id}' references unknown skill '{id}'."))
+            .Select(slot =>
+            {
+                var sk = skillDict.TryGetValue(slot.Id, out var found)
+                    ? found
+                    : throw new KeyNotFoundException(
+                        $"Unit '{raw.Id}' references unknown skill '{slot.Id}'.");
+
+                if (slot.Modifiers == null)
+                    return sk;
+
+                var compiledMods = slot.Modifiers
+                    .Select(modId => modifierDict.TryGetValue(modId, out var mod)
+                        ? mod
+                        : throw new KeyNotFoundException(
+                            $"Unit '{raw.Id}' skill slot '{slot.Id}' references unknown modifier '{modId}'."))
+                    .ToArray();
+
+                // Apply modifier stat overrides in list order; last modifier wins per field.
+                return sk with
+                {
+                    Modifiers = compiledMods.Select(m => m.Id).ToArray(),
+                    Cost = compiledMods.LastOrDefault(m => m.Cost != null)?.Cost ?? sk.Cost,
+                    Multiplier = compiledMods.LastOrDefault(m => m.Multiplier != null)?.Multiplier ?? sk.Multiplier,
+                    IsAoe = compiledMods.LastOrDefault(m => m.IsAoe != null)?.IsAoe ?? sk.IsAoe,
+                    Target = compiledMods.LastOrDefault(m => m.Target != null)?.Target ?? sk.Target,
+                    Kind = compiledMods.LastOrDefault(m => m.Kind != null)?.Kind ?? sk.Kind,
+                    Cooldown = compiledMods.LastOrDefault(m => m.Cooldown != null)?.Cooldown ?? sk.Cooldown,
+                    InitialCooldown = compiledMods.LastOrDefault(m => m.InitialCooldown != null)?.InitialCooldown ?? sk.InitialCooldown,
+                    EffectType = compiledMods.LastOrDefault(m => m.EffectType != null)?.EffectType ?? sk.EffectType,
+                };
+            })
             .ToArray();
 
         IReadOnlyDictionary<EffectType, int>? resistances = null;
@@ -103,21 +153,17 @@ public static class ContentPipeline
         var kind = Enum.Parse<EffectKind>(raw.Kind, ignoreCase: true);
         var effectType = Enum.Parse<EffectType>(raw.EffectType, ignoreCase: true);
         var target = Enum.Parse<BattleSkillTarget>(raw.Target, ignoreCase: true);
-        var modifiers = raw.Modifiers.Count > 0
-            ? raw.Modifiers.Select(m => Enum.Parse<SkillModifier>(m, ignoreCase: true)).ToArray()
-            : null;
 
         return new BattleSkill(
             raw.Id, raw.Name,
-            MpCost: raw.MpCost,
+            Cost: raw.Cost,
             Multiplier: raw.Multiplier,
             IsAoe: raw.IsAoe,
             Target: target,
             Kind: kind,
             Cooldown: raw.Cooldown,
             InitialCooldown: raw.InitialCooldown,
-            EffectType: effectType,
-            Modifiers: modifiers);
+            EffectType: effectType);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────

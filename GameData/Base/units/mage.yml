@@ -5,4 +5,9 @@ str: 62
 wis: 110
 agi: 70
 traits: [MagicUser]
-skills: [mage-bolt, mage-burst, mage-meteor]
+skills:
+  - id: mage-bolt
+    modifiers: [Basic]
+  - id: mage-burst
+  - id: mage-meteor
+    modifiers: [Ultimate]

@@ -83,7 +83,7 @@ public class BattleSessionTests
         var skills = view.PendingInput!.Skills;
         Assert.NotEmpty(skills);
         // Index 0 is always the free basic action
-        Assert.Equal(0, skills[0].MpCost);
+        Assert.Equal(0, skills[0].Cost);
     }
 
     [Fact]

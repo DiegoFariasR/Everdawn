@@ -140,7 +140,7 @@
                         string keyHint   = !_autoMode && si < _skillKeys.Length ? _skillKeys[si] : "";
                         @_renderSkillBtn((skill.Id, skill.Name, skill.EffectType, skill.Multiplier, skill.BaseDmg,
                             isAoe, isAllySkill, skill.IsBasic, skill.IsUltimate,
-                            skill.MpCost, skill.Cooldown, cdLeft, skill.EffectiveInitialCooldown,
+                            skill.Cost, skill.Cooldown, cdLeft, skill.EffectiveInitialCooldown,
                             SkillSlotClass(si), canUse, isSelected, _autoMode,
                             keyHint,
                             () => { if (!_autoMode) { if (isAoe) FireAoe(skillId); else _pendingAction = skillId; } }))
@@ -162,7 +162,7 @@
                             int baseDmg = (int)(activeEnemy.GetBaseAttack(sk.EffectType) * sk.Multiplier);
                             @_renderSkillBtn((sk.Id, sk.Name, sk.EffectType, sk.Multiplier, baseDmg,
                                 sk.IsAoe, sk.Target == BattleSkillTarget.Ally, sk.IsBasic, sk.IsUltimate,
-                                sk.MpCost, sk.Cooldown, 0, sk.EffectiveInitialCooldown,
+                                sk.Cost, sk.Cooldown, 0, sk.EffectiveInitialCooldown,
                                 SkillSlotClass(si), false, false, true,
                                 "",
                                 () => { }))
@@ -721,7 +721,7 @@
                     <span class="info-badge @DmgTypeCss(sk.EffectType)">@sk.EffectType</span>
                     <span class="info-skill-stat">x@(sk.Multiplier.ToString("0.##"))</span>
                     <span class="info-skill-stat">~@baseDmg</span>
-                    @if (sk.MpCost > 0)                   { <span class="info-skill-stat">@sk.MpCost MP</span> }
+                    @if (sk.Cost > 0)                   { <span class="info-skill-stat">@sk.Cost MP</span> }
                     @if (sk.IsAoe)                        { <span class="info-badge badge-aoe">AoE</span> }
                     @if (sk.Cooldown > 0)                 { <span class="info-skill-stat">CD @sk.Cooldown</span> }
                     @if (sk.EffectiveInitialCooldown > 0) { <span class="info-skill-stat">Init.CD @sk.EffectiveInitialCooldown</span> }
@@ -742,14 +742,14 @@
     //   3. Pass the field in every _renderSkillBtn call site (two loops above).
     private RenderFragment<(string id, string name, EffectType dmgType, double multiplier, int baseDmg,
         bool isAoe, bool isAllySkill, bool isBasic, bool isUltimate,
-        int mpCost, int cooldown, int cdLeft, int effectiveInitCd,
+        int cost, int cooldown, int cdLeft, int effectiveInitCd,
         string btnClass, bool canUse, bool isSelected, bool isInfoOnly,
         string keyHint, Action onClick)> _renderSkillBtn =>
         ctx =>
         {
             var (id, name, dmgType, multiplier, baseDmg,
                 isAoe, isAllySkill, isBasic, isUltimate,
-                mpCost, cooldown, cdLeft, effectiveInitCd,
+                cost, cooldown, cdLeft, effectiveInitCd,
                 btnClass, canUse, isSelected, isInfoOnly,
                 keyHint, onClick) = ctx;
             return @<button class="btn-action @btnClass
@@ -765,7 +765,7 @@
             @if (isAoe)       { <span class="aoe-badge">ALL</span>  }
             @if (isAllySkill) { <span class="ally-badge">ALLY</span> }
             @if (cdLeft > 0)        { <span class="cd-badge">CD @cdLeft</span> }
-            else if (mpCost > 0)    { <span class="mp-cost">@mpCost MP</span>  }
+            else if (cost > 0)    { <span class="mp-cost">@cost MP</span>  }
             @if (cdLeft == 0 && cooldown > 0) { <span class="cd-cost">@("")@cooldown</span> }
         </div>
         <div class="skill-btn-stats">

@@ -96,10 +96,10 @@ public class BattleScenarioTests
     [Theory, MemberData(nameof(AllScenarios))]
     public void AllScenarios_FirstSkillOfEveryUnitIsFree(IBattleScenario scenario)
     {
-        // Rule: index 0 is always the free basic skill (MpCost == 0).
+        // Rule: index 0 is always the free basic skill (Cost == 0).
         var setup = scenario.CreateSetup();
         foreach (var unit in setup.PlayerUnits.Concat(setup.EnemyUnits))
-            Assert.Equal(0, unit.ResolvedSkills[0].MpCost);
+            Assert.Equal(0, unit.ResolvedSkills[0].Cost);
     }
 
     [Theory, MemberData(nameof(AllScenarios))]

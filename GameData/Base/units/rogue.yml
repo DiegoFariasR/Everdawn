@@ -5,4 +5,9 @@ str: 54
 wis: 0
 agi: 120
 traits: [Focus]
-skills: [rogue-strike, rogue-poison, rogue-mark]
+skills:
+  - id: rogue-strike
+    modifiers: [Basic]
+  - id: rogue-poison
+  - id: rogue-mark
+    modifiers: [Ultimate]

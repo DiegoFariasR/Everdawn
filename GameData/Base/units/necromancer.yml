@@ -5,4 +5,9 @@ str: 80
 wis: 105
 agi: 65
 traits: [MagicUser]
-skills: [necro-bolt, necro-drain, necro-soul]
+skills:
+  - id: necro-bolt
+    modifiers: [Basic]
+  - id: necro-drain
+  - id: necro-soul
+    modifiers: [Ultimate]

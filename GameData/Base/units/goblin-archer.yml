@@ -5,4 +5,9 @@ str: 55
 wis: 0
 agi: 100
 traits: [Focus]
-skills: [ga-shot, ga-precise, ga-volley]
+skills:
+  - id: ga-shot
+    modifiers: [Basic]
+  - id: ga-precise
+  - id: ga-volley
+    modifiers: [Ultimate]

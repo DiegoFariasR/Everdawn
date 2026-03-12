@@ -101,13 +101,13 @@ public class BattleTraitTests
             PlayerUnits =
             [
                 new("hero", "Hero", "player", Level: 1, Str: 200, Wis: 100, Agi: 50,
-                    Skills: [new("basic", "Strike", MpCost: 0, Multiplier: 1.0)],
+                    Skills: [new("basic", "Strike", Cost: 0, Multiplier: 1.0)],
                     Traits: [BattleTrait.MagicUser, BattleTrait.Focus]),
             ],
             EnemyUnits =
             [
                 new("dummy", "Dummy", "enemy", Level: 1, Str: 1, Wis: 0, Agi: 1,
-                    Skills: [new("e-basic", "Hit", MpCost: 0, Multiplier: 1.0)]),
+                    Skills: [new("e-basic", "Hit", Cost: 0, Multiplier: 1.0)]),
             ],
         };
         var session = new BattleSession(seed: 0);

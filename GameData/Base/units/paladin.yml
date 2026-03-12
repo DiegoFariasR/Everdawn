@@ -5,4 +5,8 @@ str: 85
 wis: 55
 agi: 55
 traits: [MagicUser, Fury]
-skills: [paladin-strike, paladin-bash, paladin-heal]
+skills:
+  - id: paladin-strike
+    modifiers: [Basic]
+  - id: paladin-bash
+  - id: paladin-heal

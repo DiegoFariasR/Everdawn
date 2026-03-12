@@ -10,11 +10,16 @@ public sealed class ContentDatabase
 {
     private readonly IReadOnlyDictionary<string, BattleUnit> _units;
     private readonly IReadOnlyDictionary<string, BattleSkill> _skills;
+    private readonly IReadOnlyDictionary<string, BattleModifier> _modifiers;
 
-    internal ContentDatabase(IEnumerable<BattleUnit> units, IEnumerable<BattleSkill> skills)
+    internal ContentDatabase(
+        IEnumerable<BattleUnit> units,
+        IEnumerable<BattleSkill> skills,
+        IEnumerable<BattleModifier> modifiers)
     {
         _units = units.ToDictionary(u => u.Id);
         _skills = skills.ToDictionary(s => s.Id);
+        _modifiers = modifiers.ToDictionary(m => m.Id, StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>Returns the unit with the given ID. Throws if not found.</summary>
@@ -34,4 +39,11 @@ public sealed class ContentDatabase
 
     /// <summary>All skills in the database.</summary>
     public IReadOnlyCollection<BattleSkill> AllSkills => _skills.Values.ToList();
+
+    /// <summary>Returns the modifier with the given ID. Throws if not found.</summary>
+    public BattleModifier GetModifier(string id) =>
+        _modifiers.TryGetValue(id, out var m) ? m : throw new KeyNotFoundException($"Modifier '{id}' not found in content database.");
+
+    /// <summary>All modifiers in the database.</summary>
+    public IReadOnlyCollection<BattleModifier> AllModifiers => _modifiers.Values.ToList();
 }

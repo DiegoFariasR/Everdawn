@@ -2,7 +2,6 @@
   name: Strike
   effectType: Physical
   multiplier: 1.0
-  modifiers: [Basic]
 
 - id: paladin-bash
   name: Shield Bash
@@ -22,7 +21,6 @@
   name: Quick Strike
   effectType: Physical
   multiplier: 1.0
-  modifiers: [Basic]
 
 - id: rogue-poison
   name: Poison Blade
@@ -35,13 +33,11 @@
   effectType: Physical
   multiplier: 2.5
   cooldown: 3
-  modifiers: [Ultimate]
 
 - id: gw-slash
   name: Slash
   effectType: Physical
   multiplier: 1.0
-  modifiers: [Basic]
 
 - id: gw-warcry
   name: War Cry
@@ -54,13 +50,11 @@
   effectType: Physical
   multiplier: 2.4
   cooldown: 3
-  modifiers: [Ultimate]
 
 - id: ga-shot
   name: Arrow Shot
   effectType: Physical
   multiplier: 1.0
-  modifiers: [Basic]
 
 - id: ga-precise
   name: Precise Shot
@@ -73,4 +67,3 @@
   effectType: Physical
   multiplier: 2.2
   cooldown: 3
-  modifiers: [Ultimate]

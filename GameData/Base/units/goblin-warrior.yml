@@ -5,4 +5,9 @@ str: 70
 wis: 0
 agi: 50
 traits: [Fury]
-skills: [gw-slash, gw-warcry, gw-frenzy]
+skills:
+  - id: gw-slash
+    modifiers: [Basic]
+  - id: gw-warcry
+  - id: gw-frenzy
+    modifiers: [Ultimate]
