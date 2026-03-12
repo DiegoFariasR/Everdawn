@@ -62,7 +62,8 @@ public static class BattleEngine
                 snapshots.Add(new BattleSnapshot
                 {
                     Step = step++,
-                    Event = new BattleEvent(actor.Id, $"{actor.Name} attacks {target.Name} for {damage} damage.", "attack", target.Id, damage),
+                    Event = new BattleEvent(actor.Id, $"{actor.Name} attacks {target.Name} for {damage} damage.", "attack",
+                        target.Id, damage, DamageType: actor.NaturalDamageType),
                     UnitStates = TakeSnapshot()
                 });
 

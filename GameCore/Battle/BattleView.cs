@@ -50,12 +50,14 @@ public sealed record PendingInputView(
 /// holds its own copies of HP, turn state, or victory status.
 /// </summary>
 public sealed record BattleView(
-    /// <summary>Current HP, MP, and alive status for every unit.</summary>
+    /// <summary>Current HP, MP, status effects, and alive status for every unit.</summary>
     IReadOnlyList<UnitState> Units,
     /// <summary>Non-null when it is the player's turn and input is required.</summary>
     PendingInputView? PendingInput,
     /// <summary>Complete event log from battle start.</summary>
     IReadOnlyList<BattleEvent> FullLog,
     bool IsOver,
-    string? WinningTeam
+    string? WinningTeam,
+    /// <summary>Current round number (1-based). Increments at the end of each full turn-order cycle.</summary>
+    int Round = 1
 );

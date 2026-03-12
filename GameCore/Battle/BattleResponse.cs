@@ -11,5 +11,7 @@ internal record BattleResponse(
     /// <summary>Non-null when it is a player unit's turn and input is required.</summary>
     BattlePendingInput? PendingInput,
     bool IsOver,
-    string? WinningTeam
+    string? WinningTeam,
+    /// <summary>Current round number (1-based).</summary>
+    int Round
 );

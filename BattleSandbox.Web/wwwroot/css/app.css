@@ -634,6 +634,57 @@ html, body {
 .event-entry.round.event-current { background: #0a0e1e; color: #88aaff; }
 .event-num { color: #334455; margin-right: 0.3rem; }
 
+/* ── Event metadata (SkillId / DamageType / hit index) ─── */
+.ev-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: 0.4rem;
+    opacity: 0.75;
+}
+.ev-meta-badge { font-size: 0.58rem; padding: 1px 4px; }
+.ev-hit {
+    font-size: 0.58rem;
+    color: #778899;
+    border: 1px solid #334455;
+    border-radius: 3px;
+    padding: 1px 4px;
+    background: #0a0e14;
+}
+
+/* ── New-event highlight (events from last player action) ─ */
+.event-new { background: #0e1408; }
+.event-entry.event-new:not(.event-current) { color: #aaccaa; }
+
+/* ── Round badge (play mode portrait strip area) ─────────── */
+.round-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #88aaff;
+    background: #080e1e;
+    border: 1px solid #1a2a6a;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+
+/* ── Status effects on unit cards ────────────────────────── */
+.status-effects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-top: 2px;
+}
+.status-badge {
+    font-size: 0.58rem;
+    color: #cc88ff;
+    background: #12081e;
+    border: 1px solid #441a5a;
+    border-radius: 3px;
+    padding: 1px 4px;
+}
+
 /* ── Blazor infrastructure ────────────────────────── */
 #blazor-error-ui {
     background: #2d1a00;
@@ -797,6 +848,11 @@ html, body {
 .badge-phys   { color: #ff9955; border-color: #5a3010; background: #1a0e00; }
 .badge-mag    { color: #88aaff; border-color: #1a2a6a; background: #080e1e; }
 .badge-aoe    { color: #ff9f1c; border-color: #5a3a00; background: #1a0f00; }
+/* Future damage types — uncomment DmgTypeCss case + add the enum member to activate */
+.badge-fire   { color: #ff6633; border-color: #661400; background: #200500; }
+.badge-holy   { color: #ffe87c; border-color: #665a00; background: #1e1a00; }
+.badge-dark   { color: #bb77ff; border-color: #330066; background: #0e0022; }
+.badge-true   { color: #e0e0e0; border-color: #444455; background: #111118; }
 
 .info-skills {
     border-top: 1px solid #21262d;
