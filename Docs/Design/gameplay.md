@@ -6,7 +6,7 @@
 - [ ] Besides battles, PoI can have challenges which can be overcome by specific talents
 - [x] Cooldowns apply at the start of each round, not turn
 - [ ] CC bar, hard and low thresholds
-- [ ] Elemental and physical resistences
+- [x] Elemental and physical resistences
 
 ## Abilities
 
@@ -29,10 +29,10 @@
 ## Main Attributes
 
 - **Strength - STR**
-  - [ ] Physical base damage
-  - [ ] More HP
+  - [x] Physical base damage
+  - [x] More HP
 - **Wisdom - WIS**
-  - [ ] Magic base damage
+  - [x] Magic base damage
   - [x] More Mana
   - [ ] Affect on big or small the other bars are
 - **Agility - AGI**
