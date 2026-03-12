@@ -6,7 +6,7 @@ namespace GameCore.Battle
     public enum BattleSkillTarget { Enemy, Ally }
 
     /// <summary>One stat-to-damage scaling entry within a damage component.</summary>
-    public record DamageScaling(string Stat, double Multiplier);
+    public record DamageScaling(string Stat, double Scale = 1.0);
 
     /// <summary>
     /// One damage type component within a hit.
@@ -81,7 +81,7 @@ namespace GameCore.Battle
             double total = 0;
             foreach (var comp in Effects[0].DamagePerHit)
                 foreach (var s in comp.Scaling)
-                    total += actor.GetStat(s.Stat) * s.Multiplier;
+                    total += actor.GetStat(s.Stat) * s.Scale;
             return (int)(total * DamageMultiplier * NumberOfHits);
         }
     }

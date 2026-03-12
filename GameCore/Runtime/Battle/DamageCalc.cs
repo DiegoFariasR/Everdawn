@@ -79,7 +79,7 @@ namespace GameCore.Battle
                 // Sum each stat contribution, apply damageMultiplier + extraMultiplier, add variance.
                 double statBase = 0;
                 foreach (var s in component.Scaling)
-                    statBase += actor.GetStat(s.Stat) * s.Multiplier;
+                    statBase += actor.GetStat(s.Stat) * s.Scale;
                 int baseValue = (int)statBase;
                 int variance = Math.Max(1, baseValue / 5);
                 int rolled = Math.Max(

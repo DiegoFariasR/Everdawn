@@ -174,7 +174,7 @@ namespace GameCore.Content
                         ? Enum.Parse<EffectType>(rawComp.DamageType, ignoreCase: true)
                         : null;
                     var scaling = rawComp.Scaling
-                        .Select(s => new DamageScaling(s.Stat, s.Multiplier))
+                        .Select(s => new DamageScaling(s.Stat, s.Scale))
                         .ToArray();
                     components.Add(new DamageComponent(damageType, scaling));
                 }

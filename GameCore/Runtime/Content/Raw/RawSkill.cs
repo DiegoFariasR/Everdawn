@@ -5,7 +5,8 @@ namespace GameCore.Content.Raw
     public class RawDamageScaling
     {
         public string Stat { get; set; } = "str";
-        public double Multiplier { get; set; } = 1.0;
+        /// <summary>Damage coefficient for this stat. Defaults to 1.0; can be omitted from YAML.</summary>
+        public double Scale { get; set; } = 1.0;
     }
 
     /// <summary>

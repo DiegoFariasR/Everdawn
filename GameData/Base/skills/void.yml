@@ -7,7 +7,6 @@
         - damageType: void
           scaling:
             - stat: wis
-              multiplier: 1.0
 
 - id: mage-burst
   name: Arcane Burst
@@ -19,7 +18,7 @@
         - damageType: void
           scaling:
             - stat: wis
-              multiplier: 1.6
+              scale: 1.6
 
 - id: mage-meteor
   name: Meteor
@@ -32,7 +31,7 @@
         - damageType: void
           scaling:
             - stat: wis
-              multiplier: 2.0
+              scale: 2.0
 
 - id: necro-bolt
   name: Dark Bolt
@@ -43,7 +42,6 @@
         - damageType: void
           scaling:
             - stat: wis
-              multiplier: 1.0
 
 - id: necro-drain
   name: Life Drain
@@ -55,7 +53,7 @@
         - damageType: void
           scaling:
             - stat: wis
-              multiplier: 1.8
+              scale: 1.8
 
 - id: necro-soul
   name: Soul Siphon
@@ -67,4 +65,4 @@
         - damageType: void
           scaling:
             - stat: wis
-              multiplier: 3.0
+              scale: 3.0

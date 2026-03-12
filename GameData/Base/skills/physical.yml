@@ -7,7 +7,6 @@
         - damageType: physical
           scaling:
             - stat: str
-              multiplier: 1.0
 
 - id: paladin-bash
   name: Shield Bash
@@ -19,7 +18,7 @@
         - damageType: physical
           scaling:
             - stat: str
-              multiplier: 1.4
+              scale: 1.4
 
 - id: paladin-heal
   name: Lay on Hands
@@ -30,7 +29,7 @@
       damagePerHit:
         - scaling:
             - stat: str
-              multiplier: 1.2
+              scale: 1.2
 
 - id: rogue-strike
   name: Quick Strike
@@ -41,7 +40,6 @@
         - damageType: physical
           scaling:
             - stat: agi
-              multiplier: 1.0
 
 - id: rogue-poison
   name: Poison Blade
@@ -54,7 +52,6 @@
         - damageType: physical
           scaling:
             - stat: agi
-              multiplier: 1.0
 
 - id: rogue-mark
   name: Death Mark
@@ -67,7 +64,6 @@
         - damageType: physical
           scaling:
             - stat: agi
-              multiplier: 1.0
 
 - id: gw-slash
   name: Slash
@@ -78,7 +74,6 @@
         - damageType: physical
           scaling:
             - stat: str
-              multiplier: 1.0
 
 - id: gw-warcry
   name: War Cry
@@ -90,7 +85,7 @@
         - damageType: physical
           scaling:
             - stat: str
-              multiplier: 1.6
+              scale: 1.6
 
 - id: gw-frenzy
   name: Frenzy
@@ -102,7 +97,7 @@
         - damageType: physical
           scaling:
             - stat: str
-              multiplier: 2.4
+              scale: 2.4
 
 - id: ga-shot
   name: Arrow Shot
@@ -113,7 +108,6 @@
         - damageType: physical
           scaling:
             - stat: agi
-              multiplier: 1.0
 
 - id: ga-precise
   name: Precise Shot
@@ -126,7 +120,6 @@
         - damageType: physical
           scaling:
             - stat: agi
-              multiplier: 1.0
 
 - id: ga-volley
   name: Volley
@@ -139,4 +132,3 @@
         - damageType: physical
           scaling:
             - stat: agi
-              multiplier: 1.0
