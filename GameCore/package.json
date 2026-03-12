@@ -1,7 +1,8 @@
 {
   "name": "com.everdawn.gamecore",
   "version": "0.0.1",
-  "displayName": "GameCore",
-  "description": "Everdawn game logic core. No Unity dependencies.",
-  "unity": "6000.0"
+  "displayName": "Everdawn GameCore",
+  "description": "Authoritative game logic for Everdawn. No Unity dependencies. Runtime code lives in Runtime/.",
+  "unity": "6000.0",
+  "type": "library"
 }
