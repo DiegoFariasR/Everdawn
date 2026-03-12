@@ -24,4 +24,16 @@
     <ProjectReference Include="..\GameCore.Scenarios\GameCore.Scenarios.csproj" />
   </ItemGroup>
 
+  <!--
+    Copy GameData/Base into the test output so TestContentSource can find content
+    at a host-local path (AppContext.BaseDirectory/GameData/Base) without walking
+    up the directory tree to the repository root.
+  -->
+  <ItemGroup>
+    <Content Include="..\GameData\Base\**">
+      <Link>GameData\Base\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

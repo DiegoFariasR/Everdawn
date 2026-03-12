@@ -32,11 +32,13 @@ jobs:
         run: dotnet format Everdawn.slnx --verify-no-changes --verbosity diagnostic
 
       # Validates that GameCore stays compilable under a Unity-safe C# language level.
-      # Unity 6 (6000.x) compiles GameCore via its Roslyn toolchain at approximately C# 10.
-      # ImplicitUsings is disabled to simulate Unity's direct .cs compilation: Unity never
-      # reads the SDK-generated implicit-usings file in obj/, so every namespace must be
-      # declared explicitly in GlobalUsings.cs.  Catching both constraints here means a
-      # contributor cannot accidentally introduce C# 11+ syntax or an undeclared namespace
-      # without CI failing before the code reaches the Unity package.
-      - name: Unity compat check (LangVersion 10, no implicit usings)
-        run: dotnet build GameCore/GameCore.csproj --no-restore --configuration Release -p:LangVersion=10 -p:ImplicitUsings=disable
+      # GameCore targets netstandard2.1 and C# 9 (LangVersion=9).
+      # C# 9 is the highest version supported without introducing C# 10 conveniences
+      # (file-scoped namespaces, global using directives) that break Unity's Roslyn
+      # toolchain, which compiles .cs files directly without reading SDK-generated files.
+      # ImplicitUsings is disabled to enforce that every namespace is declared explicitly
+      # in each source file — Unity never reads the SDK obj/ implicit-usings file.
+      # This step fails if someone reintroduces file-scoped namespaces, global usings,
+      # C# 10+ syntax, or any namespace that relies on hidden SDK-generated imports.
+      - name: Unity compat check (LangVersion 9, no implicit usings)
+        run: dotnet build GameCore/GameCore.csproj --no-restore --configuration Release -p:LangVersion=9 -p:ImplicitUsings=disable

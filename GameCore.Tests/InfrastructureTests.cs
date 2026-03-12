@@ -1,33 +1,34 @@
 using GameCore;
 using GameCore.Scenarios;
 
-namespace GameCore.Tests;
-
-public class InfrastructureTests
+namespace GameCore.Tests
 {
-    [Fact]
-    public void GameInfo_HasCorrectName()
+    public class InfrastructureTests
     {
-        Assert.Equal("Everdawn", GameInfo.Name);
-    }
+        [Fact]
+        public void GameInfo_HasCorrectName()
+        {
+            Assert.Equal("Everdawn", GameInfo.Name);
+        }
 
-    [Fact]
-    public void GameInfo_HasVersion()
-    {
-        Assert.False(string.IsNullOrEmpty(GameInfo.Version));
-    }
+        [Fact]
+        public void GameInfo_HasVersion()
+        {
+            Assert.False(string.IsNullOrEmpty(GameInfo.Version));
+        }
 
-    [Fact]
-    public void SampleScenario_HasDeterministicSeed()
-    {
-        var scenario = new SampleScenario();
-        Assert.Equal(42, scenario.Seed);
-    }
+        [Fact]
+        public void SampleScenario_HasDeterministicSeed()
+        {
+            var scenario = new SampleScenario();
+            Assert.Equal(42, scenario.Seed);
+        }
 
-    [Fact]
-    public void SampleScenario_HasStableId()
-    {
-        var scenario = new SampleScenario();
-        Assert.Equal("sample-scenario", scenario.Id);
+        [Fact]
+        public void SampleScenario_HasStableId()
+        {
+            var scenario = new SampleScenario();
+            Assert.Equal("sample-scenario", scenario.Id);
+        }
     }
 }
