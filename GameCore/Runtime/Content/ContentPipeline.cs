@@ -68,7 +68,11 @@ namespace GameCore.Content
                     SetDamageMultiplier: raw.SetDamageMultiplier,
                     SetIsAoe: raw.SetIsAoe,
                     SetCooldown: raw.SetCooldown,
-                    SetInitialCooldown: raw.SetInitialCooldown);
+                    SetInitialCooldown: raw.SetInitialCooldown,
+                    AddCost: raw.AddCost,
+                    AddDamageMultiplier: raw.AddDamageMultiplier,
+                    AddCooldown: raw.AddCooldown,
+                    AddInitialCooldown: raw.AddInitialCooldown);
         }
 
         // ── Skills ────────────────────────────────────────────────────────────
@@ -128,14 +132,20 @@ namespace GameCore.Content
                         .ToArray();
 
                     // Apply modifier stat overrides in list order; last modifier wins per field.
+                    // Set overrides are applied first, then Add deltas are summed on top.
+                    var setCost = compiledMods.LastOrDefault(m => m.SetCost != null)?.SetCost ?? sk.Cost;
+                    var setDmgMult = compiledMods.LastOrDefault(m => m.SetDamageMultiplier != null)?.SetDamageMultiplier ?? sk.DamageMultiplier;
+                    var setCooldown = compiledMods.LastOrDefault(m => m.SetCooldown != null)?.SetCooldown ?? sk.Cooldown;
+                    var setInitCd = compiledMods.LastOrDefault(m => m.SetInitialCooldown != null)?.SetInitialCooldown ?? sk.InitialCooldown;
+
                     return sk with
                     {
                         Modifiers = compiledMods.Select(m => m.Id).ToArray(),
-                        Cost = compiledMods.LastOrDefault(m => m.SetCost != null)?.SetCost ?? sk.Cost,
-                        DamageMultiplier = compiledMods.LastOrDefault(m => m.SetDamageMultiplier != null)?.SetDamageMultiplier ?? sk.DamageMultiplier,
+                        Cost = setCost + compiledMods.Sum(m => m.AddCost ?? 0),
+                        DamageMultiplier = setDmgMult + compiledMods.Sum(m => m.AddDamageMultiplier ?? 0.0),
                         IsAoe = compiledMods.LastOrDefault(m => m.SetIsAoe != null)?.SetIsAoe ?? sk.IsAoe,
-                        Cooldown = compiledMods.LastOrDefault(m => m.SetCooldown != null)?.SetCooldown ?? sk.Cooldown,
-                        InitialCooldown = compiledMods.LastOrDefault(m => m.SetInitialCooldown != null)?.SetInitialCooldown ?? sk.InitialCooldown,
+                        Cooldown = setCooldown + compiledMods.Sum(m => m.AddCooldown ?? 0),
+                        InitialCooldown = setInitCd + compiledMods.Sum(m => m.AddInitialCooldown ?? 0),
                     };
                 })
                 .ToArray();

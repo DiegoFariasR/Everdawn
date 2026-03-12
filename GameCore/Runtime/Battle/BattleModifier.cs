@@ -14,6 +14,11 @@ namespace GameCore.Battle
         double? SetDamageMultiplier = null,
         bool? SetIsAoe = null,
         int? SetCooldown = null,
-        int? SetInitialCooldown = null
+        int? SetInitialCooldown = null,
+        // Additive adjustments — applied after all Set overrides. Can be negative.
+        int? AddCost = null,
+        double? AddDamageMultiplier = null,
+        int? AddCooldown = null,
+        int? AddInitialCooldown = null
     );
 }

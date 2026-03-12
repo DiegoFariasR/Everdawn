@@ -13,5 +13,11 @@ namespace GameCore.Content.Raw
         public bool? SetIsAoe { get; set; }
         public int? SetCooldown { get; set; }
         public int? SetInitialCooldown { get; set; }
+
+        // Additive adjustments — applied after all Set overrides. Can be negative.
+        public int? AddCost { get; set; }
+        public double? AddDamageMultiplier { get; set; }
+        public int? AddCooldown { get; set; }
+        public int? AddInitialCooldown { get; set; }
     }
 }
