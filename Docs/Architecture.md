@@ -25,25 +25,28 @@ not to GameCore:
 
 ### Content Root Configuration
 
-GameCore never searches for `GameData/` by walking directories. Each host explicitly
-configures a content root and creates an `IContentSource` from it:
+GameCore never searches for `GameData/` by walking directories and never reconstructs
+repository layout at runtime. Each host provides content through its own
+`IContentSource` implementation:
 
 ```
 // Tests (GameCore.Tests/TestContentSource.cs)
-// Resolved from the known output path — four directories above the test binary.
+// GameData/Base is copied into the test output by the project's Content items.
+// Reads from the host-local output path; no repository-relative path math.
 IContentSource source = TestContentSource.Default;
 
 // Web sandbox (BattleSandbox.Web/Program.cs)
-// Registered as a DI service at host startup; injected into components.
-builder.Services.AddSingleton<IContentSource>(SandboxContentSource.Create(contentRoot));
+// Fetches content via HTTP from wwwroot/GameData/Base/ (static assets).
+// content-index.json lists all available files; every file is pre-fetched at startup.
+var contentSource = await HttpContentSource.LoadAsync(http, "GameData/Base");
+builder.Services.AddSingleton<IContentSource>(contentSource);
 
 // Unity (future)
 IContentSource source = new FileSystemContentSource(
     Application.streamingAssetsPath + "/GameData/Base");
 ```
 
-No host adapter walks parent directories at runtime. Each host calculates or receives
-the content root once, explicitly, at startup.
+Each host owns its content root. No host traverses parent directories at runtime.
 
 ### Scenario Setup
 
@@ -60,15 +63,13 @@ returned by `IBattleEngine`, but never holds its own HP or turn-state copies.
 
 ## IContentSource: the Content Access Boundary
 
-`IContentSource` is the explicit boundary between host file-system concerns and
+`IContentSource` is the explicit boundary between host content concerns and
 GameCore's content pipeline. GameCore never resolves paths or opens files on its own.
 
 The content loading chain:
 
 ```
-Host configures content root
-    ↓
-Host creates IContentSource (e.g. FileSystemContentSource)
+Host provides IContentSource
     ↓
 IBattleScenario.CreateSetup(source)
     ↓
@@ -80,6 +81,11 @@ BattleSetup (fully resolved, authoritative)
     ↓
 IBattleEngine.Start(setup)
 ```
+
+Host-provided implementations:
+- `FileSystemContentSource` — wraps a local directory (tests, Unity editor)
+- `HttpContentSource` — pre-fetches content via HTTP from `wwwroot` (web sandbox)
+- Future: `ResourceContentSource` for embedded data
 
 The `Base/Mods/` structure is preserved for future mod support:
 - `GameData/Base/` — core content (always loaded)
@@ -100,7 +106,7 @@ GameCore is a **local Unity package** referenced in `UnityClient/Packages/manife
 ```
 GameCore/
 ├── package.json               ← Unity package manifest (com.everdawn.gamecore)
-├── GameCore.csproj            ← .NET SDK project (netstandard2.1, LangVersion 10)
+├── GameCore.csproj            ← .NET SDK project (netstandard2.1, LangVersion 9)
 ├── Runtime/                   ← All runtime source code
 │   ├── GameCore.asmdef        ← Unity assembly definition (noEngineReferences: true)
 │   ├── Battle/                ← Battle engine, commands, views
@@ -113,38 +119,43 @@ GameCore/
 │   ├── Progression/           ← (future) character progression
 │   ├── Quests/                ← (future) quest system
 │   ├── SaveData/              ← (future) save/load
-│   ├── GlobalUsings.cs        ← Explicit global using aliases (System, Collections.Generic, Linq)
-│   └── Polyfills.cs           ← C# 9/10 polyfills for netstandard2.1 + Unity
+│   └── Polyfills.cs           ← C# 9 polyfill: IsExternalInit for record types
 └── GameData/                  ← (see GameData/ at repo root — not inside package)
 ```
 
 ### Unity Compatibility
 
-GameCore targets `netstandard2.1` and `LangVersion 10` (C# 10). This is compatible
-with Unity 6 (6000.x) and above. Compatibility constraints enforced in every file:
+GameCore targets `netstandard2.1` and `LangVersion 9` (C# 9). The shared runtime
+follows a conservative language subset that Unity's Roslyn toolchain can compile
+directly without SDK tooling:
 
-- `GlobalUsings.cs` declares all global usings **explicitly**. Unity compiles `.cs`
-  files directly and never reads the SDK-generated file in `obj/`, so every namespace
-  must appear here rather than relying on `ImplicitUsings`.
-- `Polyfills.cs` provides `IsExternalInit` — required for `init`-only properties and
-  `record` types in `netstandard2.1` builds that pre-date .NET 5.
+- **Block namespaces only.** File-scoped namespaces (`namespace X;`) are C# 10
+  and are not used in GameCore runtime code.
+- **No global using directives.** Every source file declares its own `using`
+  directives explicitly. Unity compiles `.cs` files directly and never reads the
+  SDK-generated `obj/` file that `ImplicitUsings` produces.
+- **No implicit usings.** `ImplicitUsings` is disabled in `GameCore.csproj`.
+  The project compiles correctly without any hidden imports.
+- **`Polyfills.cs`** provides `IsExternalInit` — required for `init`-only properties
+  and `record` types when targeting `netstandard2.1` (pre-.NET 5).
 
 C# features intentionally **avoided** in GameCore to stay Unity-safe:
+- File-scoped namespaces (C# 10) — use block namespaces instead
+- Global using directives (C# 10) — use explicit per-file usings instead
 - `required` members (C# 11) — use `init` properties without `required` instead
 - Collection expressions `[...]` (C# 12) — use `new T[] { ... }` instead
 - Primary constructors for non-record classes (C# 12)
 - Raw string literals `"""` (C# 11)
 
-CI validates both constraints with a dedicated step:
+CI enforces these constraints with a dedicated step:
 
 ```yaml
-- name: Unity compat check (LangVersion 10, no implicit usings)
+# Fails if file-scoped namespaces, global usings, C# 10+ syntax,
+# or any namespace that relies on implicit usings is introduced.
+- name: Unity compat check (LangVersion 9, no implicit usings)
   run: dotnet build GameCore/GameCore.csproj --no-restore --configuration Release
-       -p:LangVersion=10 -p:ImplicitUsings=disable
+       -p:LangVersion=9 -p:ImplicitUsings=disable
 ```
-
-This step catches both accidental use of newer C# syntax **and** any namespace that
-relies on the SDK-generated implicit-usings file instead of `GlobalUsings.cs`.
 
 ---
 

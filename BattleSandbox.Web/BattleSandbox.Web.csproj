@@ -17,4 +17,16 @@
     <ProjectReference Include="..\GameCore.Scenarios\GameCore.Scenarios.csproj" />
   </ItemGroup>
 
+  <!--
+    Publish GameData/Base YAML files as static web assets under wwwroot/GameData/Base/.
+    HttpContentSource fetches them via HTTP at runtime using the content-index.json manifest.
+    Update content-index.json whenever files are added to or removed from GameData/Base/.
+  -->
+  <ItemGroup>
+    <Content Include="..\GameData\Base\**\*.yml">
+      <Link>wwwroot\GameData\Base\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
