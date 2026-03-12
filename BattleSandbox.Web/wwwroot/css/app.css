@@ -127,6 +127,29 @@ html, body {
 }
 .enemy-acting { color: #ff9988; }
 
+.enemy-skills-bar {
+    background: #0e1318;
+    border: 1px solid #21262d;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.enemy-skills-unit {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+.enemy-skills-name {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #aaa;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+.enemy-skills-active { color: #ff9988; }
+
 .action-buttons {
     display: flex;
     gap: 0.5rem;
@@ -149,6 +172,9 @@ html, body {
     transition: filter 0.1s, opacity 0.1s;
 }
 .btn-action:disabled { opacity: 0.35; cursor: not-allowed; filter: grayscale(0.5); }
+/* Enemy info buttons are disabled but shown at full opacity — info only, not grayed */
+.btn-enemy-info { opacity: 0.75 !important; cursor: default !important; filter: none !important; }
+.btn-enemy-info:disabled { opacity: 0.75; cursor: default; filter: none; }
 
 .btn-attack   { background: #c4501a; color: #fff; }
 .btn-attack:not(:disabled):active { background: #a04012; }
