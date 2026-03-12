@@ -20,27 +20,27 @@ This is a **battle debugger**, not a second game client.
 ## Features
 
 ### Implemented
-- **Scenario selector** — dropdown populated from `ScenarioRegistry.All`; scenarios tagged 🎮 (playable) or 👁 (watch-only)
-- **Watch mode** — runs the full battle automatically and provides stop-motion playback: step forward/back, jump to start/end, click any event to jump to it
-- **Play mode** — interactive; player picks skills and targets each turn
-  - Skill buttons labelled as attack / skill / soulburn; AoE and ally-target variants handled
-  - Cooldown badges, MP cost display, available/unavailable states
-  - Single-target: select skill → click unit card to confirm target
-  - AoE: fires immediately on skill button click
-- **Auto mode** — continuously advances turns at configurable speed (Fast / Normal / Slow); toggleable mid-battle
-- **Take Control** — in watch mode, click "Take Control" at any step to switch to play mode from that exact battle state
-- **Undo** — in play mode, click any event in the log to rewind the battle to that point (replays commands deterministically)
-- **Unit portrait strip** — compact top bar showing all units with active/dead states highlighted
-- **Arena** — unit cards with HP/MP bars, stat line (STR / WIS / AGI), active and dead states
-- **Event log** — scrollable; current event highlighted; click-to-undo in play mode
-- **Floating numbers** — damage and heal numbers animate over unit cards on action
-- **Battle over panel** — Victory / Defeat with Retry button
+- [x] **Scenario selector** — dropdown populated from `ScenarioRegistry.All`; scenarios tagged 🎮 (playable) or 👁 (watch-only)
+- [x] **Watch mode** — runs the full battle automatically and provides stop-motion playback: step forward/back, jump to start/end, click any event to jump to it
+- [x] **Play mode** — interactive; player picks skills and targets each turn
+  - [x] Skill buttons labelled as attack / skill / soulburn; AoE and ally-target variants handled
+  - [x] Cooldown badges, MP cost display, available/unavailable states
+  - [x] Single-target: select skill → click unit card to confirm target
+  - [x] AoE: fires immediately on skill button click
+- [x] **Auto mode** — continuously advances turns at configurable speed (Fast / Normal / Slow); toggleable mid-battle
+- [x] **Take Control** — in watch mode, click "Take Control" at any step to switch to play mode from that exact battle state
+- [x] **Undo** — in play mode, click any event in the log to rewind the battle to that point (replays commands deterministically)
+- [x] **Unit portrait strip** — compact top bar showing all units with active/dead states highlighted
+- [x] **Arena** — unit cards with HP/MP bars, stat line (STR / WIS / AGI), active and dead states
+- [x] **Event log** — scrollable; current event highlighted; click-to-undo in play mode
+- [x] **Floating numbers** — damage and heal numbers animate over unit cards on action
+- [x] **Battle over panel** — Victory / Defeat with Retry button
 
 ### Not yet implemented (future)
-- Seed display / seed override
-- Scenario parameter tweaks (swap a unit, change level)
-- Share link (encode scenario + seed in URL)
-- Regression scenario tagging in the UI (backend interface `IRegressionScenario` exists in `GameCore.Scenarios`)
+- [ ] Seed display / seed override
+- [ ] Scenario parameter tweaks (swap a unit, change level)
+- [ ] Share link (encode scenario + seed in URL)
+- [ ] Regression scenario tagging in the UI (backend interface `IRegressionScenario` exists in `GameCore.Scenarios`)
 
 ---
 
