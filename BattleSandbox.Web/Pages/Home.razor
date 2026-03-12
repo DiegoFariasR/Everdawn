@@ -210,6 +210,7 @@
                     var st = state.First(s => s.UnitId == u.Id);
                     int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
                     int mpPct = u.MaxMp > 0 ? st.CurrentMp * 100 / u.MaxMp : 0;
+                    int focusPct = u.MaxFocus > 0 ? st.CurrentFocus * 100 / u.MaxFocus : 0;
                     string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
                     bool canHealTarget = pendingTargetIsAlly && !pendingIsAoe && _pendingAction != null && st.IsAlive && !_autoMode;
                     <div class="unit-card
@@ -230,6 +231,10 @@
                             {
                                 <div class="bar-wrap"><div class="mp-bar" style="width:@mpPct%"></div></div>
                             }
+                            @if (u.MaxFocus > 0)
+                            {
+                                <div class="bar-wrap"><div class="focus-bar" style="width:@focusPct%"></div></div>
+                            }
                             <div class="stat-text">@st.CurrentHp/@u.MaxHp HP &nbsp;|&nbsp; STR @u.Str &nbsp;WIS @u.Wis &nbsp;AGI @u.Agi</div>
                         </div>
                     </div>
@@ -244,6 +249,8 @@
                 {
                     var st = state.First(s => s.UnitId == u.Id);
                     int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
+                    int mpPct2 = u.MaxMp > 0 ? st.CurrentMp * 100 / u.MaxMp : 0;
+                    int focusPct2 = u.MaxFocus > 0 ? st.CurrentFocus * 100 / u.MaxFocus : 0;
                     string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
                     bool canTarget = pending != null && _pendingAction != null && !pendingIsAoe && st.IsAlive && !_autoMode && !pendingTargetIsAlly;
 
@@ -261,6 +268,14 @@
                         <div class="unit-info">
                             <div class="unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
                             <div class="bar-wrap"><div class="hp-bar" style="width:@hpPct%;background:@hpColor"></div></div>
+                            @if (u.MaxMp > 0)
+                            {
+                                <div class="bar-wrap"><div class="mp-bar" style="width:@mpPct2%"></div></div>
+                            }
+                            @if (u.MaxFocus > 0)
+                            {
+                                <div class="bar-wrap"><div class="focus-bar" style="width:@focusPct2%"></div></div>
+                            }
                             <div class="stat-text">@st.CurrentHp/@u.MaxHp HP &nbsp;|&nbsp; STR @u.Str &nbsp;WIS @u.Wis &nbsp;AGI @u.Agi</div>
                         </div>
                     </div>
@@ -362,6 +377,7 @@
                     var st = snap.UnitStates.First(s => s.UnitId == u.Id);
                     int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
                     int mpPct = u.MaxMp > 0 ? st.CurrentMp * 100 / u.MaxMp : 0;
+                    int focusPct = u.MaxFocus > 0 ? st.CurrentFocus * 100 / u.MaxFocus : 0;
                     string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
                     <div class="unit-card @(snap.Event.ActorId == u.Id ? "card-active" : "") @(!st.IsAlive ? "card-dead" : "")">
                         <div class="avatar player-avatar">@u.Name[0]</div>
@@ -369,6 +385,7 @@
                             <div class="unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
                             <div class="bar-wrap"><div class="hp-bar" style="width:@hpPct%;background:@hpColor"></div></div>
                             @if (u.MaxMp > 0) { <div class="bar-wrap"><div class="mp-bar" style="width:@mpPct%"></div></div> }
+                            @if (u.MaxFocus > 0) { <div class="bar-wrap"><div class="focus-bar" style="width:@focusPct%"></div></div> }
                             <div class="stat-text">@st.CurrentHp/@u.MaxHp HP</div>
                         </div>
                     </div>
@@ -381,6 +398,7 @@
                     var st = snap.UnitStates.First(s => s.UnitId == u.Id);
                     int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
                     int mpPct = u.MaxMp > 0 ? st.CurrentMp * 100 / u.MaxMp : 0;
+                    int focusPct2 = u.MaxFocus > 0 ? st.CurrentFocus * 100 / u.MaxFocus : 0;
                     string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
                     <div class="unit-card @(snap.Event.ActorId == u.Id ? "card-active" : "") @(!st.IsAlive ? "card-dead" : "")">
                         <div class="avatar enemy-avatar">@u.Name[0]</div>
@@ -388,6 +406,7 @@
                             <div class="unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
                             <div class="bar-wrap"><div class="hp-bar" style="width:@hpPct%;background:@hpColor"></div></div>
                             @if (u.MaxMp > 0) { <div class="bar-wrap"><div class="mp-bar" style="width:@mpPct%"></div></div> }
+                            @if (u.MaxFocus > 0) { <div class="bar-wrap"><div class="focus-bar" style="width:@focusPct2%"></div></div> }
                             <div class="stat-text">@st.CurrentHp/@u.MaxHp HP</div>
                         </div>
                     </div>
