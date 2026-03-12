@@ -307,7 +307,7 @@ namespace GameCore.Battle
                         double healRaw = 0;
                         foreach (var comp in effect.DamagePerHit)
                             foreach (var s in comp.Scaling)
-                                healRaw += actor.GetStat(s.Stat) * s.Multiplier;
+                                healRaw += actor.GetStat(s.Stat) * s.Scale;
                         healRaw *= skill.DamageMultiplier * empowerMult;
                         int healVariance = Math.Max(1, (int)healRaw / 5);
                         int amount = Math.Max(0, (int)healRaw + _rng.Next(-healVariance, healVariance + 1));

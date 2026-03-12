@@ -1,4 +1,4 @@
-- id: paladin-strike
+- id: strength-strike
   name: Strike
   effects:
     - kind: damage
@@ -8,7 +8,7 @@
           scaling:
             - stat: str
 
-- id: paladin-bash
+- id: strength-bash
   name: Shield Bash
   cooldown: 3
   effects:
@@ -20,7 +20,7 @@
             - stat: str
               scale: 1.4
 
-- id: paladin-heal
+- id: melee-heal
   name: Lay on Hands
   cooldown: 3
   effects:
@@ -31,7 +31,7 @@
             - stat: str
               scale: 1.2
 
-- id: rogue-strike
+- id: agility-strike
   name: Quick Strike
   effects:
     - kind: damage
@@ -41,7 +41,7 @@
           scaling:
             - stat: agi
 
-- id: rogue-poison
+- id: multi-strike
   name: Poison Blade
   cooldown: 3
   numberOfHits: 1.5
@@ -64,16 +64,6 @@
         - damageType: physical
           scaling:
             - stat: agi
-
-- id: gw-slash
-  name: Slash
-  effects:
-    - kind: damage
-      target: enemy
-      damagePerHit:
-        - damageType: physical
-          scaling:
-            - stat: str
 
 - id: gw-warcry
   name: War Cry
