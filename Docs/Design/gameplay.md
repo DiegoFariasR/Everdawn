@@ -52,13 +52,18 @@ Crystal can be attached to your character.
 ### Weapons
 
 - Weapons grants some abilities and allow some ability types to be used with it
-- If you use the weapon long enough your party learn it
+- If you use the weapon for a long time, then the character can also learn it
 
 ## Main Attributes
 
-- **Strength - STR** — Physical base damage, HP
-- **Wisdom - WIS** — Magic base damage, Mana
-- **Agility - AGI** — Number of hits increase
+- **Strength - STR**
+  - Physical base damage
+  - HP
+- **Wisdom - WIS**
+  - Magic base damage
+  - Mana
+- **Agility - AGI**
+  - Number of hits increase
   - Each 100% increase adds an extra hit instead
   - Each weapon and spell have a base attack speed
   - Initiative
