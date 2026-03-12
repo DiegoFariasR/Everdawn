@@ -31,16 +31,16 @@
         </div>
     </section>
 
-    @if (_playMode && _response != null && _setup != null)
+    @if (_playMode && _view != null && _setup != null)
     {
-        var state   = _response.State;
-        var lastEv  = _response.FullLog.LastOrDefault();
+        var state   = _view.Units;
+        var lastEv  = _view.FullLog.LastOrDefault();
         string evType = lastEv?.Type ?? "start";
-        var pending = _response.PendingInput;
+        var pending = _view.PendingInput;
         var pendingSkill = _pendingAction != null ? pending?.Skills.FirstOrDefault(s => s.Id == _pendingAction) : null;
         bool pendingTargetIsAlly = pendingSkill?.Target == BattleSkillTarget.Ally;
         bool pendingIsAoe        = pendingSkill?.IsAoe ?? false;
-        string? activeUnitId = pending?.Actor.Id ?? lastEv?.ActorId;
+        string? activeUnitId = pending?.ActorId ?? lastEv?.ActorId;
 
         <section class="portrait-strip">
             @foreach (var u in _setup.PlayerUnits)
@@ -137,7 +137,7 @@
         {
             <section class="action-bar">
                 <div class="acting-label">
-                    @(pending.Actor.Name + "'s turn")
+                    @(pending.ActorName + "'s turn")
                 </div>
                 @if (_autoMode)
                 {
@@ -173,19 +173,19 @@
                 }
             </section>
         }
-        else if (_response.IsOver)
+        else if (_view.IsOver)
         {
-            <section class="battle-over @(_response.WinningTeam == "player" ? "over-win" : "over-lose")">
-                @(_response.WinningTeam == "player" ? "⚔ Victory!" : "💀 Defeat...")
+            <section class="battle-over @(_view.WinningTeam == "player" ? "over-win" : "over-lose")">
+                @(_view.WinningTeam == "player" ? "⚔ Victory!" : "💀 Defeat...")
                 <button class="btn-run" style="margin-left:1rem" @onclick="StartSession">Retry</button>
             </section>
         }
 
         <section class="event-log play-log" id="play-log">
-            @for (int i = 0; i < _response.FullLog.Count; i++)
+            @for (int i = 0; i < _view.FullLog.Count; i++)
             {
-                var ev  = _response.FullLog[i];
-                bool isLast = i == _response.FullLog.Count - 1;
+                var ev  = _view.FullLog[i];
+                bool isLast = i == _view.FullLog.Count - 1;
                 int  idx = i;
                 <div class="event-entry @ev.Type @(isLast ? "event-current" : "")"
                      title="@(!_autoMode ? "Click to undo to this point" : "")"
@@ -290,16 +290,17 @@
     private bool _playMode;
 
     // ── Play mode ────────────────────────────────────────────────
-    private InteractiveBattleSession? _session;
-    private BattleResponse? _response;
+    private IBattleEngine? _engine;
+    private BattleView? _view;
     private string? _pendingAction;   // skill ID selected, waiting for target
     private bool _autoMode;
     private int _autoDelay = 1750;
 
-    // ── Action history (for undo) ────────────────────────────────
-    private record ActionRecord(BattleRequest Req, int LogCountBefore);
-    private List<ActionRecord> _actionHistory = [];
-    private BattleRequest? _startRequest;
+    // ── Command history (for undo) ────────────────────────────────
+    private record CommandRecord(BattleCommand Cmd, int LogCountBefore);
+    private List<CommandRecord> _commandHistory = [];
+    // Set when "Take Control From Here" is used; null for a normal start.
+    private ResumeFromSnapshotCommand? _resumeCommand;
 
     // ── Watch mode ───────────────────────────────────────────────
     private BattleResult? _result;
@@ -316,17 +317,17 @@
         _currentScenario = _scenarios.First(s => s.Id == _selectedScenarioId);
         _setup         = _currentScenario.CreateSetup();
         _playMode      = _currentScenario.IsPlayable;
-        _session       = null;
-        _response      = null;
+        _engine        = null;
+        _view          = null;
         _result        = null;
         _pendingAction = null;
 
         if (_playMode)
         {
-            _startRequest  = new StartBattleRequest();
-            _actionHistory = [];
-            _session  = new InteractiveBattleSession(_setup, _currentScenario.Seed);
-            _response = _session.HandleRequest(_startRequest);
+            _resumeCommand  = null;
+            _commandHistory = [];
+            _engine = new BattleSession(_currentScenario.Seed);
+            _view   = _engine.Start(_setup).View;
             SelectDefaultSkill();
             if (_autoMode) _ = RunAutoAsync();
         }
@@ -340,11 +341,12 @@
     private void TakeControlFromHere()
     {
         if (_result == null || _setup == null || _currentScenario == null) return;
-        var snap   = _result.Snapshots[_step];
-        _startRequest  = new ResumeFromSnapshotRequest(snap.UnitStates, snap.Event.ActorId, _step + 1);
-        _actionHistory = [];
-        _session  = new InteractiveBattleSession(_setup, _currentScenario.Seed);
-        _response = _session.HandleRequest(_startRequest);
+        var snap        = _result.Snapshots[_step];
+        _resumeCommand  = new ResumeFromSnapshotCommand(snap.UnitStates, snap.Event.ActorId, _step + 1);
+        _commandHistory = [];
+        _engine = new BattleSession(_currentScenario.Seed);
+        _engine.Start(_setup);
+        _view = _engine.TryExecute(_resumeCommand).View;
         SelectDefaultSkill();
         _playMode = true;
         _result   = null;
@@ -354,20 +356,21 @@
     private void ToggleAuto()
     {
         _autoMode = !_autoMode;
-        if (_autoMode && _session != null && _response?.PendingInput != null && !(_response.IsOver))
+        if (_autoMode && _engine != null && _view?.PendingInput != null && !(_view.IsOver))
             _ = RunAutoAsync();
     }
 
     private async Task RunAutoAsync()
     {
-        while (_autoMode && _session != null && !(_response?.IsOver ?? true))
+        while (_autoMode && _engine != null && !(_view?.IsOver ?? true))
         {
             await Task.Delay(_autoDelay);
-            if (!_autoMode || _session == null) break;
-            var req = new AdvanceOneTurnRequest();
-            _actionHistory.Add(new ActionRecord(req, _response!.FullLog.Count));
-            _response = _session.HandleRequest(req);
-            SpawnFloats(_response);
+            if (!_autoMode || _engine == null) break;
+            var cmd = new AdvanceTurnCommand();
+            _commandHistory.Add(new CommandRecord(cmd, _view!.FullLog.Count));
+            var result = _engine.TryExecute(cmd);
+            _view = result.View;
+            SpawnFloats(result.Events);
             SelectDefaultSkill();
             StateHasChanged();
         }
@@ -375,65 +378,65 @@
 
     private void FireAoe(string skillId)
     {
-        if (_session is null) return;
-        var req = new PlayerActionRequest(skillId, null);
-        _actionHistory.Add(new ActionRecord(req, _response!.FullLog.Count));
-        _response = _session.HandleRequest(req);
-        SpawnFloats(_response);
+        if (_engine is null) return;
+        var cmd = new PlayerActionCommand(skillId, null);
+        _commandHistory.Add(new CommandRecord(cmd, _view!.FullLog.Count));
+        var result = _engine.TryExecute(cmd);
+        _view = result.View;
+        SpawnFloats(result.Events);
         SelectDefaultSkill();
     }
 
     private void ConfirmTarget(string targetId)
     {
-        if (_session is null || _pendingAction is null) return;
-        var req = new PlayerActionRequest(_pendingAction, targetId);
-        _actionHistory.Add(new ActionRecord(req, _response!.FullLog.Count));
-        _response = _session.HandleRequest(req);
-        SpawnFloats(_response);
+        if (_engine is null || _pendingAction is null) return;
+        var cmd = new PlayerActionCommand(_pendingAction, targetId);
+        _commandHistory.Add(new CommandRecord(cmd, _view!.FullLog.Count));
+        var result = _engine.TryExecute(cmd);
+        _view = result.View;
+        SpawnFloats(result.Events);
         SelectDefaultSkill();
     }
-
 
     // ── Undo ──────────────────────────────────────────────────────
     private void UndoToEvent(int logIndex)
     {
-        if (_session == null || _setup == null || _currentScenario == null || _startRequest == null) return;
+        if (_engine == null || _setup == null || _currentScenario == null) return;
         if (_autoMode) return;
 
-        // Count how many actions to replay: action j is replayed only if ALL its
-        // produced events are strictly before logIndex (next action's LogCountBefore <= logIndex).
+        // Count how many commands to replay: command j is replayed only if ALL its
+        // produced events are strictly before logIndex (next command's LogCountBefore <= logIndex).
         int actionsToReplay = 0;
-        for (int j = 0; j < _actionHistory.Count; j++)
+        for (int j = 0; j < _commandHistory.Count; j++)
         {
-            int nextLogCount = j + 1 < _actionHistory.Count
-                ? _actionHistory[j + 1].LogCountBefore
-                : _response!.FullLog.Count;
+            int nextLogCount = j + 1 < _commandHistory.Count
+                ? _commandHistory[j + 1].LogCountBefore
+                : _view!.FullLog.Count;
             if (nextLogCount <= logIndex)
                 actionsToReplay = j + 1;
             else
                 break;
         }
 
-        var newSession = new InteractiveBattleSession(_setup, _currentScenario.Seed);
-        BattleResponse resp = newSession.HandleRequest(_startRequest);
+        var newEngine = new BattleSession(_currentScenario.Seed);
+        BattleView currentView = newEngine.Start(_setup).View;
+        if (_resumeCommand != null) currentView = newEngine.TryExecute(_resumeCommand).View;
         for (int j = 0; j < actionsToReplay; j++)
-        {
-            resp = newSession.HandleRequest(_actionHistory[j].Req);
-        }
+            currentView = newEngine.TryExecute(_commandHistory[j].Cmd).View;
 
-        _session       = newSession;
-        _response      = resp;
-        _actionHistory = _actionHistory.Take(actionsToReplay).ToList();
+        _engine         = newEngine;
+        _view           = currentView;
+        _commandHistory = _commandHistory.Take(actionsToReplay).ToList();
         _floats.Clear();
         SelectDefaultSkill();
     }
 
     // ── Default skill selection ───────────────────────────────────
     /// <summary>Pre-selects the same skill the auto AI would pick (last available).
-    /// Called whenever _response changes in play mode.</summary>
+    /// Called whenever _view changes in play mode.</summary>
     private void SelectDefaultSkill()
     {
-        var p = _response?.PendingInput;
+        var p = _view?.PendingInput;
         if (p is null) { _pendingAction = null; return; }
         var def = p.Skills.LastOrDefault(s => p.AvailableSkillIds.Contains(s.Id));
         _pendingAction = def?.Id;
@@ -451,10 +454,10 @@
     private readonly List<FloatNumber> _floats = [];
     private int _floatKey = 0;
 
-    private void SpawnFloats(BattleResponse? response)
+    private void SpawnFloats(IReadOnlyList<BattleEvent>? events)
     {
-        if (response is null) return;
-        foreach (var ev in response.NewEvents)
+        if (events is null) return;
+        foreach (var ev in events)
         {
             if (ev.TargetId is null || ev.Value <= 0) continue;
             bool isHeal = ev.Type == "skill" && ev.Description.Contains("heal", StringComparison.OrdinalIgnoreCase);

@@ -1,37 +1,14 @@
 namespace GameCore.Battle;
 
-/// <summary>
-/// Base for all messages the client sends to InteractiveBattleSession.
-/// </summary>
-public abstract record BattleRequest;
-
-/// <summary>Start a fresh battle from the beginning.</summary>
-public sealed record StartBattleRequest : BattleRequest;
-
-/// <summary>
-/// GameCore picks the best available action (SoulBurn > Skill > Attack based on MP)
-/// and a random valid target for the current player unit.
-/// </summary>
-public sealed record AutoPlayerActionRequest : BattleRequest;
-
-/// <summary>
-/// Resume from a mid-battle snapshot. HP/MP come from the snapshot state;
-/// turn order picks up after <paramref name="LastActorId"/>.
-/// </summary>
-public sealed record ResumeFromSnapshotRequest(
+// Internal request types — hidden behind the BattleSession public API.
+// The client communicates through BattleCommand types defined in BattleCommand.cs.
+internal abstract record BattleRequest;
+internal sealed record StartBattleRequest : BattleRequest;
+internal sealed record AutoPlayerActionRequest : BattleRequest;
+internal sealed record ResumeFromSnapshotRequest(
     IReadOnlyList<UnitState> State,
     string? LastActorId,
     int AtStep
 ) : BattleRequest;
-
-/// <summary>Submit a player action targeting a specific unit. TargetId is null for AoE skills.</summary>
-public sealed record PlayerActionRequest(
-    string SkillId,
-    string? TargetId
-) : BattleRequest;
-
-/// <summary>
-/// Auto-resolves exactly one actor's turn (player or enemy) without chaining further turns.
-/// Used by the sandbox to pace every turn individually with a delay.
-/// </summary>
-public sealed record AdvanceOneTurnRequest : BattleRequest;
+internal sealed record PlayerActionRequest(string SkillId, string? TargetId) : BattleRequest;
+internal sealed record AdvanceOneTurnRequest : BattleRequest;

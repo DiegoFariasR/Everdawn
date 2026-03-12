@@ -1,11 +1,7 @@
 namespace GameCore.Battle;
 
-/// <summary>
-/// Returned by InteractiveBattleSession.HandleRequest().
-/// Contains everything the client needs to render the current battle state.
-/// Clients must never query session internals directly — this is the full picture.
-/// </summary>
-public record BattleResponse(
+// Internal response type — projected to the public BattleView by BattleSession.
+internal record BattleResponse(
     /// <summary>Events produced by the most recent request (for animation / highlight).</summary>
     IReadOnlyList<BattleEvent> NewEvents,
     /// <summary>Full event log from the start of the session.</summary>

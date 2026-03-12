@@ -4,51 +4,53 @@ using GameCore.Scenarios;
 namespace GameCore.Tests.Battle;
 
 /// <summary>
-/// Tests for InteractiveBattleSession — the stateful request/response interface
-/// that UnityClient uses to drive battles step by step.
+/// Tests for BattleSession / IBattleEngine — the public contract that UnityClient
+/// depends on to drive battles step by step.
 /// </summary>
-public class InteractiveBattleSessionTests
+public class BattleSessionTests
 {
-    private static InteractiveBattleSession CreateSession()
+    private static (BattleSession engine, BattleView view) CreateStartedSession()
     {
         var scenario = new SampleScenario();
-        return new InteractiveBattleSession(scenario.CreateSetup(), scenario.Seed);
+        var engine = new BattleSession(scenario.Seed);
+        var result = engine.Start(scenario.CreateSetup());
+        return (engine, result.View);
     }
 
     // ── Start ────────────────────────────────────────────────────────────
 
     [Fact]
-    public void Start_ReturnsNonNullResponse()
+    public void Start_ReturnsSuccess()
     {
-        var session = CreateSession();
-        var response = session.HandleRequest(new StartBattleRequest());
-        Assert.NotNull(response);
+        var scenario = new SampleScenario();
+        var engine = new BattleSession(scenario.Seed);
+        var result = engine.Start(scenario.CreateSetup());
+        Assert.True(result.Success);
+        Assert.Null(result.Error);
     }
 
     [Fact]
-    public void Start_LogContainsStartEvent()
+    public void Start_ViewLogContainsStartEvent()
     {
-        var session = CreateSession();
-        var response = session.HandleRequest(new StartBattleRequest());
-        Assert.Contains(response.FullLog, e => e.Type == "start");
+        var (_, view) = CreateStartedSession();
+        Assert.Contains(view.FullLog, e => e.Type == "start");
     }
 
     [Fact]
-    public void Start_StateContainsAllUnits()
+    public void Start_ViewContainsAllUnits()
     {
         var scenario = new SampleScenario();
         var setup = scenario.CreateSetup();
-        var session = new InteractiveBattleSession(setup, scenario.Seed);
-        var response = session.HandleRequest(new StartBattleRequest());
-        Assert.Equal(setup.PlayerUnits.Count + setup.EnemyUnits.Count, response.State.Count);
+        var engine = new BattleSession(scenario.Seed);
+        var result = engine.Start(setup);
+        Assert.Equal(setup.PlayerUnits.Count + setup.EnemyUnits.Count, result.View.Units.Count);
     }
 
     [Fact]
     public void Start_AllUnitsBeginAlive()
     {
-        var session = CreateSession();
-        var response = session.HandleRequest(new StartBattleRequest());
-        Assert.All(response.State, s => Assert.True(s.IsAlive, $"Unit {s.UnitId} should start alive"));
+        var (_, view) = CreateStartedSession();
+        Assert.All(view.Units, s => Assert.True(s.IsAlive, $"Unit {s.UnitId} should start alive"));
     }
 
     [Fact]
@@ -58,9 +60,9 @@ public class InteractiveBattleSessionTests
         var setup = scenario.CreateSetup();
         var maxHp = setup.PlayerUnits.Concat(setup.EnemyUnits)
                         .ToDictionary(u => u.Id, u => u.MaxHp);
-        var session = new InteractiveBattleSession(setup, scenario.Seed);
-        var response = session.HandleRequest(new StartBattleRequest());
-        foreach (var state in response.State)
+        var engine = new BattleSession(scenario.Seed);
+        var result = engine.Start(setup);
+        foreach (var state in result.View.Units)
             Assert.Equal(maxHp[state.UnitId], state.CurrentHp);
     }
 
@@ -69,40 +71,39 @@ public class InteractiveBattleSessionTests
     {
         // Rogue has AGI=120, the highest initiative in the scenario.
         // AutoAdvance stops immediately because it's a player turn.
-        var session = CreateSession();
-        var response = session.HandleRequest(new StartBattleRequest());
-        Assert.NotNull(response.PendingInput);
-        Assert.Equal("rogue", response.PendingInput!.Actor.Id);
+        var (_, view) = CreateStartedSession();
+        Assert.NotNull(view.PendingInput);
+        Assert.Equal("rogue", view.PendingInput!.ActorId);
     }
 
     [Fact]
     public void Start_PendingInputListsRogueSkills()
     {
-        var session = CreateSession();
-        var response = session.HandleRequest(new StartBattleRequest());
-        var skills = response.PendingInput!.Skills;
+        var (_, view) = CreateStartedSession();
+        var skills = view.PendingInput!.Skills;
         Assert.NotEmpty(skills);
-        // First skill is always the free basic attack
+        // Index 0 is always the free basic action
         Assert.Equal(0, skills[0].MpCost);
     }
 
     [Fact]
     public void Start_PendingInputListsLivingEnemyTargets()
     {
-        var session = CreateSession();
-        var response = session.HandleRequest(new StartBattleRequest());
-        var enemies = response.PendingInput!.EnemyTargets;
-        Assert.NotEmpty(enemies);
-        Assert.All(enemies, e => Assert.Equal("enemy", e.Team));
+        var (_, view) = CreateStartedSession();
+        var enemyIds = view.PendingInput!.EnemyTargetIds;
+        Assert.NotEmpty(enemyIds);
     }
 
     [Fact]
-    public void Start_Twice_Throws()
+    public void Start_Twice_ReturnsFailed()
     {
-        var session = CreateSession();
-        session.HandleRequest(new StartBattleRequest());
-        Assert.Throws<InvalidOperationException>(
-            () => session.HandleRequest(new StartBattleRequest()));
+        var scenario = new SampleScenario();
+        var engine = new BattleSession(scenario.Seed);
+        engine.Start(scenario.CreateSetup());
+        var second = engine.Start(scenario.CreateSetup());
+        Assert.False(second.Success);
+        Assert.NotNull(second.Error);
+        Assert.Equal(ValidationErrorCode.SessionAlreadyStarted, second.Error!.Code);
     }
 
     // ── Auto-advance ─────────────────────────────────────────────────────
@@ -110,53 +111,51 @@ public class InteractiveBattleSessionTests
     [Fact]
     public void AutoAdvance_EventuallyEndsBattle()
     {
-        var session = CreateSession();
-        session.HandleRequest(new StartBattleRequest());
+        var (engine, _) = CreateStartedSession();
 
-        BattleResponse? last = null;
-        for (int i = 0; i < 500 && (last is null || !last.IsOver); i++)
-            last = session.HandleRequest(new AdvanceOneTurnRequest());
+        BattleStepResult? last = null;
+        for (int i = 0; i < 500 && (last is null || !last.View.IsOver); i++)
+            last = engine.TryExecute(new AdvanceTurnCommand());
 
         Assert.NotNull(last);
-        Assert.True(last!.IsOver, "Battle should end within 500 single-turn advances");
-        Assert.NotNull(last.WinningTeam);
+        Assert.True(last!.View.IsOver, "Battle should end within 500 single-turn advances");
+        Assert.NotNull(last.View.WinningTeam);
     }
 
     [Fact]
     public void AutoAdvance_WinnerMatchesBattleEngineResult()
     {
-        // Both BattleEngine.Run and InteractiveBattleSession with the same seed
-        // must agree on who wins.
+        // Both BattleEngine.Run and BattleSession with the same seed must agree on who wins.
         var scenario = new SampleScenario();
 
         var engineResult = BattleEngine.Run(scenario.CreateSetup(), scenario.Seed);
 
-        var session = new InteractiveBattleSession(scenario.CreateSetup(), scenario.Seed);
-        session.HandleRequest(new StartBattleRequest());
-        BattleResponse last = null!;
+        var engine = new BattleSession(scenario.Seed);
+        engine.Start(scenario.CreateSetup());
+        BattleStepResult last = null!;
         for (int i = 0; i < 500; i++)
         {
-            last = session.HandleRequest(new AdvanceOneTurnRequest());
-            if (last.IsOver) break;
+            last = engine.TryExecute(new AdvanceTurnCommand());
+            if (last.View.IsOver) break;
         }
 
-        Assert.Equal(engineResult.WinningTeam, last.WinningTeam);
+        Assert.Equal(engineResult.WinningTeam, last.View.WinningTeam);
     }
 
     [Fact]
     public void AutoAdvance_IsDeterministic()
     {
-        static BattleResponse RunToEnd(IBattleScenario scenario)
+        static BattleView RunToEnd(IBattleScenario scenario)
         {
-            var session = new InteractiveBattleSession(scenario.CreateSetup(), scenario.Seed);
-            session.HandleRequest(new StartBattleRequest());
-            BattleResponse last = null!;
+            var engine = new BattleSession(scenario.Seed);
+            engine.Start(scenario.CreateSetup());
+            BattleStepResult last = null!;
             for (int i = 0; i < 500; i++)
             {
-                last = session.HandleRequest(new AdvanceOneTurnRequest());
-                if (last.IsOver) break;
+                last = engine.TryExecute(new AdvanceTurnCommand());
+                if (last.View.IsOver) break;
             }
-            return last;
+            return last.View;
         }
 
         var scenario = new SampleScenario();
@@ -170,13 +169,52 @@ public class InteractiveBattleSessionTests
     [Fact]
     public void AutoAdvance_FullLogGrowsOverTime()
     {
-        var session = CreateSession();
-        var start = session.HandleRequest(new StartBattleRequest());
-        int logAfterStart = start.FullLog.Count;
+        var (engine, view) = CreateStartedSession();
+        int logAfterStart = view.FullLog.Count;
 
-        var next = session.HandleRequest(new AdvanceOneTurnRequest());
-        Assert.True(next.FullLog.Count > logAfterStart,
+        var next = engine.TryExecute(new AdvanceTurnCommand());
+        Assert.True(next.View.FullLog.Count > logAfterStart,
             "FullLog should grow after advancing a turn");
+    }
+
+    // ── Validation rejections ─────────────────────────────────────────────
+
+    [Fact]
+    public void TryExecute_BeforeStart_ReturnsNotStarted()
+    {
+        var engine = new BattleSession(42);
+        var result = engine.TryExecute(new AdvanceTurnCommand());
+        Assert.False(result.Accepted);
+        Assert.Equal(ValidationErrorCode.BattleNotStarted, result.Error!.Code);
+    }
+
+    [Fact]
+    public void PlayerAction_WithUnknownSkill_ReturnsUnknownSkill()
+    {
+        var (engine, _) = CreateStartedSession();
+        var result = engine.TryExecute(new PlayerActionCommand("nonexistent-skill", null));
+        Assert.False(result.Accepted);
+        Assert.Equal(ValidationErrorCode.UnknownSkill, result.Error!.Code);
+    }
+
+    [Fact]
+    public void PlayerAction_WithInvalidTarget_ReturnsInvalidTarget()
+    {
+        var (engine, view) = CreateStartedSession();
+        var basicSkillId = view.PendingInput!.Skills[0].Id;
+        var result = engine.TryExecute(new PlayerActionCommand(basicSkillId, "ghost-unit"));
+        Assert.False(result.Accepted);
+        Assert.Equal(ValidationErrorCode.InvalidTarget, result.Error!.Code);
+    }
+
+    [Fact]
+    public void RejectedCommand_LeavesStateUnchanged()
+    {
+        var (engine, view) = CreateStartedSession();
+        int logCountBefore = view.FullLog.Count;
+        engine.TryExecute(new PlayerActionCommand("nonexistent-skill", null));
+        var viewAfter = engine.GetView();
+        Assert.Equal(logCountBefore, viewAfter.FullLog.Count);
     }
 
     // ── Invariants ───────────────────────────────────────────────────────
@@ -189,15 +227,15 @@ public class InteractiveBattleSessionTests
         var maxHp = setup.PlayerUnits.Concat(setup.EnemyUnits)
                         .ToDictionary(u => u.Id, u => u.MaxHp);
 
-        var session = new InteractiveBattleSession(setup, scenario.Seed);
-        session.HandleRequest(new StartBattleRequest());
+        var engine = new BattleSession(scenario.Seed);
+        engine.Start(setup);
         for (int i = 0; i < 50; i++)
         {
-            var response = session.HandleRequest(new AdvanceOneTurnRequest());
-            foreach (var state in response.State)
+            var result = engine.TryExecute(new AdvanceTurnCommand());
+            foreach (var state in result.View.Units)
                 Assert.True(state.CurrentHp <= maxHp[state.UnitId],
                     $"Unit {state.UnitId} HP {state.CurrentHp} > max {maxHp[state.UnitId]}");
-            if (response.IsOver) break;
+            if (result.View.IsOver) break;
         }
     }
 }
