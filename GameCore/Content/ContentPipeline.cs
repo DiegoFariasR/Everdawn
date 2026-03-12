@@ -48,14 +48,14 @@ public static class ContentPipeline
         foreach (var raw in list)
             yield return new BattleModifier(
                 raw.Id, raw.Name, raw.Description,
-                Cost: raw.Cost,
-                Multiplier: raw.Multiplier,
-                IsAoe: raw.IsAoe,
-                Target: raw.Target != null ? Enum.Parse<BattleSkillTarget>(raw.Target, ignoreCase: true) : null,
-                Kind: raw.Kind != null ? Enum.Parse<EffectKind>(raw.Kind, ignoreCase: true) : null,
-                Cooldown: raw.Cooldown,
-                InitialCooldown: raw.InitialCooldown,
-                EffectType: raw.EffectType != null ? Enum.Parse<EffectType>(raw.EffectType, ignoreCase: true) : null);
+                SetCost: raw.SetCost,
+                SetDamageMultiplier: raw.SetDamageMultiplier,
+                SetIsAoe: raw.SetIsAoe,
+                SetTarget: raw.SetTarget != null ? Enum.Parse<BattleSkillTarget>(raw.SetTarget, ignoreCase: true) : null,
+                SetKind: raw.SetKind != null ? Enum.Parse<EffectKind>(raw.SetKind, ignoreCase: true) : null,
+                SetCooldown: raw.SetCooldown,
+                SetInitialCooldown: raw.SetInitialCooldown,
+                SetEffectType: raw.SetEffectType != null ? Enum.Parse<EffectType>(raw.SetEffectType, ignoreCase: true) : null);
     }
 
     // ── Skills ────────────────────────────────────────────────────────────
@@ -116,14 +116,14 @@ public static class ContentPipeline
                 return sk with
                 {
                     Modifiers = compiledMods.Select(m => m.Id).ToArray(),
-                    Cost = compiledMods.LastOrDefault(m => m.Cost != null)?.Cost ?? sk.Cost,
-                    Multiplier = compiledMods.LastOrDefault(m => m.Multiplier != null)?.Multiplier ?? sk.Multiplier,
-                    IsAoe = compiledMods.LastOrDefault(m => m.IsAoe != null)?.IsAoe ?? sk.IsAoe,
-                    Target = compiledMods.LastOrDefault(m => m.Target != null)?.Target ?? sk.Target,
-                    Kind = compiledMods.LastOrDefault(m => m.Kind != null)?.Kind ?? sk.Kind,
-                    Cooldown = compiledMods.LastOrDefault(m => m.Cooldown != null)?.Cooldown ?? sk.Cooldown,
-                    InitialCooldown = compiledMods.LastOrDefault(m => m.InitialCooldown != null)?.InitialCooldown ?? sk.InitialCooldown,
-                    EffectType = compiledMods.LastOrDefault(m => m.EffectType != null)?.EffectType ?? sk.EffectType,
+                    Cost = compiledMods.LastOrDefault(m => m.SetCost != null)?.SetCost ?? sk.Cost,
+                    DamageMultiplier = compiledMods.LastOrDefault(m => m.SetDamageMultiplier != null)?.SetDamageMultiplier ?? sk.DamageMultiplier,
+                    IsAoe = compiledMods.LastOrDefault(m => m.SetIsAoe != null)?.SetIsAoe ?? sk.IsAoe,
+                    Target = compiledMods.LastOrDefault(m => m.SetTarget != null)?.SetTarget ?? sk.Target,
+                    Kind = compiledMods.LastOrDefault(m => m.SetKind != null)?.SetKind ?? sk.Kind,
+                    Cooldown = compiledMods.LastOrDefault(m => m.SetCooldown != null)?.SetCooldown ?? sk.Cooldown,
+                    InitialCooldown = compiledMods.LastOrDefault(m => m.SetInitialCooldown != null)?.SetInitialCooldown ?? sk.InitialCooldown,
+                    EffectType = compiledMods.LastOrDefault(m => m.SetEffectType != null)?.SetEffectType ?? sk.EffectType,
                 };
             })
             .ToArray();
@@ -157,7 +157,7 @@ public static class ContentPipeline
         return new BattleSkill(
             raw.Id, raw.Name,
             Cost: raw.Cost,
-            Multiplier: raw.Multiplier,
+            DamageMultiplier: raw.DamageMultiplier,
             IsAoe: raw.IsAoe,
             Target: target,
             Kind: kind,

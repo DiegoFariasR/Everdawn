@@ -282,7 +282,7 @@ internal sealed class InteractiveBattleSession
                 if (skill.IsHeal)
                 {
                     int variance = Math.Max(1, actor.Attack / 5);
-                    int amount = (int)(actor.Attack * skill.Multiplier * empowerMult) + _rng.Next(-variance, variance + 1);
+                    int amount = (int)(actor.Attack * skill.DamageMultiplier * empowerMult) + _rng.Next(-variance, variance + 1);
                     var maxHp = _allUnits.First(u => u.Id == target.Id).MaxHp;
                     int healed = Math.Min(amount, maxHp - _hp[target.Id]);
                     _hp[target.Id] = Math.Min(maxHp, _hp[target.Id] + amount);
@@ -293,7 +293,7 @@ internal sealed class InteractiveBattleSession
                 }
                 else
                 {
-                    var hitData = DamageCalc.Compute(actor, target, skill.EffectType, skill.Multiplier, empowerMult, _rng);
+                    var hitData = DamageCalc.Compute(actor, target, skill.EffectType, skill.DamageMultiplier, empowerMult, _rng);
                     _hp[target.Id] = Math.Max(0, _hp[target.Id] - hitData.FinalDamage);
                     string hitLabel = effectiveHits > 1 ? $" (hit {i + 1}/{effectiveHits})" : "";
                     produced.Add(AddEvent(actor.Id,

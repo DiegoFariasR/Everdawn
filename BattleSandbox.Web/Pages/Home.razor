@@ -138,7 +138,7 @@
                         bool isAllySkill = skill.Target == BattleSkillTarget.Ally;
                         int  cdLeft      = pending.SkillCooldowns.GetValueOrDefault(skill.Id);
                         string keyHint   = !_autoMode && si < _skillKeys.Length ? _skillKeys[si] : "";
-                        @_renderSkillBtn((skill.Id, skill.Name, skill.EffectType, skill.Multiplier, skill.BaseDmg,
+                        @_renderSkillBtn((skill.Id, skill.Name, skill.EffectType, skill.DamageMultiplier, skill.BaseDmg,
                             isAoe, isAllySkill, skill.IsBasic, skill.IsUltimate,
                             skill.Cost, skill.Cooldown, cdLeft, skill.EffectiveInitialCooldown,
                             SkillSlotClass(si), canUse, isSelected, _autoMode,
@@ -159,8 +159,8 @@
                         @for (int si = 0; si < activeEnemy.ResolvedSkills.Count; si++)
                         {
                             var sk      = activeEnemy.ResolvedSkills[si];
-                            int baseDmg = (int)(activeEnemy.GetBaseAttack(sk.EffectType) * sk.Multiplier);
-                            @_renderSkillBtn((sk.Id, sk.Name, sk.EffectType, sk.Multiplier, baseDmg,
+                            int baseDmg = (int)(activeEnemy.GetBaseAttack(sk.EffectType) * sk.DamageMultiplier);
+                            @_renderSkillBtn((sk.Id, sk.Name, sk.EffectType, sk.DamageMultiplier, baseDmg,
                                 sk.IsAoe, sk.Target == BattleSkillTarget.Ally, sk.IsBasic, sk.IsUltimate,
                                 sk.Cost, sk.Cooldown, 0, sk.EffectiveInitialCooldown,
                                 SkillSlotClass(si), false, false, true,
@@ -713,13 +713,13 @@
         <div class="info-skills">
             @foreach (var sk in u.ResolvedSkills)
             {
-                int baseDmg = (int)(u.GetBaseAttack(sk.EffectType) * sk.Multiplier);
+                int baseDmg = (int)(u.GetBaseAttack(sk.EffectType) * sk.DamageMultiplier);
                 <div class="info-skill-row">
                     <span class="info-skill-name">@sk.Name</span>
                     @if (sk.IsBasic)    { <span class="info-badge badge-basic">Basic</span> }
                     @if (sk.IsUltimate) { <span class="info-badge badge-ult">Ult</span>   }
                     <span class="info-badge @DmgTypeCss(sk.EffectType)">@sk.EffectType</span>
-                    <span class="info-skill-stat">x@(sk.Multiplier.ToString("0.##"))</span>
+                    <span class="info-skill-stat">x@(sk.DamageMultiplier.ToString("0.##"))</span>
                     <span class="info-skill-stat">~@baseDmg</span>
                     @if (sk.Cost > 0)                   { <span class="info-skill-stat">@sk.Cost MP</span> }
                     @if (sk.IsAoe)                        { <span class="info-badge badge-aoe">AoE</span> }
@@ -740,14 +740,14 @@
     //   1. Add field to BattleSkill / SkillView.
     //   2. Add one @if badge line in the skill-btn-top or skill-btn-stats block below.
     //   3. Pass the field in every _renderSkillBtn call site (two loops above).
-    private RenderFragment<(string id, string name, EffectType dmgType, double multiplier, int baseDmg,
+    private RenderFragment<(string id, string name, EffectType dmgType, double damageMultiplier, int baseDmg,
         bool isAoe, bool isAllySkill, bool isBasic, bool isUltimate,
         int cost, int cooldown, int cdLeft, int effectiveInitCd,
         string btnClass, bool canUse, bool isSelected, bool isInfoOnly,
         string keyHint, Action onClick)> _renderSkillBtn =>
         ctx =>
         {
-            var (id, name, dmgType, multiplier, baseDmg,
+            var (id, name, dmgType, damageMultiplier, baseDmg,
                 isAoe, isAllySkill, isBasic, isUltimate,
                 cost, cooldown, cdLeft, effectiveInitCd,
                 btnClass, canUse, isSelected, isInfoOnly,
@@ -772,7 +772,7 @@
             <span class="info-badge @DmgTypeCss(dmgType)">@dmgType</span>
             @if (isBasic)    { <span class="info-badge badge-basic">Basic</span> }
             @if (isUltimate) { <span class="info-badge badge-ult">Ult</span>   }
-            <span class="info-skill-stat">x@(multiplier.ToString("0.##"))</span>
+            <span class="info-skill-stat">x@(damageMultiplier.ToString("0.##"))</span>
             <span class="info-skill-stat">~@baseDmg</span>
             @if (effectiveInitCd > 0) { <span class="info-skill-stat">Init@("")@effectiveInitCd</span> }
         </div>

@@ -8,12 +8,12 @@ public class RawModifier
     public string Description { get; set; } = "";
 
     // Nullable stat overrides — only fields explicitly set in YAML will override the base skill.
-    public int? Cost { get; set; }
-    public double? Multiplier { get; set; }
-    public bool? IsAoe { get; set; }
-    public string? Target { get; set; }
-    public string? Kind { get; set; }
-    public int? Cooldown { get; set; }
-    public int? InitialCooldown { get; set; }
-    public string? EffectType { get; set; }
+    public int? SetCost { get; set; }
+    public double? SetDamageMultiplier { get; set; }
+    public bool? SetIsAoe { get; set; }
+    public string? SetTarget { get; set; }
+    public string? SetKind { get; set; }
+    public int? SetCooldown { get; set; }
+    public int? SetInitialCooldown { get; set; }
+    public string? SetEffectType { get; set; }
 }

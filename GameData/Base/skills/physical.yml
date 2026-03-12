@@ -1,18 +1,18 @@
 - id: paladin-strike
   name: Strike
   effectType: Physical
-  multiplier: 1.0
+  damageMultiplier: 1.0
 
 - id: paladin-bash
   name: Shield Bash
   effectType: Physical
-  multiplier: 1.4
+  damageMultiplier: 1.4
   cooldown: 3
 
 - id: paladin-heal
   name: Lay on Hands
   effectType: Physical
-  multiplier: 1.2
+  damageMultiplier: 1.2
   kind: Heal
   target: Ally
   cooldown: 3
@@ -20,50 +20,50 @@
 - id: rogue-strike
   name: Quick Strike
   effectType: Physical
-  multiplier: 1.0
+  damageMultiplier: 1.0
 
 - id: rogue-poison
   name: Poison Blade
   effectType: Physical
-  multiplier: 1.5
+  damageMultiplier: 1.5
   cooldown: 3
 
 - id: rogue-mark
   name: Death Mark
   effectType: Physical
-  multiplier: 2.5
+  damageMultiplier: 2.5
   cooldown: 3
 
 - id: gw-slash
   name: Slash
   effectType: Physical
-  multiplier: 1.0
+  damageMultiplier: 1.0
 
 - id: gw-warcry
   name: War Cry
   effectType: Physical
-  multiplier: 1.6
+  damageMultiplier: 1.6
   cooldown: 3
 
 - id: gw-frenzy
   name: Frenzy
   effectType: Physical
-  multiplier: 2.4
+  damageMultiplier: 2.4
   cooldown: 3
 
 - id: ga-shot
   name: Arrow Shot
   effectType: Physical
-  multiplier: 1.0
+  damageMultiplier: 1.0
 
 - id: ga-precise
   name: Precise Shot
   effectType: Physical
-  multiplier: 1.8
+  damageMultiplier: 1.8
   cooldown: 3
 
 - id: ga-volley
   name: Volley
   effectType: Physical
-  multiplier: 2.2
+  damageMultiplier: 2.2
   cooldown: 3

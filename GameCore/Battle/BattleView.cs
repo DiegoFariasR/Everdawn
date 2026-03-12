@@ -9,7 +9,7 @@ public sealed record SkillView(
     string Id,
     string Name,
     int Cost,
-    double Multiplier,
+    double DamageMultiplier,
     bool IsAoe,
     bool IsHeal,
     int Cooldown,

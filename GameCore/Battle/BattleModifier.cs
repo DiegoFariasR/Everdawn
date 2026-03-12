@@ -10,12 +10,12 @@ public record BattleModifier(
     string Id,
     string Name,
     string Description,
-    int? Cost = null,
-    double? Multiplier = null,
-    bool? IsAoe = null,
-    BattleSkillTarget? Target = null,
-    EffectKind? Kind = null,
-    int? Cooldown = null,
-    int? InitialCooldown = null,
-    EffectType? EffectType = null
+    int? SetCost = null,
+    double? SetDamageMultiplier = null,
+    bool? SetIsAoe = null,
+    BattleSkillTarget? SetTarget = null,
+    EffectKind? SetKind = null,
+    int? SetCooldown = null,
+    int? SetInitialCooldown = null,
+    EffectType? SetEffectType = null
 );

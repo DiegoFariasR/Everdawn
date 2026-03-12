@@ -9,7 +9,7 @@ public record BattleSkill(
     string Id,
     string Name,
     int Cost,
-    double Multiplier,
+    double DamageMultiplier,
     bool IsAoe = false,
     BattleSkillTarget Target = BattleSkillTarget.Enemy,
     EffectKind Kind = EffectKind.Damage,

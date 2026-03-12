@@ -6,7 +6,7 @@ public class RawSkill
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
     public int Cost { get; set; }
-    public double Multiplier { get; set; } = 1.0;
+    public double DamageMultiplier { get; set; } = 1.0;
     public bool IsAoe { get; set; }
     public string Target { get; set; } = "Enemy";
     public string Kind { get; set; } = "Damage";
