@@ -10,17 +10,18 @@
 
 ## Abilities
 
-- [ ] N passive traits (defaults, immutables)
-- [ ] 1 passive ability
-- [x] 1 basic attack/cantrip
-  - [x] 50% base effect
-- [x] 1 secondary ability
-  - [x] 100% base effect
-  - [x] 2 round cd
-- [x] 1 ultimate
-  - [x] 150% base effect
-  - [x] start with 1 round cd
-  - [x] 2 round cd
+- Characters can have:
+  - [ ] N passive traits
+  - [ ] 1 passive ability
+  - [x] 1 basic attack/cantrip
+    - [x] 50% base effect
+  - [x] 1 secondary ability
+    - [x] 100% base effect
+    - [x] 2 round cd
+  - [x] 1 ultimate
+    - [x] 150% base effect
+    - [x] start with 1 round cd
+    - [x] 2 round cd
 
 - [ ] Abilities can have second cast version, can be a weaker version, a stop main effect or confirm to transformation
 - [ ] Passives can do many things, separated by context
@@ -29,10 +30,11 @@
 
 - **Strength - STR**
   - [ ] Physical base damage
-  - [ ] HP
+  - [ ] More HP
 - **Wisdom - WIS**
   - [ ] Magic base damage
-  - [x] Mana
+  - [x] More Mana
+  - [ ] Affect on big or small the other bars are
 - **Agility - AGI**
   - [x] Number of hits increase
   - [x] Each 100% increase adds an extra hit instead

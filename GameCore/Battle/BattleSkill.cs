@@ -17,5 +17,7 @@ public record BattleSkill(
     /// <summary>Turns this unit must wait before using this skill again. 0 = no cooldown.</summary>
     int Cooldown = 0,
     /// <summary>Cooldown this skill starts with at the beginning of battle.</summary>
-    int InitialCooldown = 0
+    int InitialCooldown = 0,
+    /// <summary>The damage type this skill deals. Determines which attacker stat and defender resistance apply.</summary>
+    DamageType DamageType = DamageType.Physical
 );

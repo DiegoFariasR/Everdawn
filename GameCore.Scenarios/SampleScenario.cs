@@ -37,9 +37,9 @@ public class SampleScenario : IBattleScenario, IRegressionScenario
             ]),
             new("mage", "Mage", "player", Level: 12, Str: 62, Wis: 110, Agi:  70, Skills:
             [
-                new("mage-bolt",   "Magic Bolt",   MpCost: 0, Multiplier: 1.0),
-                new("mage-burst",  "Arcane Burst", MpCost: 0, Multiplier: 1.6, Cooldown: 3),
-                new("mage-meteor", "Meteor",        MpCost: 0, Multiplier: 2.0, IsAoe: true, Cooldown: 3, InitialCooldown: 1),
+                new("mage-bolt",   "Magic Bolt",   MpCost: 0, Multiplier: 1.0, DamageType: DamageType.Magical),
+                new("mage-burst",  "Arcane Burst", MpCost: 0, Multiplier: 1.6, Cooldown: 3, DamageType: DamageType.Magical),
+                new("mage-meteor", "Meteor",        MpCost: 0, Multiplier: 2.0, IsAoe: true, Cooldown: 3, InitialCooldown: 1, DamageType: DamageType.Magical),
             ], Traits: [BattleTrait.MagicUser]),
             new("rogue", "Rogue", "player", Level: 12, Str: 54, Wis:  0, Agi: 120, Skills:
             [
@@ -64,9 +64,9 @@ public class SampleScenario : IBattleScenario, IRegressionScenario
             ], Traits: [BattleTrait.Focus]),
             new("necro", "Necromancer", "enemy", Level: 15, Str: 80, Wis: 105, Agi:  65, Skills:
             [
-                new("necro-bolt",  "Dark Bolt",   MpCost: 0, Multiplier: 1.0),
-                new("necro-drain", "Life Drain",  MpCost: 0, Multiplier: 1.8, Cooldown: 3),
-                new("necro-soul",  "Soul Siphon", MpCost: 0, Multiplier: 3.0, Cooldown: 3),
+                new("necro-bolt",  "Dark Bolt",   MpCost: 0, Multiplier: 1.0, DamageType: DamageType.Magical),
+                new("necro-drain", "Life Drain",  MpCost: 0, Multiplier: 1.8, Cooldown: 3, DamageType: DamageType.Magical),
+                new("necro-soul",  "Soul Siphon", MpCost: 0, Multiplier: 3.0, Cooldown: 3, DamageType: DamageType.Magical),
             ], Traits: [BattleTrait.MagicUser]),
         ],
     };
