@@ -62,6 +62,38 @@ public sealed class BattleSession : IBattleEngine
         return BuildView(_lastResponse);
     }
 
+    /// <summary>
+    /// Runs a complete battle with AI controlling all units (same logic as auto mode in the sandbox)
+    /// and returns a <see cref="BattleResult"/> with one snapshot per event — suitable for watch-mode replay.
+    /// </summary>
+    public static BattleResult RunFull(BattleSetup setup, int seed)
+    {
+        var session = new BattleSession(seed);
+        var snapshots = new List<BattleSnapshot>();
+        int step = 0;
+
+        var start = session.Start(setup);
+        var unitStates = start.View.Units;
+        foreach (var ev in start.Events)
+            snapshots.Add(new BattleSnapshot { Step = step++, Event = ev, UnitStates = unitStates });
+
+        while (!session.GetView().IsOver)
+        {
+            var result = session.TryExecute(new AdvanceTurnCommand());
+            unitStates = result.View.Units;
+            foreach (var ev in result.Events)
+                snapshots.Add(new BattleSnapshot { Step = step++, Event = ev, UnitStates = unitStates });
+        }
+
+        var view = session.GetView();
+        return new BattleResult
+        {
+            Snapshots = snapshots,
+            WinningTeam = view.WinningTeam ?? "enemy",
+            Seed = seed,
+        };
+    }
+
     // ── Command handlers ─────────────────────────────────────────────────
 
     private BattleStepResult ExecutePlayerAction(PlayerActionCommand cmd)
