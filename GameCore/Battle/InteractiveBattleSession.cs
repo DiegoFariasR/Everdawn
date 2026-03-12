@@ -25,11 +25,11 @@ internal sealed class InteractiveBattleSession
         _hp = _allUnits.ToDictionary(u => u.Id, u => u.MaxHp);
         _mp = _allUnits.ToDictionary(u => u.Id, u => u.MaxMp);
         _rng = new Random(seed);
-        // Apply initial cooldowns
+        // Apply initial cooldowns (Ultimate modifier auto-supplies 1 round if not set higher)
         foreach (var u in _allUnits)
             foreach (var s in u.ResolvedSkills)
-                if (s.InitialCooldown > 0)
-                    _skillCooldowns[s.Id] = s.InitialCooldown;
+                if (s.EffectiveInitialCooldown > 0)
+                    _skillCooldowns[s.Id] = s.EffectiveInitialCooldown;
         // Initialize focus for Focus-trait units
         foreach (var u in _allUnits.Where(u => u.HasTrait(BattleTrait.Focus)))
             _focus[u.Id] = u.InitialFocus;
@@ -241,17 +241,14 @@ internal sealed class InteractiveBattleSession
         // Consume MP once (skill[0] always has MpCost == 0)
         _mp[actor.Id] = Math.Max(0, _mp[actor.Id] - skill.MpCost);
 
-        // Determine event type from skill index for CSS colouring
-        var skills = actor.ResolvedSkills;
-        int skillIdx = skills.ToList().IndexOf(skill);
-        if (skillIdx < 0) skillIdx = 0;
+        // Determine event type from skill modifier
         string evType = skill.IsHeal ? "skill"
-                       : skillIdx == 0 ? "attack" : skillIdx == 1 ? "skill" : "soulburn";
+                       : skill.IsBasic ? "attack" : skill.IsUltimate ? "soulburn" : "skill";
 
         // Focus empowerment: fires when focus is full and the actor uses a non-basic offensive skill
         bool isFocusEmpowered = actor.HasTrait(BattleTrait.Focus)
             && GetFocus(actor.Id) == 100
-            && skillIdx > 0
+            && !skill.IsBasic
             && !skill.IsHeal;
         if (isFocusEmpowered)
         {
@@ -266,13 +263,12 @@ internal sealed class InteractiveBattleSession
         int effectiveHits = skill.IsHeal ? 1 : actor.HitCount;
         foreach (var target in targets)
         {
-            for (int hit = 0; hit < effectiveHits; hit++)
+            for (int i = 0; i < effectiveHits; i++)
             {
-                int variance = Math.Max(1, actor.Attack / 5);
-                int amount = (int)(actor.Attack * skill.Multiplier * empowerMult) + _rng.Next(-variance, variance + 1);
-
                 if (skill.IsHeal)
                 {
+                    int variance = Math.Max(1, actor.Attack / 5);
+                    int amount = (int)(actor.Attack * skill.Multiplier * empowerMult) + _rng.Next(-variance, variance + 1);
                     var maxHp = _allUnits.First(u => u.Id == target.Id).MaxHp;
                     int healed = Math.Min(amount, maxHp - _hp[target.Id]);
                     _hp[target.Id] = Math.Min(maxHp, _hp[target.Id] + amount);
@@ -282,13 +278,14 @@ internal sealed class InteractiveBattleSession
                 }
                 else
                 {
-                    _hp[target.Id] = Math.Max(0, _hp[target.Id] - amount);
-                    string hitLabel = effectiveHits > 1 ? $" (hit {hit + 1}/{effectiveHits})" : "";
+                    var hitData = DamageCalc.Compute(actor, target, skill.DamageType, skill.Multiplier, empowerMult, _rng);
+                    _hp[target.Id] = Math.Max(0, _hp[target.Id] - hitData.FinalDamage);
+                    string hitLabel = effectiveHits > 1 ? $" (hit {i + 1}/{effectiveHits})" : "";
                     produced.Add(AddEvent(actor.Id,
                         skill.IsAoe
-                            ? $"  \u2192 {target.Name} takes {amount} damage{hitLabel}."
-                            : $"{actor.Name} uses {skill.Name} on {target.Name} for {amount} damage{hitLabel}.",
-                        evType, target.Id, amount));
+                            ? $"  \u2192 {target.Name} takes {hitData.FinalDamage} damage{hitLabel}."
+                            : $"{actor.Name} uses {skill.Name} on {target.Name} for {hitData.FinalDamage} damage{hitLabel}.",
+                        evType, target.Id, hitData.FinalDamage));
 
                     // Focus: actor gains 10 per offensive hit; target loses 10 per incoming hit
                     if (actor.HasTrait(BattleTrait.Focus))

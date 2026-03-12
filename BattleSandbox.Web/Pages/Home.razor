@@ -31,6 +31,141 @@
         </div>
     </section>
 
+    @if (_setup != null)
+    {
+        <div class="info-toggle-row">
+            <button class="btn-info-toggle @(_showInfo ? "btn-info-on" : "")"
+                    @onclick="() => _showInfo = !_showInfo">
+                ℹ @(_showInfo ? "Hide Details" : "Unit Details")
+            </button>
+        </div>
+    }
+
+    @* INFO PANEL — update this block whenever BattleUnit or BattleSkill gains a new
+       attribute, derived stat, trait, bar (MP, Focus, etc.), resistance type, or
+       skill modifier/property. Every data point visible in GameCore should appear here. *@
+    @if (_showInfo && _setup != null)
+    {
+        <section class="info-panel">
+            <div class="info-team-label">Players</div>
+            @foreach (var u in _setup.PlayerUnits)
+            {
+                int _physAtk = u.PhysAttack;
+                int _magAtk  = u.MagicAttack;
+                <div class="info-unit">
+                    <div class="info-unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
+                    <div class="info-attrs">
+                        <div class="info-attr"><span class="info-attr-key">HP</span><span class="info-attr-val">@u.MaxHp</span></div>
+                        <div class="info-attr"><span class="info-attr-key">STR</span><span class="info-attr-val">@u.Str</span></div>
+                        <div class="info-attr"><span class="info-attr-key">WIS</span><span class="info-attr-val">@u.Wis</span></div>
+                        <div class="info-attr"><span class="info-attr-key">AGI</span><span class="info-attr-val">@u.Agi</span></div>
+                        <div class="info-attr"><span class="info-attr-key">P.Atk</span><span class="info-attr-val">@_physAtk</span></div>
+                        <div class="info-attr"><span class="info-attr-key">M.Atk</span><span class="info-attr-val">@_magAtk</span></div>
+                        <div class="info-attr"><span class="info-attr-key">Init</span><span class="info-attr-val">@u.Initiative</span></div>
+                        <div class="info-attr"><span class="info-attr-key">Hits</span><span class="info-attr-val">@u.HitCount</span></div>
+                        @if (u.MaxMp > 0) {
+                            <div class="info-attr"><span class="info-attr-key">MP</span><span class="info-attr-val">@u.MaxMp</span></div>
+                        }
+                        @if (u.MaxFocus > 0) {
+                            <div class="info-attr"><span class="info-attr-key">Focus</span><span class="info-attr-val">@u.MaxFocus</span></div>
+                        }
+                    </div>
+                    @if (u.Traits is { Count: > 0 })
+                    {
+                        <div class="info-badges">
+                            @foreach (var t in u.Traits) { <span class="info-badge badge-trait">@t</span> }
+                        </div>
+                    }
+                    @if (u.Resistances is { Count: > 0 })
+                    {
+                        <div class="info-badges">
+                            @foreach (var kvp in u.Resistances)
+                            {
+                                <span class="info-badge @(kvp.Value > 0 ? "badge-resist" : "badge-weak")">@kvp.Key @(kvp.Value > 0 ? $"+{kvp.Value}%" : $"{kvp.Value}%")</span>
+                            }
+                        </div>
+                    }
+                    <div class="info-skills">
+                        @foreach (var sk in u.ResolvedSkills)
+                        {
+                            int _baseDmg = (int)(u.GetBaseAttack(sk.DamageType) * sk.Multiplier);
+                            <div class="info-skill-row">
+                                <span class="info-skill-name">@sk.Name</span>
+                                @if (sk.IsBasic)    { <span class="info-badge badge-basic">Basic</span> }
+                                @if (sk.IsUltimate) { <span class="info-badge badge-ult">Ult</span>   }
+                                <span class="info-badge @(sk.DamageType == DamageType.Magical ? "badge-mag" : "badge-phys")">@sk.DamageType</span>
+                                <span class="info-skill-stat">×@(sk.Multiplier.ToString("0.##"))</span>
+                                <span class="info-skill-stat">~@_baseDmg</span>
+                                @if (sk.MpCost > 0)                   { <span class="info-skill-stat">@sk.MpCost MP</span> }
+                                @if (sk.IsAoe)                        { <span class="info-badge badge-aoe">AoE</span> }
+                                @if (sk.Cooldown > 0)                 { <span class="info-skill-stat">CD @sk.Cooldown</span> }
+                                @if (sk.EffectiveInitialCooldown > 0) { <span class="info-skill-stat">Init.CD @sk.EffectiveInitialCooldown</span> }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            <div class="info-team-label info-team-enemies">Enemies</div>
+            @foreach (var u in _setup.EnemyUnits)
+            {
+                int _physAtk = u.PhysAttack;
+                int _magAtk  = u.MagicAttack;
+                <div class="info-unit">
+                    <div class="info-unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
+                    <div class="info-attrs">
+                        <div class="info-attr"><span class="info-attr-key">HP</span><span class="info-attr-val">@u.MaxHp</span></div>
+                        <div class="info-attr"><span class="info-attr-key">STR</span><span class="info-attr-val">@u.Str</span></div>
+                        <div class="info-attr"><span class="info-attr-key">WIS</span><span class="info-attr-val">@u.Wis</span></div>
+                        <div class="info-attr"><span class="info-attr-key">AGI</span><span class="info-attr-val">@u.Agi</span></div>
+                        <div class="info-attr"><span class="info-attr-key">P.Atk</span><span class="info-attr-val">@_physAtk</span></div>
+                        <div class="info-attr"><span class="info-attr-key">M.Atk</span><span class="info-attr-val">@_magAtk</span></div>
+                        <div class="info-attr"><span class="info-attr-key">Init</span><span class="info-attr-val">@u.Initiative</span></div>
+                        <div class="info-attr"><span class="info-attr-key">Hits</span><span class="info-attr-val">@u.HitCount</span></div>
+                        @if (u.MaxMp > 0) {
+                            <div class="info-attr"><span class="info-attr-key">MP</span><span class="info-attr-val">@u.MaxMp</span></div>
+                        }
+                        @if (u.MaxFocus > 0) {
+                            <div class="info-attr"><span class="info-attr-key">Focus</span><span class="info-attr-val">@u.MaxFocus</span></div>
+                        }
+                    </div>
+                    @if (u.Traits is { Count: > 0 })
+                    {
+                        <div class="info-badges">
+                            @foreach (var t in u.Traits) { <span class="info-badge badge-trait">@t</span> }
+                        </div>
+                    }
+                    @if (u.Resistances is { Count: > 0 })
+                    {
+                        <div class="info-badges">
+                            @foreach (var kvp in u.Resistances)
+                            {
+                                <span class="info-badge @(kvp.Value > 0 ? "badge-resist" : "badge-weak")">@kvp.Key @(kvp.Value > 0 ? $"+{kvp.Value}%" : $"{kvp.Value}%")</span>
+                            }
+                        </div>
+                    }
+                    <div class="info-skills">
+                        @foreach (var sk in u.ResolvedSkills)
+                        {
+                            int _baseDmg = (int)(u.GetBaseAttack(sk.DamageType) * sk.Multiplier);
+                            <div class="info-skill-row">
+                                <span class="info-skill-name">@sk.Name</span>
+                                @if (sk.IsBasic)    { <span class="info-badge badge-basic">Basic</span> }
+                                @if (sk.IsUltimate) { <span class="info-badge badge-ult">Ult</span>   }
+                                <span class="info-badge @(sk.DamageType == DamageType.Magical ? "badge-mag" : "badge-phys")">@sk.DamageType</span>
+                                <span class="info-skill-stat">×@(sk.Multiplier.ToString("0.##"))</span>
+                                <span class="info-skill-stat">~@_baseDmg</span>
+                                @if (sk.MpCost > 0)                   { <span class="info-skill-stat">@sk.MpCost MP</span> }
+                                @if (sk.IsAoe)                        { <span class="info-badge badge-aoe">AoE</span> }
+                                @if (sk.Cooldown > 0)                 { <span class="info-skill-stat">CD @sk.Cooldown</span> }
+                                @if (sk.EffectiveInitialCooldown > 0) { <span class="info-skill-stat">Init.CD @sk.EffectiveInitialCooldown</span> }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </section>
+    }
+
     @if (_playMode && _view != null && _setup != null)
     {
         var state   = _view.Units;
@@ -288,6 +423,7 @@
     private IBattleScenario? _currentScenario;
     private BattleSetup? _setup;
     private bool _playMode;
+    private bool _showInfo;
 
     // ── Play mode ────────────────────────────────────────────────
     private IBattleEngine? _engine;

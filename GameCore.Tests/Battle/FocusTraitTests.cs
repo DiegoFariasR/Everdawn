@@ -150,7 +150,7 @@ public class FocusTraitTests
                 new("focus-unit", "Fighter", "player", Level: 1, Str: 200, Wis: 0, Agi: playerAgi,
                     Skills:
                     [
-                        new("basic",   "Strike",     MpCost: 0, Multiplier: 1.0),
+                        new("basic",   "Strike",     MpCost: 0, Multiplier: 1.0, Modifiers: [SkillModifier.Basic]),
                         new("special", "Power Blow", MpCost: 0, Multiplier: 1.5, Cooldown: 2),
                     ],
                     Traits: [BattleTrait.Focus]),
@@ -181,7 +181,7 @@ public class FocusTraitTests
                 new("focus-unit", "Fighter", "player", Level: 1, Str: playerStr, Wis: 0, Agi: 50,
                     Skills:
                     [
-                        new("basic",   "Strike",     MpCost: 0, Multiplier: 1.0),
+                        new("basic",   "Strike",     MpCost: 0, Multiplier: 1.0, Modifiers: [SkillModifier.Basic]),
                         new("special", "Power Blow", MpCost: 0, Multiplier: 1.5, Cooldown: 2),
                     ],
                     Traits: [BattleTrait.Focus]),

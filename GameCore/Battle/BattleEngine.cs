@@ -45,8 +45,8 @@ public static class BattleEngine
                 if (targets.Count == 0) { battleOver = true; break; }
 
                 var target = targets[rng.Next(targets.Count)];
-                int variance = actor.Attack / 5;
-                int damage = actor.Attack + rng.Next(-variance, variance + 1);
+                var hitData = DamageCalc.Compute(actor, target, actor.NaturalDamageType, 1.0, 1.0, rng);
+                int damage = hitData.FinalDamage;
                 hp[target.Id] = Math.Max(0, hp[target.Id] - damage);
                 if (actor.HasTrait(BattleTrait.Focus))
                     focus[actor.Id] = Math.Min(100, GetFocus(actor.Id) + 10);

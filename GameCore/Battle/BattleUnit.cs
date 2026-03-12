@@ -13,12 +13,22 @@ public record BattleUnit(
     int Agi,
     int MaxMpOverride = 0,
     IReadOnlyList<BattleSkill>? Skills = null,
-    IReadOnlyList<BattleTrait>? Traits = null
+    IReadOnlyList<BattleTrait>? Traits = null,
+    /// <summary>Damage type → resistance percentage. Negative values are weaknesses.</summary>
+    IReadOnlyDictionary<DamageType, int>? Resistances = null
 )
 {
     // ── Traits ───────────────────────────────────────────────────────
     /// <summary>Returns true if this unit has the given trait.</summary>
     public bool HasTrait(BattleTrait trait) => Traits?.Contains(trait) ?? false;
+
+    // ── Resistances ──────────────────────────────────────────────────
+    /// <summary>
+    /// Returns this unit's resistance percentage for <paramref name="type"/>.
+    /// 0 = no mitigation. 50 = half damage. 100 = immune. Negative = weakness.
+    /// </summary>
+    public int GetResistance(DamageType type) =>
+        Resistances != null && Resistances.TryGetValue(type, out int r) ? r : 0;
 
     // ── Derived stats ────────────────────────────────────────────────
     /// <summary>Max HP derived from STR.</summary>
@@ -29,6 +39,12 @@ public record BattleUnit(
     public int MagicAttack => Wis * 8;
     /// <summary>Effective attack power — highest of physical or magic.</summary>
     public int Attack => Math.Max(PhysAttack, MagicAttack);
+    /// <summary>Returns the base attack stat for the given damage type.</summary>
+    public int GetBaseAttack(DamageType type) =>
+        type == DamageType.Magical ? MagicAttack : PhysAttack;
+    /// <summary>The damage type that maps to this unit's highest attack stat.</summary>
+    public DamageType NaturalDamageType =>
+        MagicAttack > PhysAttack ? DamageType.Magical : DamageType.Physical;
     /// <summary>Turn order priority derived from AGI.</summary>
     public int Initiative => Agi;
     /// <summary>Hits per action: 1 base + 1 per 100 AGI.</summary>
@@ -49,5 +65,5 @@ public record BattleUnit(
     /// </summary>
     public IReadOnlyList<BattleSkill> ResolvedSkills => Skills is { Count: > 0 }
         ? Skills
-        : new BattleSkill[] { new BattleSkill("attack", "Attack", MpCost: 0, Multiplier: 1.0) };
+        : new BattleSkill[] { new BattleSkill("attack", "Attack", MpCost: 0, Multiplier: 1.0, Modifiers: [SkillModifier.Basic]) };
 }
