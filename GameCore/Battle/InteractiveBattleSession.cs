@@ -1,12 +1,7 @@
 namespace GameCore.Battle;
 
-/// <summary>
-/// A stateful interactive battle session. Exposes a single entry point:
-/// <see cref="HandleRequest"/>. Clients send <see cref="BattleRequest"/> messages
-/// and receive a <see cref="BattleResponse"/> — no direct session properties are
-/// ever queried. This mirrors how the UnityClient would talk to GameCore.
-/// </summary>
-public class InteractiveBattleSession
+// Internal battle runner. All external access goes through BattleSession : IBattleEngine.
+internal sealed class InteractiveBattleSession
 {
     private readonly List<BattleUnit> _allUnits;
     private readonly List<BattleUnit> _turnOrder;
