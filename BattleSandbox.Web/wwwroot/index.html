@@ -28,6 +28,20 @@
         <span class="dismiss">🗙</span>
     </div>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
+    <script>
+        window.everdawnKeys = {
+            _handler: null,
+            init(dotNetRef) {
+                const ignore = e => ['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName);
+                this._handler = e => { if (!ignore(e)) dotNetRef.invokeMethodAsync('OnKeyDown', e.key); };
+                window.addEventListener('keydown', this._handler);
+            },
+            dispose() {
+                if (this._handler) window.removeEventListener('keydown', this._handler);
+                this._handler = null;
+            }
+        };
+    </script>
 </body>
 
 </html>

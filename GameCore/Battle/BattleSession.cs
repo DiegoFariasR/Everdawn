@@ -187,7 +187,7 @@ public sealed class BattleSession : IBattleEngine
             inputView = new PendingInputView(
                 ActorId: p.Actor.Id,
                 ActorName: p.Actor.Name,
-                Skills: p.Skills.Select(ToSkillView).ToArray(),
+                Skills: p.Skills.Select(s => ToSkillView(s, p.Actor)).ToArray(),
                 AvailableSkillIds: p.AvailableSkillIds,
                 EnemyTargetIds: p.EnemyTargets.Select(u => u.Id).ToArray(),
                 AllyTargetIds: p.AllyTargets.Select(u => u.Id).ToArray(),
@@ -204,6 +204,8 @@ public sealed class BattleSession : IBattleEngine
         );
     }
 
-    private static SkillView ToSkillView(BattleSkill s) =>
-        new SkillView(s.Id, s.Name, s.MpCost, s.Multiplier, s.IsAoe, s.IsHeal, s.Cooldown, s.Target);
+    private static SkillView ToSkillView(BattleSkill s, BattleUnit actor) =>
+        new SkillView(s.Id, s.Name, s.MpCost, s.Multiplier, s.IsAoe, s.IsHeal, s.Cooldown, s.Target,
+            s.DamageType, s.IsBasic, s.IsUltimate, s.EffectiveInitialCooldown,
+            (int)(actor.GetBaseAttack(s.DamageType) * s.Multiplier));
 }
