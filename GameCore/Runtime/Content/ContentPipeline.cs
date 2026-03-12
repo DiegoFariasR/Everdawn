@@ -189,7 +189,10 @@ namespace GameCore.Content
                 IsAoe: raw.IsAoe,
                 Cooldown: raw.Cooldown,
                 InitialCooldown: raw.InitialCooldown,
-                NumberOfHits: raw.NumberOfHits);
+                NumberOfHits: raw.NumberOfHits,
+                HitsScaling: raw.HitsScaling.Count == 0
+                    ? null
+                    : raw.HitsScaling.Select(s => new DamageScaling(s.Stat, s.Scale)).ToArray<DamageScaling>());
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────

@@ -22,8 +22,10 @@ namespace GameCore.Battle
         int EffectiveInitialCooldown,
         /// <summary>Estimated total damage across all hits = Σ(actor stat × scaling) × DamageMultiplier × NumberOfHits.</summary>
         int BaseDmg,
-        /// <summary>Number of hits this skill fires (see <see cref="BattleSkill.NumberOfHits"/>).</summary>
-        double NumberOfHits
+        /// <summary>Fixed base hit count (see <see cref="BattleSkill.NumberOfHits"/>).</summary>
+        double NumberOfHits,
+        /// <summary>Stat-based bonus to hit count (see <see cref="BattleSkill.HitsScaling"/>). Empty when not used.</summary>
+        IReadOnlyList<DamageScaling> HitsScaling
     );
 
     /// <summary>

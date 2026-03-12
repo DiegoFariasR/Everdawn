@@ -284,10 +284,15 @@ namespace GameCore.Battle
             // When NumberOfHits is 1.0 (default), the unit's HitCount (derived from AGI) applies.
             int effectiveHits;
             double perHitHitsMult;
-            if (!skill.IsHeal && skill.NumberOfHits != 1.0)
+            bool hasHitsOverride = skill.NumberOfHits != 1.0 || (skill.HitsScaling != null && skill.HitsScaling.Count > 0);
+            if (!skill.IsHeal && hasHitsOverride)
             {
-                effectiveHits = Math.Max(1, (int)Math.Floor(skill.NumberOfHits));
-                perHitHitsMult = skill.NumberOfHits / effectiveHits;
+                double rawHits = skill.NumberOfHits;
+                if (skill.HitsScaling != null)
+                    foreach (var s in skill.HitsScaling)
+                        rawHits += actor.GetStat(s.Stat) * s.Scale;
+                effectiveHits = Math.Max(1, (int)Math.Floor(rawHits));
+                perHitHitsMult = rawHits / effectiveHits;
             }
             else
             {

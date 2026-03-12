@@ -40,7 +40,12 @@ namespace GameCore.Battle
         /// Number of hits this skill fires. Floor(n) hits, each dealing DamageMultiplier × (n / floor(n)) of base.
         /// Total damage = DamageMultiplier × NumberOfHits × base. When 1.0 (default), the unit's HitCount applies instead.
         /// </summary>
-        double NumberOfHits = 1.0
+        double NumberOfHits = 1.0,
+        /// <summary>
+        /// Optional stat-based bonus to hit count. Effective hits = floor(NumberOfHits + Σ(stat × scale)), min 1.
+        /// When empty and NumberOfHits == 1.0, the unit's HitCount (AGI-derived) is used instead.
+        /// </summary>
+        IReadOnlyList<DamageScaling>? HitsScaling = null
     )
     {
         /// <summary>Returns true if this skill carries the given modifier (case-insensitive).</summary>
@@ -82,7 +87,11 @@ namespace GameCore.Battle
             foreach (var comp in Effects[0].DamagePerHit)
                 foreach (var s in comp.Scaling)
                     total += actor.GetStat(s.Stat) * s.Scale;
-            return (int)(total * DamageMultiplier * NumberOfHits);
+            double hits = NumberOfHits;
+            if (HitsScaling != null)
+                foreach (var s in HitsScaling)
+                    hits += actor.GetStat(s.Stat) * s.Scale;
+            return (int)(total * DamageMultiplier * hits);
         }
     }
 }

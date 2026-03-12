@@ -40,6 +40,11 @@ namespace GameCore.Content.Raw
         /// Total damage = DamageMultiplier × numberOfHits × base. Defaults to 1.0 (single hit, no split).
         /// </summary>
         public double NumberOfHits { get; set; } = 1.0;
+        /// <summary>
+        /// Optional stat-based bonus added to NumberOfHits at runtime.
+        /// Effective hits = floor(NumberOfHits + Σ(actor.GetStat(stat) × scale)), min 1.
+        /// </summary>
+        public List<RawDamageScaling> HitsScaling { get; set; } = new List<RawDamageScaling>();
         public bool IsAoe { get; set; }
         public int Cooldown { get; set; }
         public int InitialCooldown { get; set; }
