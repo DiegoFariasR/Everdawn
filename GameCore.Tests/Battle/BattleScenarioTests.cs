@@ -4,13 +4,50 @@ using GameCore.Scenarios;
 namespace GameCore.Tests.Battle;
 
 /// <summary>
-/// Tests against the shared scenario definitions in GameCore.Scenarios.
-/// Validates scenario structure, and locks down regression anchors
-/// so accidental engine or scenario changes are caught immediately.
+/// Tests for the shared scenario layer (GameCore.Scenarios).
+/// Structural rules run automatically over every scenario in <see cref="ScenarioRegistry"/>.
+/// Regression anchors run automatically over every <see cref="IRegressionScenario"/> in the registry.
+/// To add coverage for a new scenario: add it to <see cref="ScenarioRegistry"/> — no additional
+/// test code is needed for structural or regression checks.
 /// </summary>
 public class BattleScenarioTests
 {
-    // ── Scenario structure ───────────────────────────────────────────────
+    // ── MemberData sources ───────────────────────────────────────────────
+
+    public static IEnumerable<object[]> AllScenarios =>
+        ScenarioRegistry.All.Select(s => new object[] { s });
+
+    public static IEnumerable<object[]> AllRegressionScenarios =>
+        ScenarioRegistry.RegressionScenarios.Select(s => new object[] { s });
+
+    // ── Registry health ──────────────────────────────────────────────────
+
+    [Fact]
+    public void Registry_IsNonEmpty()
+    {
+        Assert.NotEmpty(ScenarioRegistry.All);
+    }
+
+    [Fact]
+    public void Registry_AllIdsAreUnique()
+    {
+        var ids = ScenarioRegistry.All.Select(s => s.Id).ToList();
+        Assert.Equal(ids.Count, ids.Distinct().Count());
+    }
+
+    [Fact]
+    public void Registry_HasAtLeastOnePlayableScenario()
+    {
+        Assert.Contains(ScenarioRegistry.All, s => s.IsPlayable);
+    }
+
+    [Fact]
+    public void Registry_HasAtLeastOneRegressionScenario()
+    {
+        Assert.NotEmpty(ScenarioRegistry.RegressionScenarios);
+    }
+
+    // ── SampleScenario contract ──────────────────────────────────────────
 
     [Fact]
     public void SampleScenario_HasCorrectId()
@@ -30,111 +67,91 @@ public class BattleScenarioTests
         Assert.True(new SampleScenario().IsPlayable);
     }
 
-    [Fact]
-    public void SampleScenario_HasPlayerAndEnemyUnits()
+    // ── Structural rules — every registered scenario ─────────────────────
+
+    [Theory, MemberData(nameof(AllScenarios))]
+    public void AllScenarios_HavePlayerAndEnemyUnits(IBattleScenario scenario)
     {
-        var setup = new SampleScenario().CreateSetup();
+        var setup = scenario.CreateSetup();
         Assert.NotEmpty(setup.PlayerUnits);
         Assert.NotEmpty(setup.EnemyUnits);
     }
 
-    [Fact]
-    public void SampleScenario_AllUnitsHavePositiveMaxHp()
+    [Theory, MemberData(nameof(AllScenarios))]
+    public void AllScenarios_AllUnitsHavePositiveMaxHp(IBattleScenario scenario)
     {
-        var setup = new SampleScenario().CreateSetup();
+        var setup = scenario.CreateSetup();
         foreach (var unit in setup.PlayerUnits.Concat(setup.EnemyUnits))
             Assert.True(unit.MaxHp > 0, $"Unit '{unit.Id}' has MaxHp <= 0");
     }
 
-    [Fact]
-    public void SampleScenario_AllUnitsHaveAtLeastOneSkill()
+    [Theory, MemberData(nameof(AllScenarios))]
+    public void AllScenarios_AllUnitsHaveAtLeastOneSkill(IBattleScenario scenario)
     {
-        var setup = new SampleScenario().CreateSetup();
+        var setup = scenario.CreateSetup();
         foreach (var unit in setup.PlayerUnits.Concat(setup.EnemyUnits))
             Assert.NotEmpty(unit.ResolvedSkills);
     }
 
-    [Fact]
-    public void SampleScenario_FirstSkillOfEveryUnitIsFree()
+    [Theory, MemberData(nameof(AllScenarios))]
+    public void AllScenarios_FirstSkillOfEveryUnitIsFree(IBattleScenario scenario)
     {
-        // Rule: index 0 must always be the free basic skill (MpCost == 0).
-        var setup = new SampleScenario().CreateSetup();
+        // Rule: index 0 is always the free basic skill (MpCost == 0).
+        var setup = scenario.CreateSetup();
         foreach (var unit in setup.PlayerUnits.Concat(setup.EnemyUnits))
             Assert.Equal(0, unit.ResolvedSkills[0].MpCost);
     }
 
-    [Fact]
-    public void SampleScenario_AllUnitIdsAreUnique()
+    [Theory, MemberData(nameof(AllScenarios))]
+    public void AllScenarios_AllUnitIdsAreUnique(IBattleScenario scenario)
     {
-        var setup = new SampleScenario().CreateSetup();
+        var setup = scenario.CreateSetup();
         var ids = setup.PlayerUnits.Concat(setup.EnemyUnits).Select(u => u.Id).ToList();
         Assert.Equal(ids.Count, ids.Distinct().Count());
     }
 
-    // ── Watch scenario ───────────────────────────────────────────────────
-
-    [Fact]
-    public void SampleScenarioWatch_IsNotPlayable()
+    [Theory, MemberData(nameof(AllScenarios))]
+    public void AllScenarios_RunCompletesWithoutException(IBattleScenario scenario)
     {
-        Assert.False(new SampleScenarioWatch().IsPlayable);
-    }
-
-    [Fact]
-    public void SampleScenarioWatch_SharesSeedWithPlayable()
-    {
-        Assert.Equal(new SampleScenario().Seed, new SampleScenarioWatch().Seed);
-    }
-
-    [Fact]
-    public void SampleScenarioWatch_ProducesSameResultAsPlayable()
-    {
-        var playable = new SampleScenario();
-        var watch = new SampleScenarioWatch();
-        var rPlayable = BattleEngine.Run(playable.CreateSetup(), playable.Seed);
-        var rWatch = BattleEngine.Run(watch.CreateSetup(), watch.Seed);
-        Assert.Equal(rPlayable.WinningTeam, rWatch.WinningTeam);
-        Assert.Equal(rPlayable.Snapshots.Count, rWatch.Snapshots.Count);
-    }
-
-    // ── Regression anchors ───────────────────────────────────────────────
-
-    [Fact]
-    public void SampleScenario_RunCompletesWithoutException()
-    {
-        var scenario = new SampleScenario();
         var ex = Record.Exception(() => BattleEngine.Run(scenario.CreateSetup(), scenario.Seed));
         Assert.Null(ex);
     }
 
+    // ── WatchScenario ────────────────────────────────────────────────────
+
     [Fact]
-    public void SampleScenario_Seed42_WinnerIsPlayer()
+    public void WatchScenario_IsNotPlayable()
     {
-        // Regression anchor: seed 42 always produces a player victory.
-        // If this changes, the engine or scenario definition changed non-trivially.
-        var scenario = new SampleScenario();
-        var result = BattleEngine.Run(scenario.CreateSetup(), scenario.Seed);
-        Assert.Equal("player", result.WinningTeam);
+        Assert.False(new WatchScenario(new SampleScenario()).IsPlayable);
     }
 
     [Fact]
-    public void SampleScenario_Seed42_SnapshotCountIsStable()
+    public void WatchScenario_InheritsSourceSeedAndProducesSameResult()
     {
-        // Regression anchor: exact battle length for seed 42.
-        // Updated intentionally when the scenario or engine changes.
-        // Value established by running the engine and recording the output.
-        var scenario = new SampleScenario();
-        var result = BattleEngine.Run(scenario.CreateSetup(), scenario.Seed);
-        Assert.Equal(BattleScenarioAnchors.SampleSeed42SnapshotCount, result.Snapshots.Count);
+        var source = new SampleScenario();
+        var watch = new WatchScenario(source);
+        Assert.Equal(source.Seed, watch.Seed);
+        var r1 = BattleEngine.Run(source.CreateSetup(), source.Seed);
+        var r2 = BattleEngine.Run(watch.CreateSetup(), watch.Seed);
+        Assert.Equal(r1.WinningTeam, r2.WinningTeam);
+        Assert.Equal(r1.Snapshots.Count, r2.Snapshots.Count);
     }
-}
 
-/// <summary>
-/// Holds hardcoded regression anchor values for known scenarios.
-/// Update these intentionally when the scenario or engine changes.
-/// </summary>
-internal static class BattleScenarioAnchors
-{
-    // BattleEngine.Run(SampleScenario, seed=42) produces exactly 64 snapshots:
-    // 1 start + 56 attack events + 6 death events + 1 end = 64
-    public const int SampleSeed42SnapshotCount = 64;
+    // ── Regression anchors — auto-discovered from registry ───────────────
+    // To add a new regression: implement IRegressionScenario, register it.
+    // These theory methods pick it up with zero changes here.
+
+    [Theory, MemberData(nameof(AllRegressionScenarios))]
+    public void AllRegressionScenarios_MatchExpectedWinner(IRegressionScenario scenario)
+    {
+        var result = BattleEngine.Run(scenario.CreateSetup(), scenario.Seed);
+        Assert.Equal(scenario.ExpectedWinner, result.WinningTeam);
+    }
+
+    [Theory, MemberData(nameof(AllRegressionScenarios))]
+    public void AllRegressionScenarios_MatchExpectedSnapshotCount(IRegressionScenario scenario)
+    {
+        var result = BattleEngine.Run(scenario.CreateSetup(), scenario.Seed);
+        Assert.Equal(scenario.ExpectedSnapshotCount, result.Snapshots.Count);
+    }
 }

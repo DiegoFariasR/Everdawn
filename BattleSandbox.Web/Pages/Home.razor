@@ -308,7 +308,7 @@
 
     protected override void OnInitialized()
     {
-        _scenarios = [new SampleScenario(), new SampleScenarioWatch()];
+        _scenarios = ScenarioRegistry.All.ToList();
         _selectedScenarioId = _scenarios[0].Id;
     }
 

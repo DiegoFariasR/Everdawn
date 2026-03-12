@@ -3,16 +3,21 @@ using GameCore.Battle;
 namespace GameCore.Scenarios;
 
 /// <summary>
-/// Watch-mode (auto-replay) version of the sample scenario.
-/// Uses the same setup and seed — just observed, not controlled.
+/// A watch-only (non-interactive) wrapper around any <see cref="IBattleScenario"/>.
+/// The battle runs automatically — the player observes the replay but does not control it.
+/// Use this to expose an existing scenario in the sandbox's replay/observe mode.
 /// </summary>
-public class SampleScenarioWatch : IBattleScenario
+public sealed class WatchScenario : IBattleScenario
 {
-    private readonly SampleScenario _inner = new();
+    private readonly IBattleScenario _source;
 
-    public string Id => "sample-scenario-watch";
-    public string DisplayName => "Sample Battle (Watch)";
-    public int Seed => _inner.Seed;
+    public WatchScenario(IBattleScenario source) => _source = source;
+
+    public string Id => _source.Id + "-watch";
+    public string DisplayName => _source.DisplayName + " (Watch)";
+    public int Seed => _source.Seed;
     public bool IsPlayable => false;
-    public BattleSetup CreateSetup() => _inner.CreateSetup();
+    public BattleSetup CreateSetup() => _source.CreateSetup();
+
+    public override string ToString() => $"{DisplayName} [{Id}]";
 }
