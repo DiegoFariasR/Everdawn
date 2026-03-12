@@ -36,7 +36,7 @@ public sealed class BattleSession : IBattleEngine
 
         _setup = setup;
         _inner = new InteractiveBattleSession(setup, _seed);
-        _lastResponse = _inner.HandleRequest(new StartBattleRequest());
+        _lastResponse = _inner.HandleRequest(new InitiateBattleRequest());
         return new BattleStartResult(true, null, BuildView(_lastResponse), _lastResponse.NewEvents);
     }
 

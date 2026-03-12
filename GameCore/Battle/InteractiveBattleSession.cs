@@ -38,7 +38,7 @@ internal sealed class InteractiveBattleSession
     /// </summary>
     public BattleResponse HandleRequest(BattleRequest request) => request switch
     {
-        StartBattleRequest r => HandleStart(r),
+        InitiateBattleRequest r => HandleStart(r),
         ResumeFromSnapshotRequest r => HandleResume(r),
         PlayerActionRequest r => HandlePlayerAction(r),
         AutoPlayerActionRequest r => HandleAutoPlayerAction(r),
@@ -48,7 +48,7 @@ internal sealed class InteractiveBattleSession
 
     // ── Request handlers ─────────────────────────────────────────────────
 
-    private BattleResponse HandleStart(StartBattleRequest _)
+    private BattleResponse HandleStart(InitiateBattleRequest _)
     {
         if (_started) throw new InvalidOperationException("Session already started.");
         _started = true;

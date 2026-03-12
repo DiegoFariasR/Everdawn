@@ -20,8 +20,15 @@ namespace GameCore.Battle;
 public interface IBattleEngine
 {
     /// <summary>
-    /// Initializes the battle from the given setup. Must be called exactly once before
-    /// any <see cref="TryExecute"/> calls. Returns a failed result if already started.
+    /// Initializes the battle from a fully-resolved, authoritative <see cref="BattleSetup"/>.
+    /// Must be called exactly once before any <see cref="TryExecute"/> calls.
+    /// Returns a failed result if already started.
+    /// <para>
+    /// <b>Caller responsibility:</b> The <paramref name="setup"/> passed here must already be
+    /// the backend-resolved truth. Do not pass client-assembled setup in production.
+    /// In the backend-authoritative model, this is called after the backend validates
+    /// a <see cref="StartBattleRequest"/> and builds the authoritative configuration.
+    /// </para>
     /// </summary>
     BattleStartResult Start(BattleSetup setup);
 
