@@ -3,7 +3,7 @@ namespace GameCore.Battle;
 /// <summary>
 /// The state of a single unit captured in a snapshot.
 /// </summary>
-public record UnitState(string UnitId, int CurrentHp, int CurrentMp, bool IsAlive, int CurrentFocus = 0);
+public record UnitState(string UnitId, int CurrentHp, int CurrentMp, bool IsAlive, int CurrentFocus = 0, int CurrentFury = 0);
 
 /// <summary>
 /// State of all units at a given step in the battle, paired with the event that produced it.

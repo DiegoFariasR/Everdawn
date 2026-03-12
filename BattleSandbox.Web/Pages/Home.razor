@@ -69,6 +69,9 @@
                         @if (u.MaxFocus > 0) {
                             <div class="info-attr"><span class="info-attr-key">Focus</span><span class="info-attr-val">@u.MaxFocus</span></div>
                         }
+                        @if (u.MaxFury > 0) {
+                            <div class="info-attr"><span class="info-attr-key">Fury</span><span class="info-attr-val">@u.MaxFury</span></div>
+                        }
                     </div>
                     @if (u.Traits is { Count: > 0 })
                     {
@@ -126,6 +129,9 @@
                         }
                         @if (u.MaxFocus > 0) {
                             <div class="info-attr"><span class="info-attr-key">Focus</span><span class="info-attr-val">@u.MaxFocus</span></div>
+                        }
+                        @if (u.MaxFury > 0) {
+                            <div class="info-attr"><span class="info-attr-key">Fury</span><span class="info-attr-val">@u.MaxFury</span></div>
                         }
                     </div>
                     @if (u.Traits is { Count: > 0 })
@@ -211,6 +217,7 @@
                     int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
                     int mpPct = u.MaxMp > 0 ? st.CurrentMp * 100 / u.MaxMp : 0;
                     int focusPct = u.MaxFocus > 0 ? st.CurrentFocus * 100 / u.MaxFocus : 0;
+                    int furyPct = u.MaxFury > 0 ? st.CurrentFury * 100 / u.MaxFury : 0;
                     string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
                     bool canHealTarget = pendingTargetIsAlly && !pendingIsAoe && _pendingAction != null && st.IsAlive && !_autoMode;
                     <div class="unit-card
@@ -235,6 +242,10 @@
                             {
                                 <div class="bar-wrap"><div class="focus-bar" style="width:@focusPct%"></div></div>
                             }
+                            @if (u.MaxFury > 0)
+                            {
+                                <div class="bar-wrap"><div class="fury-bar" style="width:@furyPct%"></div></div>
+                            }
                             <div class="stat-text">@st.CurrentHp/@u.MaxHp HP &nbsp;|&nbsp; STR @u.Str &nbsp;WIS @u.Wis &nbsp;AGI @u.Agi</div>
                         </div>
                     </div>
@@ -251,6 +262,7 @@
                     int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
                     int mpPct2 = u.MaxMp > 0 ? st.CurrentMp * 100 / u.MaxMp : 0;
                     int focusPct2 = u.MaxFocus > 0 ? st.CurrentFocus * 100 / u.MaxFocus : 0;
+                    int furyPct2 = u.MaxFury > 0 ? st.CurrentFury * 100 / u.MaxFury : 0;
                     string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
                     bool canTarget = pending != null && _pendingAction != null && !pendingIsAoe && st.IsAlive && !_autoMode && !pendingTargetIsAlly;
 
@@ -275,6 +287,10 @@
                             @if (u.MaxFocus > 0)
                             {
                                 <div class="bar-wrap"><div class="focus-bar" style="width:@focusPct2%"></div></div>
+                            }
+                            @if (u.MaxFury > 0)
+                            {
+                                <div class="bar-wrap"><div class="fury-bar" style="width:@furyPct2%"></div></div>
                             }
                             <div class="stat-text">@st.CurrentHp/@u.MaxHp HP &nbsp;|&nbsp; STR @u.Str &nbsp;WIS @u.Wis &nbsp;AGI @u.Agi</div>
                         </div>
@@ -378,6 +394,7 @@
                     int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
                     int mpPct = u.MaxMp > 0 ? st.CurrentMp * 100 / u.MaxMp : 0;
                     int focusPct = u.MaxFocus > 0 ? st.CurrentFocus * 100 / u.MaxFocus : 0;
+                    int furyPct = u.MaxFury > 0 ? st.CurrentFury * 100 / u.MaxFury : 0;
                     string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
                     <div class="unit-card @(snap.Event.ActorId == u.Id ? "card-active" : "") @(!st.IsAlive ? "card-dead" : "")">
                         <div class="avatar player-avatar">@u.Name[0]</div>
@@ -386,6 +403,7 @@
                             <div class="bar-wrap"><div class="hp-bar" style="width:@hpPct%;background:@hpColor"></div></div>
                             @if (u.MaxMp > 0) { <div class="bar-wrap"><div class="mp-bar" style="width:@mpPct%"></div></div> }
                             @if (u.MaxFocus > 0) { <div class="bar-wrap"><div class="focus-bar" style="width:@focusPct%"></div></div> }
+                            @if (u.MaxFury > 0) { <div class="bar-wrap"><div class="fury-bar" style="width:@furyPct%"></div></div> }
                             <div class="stat-text">@st.CurrentHp/@u.MaxHp HP</div>
                         </div>
                     </div>
@@ -399,6 +417,7 @@
                     int hpPct = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
                     int mpPct = u.MaxMp > 0 ? st.CurrentMp * 100 / u.MaxMp : 0;
                     int focusPct2 = u.MaxFocus > 0 ? st.CurrentFocus * 100 / u.MaxFocus : 0;
+                    int furyPct2 = u.MaxFury > 0 ? st.CurrentFury * 100 / u.MaxFury : 0;
                     string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
                     <div class="unit-card @(snap.Event.ActorId == u.Id ? "card-active" : "") @(!st.IsAlive ? "card-dead" : "")">
                         <div class="avatar enemy-avatar">@u.Name[0]</div>
@@ -407,6 +426,7 @@
                             <div class="bar-wrap"><div class="hp-bar" style="width:@hpPct%;background:@hpColor"></div></div>
                             @if (u.MaxMp > 0) { <div class="bar-wrap"><div class="mp-bar" style="width:@mpPct%"></div></div> }
                             @if (u.MaxFocus > 0) { <div class="bar-wrap"><div class="focus-bar" style="width:@focusPct2%"></div></div> }
+                            @if (u.MaxFury > 0) { <div class="bar-wrap"><div class="fury-bar" style="width:@furyPct2%"></div></div> }
                             <div class="stat-text">@st.CurrentHp/@u.MaxHp HP</div>
                         </div>
                     </div>

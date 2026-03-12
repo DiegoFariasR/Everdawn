@@ -19,8 +19,8 @@ public class SampleScenario : IBattleScenario, IRegressionScenario
     // Values established from a known-good run. Update intentionally if the engine or
     // scenario changes in a way that is expected and reviewed.
     public string ExpectedWinner => "player";
-    // 1 start + 56 attack/skill events + 6 death events + 1 end = 64
-    public int ExpectedSnapshotCount => 64;
+    // 1 start + 56 attack/skill events + 6 death events + 1 end + 3 fury empowerment events = 67
+    public int ExpectedSnapshotCount => 67;
 
     public override string ToString() => $"{DisplayName} [{Id}]";
 
@@ -28,13 +28,13 @@ public class SampleScenario : IBattleScenario, IRegressionScenario
     {
         PlayerUnits =
         [
-            new("paladin", "Paladin", "player", Level: 12, Str: 85, Wis:  0, Agi:  55, Skills:
+            new("paladin", "Paladin", "player", Level: 12, Str: 85, Wis: 55, Agi:  55, Skills:
             [
                 new("paladin-strike",  "Strike",       MpCost: 0, Multiplier: 1.0, Modifiers: [SkillModifier.Basic]),
                 new("paladin-bash",    "Shield Bash",  MpCost: 0, Multiplier: 1.4, Cooldown: 3),
                 new("paladin-heal",    "Lay on Hands", MpCost: 0, Multiplier: 1.2,
                     Target: BattleSkillTarget.Ally, IsHeal: true, Cooldown: 3),
-            ]),
+            ], Traits: [BattleTrait.MagicUser, BattleTrait.Fury]),
             new("mage", "Mage", "player", Level: 12, Str: 62, Wis: 110, Agi:  70, Skills:
             [
                 new("mage-bolt",   "Magic Bolt",   MpCost: 0, Multiplier: 1.0, DamageType: DamageType.Magical, Modifiers: [SkillModifier.Basic]),
@@ -55,7 +55,7 @@ public class SampleScenario : IBattleScenario, IRegressionScenario
                 new("gw-slash",   "Slash",   MpCost: 0, Multiplier: 1.0, Modifiers: [SkillModifier.Basic]),
                 new("gw-warcry",  "War Cry", MpCost: 0, Multiplier: 1.6, Cooldown: 3),
                 new("gw-frenzy",  "Frenzy",  MpCost: 0, Multiplier: 2.4, Cooldown: 3, Modifiers: [SkillModifier.Ultimate]),
-            ]),
+            ], Traits: [BattleTrait.Fury]),
             new("goblin-a", "Goblin Archer", "enemy", Level: 14, Str: 55, Wis:  0, Agi: 100, Skills:
             [
                 new("ga-shot",    "Arrow Shot",   MpCost: 0, Multiplier: 1.0, Modifiers: [SkillModifier.Basic]),

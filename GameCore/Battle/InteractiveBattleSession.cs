@@ -15,6 +15,7 @@ internal sealed class InteractiveBattleSession
     private bool _started;
     private readonly Dictionary<string, int> _skillCooldowns = new();
     private readonly Dictionary<string, int> _focus = new();
+    private readonly Dictionary<string, int> _fury = new();
     private bool _isOver;
     private string? _winningTeam;
 
@@ -33,6 +34,9 @@ internal sealed class InteractiveBattleSession
         // Initialize focus for Focus-trait units
         foreach (var u in _allUnits.Where(u => u.HasTrait(BattleTrait.Focus)))
             _focus[u.Id] = u.InitialFocus;
+        // Initialize fury for Fury-trait units (starts at 0)
+        foreach (var u in _allUnits.Where(u => u.HasTrait(BattleTrait.Fury)))
+            _fury[u.Id] = u.InitialFury;
     }
 
     /// <summary>
@@ -70,6 +74,7 @@ internal sealed class InteractiveBattleSession
             if (_hp.ContainsKey(us.UnitId)) _hp[us.UnitId] = us.CurrentHp;
             if (_mp.ContainsKey(us.UnitId)) _mp[us.UnitId] = us.CurrentMp;
             if (_focus.ContainsKey(us.UnitId)) _focus[us.UnitId] = us.CurrentFocus;
+            if (_fury.ContainsKey(us.UnitId)) _fury[us.UnitId] = us.CurrentFury;
         }
         _turnIndex = NextAliveIndexAfter(r.LastActorId);
 
@@ -169,7 +174,7 @@ internal sealed class InteractiveBattleSession
         return new BattleResponse(
             NewEvents: newEvents,
             FullLog: _log,
-            State: _allUnits.Select(u => new UnitState(u.Id, _hp[u.Id], _mp[u.Id], _hp[u.Id] > 0, GetFocus(u.Id))).ToArray(),
+            State: _allUnits.Select(u => new UnitState(u.Id, _hp[u.Id], _mp[u.Id], _hp[u.Id] > 0, GetFocus(u.Id), GetFury(u.Id))).ToArray(),
             PendingInput: pending,
             IsOver: _isOver,
             WinningTeam: _winningTeam
@@ -229,6 +234,9 @@ internal sealed class InteractiveBattleSession
     private int GetFocus(string unitId) =>
         _focus.TryGetValue(unitId, out int f) ? f : 0;
 
+    private int GetFury(string unitId) =>
+        _fury.TryGetValue(unitId, out int f) ? f : 0;
+
     private IReadOnlyList<BattleEvent> ExecuteAction(BattleUnit actor, List<BattleUnit> targets, BattleSkill skill)
     {
         var produced = new List<BattleEvent>();
@@ -255,7 +263,19 @@ internal sealed class InteractiveBattleSession
             _focus[actor.Id] = 50;
             produced.Add(AddEvent(actor.Id, $"{actor.Name}'s Focus empowers their attack!", "skill"));
         }
-        double empowerMult = isFocusEmpowered ? 1.5 : 1.0;
+        // Fury empowerment: fires when fury is full and the actor uses a non-basic offensive skill
+        bool isFuryEmpowered = actor.HasTrait(BattleTrait.Fury)
+            && GetFury(actor.Id) == 100
+            && !skill.IsBasic
+            && !skill.IsHeal;
+        if (isFuryEmpowered)
+        {
+            _fury[actor.Id] = 0;
+            produced.Add(AddEvent(actor.Id, $"{actor.Name}'s Fury empowers their attack!", "skill"));
+        }
+        double empowerMult = 1.0;
+        if (isFocusEmpowered) empowerMult *= 1.5;
+        if (isFuryEmpowered) empowerMult *= 1.5;
 
         if (skill.IsAoe && targets.Count > 1)
             produced.Add(AddEvent(actor.Id, $"{actor.Name} unleashes {skill.Name} on all enemies!", evType));
@@ -292,6 +312,9 @@ internal sealed class InteractiveBattleSession
                         _focus[actor.Id] = Math.Min(100, GetFocus(actor.Id) + 10);
                     if (target.HasTrait(BattleTrait.Focus))
                         _focus[target.Id] = Math.Max(0, GetFocus(target.Id) - 10);
+                    // Fury: target gains 10–20 per incoming hit
+                    if (target.HasTrait(BattleTrait.Fury))
+                        _fury[target.Id] = Math.Min(100, GetFury(target.Id) + _rng.Next(10, 21));
 
                     if (_hp[target.Id] <= 0)
                     {
@@ -305,6 +328,9 @@ internal sealed class InteractiveBattleSession
         // Apply cooldown for the used skill
         if (skill.Cooldown > 0)
             _skillCooldowns[skill.Id] = skill.Cooldown;
+        // Fury: actor gains 10–50 per action (excludes heals)
+        if (actor.HasTrait(BattleTrait.Fury) && !skill.IsHeal)
+            _fury[actor.Id] = Math.Min(100, GetFury(actor.Id) + _rng.Next(10, 51));
 
         CheckEnd();
         return produced;

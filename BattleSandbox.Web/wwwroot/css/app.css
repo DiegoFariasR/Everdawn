@@ -474,6 +474,7 @@ html, body {
 }
 .mp-bar    { background: #2266cc; }
 .focus-bar { background: #cc8800; }
+.fury-bar  { background: #cc2200; }
 
 .stat-text {
     font-size: 0.58rem;

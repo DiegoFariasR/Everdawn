@@ -18,12 +18,12 @@
 - [x] When full, the next non basic attack is empowered (×1.5) and resets focus to 50
 
 ## Fury
-- [ ] Trait implemented
-- [ ] Has fury bar which is red
-- [ ] Fixed max 100, starts at 0
-- [ ] Any attack grants from 10 to 50 fury
-- [ ] Any damage grants 10 to 20 fury
-- [ ] When full, the next non basic attack is empowered and empties fury
+- [x] Trait implemented
+- [x] Has fury bar which is red
+- [x] Fixed max 100, starts at 0
+- [x] Any attack grants from 10 to 50 fury
+- [x] Any damage grants 10 to 20 fury
+- [x] When full, the next non basic attack is empowered and empties fury
 
 ## Divine
 - [ ] Trait implemented
