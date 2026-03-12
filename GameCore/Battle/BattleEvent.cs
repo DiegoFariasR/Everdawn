@@ -9,7 +9,7 @@ namespace GameCore.Battle;
 /// </para>
 /// <list type="bullet">
 ///   <item><see cref="SkillId"/> — which animation / VFX set to play (null for system events)</item>
-///   <item><see cref="DamageType"/> — physical or magical hit category (null for heals and system events)</item>
+///   <item><see cref="EffectType"/> — elemental hit category (null for heals and system events)</item>
 ///   <item><see cref="HitIndex"/> / <see cref="TotalHits"/> — position in a multi-hit sequence for animation chaining</item>
 /// </list>
 /// </summary>
@@ -21,8 +21,8 @@ public record BattleEvent(
     int Value = 0,
     /// <summary>ID of the skill that produced this event. Null for system/round events.</summary>
     string? SkillId = null,
-    /// <summary>Damage type of the hit. Null for heals and system events.</summary>
-    DamageType? DamageType = null,
+    /// <summary>Effect type of the hit. Null for heals and system events.</summary>
+    EffectType? EffectType = null,
     /// <summary>0-based index of this hit within a multi-hit sequence.</summary>
     int HitIndex = 0,
     /// <summary>Total number of hits in this sequence. 1 for single-hit skills.</summary>

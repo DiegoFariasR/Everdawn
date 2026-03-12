@@ -14,7 +14,7 @@ public sealed record SkillView(
     bool IsHeal,
     int Cooldown,
     BattleSkillTarget Target,
-    DamageType DamageType,
+    EffectType EffectType,
     bool IsBasic,
     bool IsUltimate,
     int EffectiveInitialCooldown,

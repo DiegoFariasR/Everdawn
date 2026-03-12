@@ -1,14 +1,29 @@
 namespace GameCore.Battle;
 
 /// <summary>
-/// The category of damage dealt by a skill.
-/// Used to select the correct attacker stat and to match against the defender's resistances.
+/// What an effect does — routes heal and shield logic separately from damage.
 /// </summary>
-public enum DamageType
+public enum EffectKind
 {
-    /// <summary>Damage derived from STR — melee and ranged physical attacks.</summary>
-    Physical,
+    Damage,
+    Heal,
+    Shield,
+}
 
-    /// <summary>Damage derived from WIS — spells and magical effects.</summary>
-    Magical,
+/// <summary>
+/// The elemental category of a skill's effect.
+/// Determines which attacker stat and defender resistance apply.
+/// <list type="bullet">
+///   <item><see cref="Physical"/> — uses STR (PhysAttack)</item>
+///   <item>All other types — use WIS (MagicAttack)</item>
+/// </list>
+/// </summary>
+public enum EffectType
+{
+    Physical,
+    Fire,
+    Cold,
+    Lightning,
+    Holy,
+    Void,
 }

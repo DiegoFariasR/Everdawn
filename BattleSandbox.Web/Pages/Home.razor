@@ -138,7 +138,7 @@
                         bool isAllySkill = skill.Target == BattleSkillTarget.Ally;
                         int  cdLeft      = pending.SkillCooldowns.GetValueOrDefault(skill.Id);
                         string keyHint   = !_autoMode && si < _skillKeys.Length ? _skillKeys[si] : "";
-                        @_renderSkillBtn((skill.Id, skill.Name, skill.DamageType, skill.Multiplier, skill.BaseDmg,
+                        @_renderSkillBtn((skill.Id, skill.Name, skill.EffectType, skill.Multiplier, skill.BaseDmg,
                             isAoe, isAllySkill, skill.IsBasic, skill.IsUltimate,
                             skill.MpCost, skill.Cooldown, cdLeft, skill.EffectiveInitialCooldown,
                             SkillSlotClass(si), canUse, isSelected, _autoMode,
@@ -159,8 +159,8 @@
                         @for (int si = 0; si < activeEnemy.ResolvedSkills.Count; si++)
                         {
                             var sk      = activeEnemy.ResolvedSkills[si];
-                            int baseDmg = (int)(activeEnemy.GetBaseAttack(sk.DamageType) * sk.Multiplier);
-                            @_renderSkillBtn((sk.Id, sk.Name, sk.DamageType, sk.Multiplier, baseDmg,
+                            int baseDmg = (int)(activeEnemy.GetBaseAttack(sk.EffectType) * sk.Multiplier);
+                            @_renderSkillBtn((sk.Id, sk.Name, sk.EffectType, sk.Multiplier, baseDmg,
                                 sk.IsAoe, sk.Target == BattleSkillTarget.Ally, sk.IsBasic, sk.IsUltimate,
                                 sk.MpCost, sk.Cooldown, 0, sk.EffectiveInitialCooldown,
                                 SkillSlotClass(si), false, false, true,
@@ -190,10 +190,10 @@
                      title="@(!_autoMode ? "Click to undo to this point" : "")"
                      @onclick="() => UndoToEvent(idx)">
                     @ev.Description
-                    @if (ev.DamageType.HasValue || ev.TotalHits > 1)
+                    @if (ev.EffectType.HasValue || ev.TotalHits > 1)
                     {
                         <span class="ev-meta">
-                            @if (ev.DamageType.HasValue) { <span class="info-badge @DmgTypeCss(ev.DamageType.Value) ev-meta-badge">@ev.DamageType</span> }
+                            @if (ev.EffectType.HasValue) { <span class="info-badge @DmgTypeCss(ev.EffectType.Value) ev-meta-badge">@ev.EffectType</span> }
                             @if (ev.TotalHits > 1) { <span class="ev-hit">@(ev.HitIndex + 1)/@ev.TotalHits</span> }
                         </span>
                     }
@@ -263,10 +263,10 @@
                 var s = _result.Snapshots[i];
                 <div class="event-entry @(idx == _step ? "event-current" : "") @s.Event.Type" @onclick="() => _step = idx">
                     <span class="event-num">@(i + 1).</span> @s.Event.Description
-                    @if (s.Event.DamageType.HasValue || s.Event.TotalHits > 1)
+                    @if (s.Event.EffectType.HasValue || s.Event.TotalHits > 1)
                     {
                         <span class="ev-meta">
-                            @if (s.Event.DamageType.HasValue) { <span class="info-badge @DmgTypeCss(s.Event.DamageType.Value) ev-meta-badge">@s.Event.DamageType</span> }
+                            @if (s.Event.EffectType.HasValue) { <span class="info-badge @DmgTypeCss(s.Event.EffectType.Value) ev-meta-badge">@s.Event.EffectType</span> }
                             @if (s.Event.TotalHits > 1) { <span class="ev-hit">@(s.Event.HitIndex + 1)/@s.Event.TotalHits</span> }
                         </span>
                     }
@@ -569,7 +569,7 @@
         {
             if (ev.TargetId is null || ev.Value <= 0) continue;
             // Heal: has a skillId but no damage type. Damage: has both.
-            bool isHeal = ev.SkillId != null && ev.DamageType == null;
+            bool isHeal = ev.SkillId != null && ev.EffectType == null;
             int offset  = 20 + (_floatKey % 5) * 12;   // spread horizontally so multi-hits don't stack
             _floats.Add(new FloatNumber(ev.TargetId, ev.Value, isHeal, offset, _floatKey++));
         }
@@ -591,18 +591,18 @@
     // 
 
     /// <summary>
-    /// Maps a DamageType to its CSS badge class.
-    /// To add a new damage type: add an enum member in DamageType.cs, add a case here,
+    /// Maps an EffectType to its CSS badge class.
+    /// To add a new effect type: add an enum member in EffectType in DamageType.cs, add a case here,
     /// and add a .badge-xxx rule in app.css. No other template code changes.
     /// </summary>
-    private static string DmgTypeCss(DamageType t) => t switch
+    private static string DmgTypeCss(EffectType t) => t switch
     {
-        DamageType.Physical => "badge-phys",
-        DamageType.Magical  => "badge-mag",
-        // DamageType.Fire  => "badge-fire",
-        // DamageType.Holy  => "badge-holy",
-        // DamageType.Dark  => "badge-dark",
-        // DamageType.True  => "badge-true",
+        EffectType.Physical  => "badge-phys",
+        EffectType.Fire      => "badge-fire",
+        EffectType.Cold      => "badge-cold",
+        EffectType.Lightning => "badge-lightning",
+        EffectType.Holy      => "badge-holy",
+        EffectType.Void      => "badge-void",
         _ => "badge-phys",
     };
 
@@ -713,12 +713,12 @@
         <div class="info-skills">
             @foreach (var sk in u.ResolvedSkills)
             {
-                int baseDmg = (int)(u.GetBaseAttack(sk.DamageType) * sk.Multiplier);
+                int baseDmg = (int)(u.GetBaseAttack(sk.EffectType) * sk.Multiplier);
                 <div class="info-skill-row">
                     <span class="info-skill-name">@sk.Name</span>
                     @if (sk.IsBasic)    { <span class="info-badge badge-basic">Basic</span> }
                     @if (sk.IsUltimate) { <span class="info-badge badge-ult">Ult</span>   }
-                    <span class="info-badge @DmgTypeCss(sk.DamageType)">@sk.DamageType</span>
+                    <span class="info-badge @DmgTypeCss(sk.EffectType)">@sk.EffectType</span>
                     <span class="info-skill-stat">x@(sk.Multiplier.ToString("0.##"))</span>
                     <span class="info-skill-stat">~@baseDmg</span>
                     @if (sk.MpCost > 0)                   { <span class="info-skill-stat">@sk.MpCost MP</span> }
@@ -740,7 +740,7 @@
     //   1. Add field to BattleSkill / SkillView.
     //   2. Add one @if badge line in the skill-btn-top or skill-btn-stats block below.
     //   3. Pass the field in every _renderSkillBtn call site (two loops above).
-    private RenderFragment<(string id, string name, DamageType dmgType, double multiplier, int baseDmg,
+    private RenderFragment<(string id, string name, EffectType dmgType, double multiplier, int baseDmg,
         bool isAoe, bool isAllySkill, bool isBasic, bool isUltimate,
         int mpCost, int cooldown, int cdLeft, int effectiveInitCd,
         string btnClass, bool canUse, bool isSelected, bool isInfoOnly,

@@ -33,13 +33,13 @@ public class SampleScenario : IBattleScenario, IRegressionScenario
                 new("paladin-strike",  "Strike",       MpCost: 0, Multiplier: 1.0, Modifiers: [SkillModifier.Basic]),
                 new("paladin-bash",    "Shield Bash",  MpCost: 0, Multiplier: 1.4, Cooldown: 3),
                 new("paladin-heal",    "Lay on Hands", MpCost: 0, Multiplier: 1.2,
-                    Target: BattleSkillTarget.Ally, IsHeal: true, Cooldown: 3),
+                    Target: BattleSkillTarget.Ally, Kind: EffectKind.Heal, Cooldown: 3),
             ], Traits: [BattleTrait.MagicUser, BattleTrait.Fury]),
             new("mage", "Mage", "player", Level: 12, Str: 62, Wis: 110, Agi:  70, Skills:
             [
-                new("mage-bolt",   "Magic Bolt",   MpCost: 0, Multiplier: 1.0, DamageType: DamageType.Magical, Modifiers: [SkillModifier.Basic]),
-                new("mage-burst",  "Arcane Burst", MpCost: 0, Multiplier: 1.6, Cooldown: 3, DamageType: DamageType.Magical),
-                new("mage-meteor", "Meteor",        MpCost: 0, Multiplier: 2.0, IsAoe: true, Cooldown: 3, DamageType: DamageType.Magical, Modifiers: [SkillModifier.Ultimate]),
+                new("mage-bolt",   "Magic Bolt",   MpCost: 0, Multiplier: 1.0, EffectType: EffectType.Void, Modifiers: [SkillModifier.Basic]),
+                new("mage-burst",  "Arcane Burst", MpCost: 0, Multiplier: 1.6, Cooldown: 3, EffectType: EffectType.Void),
+                new("mage-meteor", "Meteor",        MpCost: 0, Multiplier: 2.0, IsAoe: true, Cooldown: 3, EffectType: EffectType.Void, Modifiers: [SkillModifier.Ultimate]),
             ], Traits: [BattleTrait.MagicUser]),
             new("rogue", "Rogue", "player", Level: 12, Str: 54, Wis:  0, Agi: 120, Skills:
             [
@@ -64,9 +64,9 @@ public class SampleScenario : IBattleScenario, IRegressionScenario
             ], Traits: [BattleTrait.Focus]),
             new("necro", "Necromancer", "enemy", Level: 15, Str: 80, Wis: 105, Agi:  65, Skills:
             [
-                new("necro-bolt",  "Dark Bolt",   MpCost: 0, Multiplier: 1.0, DamageType: DamageType.Magical, Modifiers: [SkillModifier.Basic]),
-                new("necro-drain", "Life Drain",  MpCost: 0, Multiplier: 1.8, Cooldown: 3, DamageType: DamageType.Magical),
-                new("necro-soul",  "Soul Siphon", MpCost: 0, Multiplier: 3.0, Cooldown: 3, DamageType: DamageType.Magical, Modifiers: [SkillModifier.Ultimate]),
+                new("necro-bolt",  "Dark Bolt",   MpCost: 0, Multiplier: 1.0, EffectType: EffectType.Void, Modifiers: [SkillModifier.Basic]),
+                new("necro-drain", "Life Drain",  MpCost: 0, Multiplier: 1.8, Cooldown: 3, EffectType: EffectType.Void),
+                new("necro-soul",  "Soul Siphon", MpCost: 0, Multiplier: 3.0, Cooldown: 3, EffectType: EffectType.Void, Modifiers: [SkillModifier.Ultimate]),
             ], Traits: [BattleTrait.MagicUser]),
         ],
     };

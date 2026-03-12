@@ -239,6 +239,6 @@ public sealed class BattleSession : IBattleEngine
 
     private static SkillView ToSkillView(BattleSkill s, BattleUnit actor) =>
         new SkillView(s.Id, s.Name, s.MpCost, s.Multiplier, s.IsAoe, s.IsHeal, s.Cooldown, s.Target,
-            s.DamageType, s.IsBasic, s.IsUltimate, s.EffectiveInitialCooldown,
-            (int)(actor.GetBaseAttack(s.DamageType) * s.Multiplier));
+            s.EffectType, s.IsBasic, s.IsUltimate, s.EffectiveInitialCooldown,
+            (int)(actor.GetBaseAttack(s.EffectType) * s.Multiplier));
 }

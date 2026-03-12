@@ -847,12 +847,15 @@ html, body {
 .badge-ult    { color: #cc88ff; border-color: #441a5a; background: #12081e; }
 .badge-phys   { color: #ff9955; border-color: #5a3010; background: #1a0e00; }
 .badge-mag    { color: #88aaff; border-color: #1a2a6a; background: #080e1e; }
-.badge-aoe    { color: #ff9f1c; border-color: #5a3a00; background: #1a0f00; }
-/* Future damage types — uncomment DmgTypeCss case + add the enum member to activate */
 .badge-fire   { color: #ff6633; border-color: #661400; background: #200500; }
+.badge-cold   { color: #88ddff; border-color: #1a4a6a; background: #02111e; }
+.badge-lightning { color: #ffee55; border-color: #5a5200; background: #1a1800; }
 .badge-holy   { color: #ffe87c; border-color: #665a00; background: #1e1a00; }
+.badge-void   { color: #cc88ff; border-color: #441a5a; background: #0e0022; }
+/* Legacy — kept for CSS completeness */
 .badge-dark   { color: #bb77ff; border-color: #330066; background: #0e0022; }
 .badge-true   { color: #e0e0e0; border-color: #444455; background: #111118; }
+.badge-aoe    { color: #ff9f1c; border-color: #5a3a00; background: #1a0f00; }
 
 .info-skills {
     border-top: 1px solid #21262d;

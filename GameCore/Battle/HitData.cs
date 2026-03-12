@@ -19,7 +19,7 @@ public record DamageStep(string Name, int ValueBefore, int ValueAfter);
 /// actually takes.
 /// </para>
 /// </summary>
-public record DamageResult(DamageType DamageType, IReadOnlyList<DamageStep> Steps)
+public record DamageResult(EffectType EffectType, IReadOnlyList<DamageStep> Steps)
 {
     /// <summary>Output of the "Base" step — damage before any mitigation.</summary>
     public int RawDamage => Steps.Count > 0 ? Steps[0].ValueAfter : 0;

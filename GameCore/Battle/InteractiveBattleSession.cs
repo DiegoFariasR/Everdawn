@@ -293,7 +293,7 @@ internal sealed class InteractiveBattleSession
                 }
                 else
                 {
-                    var hitData = DamageCalc.Compute(actor, target, skill.DamageType, skill.Multiplier, empowerMult, _rng);
+                    var hitData = DamageCalc.Compute(actor, target, skill.EffectType, skill.Multiplier, empowerMult, _rng);
                     _hp[target.Id] = Math.Max(0, _hp[target.Id] - hitData.FinalDamage);
                     string hitLabel = effectiveHits > 1 ? $" (hit {i + 1}/{effectiveHits})" : "";
                     produced.Add(AddEvent(actor.Id,
@@ -301,7 +301,7 @@ internal sealed class InteractiveBattleSession
                             ? $"  \u2192 {target.Name} takes {hitData.FinalDamage} damage{hitLabel}."
                             : $"{actor.Name} uses {skill.Name} on {target.Name} for {hitData.FinalDamage} damage{hitLabel}.",
                         evType, target.Id, hitData.FinalDamage,
-                        skillId: skill.Id, damageType: skill.DamageType,
+                        skillId: skill.Id, effectType: skill.EffectType,
                         hitIndex: i, totalHits: effectiveHits));
 
                     // Focus: actor gains 10 per offensive hit; target loses 10 per incoming hit
@@ -394,9 +394,9 @@ internal sealed class InteractiveBattleSession
 
     private BattleEvent AddEvent(string actorId, string description, string type,
         string? targetId = null, int value = 0,
-        string? skillId = null, DamageType? damageType = null, int hitIndex = 0, int totalHits = 1)
+        string? skillId = null, EffectType? effectType = null, int hitIndex = 0, int totalHits = 1)
     {
-        var ev = new BattleEvent(actorId, description, type, targetId, value, skillId, damageType, hitIndex, totalHits);
+        var ev = new BattleEvent(actorId, description, type, targetId, value, skillId, effectType, hitIndex, totalHits);
         _log.Add(ev);
         return ev;
     }

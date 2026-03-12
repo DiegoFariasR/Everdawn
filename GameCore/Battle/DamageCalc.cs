@@ -21,7 +21,7 @@ public static class DamageCalc
     public static DamageResult Compute(
         BattleUnit actor,
         BattleUnit target,
-        DamageType damageType,
+        EffectType effectType,
         double skillMultiplier,
         double extraMultiplier,
         Random rng)
@@ -31,7 +31,7 @@ public static class DamageCalc
         // ── Layer 1: Base ────────────────────────────────────────────────
         // Roll damage from the attacker's stat, skill multiplier, and variance.
         // ValueBefore = flat base stat (for reference). ValueAfter = rolled value.
-        int baseAttack = actor.GetBaseAttack(damageType);
+        int baseAttack = actor.GetBaseAttack(effectType);
         int variance = Math.Max(1, baseAttack / 5);
         int rolled = Math.Max(
             0,
@@ -43,13 +43,13 @@ public static class DamageCalc
         // ── Layer 2: Resistance ──────────────────────────────────────────
         // Reduce damage by the defender's resistance percentage for this damage type.
         // 0 = no change. 50 = half damage. 100 = immune. Negative = weakness (extra damage).
-        int resistance = target.GetResistance(damageType);
+        int resistance = target.GetResistance(effectType);
         int afterResistance = Math.Max(0, (int)(value * (1.0 - resistance / 100.0)));
         steps.Add(new DamageStep("Resistance", value, afterResistance));
         value = afterResistance;
 
         // ── Add future layers here ───────────────────────────────────────
 
-        return new DamageResult(damageType, steps);
+        return new DamageResult(effectType, steps);
     }
 }

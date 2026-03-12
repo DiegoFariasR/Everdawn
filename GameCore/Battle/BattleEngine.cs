@@ -46,7 +46,7 @@ public static class BattleEngine
                 if (targets.Count == 0) { battleOver = true; break; }
 
                 var target = targets[rng.Next(targets.Count)];
-                var hitData = DamageCalc.Compute(actor, target, actor.NaturalDamageType, 1.0, 1.0, rng);
+                var hitData = DamageCalc.Compute(actor, target, actor.NaturalEffectType, 1.0, 1.0, rng);
                 int damage = hitData.FinalDamage;
                 hp[target.Id] = Math.Max(0, hp[target.Id] - damage);
                 if (actor.HasTrait(BattleTrait.Focus))
@@ -63,7 +63,7 @@ public static class BattleEngine
                 {
                     Step = step++,
                     Event = new BattleEvent(actor.Id, $"{actor.Name} attacks {target.Name} for {damage} damage.", "attack",
-                        target.Id, damage, DamageType: actor.NaturalDamageType),
+                        target.Id, damage, EffectType: actor.NaturalEffectType),
                     UnitStates = TakeSnapshot()
                 });
 

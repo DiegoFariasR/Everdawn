@@ -14,8 +14,8 @@ public record BattleUnit(
     int MaxMpOverride = 0,
     IReadOnlyList<BattleSkill>? Skills = null,
     IReadOnlyList<BattleTrait>? Traits = null,
-    /// <summary>Damage type → resistance percentage. Negative values are weaknesses.</summary>
-    IReadOnlyDictionary<DamageType, int>? Resistances = null
+    /// <summary>Effect type → resistance percentage. Negative values are weaknesses.</summary>
+    IReadOnlyDictionary<EffectType, int>? Resistances = null
 )
 {
     // ── Traits ───────────────────────────────────────────────────────
@@ -27,7 +27,7 @@ public record BattleUnit(
     /// Returns this unit's resistance percentage for <paramref name="type"/>.
     /// 0 = no mitigation. 50 = half damage. 100 = immune. Negative = weakness.
     /// </summary>
-    public int GetResistance(DamageType type) =>
+    public int GetResistance(EffectType type) =>
         Resistances != null && Resistances.TryGetValue(type, out int r) ? r : 0;
 
     // ── Derived stats ────────────────────────────────────────────────
@@ -39,12 +39,12 @@ public record BattleUnit(
     public int MagicAttack => Wis * 8;
     /// <summary>Effective attack power — highest of physical or magic.</summary>
     public int Attack => Math.Max(PhysAttack, MagicAttack);
-    /// <summary>Returns the base attack stat for the given damage type.</summary>
-    public int GetBaseAttack(DamageType type) =>
-        type == DamageType.Magical ? MagicAttack : PhysAttack;
-    /// <summary>The damage type that maps to this unit's highest attack stat.</summary>
-    public DamageType NaturalDamageType =>
-        MagicAttack > PhysAttack ? DamageType.Magical : DamageType.Physical;
+    /// <summary>Returns the base attack stat for the given effect type. Physical uses STR; all other types use WIS.</summary>
+    public int GetBaseAttack(EffectType type) =>
+        type == EffectType.Physical ? PhysAttack : MagicAttack;
+    /// <summary>The effect type that maps to this unit's highest attack stat.</summary>
+    public EffectType NaturalEffectType =>
+        MagicAttack > PhysAttack ? EffectType.Void : EffectType.Physical;
     /// <summary>Turn order priority derived from AGI.</summary>
     public int Initiative => Agi;
     /// <summary>Hits per action: 1 base + 1 per 100 AGI.</summary>
