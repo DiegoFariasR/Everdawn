@@ -221,3 +221,72 @@ These phrases have defined meanings when used in requests:
 | **"push fix"** | `dotnet format` → commit → push directly to `main` (for small hotfixes) |
 | **"start server"** | Kill port 5001 + `dotnet run --no-launch-profile --urls "http://localhost:5001"` in `BattleSandbox.Web/` |
 | **"debug prod"** | Check recent GitHub Actions runs for failures (CI + Deploy) + verify `https://diegofariasr.github.io/Everdawn/` is reachable and returns HTTP 200 |
+
+---
+
+## Gameplay Quality Warnings
+
+Treat the following as development warnings. Apply them during design, implementation, playtesting, and content production — not just at launch. These are relevant once the game is large enough to evaluate end-to-end.
+
+**[CRITICAL] Do not let combat become repetitive early.**
+- Warn when one skill, combo, or tactic solves most encounters.
+- Warn when normal fights stop asking the player to adapt.
+- Ensure each character has multiple valid uses in battle.
+- Ensure status, defense, setup, and resource control matter often.
+- Avoid building encounters around one obvious best answer.
+
+**[CRITICAL] Do not make battles feel slow.**
+- Warn when animations, transitions, and UI flow delay the player too much.
+- Ensure repeated actions resolve quickly.
+- Ensure normal encounters end fast once the player understands them.
+- Add battle speed-up, fast text, and animation reduction early.
+- Avoid designing spectacle that becomes friction after repetition.
+
+**[CRITICAL] Do not rely on presentation to carry weak writing.**
+- Warn when scenes look good but do not deepen character, stakes, or conflict.
+- Ensure each main character has a distinct voice, motive, and tension.
+- Ensure important scenes change something meaningful.
+- Keep the cast small enough to write well.
+- Avoid flat protagonists and dialogue that only explains plot.
+
+**[HIGH] Do not let the party feel fake or disconnected.**
+- Warn when characters feel like separate solo stories sharing the same combat system.
+- Ensure the party has a strong shared goal.
+- Ensure members react to events, to each other, and to decisions.
+- Add party banter, group scenes, and relationship development.
+- Avoid party members disappearing from the narrative outside their own moments.
+
+**[HIGH] Do not add progression systems that create menu work without meaningful choices.**
+- Warn when a system adds complexity but does not change playstyle or decisions.
+- Ensure upgrades are understandable, comparable, and impactful.
+- Prefer fewer systems with stronger identity.
+- Allow cheap recovery from bad build decisions.
+- Avoid overdesigned crafting, socket, crystal, or upgrade layers that feel like chores.
+
+**[HIGH] Do not allow balance to collapse into exploits or frustration.**
+- Warn when one build, stat, or mechanic is clearly dominant.
+- Warn when difficulty spikes depend on hidden knowledge or one required counter.
+- Test the game as a critical-path player and as a completionist player.
+- Ensure multiple builds and strategies remain viable.
+- Avoid boss design that punishes experimentation unfairly.
+
+**[HIGH] Do not waste the player's time.**
+- Warn when the game forces long replays, unclear objectives, or excessive backtracking.
+- Ensure retries are quick and friction is low.
+- Ensure current objectives and recent story context are easy to review.
+- Add save flexibility, cutscene skip, fast travel, and recap tools.
+- Avoid long stretches of repeated content between meaningful decisions.
+
+**[MEDIUM] Do not make party management annoying.**
+- Warn when swapping characters creates heavy equipment, leveling, or setup friction.
+- Ensure reserve characters stay usable through catch-up systems or shared progression.
+- Save loadouts and support quick swap.
+- Ensure forced party changes do not punish the player.
+- Avoid constant manual re-equipping and underprepared story-mandated characters.
+
+### Ongoing Review Rule
+- If a feature is impressive once but annoying after 20 repetitions, redesign it.
+- If a system looks deep but produces no new decisions, simplify or remove it.
+- If a scene does not improve character, stakes, or clarity, rewrite or cut it.
+- If a mechanic only works because the player has not solved it yet, it is not strong enough.
+- If the game respects the player's time, the player will forgive lower production value more easily.

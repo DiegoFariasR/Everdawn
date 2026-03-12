@@ -19,21 +19,28 @@ This is a **battle debugger**, not a second game client.
 
 ## Features
 
-### MVP (Phase 1)
-- Scenario selector: pick from available scenarios defined in GameCore.Scenarios
-- Run battle: execute the scenario with GameCore's battle engine in the browser
-- Stop-motion playback:
-  - Step forward / step back through battle events
-  - Jump to start / jump to end
-- State panel: shows unit HP, buffs, cooldowns, status at the current step
-- Event log: scrollable list of all battle events with the current one highlighted
-- Seed display: shows the RNG seed used
+### Implemented
+- [x] **Scenario selector** — dropdown populated from `ScenarioRegistry.All`; scenarios tagged 🎮 (playable) or 👁 (watch-only)
+- [x] **Watch mode** — runs the full battle automatically and provides stop-motion playback: step forward/back, jump to start/end, click any event to jump to it
+- [x] **Play mode** — interactive; player picks skills and targets each turn
+  - [x] Skill buttons labelled as attack / skill / soulburn; AoE and ally-target variants handled
+  - [x] Cooldown badges, MP cost display, available/unavailable states
+  - [x] Single-target: select skill → click unit card to confirm target
+  - [x] AoE: fires immediately on skill button click
+- [x] **Auto mode** — continuously advances turns at configurable speed (Fast / Normal / Slow); toggleable mid-battle
+- [x] **Take Control** — in watch mode, click "Take Control" at any step to switch to play mode from that exact battle state
+- [x] **Undo** — in play mode, click any event in the log to rewind the battle to that point (replays commands deterministically)
+- [x] **Unit portrait strip** — compact top bar showing all units with active/dead states highlighted
+- [x] **Arena** — unit cards with HP/MP bars, stat line (STR / WIS / AGI), active and dead states
+- [x] **Event log** — scrollable; current event highlighted; click-to-undo in play mode
+- [x] **Floating numbers** — damage and heal numbers animate over unit cards on action
+- [x] **Battle over panel** — Victory / Defeat with Retry button
 
-### Phase 2 (later)
-- Seed override: type a custom seed and re-run
-- Scenario parameter tweaks (e.g. swap a unit, change level)
-- Share link: encode scenario + seed in URL for easy sharing
-- Regression scenario tagging: mark a scenario as "regression" with notes
+### Not yet implemented (future)
+- [ ] Seed display / seed override
+- [ ] Scenario parameter tweaks (swap a unit, change level)
+- [ ] Share link (encode scenario + seed in URL)
+- [ ] Regression scenario tagging in the UI (backend interface `IRegressionScenario` exists in `GameCore.Scenarios`)
 
 ---
 
@@ -46,14 +53,12 @@ BattleSandbox.Web/
     css/
       app.css           # Mobile-first styles
   Pages/
-    Home.razor          # Scenario selector + battle viewer
-  Components/
-    BattleViewer.razor  # Stop-motion playback controls + event display
-    StatePanel.razor    # Current battle state (units, HP, buffs)
-    EventLog.razor      # Scrollable event list
+    Home.razor          # Everything: scenario picker, play mode, watch mode
   Program.cs            # Blazor WASM entry point
   BattleSandbox.Web.csproj
 ```
+
+> All UI currently lives in `Home.razor`. The `Components/` split (BattleViewer, StatePanel, EventLog) is a future refactor, not a hard requirement.
 
 ---
 
@@ -61,38 +66,45 @@ BattleSandbox.Web/
 
 1. User opens the page on their phone
 2. Blazor WASM loads (~2–5 MB on first visit, cached after)
-3. User picks a scenario from a dropdown (scenarios come from GameCore.Scenarios)
-4. Clicking "Run" executes the battle through GameCore's battle engine (in-browser via WASM)
-5. GameCore produces a list of battle events/snapshots
-6. User steps through events with forward/back buttons
-7. State panel updates to reflect the battle state at each step
+3. User picks a scenario from the dropdown — scenarios come from `ScenarioRegistry.All` in `GameCore.Scenarios`
+4. Clicking "▶ Start" runs the scenario:
+   - **Watch mode** (`IsPlayable = false`): runs the full battle via `BattleEngine.Run()` and enters stop-motion playback
+   - **Play mode** (`IsPlayable = true`): starts an interactive `BattleSession` and waits for player input
+5. In watch mode, "⚔ Take Control" at any step resumes as an interactive session from that exact state
+6. In play mode, selecting Auto ON advances turns automatically at the configured speed
+7. All battle logic runs in-browser via WASM — no network calls
 
 ---
 
 ## UI Layout (Mobile Portrait)
 
 ```
-┌─────────────────────────┐
-│  Scenario: [dropdown ▼] │
-│  Seed: 42     [Run ▶]   │
-├─────────────────────────┤
-│                         │
-│     State Panel         │
-│  ┌───────┐  ┌───────┐  │
-│  │ Unit A│  │ Unit B│  │
-│  │ HP 80 │  │ HP 45 │  │
-│  │ ...   │  │ ...   │  │
-│  └───────┘  └───────┘  │
-│                         │
-├─────────────────────────┤
-│  ◀◀  ◀  Step 3/12  ▶  ▶▶│
-├─────────────────────────┤
-│  Event Log              │
-│  1. A attacks B (30dmg) │
-│  2. B casts Shield      │
-│  ► 3. A uses Fireball   │
-│  4. ...                 │
-└─────────────────────────┘
+┌─────────────────────────────────┐
+│  Scenario: [dropdown ▼]  [▶ Start] │
+│  Speed: [Fast/Normal/Slow ▼] [⚡ Auto ON/OFF] │
+├─────────────────────────────────┤
+│  Portrait strip: A  B  C  ⚔  X  Y  Z  W │
+├─────────────────────────────────┤
+│  Current event banner           │
+├─────────────────────────────────┤
+│  Arena                          │
+│  ┌──────┐  ┌──────┐            │
+│  │ Hero │  │ Enemy│  vs        │
+│  │ HP ▓▓│  │ HP ░░│            │
+│  │ MP ▓ │  │      │            │
+│  └──────┘  └──────┘            │
+├─────────────────────────────────┤
+│  Action bar (play mode)         │
+│  [Attack] [Skill CD2] [Ultimate]│
+├── OR ───────────────────────────┤
+│  Step controls (watch mode)     │
+│  ◀◀  ◀  Step 3/64  ▶  ▶▶  [⚔ Take Control] │
+├─────────────────────────────────┤
+│  Event log (scrollable)         │
+│  1. Battle begins!              │
+│  2. Hero attacks Enemy (42 dmg) │
+│  ► 3. Enemy uses Strike ...     │
+└─────────────────────────────────┘
 ```
 
 ---
@@ -107,9 +119,9 @@ BattleSandbox.Web/
 
 ## Dependencies
 
-- GameCore (battle engine, game logic)
-- GameCore.Scenarios (scenario definitions)
-- Microsoft.AspNetCore.Components.WebAssembly (Blazor WASM runtime)
+- `GameCore` — battle engine (`BattleSession`, `BattleEngine`), public API (`IBattleEngine`, `BattleView`, `BattleCommand` hierarchy)
+- `GameCore.Scenarios` — scenario definitions (`ScenarioRegistry`, `IBattleScenario`, `IRegressionScenario`)
+- `Microsoft.AspNetCore.Components.WebAssembly` — Blazor WASM runtime
 
 ---
 

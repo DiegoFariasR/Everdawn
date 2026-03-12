@@ -14,9 +14,13 @@ public static class BattleEngine
         var allUnits = setup.PlayerUnits.Concat(setup.EnemyUnits).ToList();
         var hp = allUnits.ToDictionary(u => u.Id, u => u.MaxHp);
         var mp = allUnits.ToDictionary(u => u.Id, u => u.MaxMp);
+        var focus = allUnits
+            .Where(u => u.HasTrait(BattleTrait.Focus))
+            .ToDictionary(u => u.Id, u => u.InitialFocus);
+        int GetFocus(string id) => focus.TryGetValue(id, out int f) ? f : 0;
 
         IReadOnlyList<UnitState> TakeSnapshot() =>
-            allUnits.Select(u => new UnitState(u.Id, hp[u.Id], mp[u.Id], hp[u.Id] > 0)).ToArray();
+            allUnits.Select(u => new UnitState(u.Id, hp[u.Id], mp[u.Id], hp[u.Id] > 0, GetFocus(u.Id))).ToArray();
 
         var snapshots = new List<BattleSnapshot>();
         int step = 0;
@@ -44,6 +48,10 @@ public static class BattleEngine
                 int variance = actor.Attack / 5;
                 int damage = actor.Attack + rng.Next(-variance, variance + 1);
                 hp[target.Id] = Math.Max(0, hp[target.Id] - damage);
+                if (actor.HasTrait(BattleTrait.Focus))
+                    focus[actor.Id] = Math.Min(100, GetFocus(actor.Id) + 10);
+                if (target.HasTrait(BattleTrait.Focus))
+                    focus[target.Id] = Math.Max(0, GetFocus(target.Id) - 10);
 
                 snapshots.Add(new BattleSnapshot
                 {

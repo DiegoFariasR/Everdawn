@@ -1,40 +1,48 @@
 # Traits
 
 ## Magic User
-- Has mana bar
-- Max mana based on WIS, starts at half and regens every start of round
-- Group by 10 mana as a slot
-- When available, spells can be empowered by 1 or more slots expended
+- [x] Trait implemented
+- [x] Has mana bar which is blue
+- [x] Max mana based on WIS (WIS × 10)
+- [ ] Starts at half mana
+- [x] Regens every start of round
+- [ ] Group by 10 mana as a slot
+- [ ] When available, spells can be empowered by 1 or more slots expended
 
 ## Focus
-- Has focus bar
-- Fixed max 100, starts at 50
-- Each hit grants 10
-- Any damage reduces 10 focus
-- When full, the next non basic attack is empowered and set focus to 50
+- [x] Trait implemented
+- [ ] Has focus bar which is yellow
+- [x] Fixed max 100, starts at 50
+- [x] Each hit grants 10
+- [x] Any damage reduces 10 focus
+- [x] When full, the next non basic attack is empowered (×1.5) and resets focus to 50
 
-## Fury Control
-- Has fury bar
-- Fixed max 100, starts at 0
-- Any attack grants from 10 to 50 fury
-- Any damage grants 10 to 20 fury
-- When full, the next non basic attack is empowered and empties fury
+## Fury
+- [ ] Trait implemented
+- [ ] Has fury bar which is red
+- [ ] Fixed max 100, starts at 0
+- [ ] Any attack grants from 10 to 50 fury
+- [ ] Any damage grants 10 to 20 fury
+- [ ] When full, the next non basic attack is empowered and empties fury
 
 ## Divine
-- Has divine favors
-- Fixed max 5, recover all on rest/pray
-- Deal less non-holy damage
-- Abilities cost favors optionally to:
-  - Deal extra damage as holy
-  - Heals more
+- [ ] Trait implemented
+- [ ] Has divine favors which are white filled circles
+- [ ] Fixed max 5, recover all on rest/pray
+- [ ] Deal less non-holy damage
+- [ ] Abilities cost favors optionally to:
+  - [ ] Deal extra damage as holy
+  - [ ] Heals more
 
 ## Profane
-- Has profane favors
-- Fixed max 5, recover all on rest/pray
-- Deal less non-void damage
-- Abilities cost favors optionally to:
-  - Deal extra damage as void
-  - Heals more
+- [ ] Trait implemented
+- [ ] Has profane favors which are black filled circles
+- [ ] Fixed max 5, recover all on rest/pray
+- [ ] Deal less non-void damage
+- [ ] Abilities cost favors optionally to:
+  - [ ] Deal extra damage as void
+  - [ ] Heals more
 
 ## Shape Shift Curse
-- Transform for a time after filling some other bar
+- [ ] Trait implemented
+- [ ] Transform for a time after filling some other bar

@@ -11,10 +11,15 @@ public record BattleUnit(
     int Str,
     int Wis,
     int Agi,
-    int MaxMp = 0,
-    IReadOnlyList<BattleSkill>? Skills = null
+    int MaxMpOverride = 0,
+    IReadOnlyList<BattleSkill>? Skills = null,
+    IReadOnlyList<BattleTrait>? Traits = null
 )
 {
+    // ── Traits ───────────────────────────────────────────────────────
+    /// <summary>Returns true if this unit has the given trait.</summary>
+    public bool HasTrait(BattleTrait trait) => Traits?.Contains(trait) ?? false;
+
     // ── Derived stats ────────────────────────────────────────────────
     /// <summary>Max HP derived from STR.</summary>
     public int MaxHp => Str * 100;
@@ -28,6 +33,15 @@ public record BattleUnit(
     public int Initiative => Agi;
     /// <summary>Hits per action: 1 base + 1 per 100 AGI.</summary>
     public int HitCount => 1 + Agi / 100;
+    /// <summary>
+    /// Max mana. MagicUser trait derives this from WIS (WIS × 10).
+    /// Use MaxMpOverride for a manual value when no trait applies.
+    /// </summary>
+    public int MaxMp => HasTrait(BattleTrait.MagicUser) ? Wis * 10 : MaxMpOverride;
+    /// <summary>Max focus. Fixed at 100 for Focus-trait units, 0 otherwise.</summary>
+    public int MaxFocus => HasTrait(BattleTrait.Focus) ? 100 : 0;
+    /// <summary>Starting focus. Fixed at 50 for Focus-trait units, 0 otherwise.</summary>
+    public int InitialFocus => HasTrait(BattleTrait.Focus) ? 50 : 0;
 
     /// <summary>
     /// The unit's skill list. Always has at least one skill (the free basic action).
