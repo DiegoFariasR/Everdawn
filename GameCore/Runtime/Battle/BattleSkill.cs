@@ -17,7 +17,16 @@ namespace GameCore.Battle
     /// <summary>
     /// One effect produced by a skill: its kind (damage/heal), intended target side, and per-hit formula.
     /// </summary>
-    public record SkillEffect(EffectKind Kind, BattleSkillTarget Target, IReadOnlyList<DamageComponent> DamagePerHit);
+    public record SkillEffect(
+        EffectKind Kind,
+        BattleSkillTarget Target,
+        IReadOnlyList<DamageComponent> DamagePerHit,
+        /// <summary>
+        /// Disruption power applied per hit to the target's disruption bar.
+        /// 0 = no disruption (default). Set explicitly on blunt/impact and lightning skills that should stagger.
+        /// </summary>
+        int DisruptionPower = 0
+    );
 
     /// <summary>
     /// A skill that a BattleUnit can use in combat.

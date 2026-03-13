@@ -18,7 +18,12 @@ namespace GameCore.Battle
         IReadOnlyList<BattleSkill>? Skills = null,
         IReadOnlyList<BattleTrait>? Traits = null,
         /// <summary>Effect type → resistance percentage. Negative values are weaknesses.</summary>
-        IReadOnlyDictionary<EffectType, int>? Resistances = null
+        IReadOnlyDictionary<EffectType, int>? Resistances = null,
+        /// <summary>
+        /// Reduces disruption bar gain (0 = none, 50 = half, 100 = immune, negative = weakness).
+        /// Kept separate from element resistances because disruption is a bar mechanic, not a damage type.
+        /// </summary>
+        int DisruptionResistance = 0
     )
     {
         // ── Traits ───────────────────────────────────────────────────────
@@ -80,6 +85,8 @@ namespace GameCore.Battle
                 // Thermal bars: every unit can accumulate cold and burn.
                 d[ThermalSystem.BarCold] = ThermalSystem.MaxBar;
                 d[ThermalSystem.BarBurn] = ThermalSystem.MaxBar;
+                // Disruption bar: every unit can accumulate disruption.
+                d[DisruptionSystem.BarDisruption] = DisruptionSystem.MaxBar;
                 return d;
             }
         }
@@ -96,6 +103,7 @@ namespace GameCore.Battle
                 if (HasTrait(BattleTrait.Fury)) d["fury"] = 0;    // fury starts empty
                 d[ThermalSystem.BarCold] = 0;                      // thermal bars start empty
                 d[ThermalSystem.BarBurn] = 0;
+                d[DisruptionSystem.BarDisruption] = 0;             // disruption bar starts empty
                 return d;
             }
         }
