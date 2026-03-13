@@ -221,6 +221,63 @@ namespace GameCore.Tests.Battle
             Assert.Contains(mage.ResolvedSkills, s => s.Id == "mage-barrier");
         }
 
+        [Fact]
+        public void MageBarrier_GrantsBarrierToAllPlayerUnits()
+        {
+            // Loads the real mage-barrier from content and verifies it covers every ally —
+            // not just the caster. Mage (agi=70) goes first because it has the highest AGI
+            // of the player units; the first available skill at full cooldown is mage-bolt (Basic),
+            // then mage-burst, then mage-barrier (which is what we want to cast).
+            var db = GameCore.Content.ContentPipeline.Load(TestContentSource.Default);
+
+            // Use the three standard player units from the SampleScenario.
+            var paladin = db.GetUnit("paladin") with { Team = "player" };
+            var mage    = db.GetUnit("mage")    with { Team = "player" };
+            var rogue   = db.GetUnit("rogue")   with { Team = "player" };
+
+            // Harmless enemy so the battle doesn't end before we check.
+            // Str=500 → MaxHp=50,000. It deals negligible void damage (Wis=0 → 0 magic attack).
+            var enemy = new BattleUnit("dummy", "Dummy", "enemy",
+                Level: 1, Str: 500, Wis: 0, Agi: 1,
+                Skills: new BattleSkill[]
+                {
+                    new("dummy-attack", "Attack", Cost: 0, DamageMultiplier: 0.0,
+                        Effects: DamageEffect(wisScale: 0.001))
+                });
+
+            var session = new BattleSession(seed: 42);
+            session.Start(new BattleSetup
+            {
+                PlayerUnits = new System.Collections.Generic.List<BattleUnit> { paladin, mage, rogue },
+                EnemyUnits  = new System.Collections.Generic.List<BattleUnit> { enemy },
+            });
+
+            // Drive turns until the mage casts mage-barrier (AoE shield).
+            // mage-barrier is AoE + ally, so no target needed. We look for a "shield" event.
+            BattleView? viewAfterBarrier = null;
+            for (int i = 0; i < 30 && !session.GetView().IsOver; i++)
+            {
+                var result = session.TryExecute(new AdvanceTurnCommand());
+                bool barrierEventFired = result.Events.Any(e =>
+                    e.SkillId == "mage-barrier" && e.Type == "skill");
+                if (barrierEventFired)
+                {
+                    viewAfterBarrier = result.View;
+                    break;
+                }
+            }
+
+            Assert.NotNull(viewAfterBarrier);
+
+            var paladinState = viewAfterBarrier!.Units.First(u => u.UnitId == paladin.Id);
+            var mageState    = viewAfterBarrier.Units.First(u => u.UnitId == mage.Id);
+            var rogueState   = viewAfterBarrier.Units.First(u => u.UnitId == rogue.Id);
+
+            Assert.True(paladinState.GetBar("barrier") > 0, "Paladin should have received barrier from mage-barrier");
+            Assert.True(mageState.GetBar("barrier")    > 0, "Mage should have received barrier from mage-barrier");
+            Assert.True(rogueState.GetBar("barrier")   > 0, "Rogue should have received barrier from mage-barrier");
+        }
+
         // ── Helpers ──────────────────────────────────────────────────────────
 
         private static SkillEffect[] DamageEffect(double wisScale = 0.01) =>
