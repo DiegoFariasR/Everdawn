@@ -44,5 +44,21 @@ namespace GameCore.Battle
         /// Throws if <see cref="Start"/> has not been called.
         /// </summary>
         BattleView GetView();
+
+        /// <summary>
+        /// Applies a runtime active effect to a target unit.
+        /// <para>
+        /// This is the programmatic hook for buff and debuff application. In a future content
+        /// wiring pass, skills will call this internally during action resolution.
+        /// For now, callers (tests, scripted events) apply effects directly.
+        /// </para>
+        /// <para>
+        /// Stacking policy from the definition controls behaviour when the same effect is already active.
+        /// </para>
+        /// </summary>
+        /// <param name="targetUnitId">ID of the unit to apply the effect to.</param>
+        /// <param name="definition">The effect definition (template) to apply.</param>
+        /// <param name="sourceUnitId">ID of the unit that caused the effect (self for self-buffs).</param>
+        void ApplyActiveEffect(string targetUnitId, ActiveEffectDefinition definition, string sourceUnitId);
     }
 }

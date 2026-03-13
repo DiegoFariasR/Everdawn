@@ -65,6 +65,15 @@ namespace GameCore.Battle
             return BuildView(_lastResponse);
         }
 
+        public void ApplyActiveEffect(string targetUnitId, ActiveEffectDefinition definition, string sourceUnitId)
+        {
+            if (_inner == null)
+                throw new InvalidOperationException("Call Start() before applying active effects.");
+            _inner.ApplyActiveEffect(targetUnitId, definition, sourceUnitId);
+            // Refresh the cached response so GetView() reflects the newly applied effect.
+            _lastResponse = _inner.RebuildCurrentResponse();
+        }
+
         /// <summary>
         /// Runs a complete battle with AI controlling all units and returns a <see cref="BattleResult"/>
         /// with one snapshot per event — suitable for watch-mode replay.

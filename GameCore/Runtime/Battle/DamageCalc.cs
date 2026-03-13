@@ -60,13 +60,19 @@ namespace GameCore.Battle
         /// one <see cref="DamageResult"/> per component.
         /// Components with a null <see cref="DamageComponent.DamageType"/> are skipped (heal-only components).
         /// </summary>
+        /// <param name="getEffectiveResistance">
+        /// Optional override for the resistance lookup. When provided, called instead of
+        /// <c>target.GetResistance(type)</c> so that runtime active-effect resistance modifiers
+        /// are applied. When null, falls back to the unit's compiled base resistances.
+        /// </param>
         public static IReadOnlyList<DamageResult> Compute(
             BattleUnit actor,
             BattleUnit target,
             IReadOnlyList<DamageComponent> components,
             double damageMultiplier,
             double extraMultiplier,
-            Random rng)
+            Random rng,
+            Func<EffectType, int>? getEffectiveResistance = null)
         {
             var results = new List<DamageResult>();
             foreach (var component in components)
@@ -90,7 +96,11 @@ namespace GameCore.Battle
                 int value = rolled;
 
                 // ── Layer 2: Resistance ──────────────────────────────────────────
-                int resistance = target.GetResistance(component.DamageType.Value);
+                // Use getEffectiveResistance if supplied (includes runtime stat modifiers);
+                // fall back to the unit's compiled base resistance otherwise.
+                int resistance = getEffectiveResistance != null
+                    ? getEffectiveResistance(component.DamageType.Value)
+                    : target.GetResistance(component.DamageType.Value);
                 int afterResistance = Math.Max(0, (int)(value * (1.0 - resistance / 100.0)));
                 steps.Add(new DamageStep("Resistance", value, afterResistance));
 
