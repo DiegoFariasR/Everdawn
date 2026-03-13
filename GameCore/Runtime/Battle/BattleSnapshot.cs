@@ -20,9 +20,16 @@ namespace GameCore.Battle
         IReadOnlyDictionary<string, int>? Bars = null,
         /// <summary>
         /// Active status effect identifiers on this unit (e.g. "poison", "stun", "slow").
+        /// Also includes definition IDs for runtime active effects (e.g. "attackUp", "guard").
         /// Empty when no effects are active. Unity renders buff/debuff icons from this list.
         /// </summary>
-        IReadOnlyList<string>? StatusEffects = null
+        IReadOnlyList<string>? StatusEffects = null,
+        /// <summary>
+        /// Full view of all runtime active effects on this unit.
+        /// Includes remaining duration and stack count for each effect.
+        /// Null when no active effects are present.
+        /// </summary>
+        IReadOnlyList<ActiveEffectView>? ActiveEffects = null
     )
     {
         /// <summary>Returns the current value of a named bar, or 0 if the unit does not have it.</summary>

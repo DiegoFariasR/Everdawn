@@ -24,6 +24,11 @@ namespace GameCore.Battle
         private readonly HashSet<string> _frozenUnits = new HashSet<string>();
         // Units that will lose their next turn due to the stunned status effect.
         private readonly HashSet<string> _stunnedUnits = new HashSet<string>();
+        // Active runtime effects: unitId → list of instances currently on that unit.
+        private readonly Dictionary<string, List<ActiveEffectInstance>> _activeEffects =
+            new Dictionary<string, List<ActiveEffectInstance>>();
+        // Counter for generating unique runtime instance IDs within this session.
+        private int _nextEffectId;
 
         public InteractiveBattleSession(BattleSetup setup, int seed)
         {
@@ -246,7 +251,8 @@ namespace GameCore.Battle
                 FullLog: _log,
                 State: _allUnits.Select(u => new UnitState(u.Id, _hp[u.Id], _hp[u.Id] > 0,
                     _bars[u.Id].Count > 0 ? new Dictionary<string, int>(_bars[u.Id]) : null,
-                    BuildStatusEffects(u.Id))).ToArray(),
+                    BuildStatusEffects(u.Id),
+                    BuildActiveEffectViews(u.Id))).ToArray(),
                 PendingInput: pending,
                 IsOver: _isOver,
                 WinningTeam: _winningTeam,
@@ -345,20 +351,24 @@ namespace GameCore.Battle
                 if (_skillCooldowns.TryGetValue(s.Id, out int cd) && cd > 0)
                     _skillCooldowns[s.Id] = cd - 1;
 
+            // Resolve the effective skill for this action: applies any runtime skill modifiers
+            // from active effects on the actor. The base compiled skill is never mutated.
+            var effectiveSkill = ResolveEffectiveSkill(actor, skill);
+
             // Consume the skill's cost from the unit's mana bar, if they have one.
             if (_bars[actor.Id].ContainsKey("mp"))
-                _bars[actor.Id]["mp"] = Math.Max(0, _bars[actor.Id]["mp"] - skill.Cost);
+                _bars[actor.Id]["mp"] = Math.Max(0, _bars[actor.Id]["mp"] - effectiveSkill.Cost);
 
             // Determine event type from skill modifier
-            string evType = (skill.IsHeal || skill.IsShield) ? "skill"
-                           : skill.IsBasic ? "attack" : skill.IsUltimate ? "soulburn" : "skill";
+            string evType = (effectiveSkill.IsHeal || effectiveSkill.IsShield) ? "skill"
+                           : effectiveSkill.IsBasic ? "attack" : effectiveSkill.IsUltimate ? "soulburn" : "skill";
 
             // Focus empowerment: fires when focus is full and the actor uses a non-basic offensive skill
             bool isFocusEmpowered = actor.HasTrait(BattleTrait.Focus)
                 && GetBar(actor.Id, "focus") == 100
-                && !skill.IsBasic
-                && !skill.IsHeal
-                && !skill.IsShield;
+                && !effectiveSkill.IsBasic
+                && !effectiveSkill.IsHeal
+                && !effectiveSkill.IsShield;
             if (isFocusEmpowered)
             {
                 _bars[actor.Id]["focus"] = 50;
@@ -367,23 +377,24 @@ namespace GameCore.Battle
             // Fury empowerment: fires when fury is full and the actor uses a non-basic offensive skill
             bool isFuryEmpowered = actor.HasTrait(BattleTrait.Fury)
                 && GetBar(actor.Id, "fury") == 100
-                && !skill.IsBasic
-                && !skill.IsHeal
-                && !skill.IsShield;
+                && !effectiveSkill.IsBasic
+                && !effectiveSkill.IsHeal
+                && !effectiveSkill.IsShield;
             if (isFuryEmpowered)
             {
                 _bars[actor.Id]["fury"] = 0;
                 produced.Add(AddEvent(actor.Id, $"{actor.Name}'s Fury empowers their attack!", "skill"));
             }
-            double empowerMult = 1.0;
+            // DamageDealtMultiplier from active effects stacks with focus/fury empowerment.
+            double empowerMult = GetDamageDealtMultiplier(actor.Id);
             if (isFocusEmpowered) empowerMult *= 1.5;
             if (isFuryEmpowered) empowerMult *= 1.5;
 
-            if (skill.IsAoe && targets.Count > 1)
+            if (effectiveSkill.IsAoe && targets.Count > 1)
             {
-                string aoeDesc = skill.IsShield
-                    ? $"{actor.Name} conjures {skill.Name} on all allies!"
-                    : $"{actor.Name} unleashes {skill.Name} on all enemies!";
+                string aoeDesc = effectiveSkill.IsShield
+                    ? $"{actor.Name} conjures {effectiveSkill.Name} on all allies!"
+                    : $"{actor.Name} unleashes {effectiveSkill.Name} on all enemies!";
                 produced.Add(AddEvent(actor.Id, aoeDesc, evType));
             }
 
@@ -396,12 +407,12 @@ namespace GameCore.Battle
             // subject to the slow debuff (slow halves the base-hit contribution).
             int effectiveHits;
             double perHitHitsMult;
-            bool hasHitsOverride = skill.BaseHits != 1.0 || (skill.ScalingHits != null && skill.ScalingHits.Count > 0);
-            if (!skill.IsHeal && !skill.IsShield && hasHitsOverride)
+            bool hasHitsOverride = effectiveSkill.BaseHits != 1.0 || (effectiveSkill.ScalingHits != null && effectiveSkill.ScalingHits.Count > 0);
+            if (!effectiveSkill.IsHeal && !effectiveSkill.IsShield && hasHitsOverride)
             {
-                double rawHits = skill.BaseHits;
-                if (skill.ScalingHits != null)
-                    foreach (var s in skill.ScalingHits)
+                double rawHits = effectiveSkill.BaseHits;
+                if (effectiveSkill.ScalingHits != null)
+                    foreach (var s in effectiveSkill.ScalingHits)
                         rawHits += actor.GetStat(s.Stat) * s.Scale;
                 rawHits = Math.Max(0.5, rawHits);
                 effectiveHits = Math.Max(1, (int)Math.Floor(rawHits));
@@ -412,11 +423,11 @@ namespace GameCore.Battle
                 // AGI-derived hit count, reduced by slow if active.
                 bool actorIsSlow = GetBar(actor.Id, ThermalSystem.BarCold) >= ThermalSystem.SlowThreshold
                                    && !_frozenUnits.Contains(actor.Id);
-                effectiveHits = (skill.IsHeal || skill.IsShield) ? 1 : ThermalSystem.ResolveAgiHits(actor.Agi, actorIsSlow);
+                effectiveHits = (effectiveSkill.IsHeal || effectiveSkill.IsShield) ? 1 : ThermalSystem.ResolveAgiHits(actor.Agi, actorIsSlow);
                 perHitHitsMult = 1.0;
             }
 
-            var effect = skill.Effects.Count > 0 ? skill.Effects[0] : null;
+            var effect = effectiveSkill.Effects.Count > 0 ? effectiveSkill.Effects[0] : null;
 
             // Dizzy: actor's final damage output is reduced when their disruption bar is at/above the dizzy threshold.
             // Stunned actors don't reach ExecuteAction (turn is skipped), so no need to exclude them here.
@@ -433,7 +444,7 @@ namespace GameCore.Battle
                         foreach (var comp in effect.DamagePerHit)
                             foreach (var s in comp.Scaling)
                                 healRaw += actor.GetStat(s.Stat) * s.Scale;
-                        healRaw *= skill.DamageMultiplier * empowerMult;
+                        healRaw *= effectiveSkill.DamageMultiplier * empowerMult;
                         int healVariance = Math.Max(1, (int)healRaw / 5);
                         int amount = Math.Max(0, (int)healRaw + _rng.Next(-healVariance, healVariance + 1));
                         var maxHp = _allUnits.First(u => u.Id == target.Id).MaxHp;
@@ -452,14 +463,14 @@ namespace GameCore.Battle
                         foreach (var comp in effect.DamagePerHit)
                             foreach (var s in comp.Scaling)
                                 shieldRaw += actor.GetStat(s.Stat) * s.Scale;
-                        shieldRaw *= skill.DamageMultiplier * empowerMult;
+                        shieldRaw *= effectiveSkill.DamageMultiplier * empowerMult;
                         int shieldVariance = Math.Max(1, (int)shieldRaw / 5);
                         int amount = Math.Max(0, (int)shieldRaw + _rng.Next(-shieldVariance, shieldVariance + 1));
                         if (!_bars[target.Id].ContainsKey("barrier"))
                             _bars[target.Id]["barrier"] = 0;
                         _bars[target.Id]["barrier"] += amount;
                         produced.Add(AddEvent(actor.Id,
-                            skill.IsAoe
+                            effectiveSkill.IsAoe
                                 ? $"  \u2192 {target.Name} gains {amount} barrier."
                                 : $"{actor.Name} grants {amount} barrier to {target.Name}.",
                             evType, target.Id, amount,
@@ -468,14 +479,22 @@ namespace GameCore.Battle
                     else
                     {
                         var components = effect?.DamagePerHit ?? System.Array.Empty<DamageComponent>();
-                        var hitResults = DamageCalc.Compute(actor, target, components, skill.DamageMultiplier, empowerMult * perHitHitsMult, _rng);
+                        // Pass effective resistance resolver so runtime resistance modifiers are applied.
+                        var hitResults = DamageCalc.Compute(actor, target, components, effectiveSkill.DamageMultiplier,
+                            empowerMult * perHitHitsMult, _rng,
+                            et => GetEffectiveResistance(target.Id, et));
                         int totalDamage = 0;
                         foreach (var r in hitResults) totalDamage += r.FinalDamage;
 
                         // Dizzy: reduce the actor's final damage output by 20%.
                         totalDamage = DisruptionSystem.ApplyDizzyReduction(totalDamage, actorIsDizzy);
 
-                        var primaryType = skill.PrimaryEffectType;
+                        // DamageTakenMultiplier from target's active effects (e.g. Guard).
+                        // Applied after dizzy (dizzy is an actor debuff; Guard is a target buff).
+                        double damageTakenMult = GetDamageTakenMultiplier(target.Id);
+                        totalDamage = (int)(totalDamage * damageTakenMult);
+
+                        var primaryType = effectiveSkill.PrimaryEffectType;
 
                         // Barrier absorbs damage before HP.
                         int barrierCurrent = GetBar(target.Id, "barrier");
@@ -486,9 +505,9 @@ namespace GameCore.Battle
 
                         string hitLabel = effectiveHits > 1 ? $" (hit {i + 1}/{effectiveHits})" : "";
                         produced.Add(AddEvent(actor.Id,
-                            skill.IsAoe
+                            effectiveSkill.IsAoe
                                 ? $"  \u2192 {target.Name} takes {totalDamage} damage{hitLabel}."
-                                : $"{actor.Name} uses {skill.Name} on {target.Name} for {totalDamage} damage{hitLabel}.",
+                                : $"{actor.Name} uses {effectiveSkill.Name} on {target.Name} for {totalDamage} damage{hitLabel}.",
                             evType, target.Id, totalDamage,
                             skillId: skill.Id, effectType: primaryType,
                             hitIndex: i, totalHits: effectiveHits));
@@ -518,12 +537,16 @@ namespace GameCore.Battle
                 }
             }
 
-            // Apply cooldown for the used skill
+            // Apply cooldown for the used skill (uses the base skill's cooldown, not the effective one,
+            // so that runtime cooldown modifiers do not permanently alter the session's cooldown state).
             if (skill.Cooldown > 0)
                 _skillCooldowns[skill.Id] = skill.Cooldown;
             // Fury: actor gains 10–50 per action (excludes heals and shields)
-            if (actor.HasTrait(BattleTrait.Fury) && !skill.IsHeal && !skill.IsShield)
+            if (actor.HasTrait(BattleTrait.Fury) && !effectiveSkill.IsHeal && !effectiveSkill.IsShield)
                 _bars[actor.Id]["fury"] = Math.Min(100, GetBar(actor.Id, "fury") + _rng.Next(10, 51));
+
+            // Tick active effects: decrement durations and remove expired instances.
+            produced.AddRange(TickActiveEffects(actor.Id));
 
             CheckEnd();
             return produced;
@@ -591,6 +614,7 @@ namespace GameCore.Battle
         /// <summary>
         /// Applies thermal buildup to <paramref name="target"/> from fire and cold hits in
         /// <paramref name="hitResults"/>. Generates events for freeze triggers.
+        /// Uses runtime resistance modifiers from active effects when computing buildup.
         /// </summary>
         private IReadOnlyList<BattleEvent> ApplyThermalBuildup(BattleUnit target, IReadOnlyList<DamageResult> hitResults)
         {
@@ -602,7 +626,8 @@ namespace GameCore.Battle
                 {
                     int currentCold = GetBar(target.Id, ThermalSystem.BarCold);
                     int currentBurn = GetBar(target.Id, ThermalSystem.BarBurn);
-                    ThermalSystem.ApplyCold(r.RawDamage, target.GetResistance(EffectType.Cold),
+                    int effectiveColdResistance = GetEffectiveResistance(target.Id, EffectType.Cold);
+                    ThermalSystem.ApplyCold(r.RawDamage, effectiveColdResistance,
                         currentBurn, currentCold, out int newBurn, out int newCold);
                     _bars[target.Id][ThermalSystem.BarBurn] = newBurn;
                     _bars[target.Id][ThermalSystem.BarCold] = newCold;
@@ -618,7 +643,8 @@ namespace GameCore.Battle
                 {
                     int currentCold = GetBar(target.Id, ThermalSystem.BarCold);
                     int currentBurn = GetBar(target.Id, ThermalSystem.BarBurn);
-                    ThermalSystem.ApplyFire(r.RawDamage, target.GetResistance(EffectType.Fire),
+                    int effectiveFireResistance = GetEffectiveResistance(target.Id, EffectType.Fire);
+                    ThermalSystem.ApplyFire(r.RawDamage, effectiveFireResistance,
                         currentCold, currentBurn, out int newCold, out int newBurn);
                     _bars[target.Id][ThermalSystem.BarCold] = newCold;
                     _bars[target.Id][ThermalSystem.BarBurn] = newBurn;
@@ -632,12 +658,14 @@ namespace GameCore.Battle
         /// <summary>
         /// Applies disruption power to <paramref name="target"/>'s disruption bar for one hit.
         /// Generates stun events when the bar reaches the stun threshold.
+        /// Uses runtime disruption-resistance modifiers from active effects.
         /// </summary>
         private IReadOnlyList<BattleEvent> ApplyDisruptionBuildup(BattleUnit target, int disruptionPower)
         {
             var events = new List<BattleEvent>();
             int current = GetBar(target.Id, DisruptionSystem.BarDisruption);
-            int built = DisruptionSystem.ApplyDisruption(disruptionPower, target.DisruptionResistance, current, out int newBar);
+            int effectiveDisruptionResistance = GetEffectiveDisruptionResistance(target.Id);
+            int built = DisruptionSystem.ApplyDisruption(disruptionPower, effectiveDisruptionResistance, current, out int newBar);
             _bars[target.Id][DisruptionSystem.BarDisruption] = newBar;
 
             if (built > 0)
@@ -655,7 +683,7 @@ namespace GameCore.Battle
 
         /// <summary>
         /// Returns the active status effect IDs for a unit, or null when none are active.
-        /// Combines thermal (slow/frozen/burning) and disruption (dizzy/stunned) effects.
+        /// Combines thermal (slow/frozen/burning), disruption (dizzy/stunned), and runtime active-effect IDs.
         /// </summary>
         private IReadOnlyList<string>? BuildStatusEffects(string unitId)
         {
@@ -670,10 +698,16 @@ namespace GameCore.Battle
             bool isStunned = _stunnedUnits.Contains(unitId);
             var disruptionEffects = DisruptionSystem.GetDisruptionStatusEffects(disruptionBar, isStunned);
 
-            if (thermalEffects.Count == 0 && disruptionEffects.Count == 0) return null;
+            // Include the definition ID of each active runtime effect so the client can display icons.
+            bool hasActiveEffects = _activeEffects.TryGetValue(unitId, out var effects) && effects.Count > 0;
+
+            if (thermalEffects.Count == 0 && disruptionEffects.Count == 0 && !hasActiveEffects) return null;
 
             var all = new List<string>(thermalEffects);
             all.AddRange(disruptionEffects);
+            if (hasActiveEffects)
+                foreach (var e in effects!)
+                    all.Add(e.DefinitionId);
             return all;
         }
 
@@ -742,5 +776,300 @@ namespace GameCore.Battle
             _log.Add(ev);
             return ev;
         }
+
+        // ── Active-effect system ─────────────────────────────────────────────
+
+        /// <summary>
+        /// Applies a runtime active effect to a target unit.
+        /// Stacking policy controls behaviour when the same definition is already active.
+        /// </summary>
+        internal void ApplyActiveEffect(string targetUnitId, ActiveEffectDefinition definition, string sourceUnitId)
+        {
+            if (!_activeEffects.ContainsKey(targetUnitId))
+                _activeEffects[targetUnitId] = new List<ActiveEffectInstance>();
+
+            var list = _activeEffects[targetUnitId];
+            var existing = FindExistingInstance(list, definition.Id);
+
+            switch (definition.StackingPolicy)
+            {
+                case EffectStackingPolicy.RefreshDuration:
+                    if (existing != null)
+                    {
+                        int idx = list.IndexOf(existing);
+                        list[idx] = existing with { RemainingDuration = definition.Duration };
+                        return;
+                    }
+                    break;
+
+                case EffectStackingPolicy.ReplaceIfStronger:
+                    if (existing != null)
+                    {
+                        // Keep the existing instance if it has more duration remaining.
+                        if (definition.Duration <= existing.RemainingDuration) return;
+                        list.Remove(existing);
+                    }
+                    break;
+
+                case EffectStackingPolicy.StackIntensity:
+                    if (existing != null)
+                    {
+                        int idx = list.IndexOf(existing);
+                        list[idx] = existing with
+                        {
+                            Stacks = existing.Stacks + 1,
+                            RemainingDuration = Math.Max(existing.RemainingDuration, definition.Duration),
+                        };
+                        return;
+                    }
+                    break;
+
+                case EffectStackingPolicy.IndependentInstances:
+                    // Always fall through to create a new instance.
+                    break;
+            }
+
+            string instanceId = $"effect_{_nextEffectId++}";
+            list.Add(new ActiveEffectInstance(
+                InstanceId: instanceId,
+                DefinitionId: definition.Id,
+                Name: definition.Name,
+                SourceUnitId: sourceUnitId,
+                TargetUnitId: targetUnitId,
+                RemainingDuration: definition.Duration,
+                DurationKind: definition.DurationKind,
+                SkillModifier: definition.SkillModifier,
+                StatModifiers: definition.StatModifiers
+            ));
+        }
+
+        /// <summary>Returns all active effect instances currently on a unit (read-only view).</summary>
+        internal IReadOnlyList<ActiveEffectInstance> GetActiveEffects(string unitId) =>
+            _activeEffects.TryGetValue(unitId, out var list) ? list : System.Array.Empty<ActiveEffectInstance>();
+
+        /// <summary>
+        /// Rebuilds and returns the current BattleResponse from the present runtime state.
+        /// Used to refresh the external view after out-of-band state changes such as
+        /// <see cref="ApplyActiveEffect"/> that do not go through a HandleRequest call.
+        /// </summary>
+        internal BattleResponse RebuildCurrentResponse() =>
+            BuildResponse(System.Array.Empty<BattleEvent>());
+
+        /// <summary>Resolves the effective skill for an action by overlaying runtime skill modifiers.</summary>
+        private BattleSkill ResolveEffectiveSkill(BattleUnit actor, BattleSkill skill)
+        {
+            if (!_activeEffects.TryGetValue(actor.Id, out var effects) || effects.Count == 0)
+                return skill;
+
+            var modifiers = new List<RuntimeSkillModifier>();
+            foreach (var e in effects)
+                if (e.SkillModifier != null)
+                    modifiers.Add(e.SkillModifier);
+
+            if (modifiers.Count == 0) return skill;
+
+            // ── Phase 1: Set (last modifier with a given key wins) ───────────
+            double damageMultiplier = skill.DamageMultiplier;
+            int cost = skill.Cost;
+            bool isAoe = skill.IsAoe;
+            int cooldown = skill.Cooldown;
+
+            foreach (var mod in modifiers)
+            {
+                if (mod.Set == null) continue;
+                if (mod.Set.TryGetValue("damageMultiplier", out var dm))
+                    damageMultiplier = System.Convert.ToDouble(dm);
+                if (mod.Set.TryGetValue("cost", out var c))
+                    cost = System.Convert.ToInt32(c);
+                if (mod.Set.TryGetValue("isAoe", out var aoe))
+                    isAoe = System.Convert.ToBoolean(aoe);
+                if (mod.Set.TryGetValue("cooldown", out var cd))
+                    cooldown = System.Convert.ToInt32(cd);
+            }
+
+            // ── Phase 2: Modify (sum all deltas) ─────────────────────────────
+            foreach (var mod in modifiers)
+            {
+                if (mod.Modify == null) continue;
+                if (mod.Modify.TryGetValue("damageMultiplier", out var dm))
+                    damageMultiplier += dm;
+                if (mod.Modify.TryGetValue("cost", out var c))
+                    cost += (int)c;
+                if (mod.Modify.TryGetValue("cooldown", out var cd))
+                    cooldown += (int)cd;
+            }
+
+            // ── Phase 3: Add (append damage components to first effect) ──────
+            var addedComponents = new List<DamageComponent>();
+            foreach (var mod in modifiers)
+                if (mod.AddDamagePerHit != null)
+                    foreach (var comp in mod.AddDamagePerHit)
+                        addedComponents.Add(comp);
+
+            IReadOnlyList<SkillEffect> newEffects = skill.Effects;
+            if (addedComponents.Count > 0 && skill.Effects.Count > 0)
+            {
+                var firstEffect = skill.Effects[0];
+                var newComponents = new List<DamageComponent>(firstEffect.DamagePerHit);
+                newComponents.AddRange(addedComponents);
+                var newFirstEffect = firstEffect with { DamagePerHit = newComponents };
+                var effectsList = new List<SkillEffect>(skill.Effects);
+                effectsList[0] = newFirstEffect;
+                newEffects = effectsList;
+            }
+
+            return skill with
+            {
+                DamageMultiplier = Math.Max(0.0, damageMultiplier),
+                Cost = Math.Max(0, cost),
+                IsAoe = isAoe,
+                Cooldown = Math.Max(0, cooldown),
+                Effects = newEffects,
+            };
+        }
+
+        /// <summary>Returns the effective damage-dealt multiplier for a unit from active effects.</summary>
+        private double GetDamageDealtMultiplier(string unitId) =>
+            ResolveStatModifier(unitId, RuntimeStatKey.DamageDealtMultiplier, baseValue: 1.0);
+
+        /// <summary>Returns the effective damage-taken multiplier for a unit from active effects.</summary>
+        private double GetDamageTakenMultiplier(string unitId) =>
+            ResolveStatModifier(unitId, RuntimeStatKey.DamageTakenMultiplier, baseValue: 1.0);
+
+        /// <summary>
+        /// Returns the effective resistance percentage for a unit and damage type, combining the
+        /// unit's compiled base resistance with any runtime stat modifiers from active effects.
+        /// </summary>
+        private int GetEffectiveResistance(string unitId, EffectType effectType)
+        {
+            var unit = _allUnits.First(u => u.Id == unitId);
+            int baseResistance = unit.GetResistance(effectType);
+            RuntimeStatKey key = EffectTypeToResistanceKey(effectType);
+            return (int)ResolveStatModifier(unitId, key, baseValue: baseResistance);
+        }
+
+        /// <summary>
+        /// Returns the effective disruption resistance for a unit, combining the compiled base value
+        /// with any runtime stat modifiers from active effects.
+        /// </summary>
+        private int GetEffectiveDisruptionResistance(string unitId)
+        {
+            var unit = _allUnits.First(u => u.Id == unitId);
+            return (int)ResolveStatModifier(unitId, RuntimeStatKey.DisruptionResistance,
+                baseValue: unit.DisruptionResistance);
+        }
+
+        /// <summary>
+        /// Resolves a single stat key by applying all active-effect modifiers in Set → Add → Multiply order.
+        /// </summary>
+        private double ResolveStatModifier(string unitId, RuntimeStatKey key, double baseValue)
+        {
+            if (!_activeEffects.TryGetValue(unitId, out var effects) || effects.Count == 0)
+                return baseValue;
+
+            double value = baseValue;
+
+            // 1. Set: last modifier with this key wins.
+            foreach (var effect in effects)
+            {
+                if (effect.StatModifiers == null) continue;
+                foreach (var mod in effect.StatModifiers)
+                    if (mod.StatKey == key && mod.Operation == ModifierOperation.Set)
+                        value = mod.Value;
+            }
+
+            // 2. Add: sum all additive deltas.
+            foreach (var effect in effects)
+            {
+                if (effect.StatModifiers == null) continue;
+                foreach (var mod in effect.StatModifiers)
+                    if (mod.StatKey == key && mod.Operation == ModifierOperation.Add)
+                        value += mod.Value;
+            }
+
+            // 3. Multiply: apply all multiplicative factors.
+            foreach (var effect in effects)
+            {
+                if (effect.StatModifiers == null) continue;
+                foreach (var mod in effect.StatModifiers)
+                    if (mod.StatKey == key && mod.Operation == ModifierOperation.Multiply)
+                        value *= mod.Value;
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// Decrements the remaining duration for all active effects whose count-down condition matches
+        /// the acting unit, and removes any effects that have expired.
+        /// </summary>
+        private IReadOnlyList<BattleEvent> TickActiveEffects(string actorId)
+        {
+            var events = new List<BattleEvent>();
+
+            foreach (var unitId in new List<string>(_activeEffects.Keys))
+            {
+                if (!_activeEffects.TryGetValue(unitId, out var effectList)) continue;
+
+                for (int i = effectList.Count - 1; i >= 0; i--)
+                {
+                    var effect = effectList[i];
+                    bool shouldTick = effect.DurationKind switch
+                    {
+                        EffectDurationKind.ForTargetTurns => effect.TargetUnitId == actorId,
+                        EffectDurationKind.ForSourceTurns => effect.SourceUnitId == actorId,
+                        EffectDurationKind.UntilNextAction => effect.TargetUnitId == actorId,
+                        _ => false,
+                    };
+
+                    if (!shouldTick) continue;
+
+                    int newDuration = effect.RemainingDuration - 1;
+                    if (newDuration <= 0)
+                    {
+                        effectList.RemoveAt(i);
+                        var targetUnit = _allUnits.FirstOrDefault(u => u.Id == unitId);
+                        string targetName = targetUnit?.Name ?? unitId;
+                        events.Add(AddEvent(actorId, $"{effect.Name} fades from {targetName}.", "status"));
+                    }
+                    else
+                    {
+                        effectList[i] = effect with { RemainingDuration = newDuration };
+                    }
+                }
+            }
+
+            return events;
+        }
+
+        /// <summary>Builds the UI-facing active-effect view list for a unit. Null when none are active.</summary>
+        private IReadOnlyList<ActiveEffectView>? BuildActiveEffectViews(string unitId)
+        {
+            if (!_activeEffects.TryGetValue(unitId, out var effects) || effects.Count == 0)
+                return null;
+            var views = new List<ActiveEffectView>(effects.Count);
+            foreach (var e in effects)
+                views.Add(new ActiveEffectView(e.DefinitionId, e.Name, e.RemainingDuration, e.Stacks));
+            return views;
+        }
+
+        private static ActiveEffectInstance? FindExistingInstance(List<ActiveEffectInstance> list, string definitionId)
+        {
+            foreach (var e in list)
+                if (e.DefinitionId == definitionId)
+                    return e;
+            return null;
+        }
+
+        private static RuntimeStatKey EffectTypeToResistanceKey(EffectType effectType) => effectType switch
+        {
+            EffectType.Physical => RuntimeStatKey.PhysicalResistance,
+            EffectType.Fire => RuntimeStatKey.FireResistance,
+            EffectType.Cold => RuntimeStatKey.ColdResistance,
+            EffectType.Lightning => RuntimeStatKey.LightningResistance,
+            EffectType.Holy => RuntimeStatKey.HolyResistance,
+            EffectType.Void => RuntimeStatKey.VoidResistance,
+            _ => RuntimeStatKey.PhysicalResistance,
+        };
     }
 }
