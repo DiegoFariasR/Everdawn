@@ -294,7 +294,7 @@ html, body {
 /* Enemy info buttons are disabled but shown at full opacity — info only, not grayed */
 .btn-enemy-info { opacity: 0.75 !important; cursor: default !important; filter: none !important; }
 .btn-enemy-info:disabled { opacity: 0.75; cursor: default; filter: none; }
-.btn-enemy-info.btn-selected { opacity: 1 !important; box-shadow: 0 0 0 2px #ffd700, 0 0 10px #ffd70066; }
+.btn-enemy-info.btn-selected { opacity: 1 !important; outline: 3px solid #ffd700; outline-offset: 2px; filter: brightness(1.3); }
 
 .skill-btn-top {
     display: flex;
@@ -359,12 +359,13 @@ html, body {
 
 /* Selected skill highlight */
 .btn-selected {
-    box-shadow: 0 0 0 2px #ffd700, 0 0 10px 2px rgba(255, 215, 0, 0.4);
-    background-color: rgba(255, 215, 0, 0.12) !important;
+    outline: 3px solid #ffd700;
+    outline-offset: 2px;
+    filter: brightness(1.3) saturate(1.2);
 }
 .btn-selected.btn-aoe {
-    box-shadow: 0 0 0 2px #ffd700, 0 0 10px 2px rgba(255, 215, 0, 0.4);
-    bg: none; outline: none;
+    outline: 3px solid #ffd700;
+    outline-offset: 2px;
 }
 
 .aoe-badge {
