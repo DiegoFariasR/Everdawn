@@ -22,7 +22,7 @@ namespace GameCore.Scenarios
         // scenario changes in a way that is expected and reviewed.
         public string ExpectedWinner => "player";
         // 1 start + round banners + skill/attack/death/heal events + 1 end = 60
-        public int ExpectedSnapshotCount => 92;
+        public int ExpectedSnapshotCount => 109;
 
         public override string ToString() => $"{DisplayName} [{Id}]";
 

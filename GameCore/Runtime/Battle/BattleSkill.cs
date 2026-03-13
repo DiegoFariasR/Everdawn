@@ -59,6 +59,9 @@ namespace GameCore.Battle
         /// <summary>True if this skill heals rather than damages.</summary>
         public bool IsHeal => Effects.Count > 0 && Effects[0].Kind == EffectKind.Heal;
 
+        /// <summary>True if this skill grants a barrier (shield) rather than dealing damage.</summary>
+        public bool IsShield => Effects.Count > 0 && Effects[0].Kind == EffectKind.Shield;
+
         /// <summary>Target side of the first effect. Defaults to Enemy if Effects is empty.</summary>
         public BattleSkillTarget Target => Effects.Count > 0 ? Effects[0].Target : BattleSkillTarget.Enemy;
 

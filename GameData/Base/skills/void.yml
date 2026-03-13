@@ -33,6 +33,19 @@
             - stat: wis
               scale: 2.0
 
+- id: mage-barrier
+  name: Arcane Barrier
+  isAoe: true
+  cooldown: 4
+  category: Spell
+  effects:
+    - kind: shield
+      target: ally
+      damagePerHit:
+        - scaling:
+            - stat: wis
+              scale: 2.0
+
 - id: necro-bolt
   name: Dark Bolt
   effects:
