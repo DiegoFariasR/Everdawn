@@ -507,7 +507,7 @@ namespace GameCore.Battle
                         produced.Add(AddEvent(actor.Id,
                             effectiveSkill.IsAoe
                                 ? $"  \u2192 {target.Name} takes {totalDamage} damage{hitLabel}."
-                                : $"{actor.Name} uses {skill.Name} on {target.Name} for {totalDamage} damage{hitLabel}.",
+                                : $"{actor.Name} uses {effectiveSkill.Name} on {target.Name} for {totalDamage} damage{hitLabel}.",
                             evType, target.Id, totalDamage,
                             skillId: skill.Id, effectType: primaryType,
                             hitIndex: i, totalHits: effectiveHits));

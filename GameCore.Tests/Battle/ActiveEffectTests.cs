@@ -703,7 +703,7 @@ namespace GameCore.Tests.Battle
         }
 
         [Fact]
-        public void StackingPolicy_ReplaceIfStronger_ReplacesWhenNewIsDonger()
+        public void StackingPolicy_ReplaceIfStronger_ReplacesWhenNewIsLonger()
         {
             var player = MakePlayer();
             var enemy = MakeEnemy();
