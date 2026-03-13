@@ -77,6 +77,9 @@ namespace GameCore.Battle
                 if (mp > 0) d["mp"] = mp;
                 if (HasTrait(BattleTrait.Focus)) d["focus"] = 100;
                 if (HasTrait(BattleTrait.Fury)) d["fury"] = 100;
+                // Thermal bars: every unit can accumulate cold and burn.
+                d[ThermalSystem.BarCold] = ThermalSystem.MaxBar;
+                d[ThermalSystem.BarBurn] = ThermalSystem.MaxBar;
                 return d;
             }
         }
@@ -88,9 +91,11 @@ namespace GameCore.Battle
             {
                 var d = new Dictionary<string, int>();
                 int mp = HasTrait(BattleTrait.MagicUser) ? Wis * 10 : MaxMpOverride;
-                if (mp > 0) d["mp"] = mp;                      // mana starts full
-                if (HasTrait(BattleTrait.Focus)) d["focus"] = 50;  // focus starts half
-                if (HasTrait(BattleTrait.Fury)) d["fury"] = 0;  // fury starts empty
+                if (mp > 0) d["mp"] = mp;                         // mana starts full
+                if (HasTrait(BattleTrait.Focus)) d["focus"] = 50; // focus starts half
+                if (HasTrait(BattleTrait.Fury)) d["fury"] = 0;    // fury starts empty
+                d[ThermalSystem.BarCold] = 0;                      // thermal bars start empty
+                d[ThermalSystem.BarBurn] = 0;
                 return d;
             }
         }

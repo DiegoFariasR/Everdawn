@@ -20,6 +20,8 @@ namespace GameCore.Battle
         private readonly Dictionary<string, int> _skillCooldowns = new();
         private bool _isOver;
         private string? _winningTeam;
+        // Units that will lose their next turn due to the frozen status effect.
+        private readonly HashSet<string> _frozenUnits = new HashSet<string>();
 
         public InteractiveBattleSession(BattleSetup setup, int seed)
         {
@@ -94,6 +96,20 @@ namespace GameCore.Battle
                 throw new InvalidOperationException("Not a player turn.");
 
             var actor = _turnOrder[_turnIndex];
+
+            // Start-of-turn phase.
+            var newEvents = new List<BattleEvent>(StartOfTurn(actor));
+
+            // If the player is frozen, their chosen action is skipped and the turn is consumed.
+            if (_frozenUnits.Contains(actor.Id))
+            {
+                _frozenUnits.Remove(actor.Id);
+                newEvents.Add(AddEvent(actor.Id, $"{actor.Name} is frozen and cannot act!", "status"));
+                if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
+                newEvents.AddRange(AutoAdvance());
+                return BuildResponse(newEvents);
+            }
+
             var skill = actor.ResolvedSkills.FirstOrDefault(s => s.Id == r.SkillId)
                          ?? throw new ArgumentException($"Unknown skill: {r.SkillId}");
 
@@ -109,7 +125,7 @@ namespace GameCore.Battle
                 targets = new List<BattleUnit> { t };
             }
 
-            var newEvents = new List<BattleEvent>(ExecuteAction(actor, targets, skill));
+            newEvents.AddRange(ExecuteAction(actor, targets, skill));
             if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
             newEvents.AddRange(AutoAdvance());
             return BuildResponse(newEvents);
@@ -123,11 +139,24 @@ namespace GameCore.Battle
                 throw new InvalidOperationException("Not a player turn.");
 
             var actor = _turnOrder[_turnIndex];
+
+            // Start-of-turn phase.
+            var newEvents = new List<BattleEvent>(StartOfTurn(actor));
+
+            if (_frozenUnits.Contains(actor.Id))
+            {
+                _frozenUnits.Remove(actor.Id);
+                newEvents.Add(AddEvent(actor.Id, $"{actor.Name} is frozen and cannot act!", "status"));
+                if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
+                newEvents.AddRange(AutoAdvance());
+                return BuildResponse(newEvents);
+            }
+
             var skill = actor.ResolvedSkills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Last();
             var targets = ResolveAutoTargets(actor, skill);
             if (targets.Count == 0) { CheckEnd(); return BuildResponse(Array.Empty<BattleEvent>()); }
 
-            var newEvents = new List<BattleEvent>(ExecuteAction(actor, targets, skill));
+            newEvents.AddRange(ExecuteAction(actor, targets, skill));
             if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
             newEvents.AddRange(AutoAdvance());
             return BuildResponse(newEvents);
@@ -139,11 +168,25 @@ namespace GameCore.Battle
             if (_isOver) return BuildResponse(Array.Empty<BattleEvent>());
 
             var actor = _turnOrder[_turnIndex];
+
+            // Start-of-turn phase.
+            var newEvents = new List<BattleEvent>(StartOfTurn(actor));
+            if (_isOver) return BuildResponse(newEvents);
+
+            if (_frozenUnits.Contains(actor.Id))
+            {
+                // Consume the frozen turn: skip the action and advance.
+                _frozenUnits.Remove(actor.Id);
+                newEvents.Add(AddEvent(actor.Id, $"{actor.Name} is frozen and cannot act!", "status"));
+                if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
+                return BuildResponse(newEvents);
+            }
+
             var skill = actor.ResolvedSkills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Last();
             var targets = ResolveAutoTargets(actor, skill);
-            if (targets.Count == 0) { CheckEnd(); return BuildResponse(Array.Empty<BattleEvent>()); }
+            if (targets.Count == 0) { CheckEnd(); return BuildResponse(newEvents); }
 
-            var newEvents = new List<BattleEvent>(ExecuteAction(actor, targets, skill));
+            newEvents.AddRange(ExecuteAction(actor, targets, skill));
             if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
             return BuildResponse(newEvents);
         }
@@ -172,7 +215,8 @@ namespace GameCore.Battle
                 NewEvents: newEvents,
                 FullLog: _log,
                 State: _allUnits.Select(u => new UnitState(u.Id, _hp[u.Id], _hp[u.Id] > 0,
-                    _bars[u.Id].Count > 0 ? new Dictionary<string, int>(_bars[u.Id]) : null)).ToArray(),
+                    _bars[u.Id].Count > 0 ? new Dictionary<string, int>(_bars[u.Id]) : null,
+                    BuildStatusEffects(u.Id))).ToArray(),
                 PendingInput: pending,
                 IsOver: _isOver,
                 WinningTeam: _winningTeam,
@@ -182,13 +226,32 @@ namespace GameCore.Battle
 
         // ── Internals ────────────────────────────────────────────────────────
 
-        /// <summary>Auto-resolves enemy turns until it's a player's turn or the battle ends.</summary>
+        /// <summary>Auto-resolves enemy turns until it's a non-frozen player's turn or the battle ends.</summary>
         private IReadOnlyList<BattleEvent> AutoAdvance()
         {
             var produced = new List<BattleEvent>();
-            while (!_isOver && _turnOrder[_turnIndex].Team != "player")
+            while (!_isOver)
             {
                 var actor = _turnOrder[_turnIndex];
+                bool isFrozen = _frozenUnits.Contains(actor.Id);
+
+                // Stop when it is a living, non-frozen player's turn — they need to provide input.
+                if (!isFrozen && actor.Team == "player") break;
+
+                // Process start-of-turn effects for this actor (burn DOT, thermal decay).
+                produced.AddRange(StartOfTurn(actor));
+                if (_isOver) break;
+
+                if (isFrozen)
+                {
+                    // Consume the frozen turn: skip the action and advance.
+                    _frozenUnits.Remove(actor.Id);
+                    produced.Add(AddEvent(actor.Id, $"{actor.Name} is frozen and cannot act!", "status"));
+                    if (AdvanceTurn()) produced.AddRange(StartOfRound());
+                    continue;
+                }
+
+                // Auto-resolve enemy action.
                 var skill = actor.ResolvedSkills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Last();
                 var targets = ResolveAutoTargets(actor, skill);
                 if (targets.Count == 0) { CheckEnd(); break; }
@@ -289,7 +352,8 @@ namespace GameCore.Battle
             //   raw = clamp(BaseHits + Σ scalingHits, min 0.5)
             //   floor(raw) hits, each dealing DamageMultiplier × (raw / floor(raw)) × base.
             //   At raw = 0.5: 1 hit at 50% power. Total damage = DamageMultiplier × raw × base.
-            // When BaseHits is 1.0 and ScalingHits is empty, actor.HitCount (AGI-derived) applies.
+            // When BaseHits is 1.0 and ScalingHits is empty, the AGI-derived count applies,
+            // subject to the slow debuff (slow halves the base-hit contribution).
             int effectiveHits;
             double perHitHitsMult;
             bool hasHitsOverride = skill.BaseHits != 1.0 || (skill.ScalingHits != null && skill.ScalingHits.Count > 0);
@@ -305,7 +369,10 @@ namespace GameCore.Battle
             }
             else
             {
-                effectiveHits = (skill.IsHeal || skill.IsShield) ? 1 : actor.HitCount;
+                // AGI-derived hit count, reduced by slow if active.
+                bool actorIsSlow = GetBar(actor.Id, ThermalSystem.BarCold) >= ThermalSystem.SlowThreshold
+                                   && !_frozenUnits.Contains(actor.Id);
+                effectiveHits = (skill.IsHeal || skill.IsShield) ? 1 : ThermalSystem.ResolveAgiHits(actor.Agi, actorIsSlow);
                 perHitHitsMult = 1.0;
             }
 
@@ -387,6 +454,9 @@ namespace GameCore.Battle
                         if (target.HasTrait(BattleTrait.Fury))
                             _bars[target.Id]["fury"] = Math.Min(100, GetBar(target.Id, "fury") + _rng.Next(10, 21));
 
+                        // Thermal buildup: fire and cold hits build opposing bars on the target.
+                        produced.AddRange(ApplyThermalBuildup(target, hitResults));
+
                         if (_hp[target.Id] <= 0)
                         {
                             produced.Add(AddEvent(target.Id, $"{target.Name} is defeated!", "death"));
@@ -419,6 +489,98 @@ namespace GameCore.Battle
             }
             CheckEnd();
             return false;
+        }
+
+        // ── Thermal helpers ──────────────────────────────────────────────────
+
+        /// <summary>
+        /// Processes the start-of-turn phase for <paramref name="actor"/>:
+        /// applies burn DOT and decays thermal bars.
+        /// Frozen-turn consumption is handled by callers.
+        /// </summary>
+        private IReadOnlyList<BattleEvent> StartOfTurn(BattleUnit actor)
+        {
+            var events = new List<BattleEvent>();
+            if (_hp[actor.Id] <= 0) return events;
+
+            int burnBar = GetBar(actor.Id, ThermalSystem.BarBurn);
+
+            // Burn DOT: applied before decay so the damage reflects the current bar.
+            if (burnBar >= ThermalSystem.BurningThreshold)
+            {
+                int dot = ThermalSystem.ComputeBurnDot(burnBar);
+                if (dot > 0)
+                {
+                    int barrierCurrent = GetBar(actor.Id, "barrier");
+                    int barrierAbsorbed = Math.Min(barrierCurrent, dot);
+                    if (barrierAbsorbed > 0)
+                        _bars[actor.Id]["barrier"] = barrierCurrent - barrierAbsorbed;
+                    _hp[actor.Id] = Math.Max(0, _hp[actor.Id] - (dot - barrierAbsorbed));
+                    events.Add(AddEvent(actor.Id, $"{actor.Name} takes {dot} burn damage!", "status",
+                        targetId: actor.Id, value: dot));
+                    CheckEnd();
+                }
+            }
+
+            // Thermal bar decay.
+            int coldBar = GetBar(actor.Id, ThermalSystem.BarCold);
+            var (newCold, newBurn) = ThermalSystem.ApplyDecay(coldBar, burnBar);
+            if (newCold != coldBar) _bars[actor.Id][ThermalSystem.BarCold] = newCold;
+            if (newBurn != burnBar) _bars[actor.Id][ThermalSystem.BarBurn] = newBurn;
+
+            return events;
+        }
+
+        /// <summary>
+        /// Applies thermal buildup to <paramref name="target"/> from fire and cold hits in
+        /// <paramref name="hitResults"/>. Generates events for freeze triggers.
+        /// </summary>
+        private IReadOnlyList<BattleEvent> ApplyThermalBuildup(BattleUnit target, IReadOnlyList<DamageResult> hitResults)
+        {
+            var events = new List<BattleEvent>();
+            foreach (var r in hitResults)
+            {
+                if (r.RawDamage <= 0) continue;
+                if (r.EffectType == EffectType.Cold)
+                {
+                    int currentCold = GetBar(target.Id, ThermalSystem.BarCold);
+                    int currentBurn = GetBar(target.Id, ThermalSystem.BarBurn);
+                    ThermalSystem.ApplyCold(r.RawDamage, target.GetResistance(EffectType.Cold),
+                        currentBurn, currentCold, out int newBurn, out int newCold);
+                    _bars[target.Id][ThermalSystem.BarBurn] = newBurn;
+                    _bars[target.Id][ThermalSystem.BarCold] = newCold;
+
+                    if (ThermalSystem.CheckFreezeTriggered(ref newCold))
+                    {
+                        _bars[target.Id][ThermalSystem.BarCold] = newCold;
+                        _frozenUnits.Add(target.Id);
+                        events.Add(AddEvent(target.Id, $"{target.Name} is frozen!", "status"));
+                    }
+                }
+                else if (r.EffectType == EffectType.Fire)
+                {
+                    int currentCold = GetBar(target.Id, ThermalSystem.BarCold);
+                    int currentBurn = GetBar(target.Id, ThermalSystem.BarBurn);
+                    ThermalSystem.ApplyFire(r.RawDamage, target.GetResistance(EffectType.Fire),
+                        currentCold, currentBurn, out int newCold, out int newBurn);
+                    _bars[target.Id][ThermalSystem.BarCold] = newCold;
+                    _bars[target.Id][ThermalSystem.BarBurn] = newBurn;
+                }
+            }
+            return events;
+        }
+
+        /// <summary>
+        /// Returns the active thermal status effect IDs for a unit, or null when none are active.
+        /// </summary>
+        private IReadOnlyList<string>? BuildStatusEffects(string unitId)
+        {
+            if (_hp[unitId] <= 0) return null;
+            int coldBar = GetBar(unitId, ThermalSystem.BarCold);
+            int burnBar = GetBar(unitId, ThermalSystem.BarBurn);
+            bool isFrozen = _frozenUnits.Contains(unitId);
+            var effects = ThermalSystem.GetThermalStatusEffects(coldBar, burnBar, isFrozen);
+            return effects.Count > 0 ? effects : null;
         }
 
         /// <summary>Called when the turn order wraps. Increments round, regenerates mana, decays barrier.</summary>
