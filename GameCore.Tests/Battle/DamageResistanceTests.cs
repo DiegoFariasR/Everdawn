@@ -12,6 +12,9 @@ namespace GameCore.Tests.Battle
         private static BattleUnit MakeActor(int str = 100, int wis = 0) =>
             new("actor", "Actor", "player", Level: 1, Str: str, Wis: wis, Agi: 50);
 
+        private static BattleUnit MakeActorWithPenetration(int str = 100, int wis = 0, IReadOnlyDictionary<EffectType, int>? penetrations = null) =>
+            new("actor", "Actor", "player", Level: 1, Str: str, Wis: wis, Agi: 50, Penetrations: penetrations);
+
         private static BattleUnit MakeTarget(IReadOnlyDictionary<EffectType, int>? resistances = null) =>
             new("target", "Target", "enemy", Level: 1, Str: 100, Wis: 0, Agi: 50, Resistances: resistances);
 
@@ -168,6 +171,69 @@ namespace GameCore.Tests.Battle
             var unit = MakeTarget();
             Assert.Equal(0, unit.GetResistance(EffectType.Physical));
             Assert.Equal(0, unit.GetResistance(EffectType.Void));
+        }
+
+        // ── Penetration ───────────────────────────────────────────────────────
+
+        [Fact]
+        public void GetPenetration_ReturnsZeroWhenNoPenetrationsDefined()
+        {
+            var actor = MakeActor();
+            Assert.Equal(0, actor.GetPenetration(EffectType.Physical));
+            Assert.Equal(0, actor.GetPenetration(EffectType.Void));
+        }
+
+        [Fact]
+        public void Penetration_ReducesEffectiveResistance()
+        {
+            // Target has 50% resistance, actor has 20% penetration → net 30% resistance.
+            var target = MakeTarget(new Dictionary<EffectType, int> { [EffectType.Physical] = 50 });
+            var actor = MakeActorWithPenetration(penetrations: new Dictionary<EffectType, int> { [EffectType.Physical] = 20 });
+            var result = Compute(actor, target, EffectType.Physical);
+            // Net resistance = 30% → final = raw * 0.70
+            Assert.Equal((int)(result.RawDamage * 0.70), result.FinalDamage);
+        }
+
+        [Fact]
+        public void Penetration_CanReduceResistanceBelowZero_CausingExtraDamage()
+        {
+            // Target has 10% resistance, actor has 30% penetration → net -20% (weakness).
+            var target = MakeTarget(new Dictionary<EffectType, int> { [EffectType.Physical] = 10 });
+            var actor = MakeActorWithPenetration(penetrations: new Dictionary<EffectType, int> { [EffectType.Physical] = 30 });
+            var result = Compute(actor, target, EffectType.Physical);
+            // Net resistance = -20% → final = raw * 1.20
+            Assert.Equal((int)(result.RawDamage * 1.20), result.FinalDamage);
+        }
+
+        [Fact]
+        public void Penetration_WithNoResistance_CausesExtraDamage()
+        {
+            // Target has 0% resistance, actor has 50% penetration → net -50% (weakness).
+            var actor = MakeActorWithPenetration(penetrations: new Dictionary<EffectType, int> { [EffectType.Physical] = 50 });
+            var result = Compute(actor, MakeTarget(), EffectType.Physical);
+            // Net resistance = -50% → final = raw * 1.50
+            Assert.Equal((int)(result.RawDamage * 1.50), result.FinalDamage);
+        }
+
+        [Fact]
+        public void Penetration_OnlyAffectsMatchingDamageType()
+        {
+            // Actor has physical penetration, dealing void damage → penetration ignored.
+            var target = MakeTarget(new Dictionary<EffectType, int> { [EffectType.Void] = 50 });
+            var actor = MakeActorWithPenetration(wis: 100, penetrations: new Dictionary<EffectType, int> { [EffectType.Physical] = 50 });
+            var result = Compute(actor, target, EffectType.Void);
+            // Physical penetration does not reduce void resistance → net 50% resistance.
+            Assert.Equal((int)(result.RawDamage * 0.50), result.FinalDamage);
+        }
+
+        [Fact]
+        public void Penetration_FullPenetrationNegatesImmunity()
+        {
+            // Target is immune (100% resistance), actor has 100% penetration → net 0%.
+            var target = MakeTarget(new Dictionary<EffectType, int> { [EffectType.Physical] = 100 });
+            var actor = MakeActorWithPenetration(penetrations: new Dictionary<EffectType, int> { [EffectType.Physical] = 100 });
+            var result = Compute(actor, target, EffectType.Physical);
+            Assert.Equal(result.RawDamage, result.FinalDamage);
         }
 
         [Fact]

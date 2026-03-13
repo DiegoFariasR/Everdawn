@@ -215,6 +215,35 @@ namespace GameCore.Content
                     + SumModifyInt(unitMods, ModifierVariable.DisruptionResistance);
             }
 
+            IReadOnlyDictionary<EffectType, int>? penetrations = null;
+            int disruptionPenetration = 0;
+            if (unitMods.Length > 0)
+            {
+                var mergedPenetrations = new Dictionary<EffectType, int>();
+
+                var penetrationKeys = new (EffectType Type, ModifierVariable Key)[]
+                {
+                    (EffectType.Physical, ModifierVariable.PhysicalPenetration),
+                    (EffectType.Fire, ModifierVariable.FirePenetration),
+                    (EffectType.Cold, ModifierVariable.ColdPenetration),
+                    (EffectType.Lightning, ModifierVariable.LightningPenetration),
+                    (EffectType.Holy, ModifierVariable.HolyPenetration),
+                    (EffectType.Void, ModifierVariable.VoidPenetration),
+                };
+
+                foreach (var (type, key) in penetrationKeys)
+                {
+                    int finalVal = GetLastSet<int>(unitMods, key, 0) + SumModifyInt(unitMods, key);
+                    if (finalVal != 0)
+                        mergedPenetrations[type] = finalVal;
+                }
+
+                penetrations = mergedPenetrations.Count > 0 ? mergedPenetrations : null;
+
+                disruptionPenetration = GetLastSet<int>(unitMods, ModifierVariable.DisruptionPenetration, 0)
+                    + SumModifyInt(unitMods, ModifierVariable.DisruptionPenetration);
+            }
+
             return new BattleUnit(
                 raw.Id, raw.Name,
                 Team: "",           // team is assigned by the scenario, not the data file
@@ -225,7 +254,9 @@ namespace GameCore.Content
                 Skills: skills,
                 Traits: traits,
                 Resistances: resistances,
-                DisruptionResistance: disruptionResistance);
+                DisruptionResistance: disruptionResistance,
+                Penetrations: penetrations,
+                DisruptionPenetration: disruptionPenetration);
         }
 
         private static BattleSkill CompileSkill(RawSkill raw)

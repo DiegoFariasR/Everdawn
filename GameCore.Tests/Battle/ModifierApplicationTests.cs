@@ -577,5 +577,140 @@ skills:
             Assert.Equal(50, unit.GetResistance(EffectType.Holy));
             Assert.Equal(60, unit.GetResistance(EffectType.Void));
         }
+
+        // ── Unit-level penetration modifiers ──────────────────────────────────
+
+        [Fact]
+        public void UnitModifier_Set_OverridesPhysicalPenetration()
+        {
+            var db = BuildDb(@"
+- id: test-mod
+  set:
+    physicalPenetration: 30
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(30, unit.GetPenetration(EffectType.Physical));
+        }
+
+        [Fact]
+        public void UnitModifier_Set_OverridesVoidPenetration()
+        {
+            var db = BuildDb(@"
+- id: test-mod
+  set:
+    voidPenetration: 50
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(50, unit.GetPenetration(EffectType.Void));
+        }
+
+        [Fact]
+        public void UnitModifier_Modify_AddsToPenetration()
+        {
+            var db = BuildDb(@"
+- id: test-mod
+  modify:
+    firePenetration: 25
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(25, unit.GetPenetration(EffectType.Fire));
+        }
+
+        [Fact]
+        public void UnitModifier_Set_OverridesDisruptionPenetration()
+        {
+            var db = BuildDb(@"
+- id: test-mod
+  set:
+    disruptionPenetration: 40
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(40, unit.DisruptionPenetration);
+        }
+
+        [Fact]
+        public void UnitModifier_Modify_AddsToDisruptionPenetration()
+        {
+            var db = BuildDb(@"
+- id: test-mod
+  modify:
+    disruptionPenetration: 20
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(20, unit.DisruptionPenetration);
+        }
+
+        [Fact]
+        public void UnitModifier_AllPenetrationTypes_AreAppliedIndependently()
+        {
+            var db = BuildDb(@"
+- id: test-mod
+  set:
+    physicalPenetration: 10
+    firePenetration: 20
+    coldPenetration: 30
+    lightningPenetration: 40
+    holyPenetration: 50
+    voidPenetration: 60
+    disruptionPenetration: 70
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(10, unit.GetPenetration(EffectType.Physical));
+            Assert.Equal(20, unit.GetPenetration(EffectType.Fire));
+            Assert.Equal(30, unit.GetPenetration(EffectType.Cold));
+            Assert.Equal(40, unit.GetPenetration(EffectType.Lightning));
+            Assert.Equal(50, unit.GetPenetration(EffectType.Holy));
+            Assert.Equal(60, unit.GetPenetration(EffectType.Void));
+            Assert.Equal(70, unit.DisruptionPenetration);
+        }
+
+        [Fact]
+        public void UnitModifier_Penetration_DoesNotAffectResistances()
+        {
+            // A penetration modifier should not change the unit's own resistances.
+            var db = BuildDb(@"
+- id: test-mod
+  set:
+    physicalPenetration: 50
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(0, unit.GetResistance(EffectType.Physical));
+        }
+
+        [Fact]
+        public void UnitModifier_Resistance_DoesNotAffectPenetrations()
+        {
+            // A resistance modifier should not affect the unit's penetration.
+            var db = BuildDb(@"
+- id: test-mod
+  set:
+    physicalResistance: 50
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(0, unit.GetPenetration(EffectType.Physical));
+        }
+
+        [Fact]
+        public void UnitModifier_NoPenetrationModifier_DefaultIsZero()
+        {
+            var db = BuildDb(@"
+- id: test-mod
+  set:
+    physicalResistance: 50
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(0, unit.GetPenetration(EffectType.Physical));
+            Assert.Equal(0, unit.GetPenetration(EffectType.Void));
+            Assert.Equal(0, unit.DisruptionPenetration);
+        }
     }
 }

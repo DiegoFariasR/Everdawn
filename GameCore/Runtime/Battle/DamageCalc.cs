@@ -43,9 +43,10 @@ namespace GameCore.Battle
             int value = rolled;
 
             // ── Layer 2: Resistance ──────────────────────────────────────────
-            // Reduce damage by the defender's resistance percentage for this damage type.
+            // Reduce damage by the defender's resistance percentage for this damage type,
+            // minus the attacker's penetration for the same type.
             // 0 = no change. 50 = half damage. 100 = immune. Negative = weakness (extra damage).
-            int resistance = target.GetResistance(effectType);
+            int resistance = target.GetResistance(effectType) - actor.GetPenetration(effectType);
             int afterResistance = Math.Max(0, (int)(value * (1.0 - resistance / 100.0)));
             steps.Add(new DamageStep("Resistance", value, afterResistance));
             value = afterResistance;
@@ -65,6 +66,11 @@ namespace GameCore.Battle
         /// <c>target.GetResistance(type)</c> so that runtime active-effect resistance modifiers
         /// are applied. When null, falls back to the unit's compiled base resistances.
         /// </param>
+        /// <param name="getEffectivePenetration">
+        /// Optional override for the penetration lookup. When provided, called instead of
+        /// <c>actor.GetPenetration(type)</c> so that runtime active-effect penetration modifiers
+        /// are applied. When null, falls back to the actor's compiled base penetrations.
+        /// </param>
         public static IReadOnlyList<DamageResult> Compute(
             BattleUnit actor,
             BattleUnit target,
@@ -72,7 +78,8 @@ namespace GameCore.Battle
             double damageMultiplier,
             double extraMultiplier,
             Random rng,
-            Func<EffectType, int>? getEffectiveResistance = null)
+            Func<EffectType, int>? getEffectiveResistance = null,
+            Func<EffectType, int>? getEffectivePenetration = null)
         {
             var results = new List<DamageResult>();
             foreach (var component in components)
@@ -98,9 +105,13 @@ namespace GameCore.Battle
                 // ── Layer 2: Resistance ──────────────────────────────────────────
                 // Use getEffectiveResistance if supplied (includes runtime stat modifiers);
                 // fall back to the unit's compiled base resistance otherwise.
-                int resistance = getEffectiveResistance != null
+                // Subtract the actor's penetration (compiled or runtime) from the resistance.
+                int resistance = (getEffectiveResistance != null
                     ? getEffectiveResistance(component.DamageType.Value)
-                    : target.GetResistance(component.DamageType.Value);
+                    : target.GetResistance(component.DamageType.Value))
+                    - (getEffectivePenetration != null
+                        ? getEffectivePenetration(component.DamageType.Value)
+                        : actor.GetPenetration(component.DamageType.Value));
                 int afterResistance = Math.Max(0, (int)(value * (1.0 - resistance / 100.0)));
                 steps.Add(new DamageStep("Resistance", value, afterResistance));
 

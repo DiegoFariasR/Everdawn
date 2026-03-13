@@ -479,10 +479,11 @@ namespace GameCore.Battle
                     else
                     {
                         var components = effect?.DamagePerHit ?? System.Array.Empty<DamageComponent>();
-                        // Pass effective resistance resolver so runtime resistance modifiers are applied.
+                        // Pass effective resistance and penetration resolvers so runtime modifiers are applied.
                         var hitResults = DamageCalc.Compute(actor, target, components, effectiveSkill.DamageMultiplier,
                             empowerMult * perHitHitsMult, _rng,
-                            et => GetEffectiveResistance(target.Id, et));
+                            et => GetEffectiveResistance(target.Id, et),
+                            et => GetEffectivePenetration(actor.Id, et));
                         int totalDamage = 0;
                         foreach (var r in hitResults) totalDamage += r.FinalDamage;
 
@@ -526,7 +527,7 @@ namespace GameCore.Battle
 
                         // Disruption buildup: apply per-hit disruption power declared on the skill effect.
                         if (effect != null && effect.DisruptionPower > 0)
-                            produced.AddRange(ApplyDisruptionBuildup(target, effect.DisruptionPower));
+                            produced.AddRange(ApplyDisruptionBuildup(actor, target, effect.DisruptionPower));
 
                         if (_hp[target.Id] <= 0)
                         {
@@ -658,13 +659,14 @@ namespace GameCore.Battle
         /// <summary>
         /// Applies disruption power to <paramref name="target"/>'s disruption bar for one hit.
         /// Generates stun events when the bar reaches the stun threshold.
-        /// Uses runtime disruption-resistance modifiers from active effects.
+        /// Uses runtime disruption-resistance and disruption-penetration modifiers from active effects.
         /// </summary>
-        private IReadOnlyList<BattleEvent> ApplyDisruptionBuildup(BattleUnit target, int disruptionPower)
+        private IReadOnlyList<BattleEvent> ApplyDisruptionBuildup(BattleUnit actor, BattleUnit target, int disruptionPower)
         {
             var events = new List<BattleEvent>();
             int current = GetBar(target.Id, DisruptionSystem.BarDisruption);
-            int effectiveDisruptionResistance = GetEffectiveDisruptionResistance(target.Id);
+            int effectiveDisruptionResistance = GetEffectiveDisruptionResistance(target.Id)
+                - GetEffectiveDisruptionPenetration(actor.Id);
             int built = DisruptionSystem.ApplyDisruption(disruptionPower, effectiveDisruptionResistance, current, out int newBar);
             _bars[target.Id][DisruptionSystem.BarDisruption] = newBar;
 
@@ -949,6 +951,18 @@ namespace GameCore.Battle
         }
 
         /// <summary>
+        /// Returns the effective penetration percentage for a unit and damage type, combining the
+        /// unit's compiled base penetration with any runtime stat modifiers from active effects.
+        /// </summary>
+        private int GetEffectivePenetration(string unitId, EffectType effectType)
+        {
+            var unit = _allUnits.First(u => u.Id == unitId);
+            int basePenetration = unit.GetPenetration(effectType);
+            RuntimeStatKey key = EffectTypeToPenetrationKey(effectType);
+            return (int)ResolveStatModifier(unitId, key, baseValue: basePenetration);
+        }
+
+        /// <summary>
         /// Returns the effective disruption resistance for a unit, combining the compiled base value
         /// with any runtime stat modifiers from active effects.
         /// </summary>
@@ -957,6 +971,17 @@ namespace GameCore.Battle
             var unit = _allUnits.First(u => u.Id == unitId);
             return (int)ResolveStatModifier(unitId, RuntimeStatKey.DisruptionResistance,
                 baseValue: unit.DisruptionResistance);
+        }
+
+        /// <summary>
+        /// Returns the effective disruption penetration for a unit, combining the compiled base value
+        /// with any runtime stat modifiers from active effects.
+        /// </summary>
+        private int GetEffectiveDisruptionPenetration(string unitId)
+        {
+            var unit = _allUnits.First(u => u.Id == unitId);
+            return (int)ResolveStatModifier(unitId, RuntimeStatKey.DisruptionPenetration,
+                baseValue: unit.DisruptionPenetration);
         }
 
         /// <summary>
@@ -1070,6 +1095,17 @@ namespace GameCore.Battle
             EffectType.Holy => RuntimeStatKey.HolyResistance,
             EffectType.Void => RuntimeStatKey.VoidResistance,
             _ => RuntimeStatKey.PhysicalResistance,
+        };
+
+        private static RuntimeStatKey EffectTypeToPenetrationKey(EffectType effectType) => effectType switch
+        {
+            EffectType.Physical => RuntimeStatKey.PhysicalPenetration,
+            EffectType.Fire => RuntimeStatKey.FirePenetration,
+            EffectType.Cold => RuntimeStatKey.ColdPenetration,
+            EffectType.Lightning => RuntimeStatKey.LightningPenetration,
+            EffectType.Holy => RuntimeStatKey.HolyPenetration,
+            EffectType.Void => RuntimeStatKey.VoidPenetration,
+            _ => RuntimeStatKey.PhysicalPenetration,
         };
     }
 }
