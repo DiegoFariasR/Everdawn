@@ -1,0 +1,126 @@
+@page "/report"
+@using System.Text.Json
+@inject HttpClient Http
+
+<PageTitle>Balance Report — Everdawn</PageTitle>
+
+@if (_loading)
+{
+    <p class="report-loading">Loading report…</p>
+}
+else if (_notFound || _report == null)
+{
+    <div class="report-no-data">
+        <h2>No report data</h2>
+        <p>Run the export test to generate it:</p>
+        <pre class="report-cmd">dotnet test GameCore.Tests --filter "FullyQualifiedName=GameCore.Tests.Battle.ArchetypeDamageTests.ExportBalancingJson"</pre>
+        <p>Then commit <code>BattleSandbox.Web/wwwroot/balancing-report.json</code> and deploy.</p>
+    </div>
+}
+else
+{
+    <div class="report-header">
+        <h2>Balance Report</h2>
+        <p class="report-generated">Generated: @_report.GeneratedAt</p>
+    </div>
+
+    @foreach (var budgetSection in _report.Budgets)
+    {
+        <div class="report-budget">
+            <h3>Budget @budgetSection.Budget <small>(Boss HP @budgetSection.BossHp)</small></h3>
+            <div class="report-table-wrap">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th class="report-th report-archetype-th">Archetype</th>
+                            @foreach (var skill in budgetSection.Skills)
+                            {
+                                <th class="report-th">@skill.Name</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var vals = budgetSection.Rows.SelectMany(r => r.Rounds).Where(v => v < 999).ToList();
+                            int rMin = vals.Count > 0 ? vals.Min() : 1;
+                            int rMax = vals.Count > 0 ? vals.Max() : 1;
+                        }
+                        @foreach (var row in budgetSection.Rows)
+                        {
+                            <tr>
+                                <td class="report-archetype-label">@row.Archetype</td>
+                                @for (int i = 0; i < row.Rounds.Count; i++)
+                                {
+                                    int r = row.Rounds[i];
+                                    <td class="report-cell" style="background:@HeatColor(r, rMin, rMax);">@CellText(r)</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <p class="report-legend">Green = faster kill (fewer rounds) &nbsp;·&nbsp; Red = slower &nbsp;·&nbsp; DNF = timed out at 999 rounds</p>
+        </div>
+    }
+}
+
+@code {
+    private ReportModel? _report;
+    private bool _loading = true;
+    private bool _notFound;
+
+    protected override async System.Threading.Tasks.Task OnInitializedAsync()
+    {
+        try
+        {
+            var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            _report = await Http.GetFromJsonAsync<ReportModel>("balancing-report.json", opts);
+        }
+        catch (System.Net.Http.HttpRequestException)
+        {
+            _notFound = true;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private static string HeatColor(int rounds, int min, int max)
+    {
+        if (rounds >= 999) return "hsl(0,80%,28%)";
+        if (max <= min) return "hsl(120,60%,38%)";
+        double t = (double)(rounds - min) / (max - min);
+        double hue = 120.0 * (1.0 - t);
+        return $"hsl({hue:F0},70%,38%)";
+    }
+
+    private static string CellText(int rounds) => rounds >= 999 ? "DNF" : rounds.ToString();
+
+    private class ReportModel
+    {
+        public string GeneratedAt { get; set; } = "";
+        public System.Collections.Generic.List<BudgetSection> Budgets { get; set; } = new();
+    }
+
+    private class BudgetSection
+    {
+        public int Budget { get; set; }
+        public int BossHp { get; set; }
+        public System.Collections.Generic.List<SkillInfo> Skills { get; set; } = new();
+        public System.Collections.Generic.List<string> Archetypes { get; set; } = new();
+        public System.Collections.Generic.List<ArchetypeRow> Rows { get; set; } = new();
+    }
+
+    private class SkillInfo
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+    }
+
+    private class ArchetypeRow
+    {
+        public string Archetype { get; set; } = "";
+        public System.Collections.Generic.List<int> Rounds { get; set; } = new();
+    }
+}

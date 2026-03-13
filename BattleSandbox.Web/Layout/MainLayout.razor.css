@@ -16,3 +16,28 @@
     margin: 0 auto;
     padding: 1rem;
 }
+
+.top-nav {
+    background: #12122a;
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid #2a2a4a;
+}
+
+.top-nav-link {
+    padding: 0.5rem 1rem;
+    color: #aaa;
+    text-decoration: none;
+    font-size: 0.85rem;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s;
+}
+
+.top-nav-link:hover {
+    color: #e0e0e0;
+}
+
+.top-nav-link.active {
+    color: #e0e0e0;
+    border-bottom-color: #5a8dee;
+}

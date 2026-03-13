@@ -177,5 +177,58 @@ namespace GameCore.Tests.Battle
             Assert.Equal(26, maceRounds);
         }
 
+        [Fact]
+        public void ExportBalancingJson()
+        {
+            var db = ContentPipeline.Load(TestContentSource.Default);
+            var allSkills = WeaponSkillIds.Concat(SpellSkillIds)
+                                          .Select(id => db.GetSkill(id))
+                                          .ToArray();
+
+            var json = System.Text.Json.JsonSerializer.Serialize(
+                new
+                {
+                    GeneratedAt = DateTime.UtcNow.ToString("o"),
+                    Budgets = Budgets.Select(budget =>
+                    {
+                        var entries = new List<(string Archetype, string Skill, int Rounds)>();
+                        foreach (var (arcId, strF, agiF, wisF) in Archetypes)
+                            foreach (var sk in allSkills)
+                            {
+                                var result = BattleEngine.Run(
+                                    new BattleSetup
+                                    {
+                                        PlayerUnits = new List<BattleUnit> { BuildAttacker(arcId, strF, agiF, wisF, budget, sk) },
+                                        EnemyUnits = new List<BattleUnit> { BuildBoss(budget) },
+                                    },
+                                    seed: 42, maxRounds: 999);
+                                entries.Add((arcId, sk.Id, result.Snapshots.Count(s => s.Event.Type == "round")));
+                            }
+
+                        return new
+                        {
+                            Budget = budget,
+                            BossHp = 200 * budget,
+                            Skills = allSkills.Select(s => new { Id = s.Id, Name = s.Name }).ToArray(),
+                            Archetypes = Archetypes.Select(a => a.Id).ToArray(),
+                            Rows = Archetypes.Select(a => new
+                            {
+                                Archetype = a.Id,
+                                Rounds = allSkills.Select(s =>
+                                    entries.First(e => e.Archetype == a.Id && e.Skill == s.Id).Rounds).ToArray(),
+                            }).ToArray(),
+                        };
+                    }).ToArray(),
+                },
+                new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+
+            var outPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(
+                AppContext.BaseDirectory,
+                "..", "..", "..", "..",
+                "BattleSandbox.Web", "wwwroot", "balancing-report.json"));
+            System.IO.File.WriteAllText(outPath, json);
+            _output.WriteLine($"Written: {outPath}");
+        }
+
     }
 }

@@ -1,0 +1,96 @@
+.report-loading {
+    color: #999;
+    padding: 1rem;
+}
+
+.report-no-data {
+    padding: 1rem;
+}
+
+.report-no-data h2 {
+    margin-top: 0;
+}
+
+.report-cmd {
+    background: #1a1a2e;
+    color: #e0e0e0;
+    padding: 0.75rem;
+    border-radius: 4px;
+    font-size: 0.78em;
+    overflow-x: auto;
+    white-space: pre;
+}
+
+.report-header {
+    margin-bottom: 1.5rem;
+}
+
+.report-header h2 {
+    margin: 0 0 0.2rem;
+}
+
+.report-generated {
+    margin: 0;
+    color: #888;
+    font-size: 0.78em;
+}
+
+.report-budget {
+    margin-bottom: 2.5rem;
+}
+
+.report-budget h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+}
+
+.report-budget h3 small {
+    font-weight: normal;
+    color: #888;
+    font-size: 0.85em;
+}
+
+.report-table-wrap {
+    overflow-x: auto;
+}
+
+.report-table {
+    border-collapse: collapse;
+    font-size: 0.82em;
+    min-width: max-content;
+}
+
+.report-th {
+    padding: 4px 10px;
+    border-bottom: 1px solid #444;
+    white-space: nowrap;
+    text-align: center;
+    color: #ccc;
+    font-weight: 600;
+}
+
+.report-archetype-th {
+    text-align: left;
+    padding-left: 0;
+}
+
+.report-archetype-label {
+    padding: 4px 12px 4px 0;
+    white-space: nowrap;
+    color: #ccc;
+    font-size: 0.9em;
+}
+
+.report-cell {
+    text-align: center;
+    padding: 4px 10px;
+    color: white;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.9em;
+}
+
+.report-legend {
+    margin: 0.4rem 0 0;
+    font-size: 0.72em;
+    color: #666;
+}

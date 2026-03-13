@@ -1,0 +1,901 @@
+{
+  "GeneratedAt": "2026-03-13T14:02:53.1991486Z",
+  "Budgets": [
+    {
+      "Budget": 20,
+      "BossHp": 4000,
+      "Skills": [
+        {
+          "Id": "mace-strike",
+          "Name": "Mace Strike"
+        },
+        {
+          "Id": "sword-strike",
+          "Name": "Sword Strike"
+        },
+        {
+          "Id": "bow-shot",
+          "Name": "Arrow Shot"
+        },
+        {
+          "Id": "dagger-strike",
+          "Name": "Dagger Strike"
+        },
+        {
+          "Id": "mage-bolt",
+          "Name": "Magic Bolt"
+        },
+        {
+          "Id": "spell-missiles",
+          "Name": "Magic Missiles"
+        },
+        {
+          "Id": "spell-burst",
+          "Name": "Arcane Burst"
+        },
+        {
+          "Id": "spell-volley",
+          "Name": "Magic Volley"
+        }
+      ],
+      "Archetypes": [
+        "str100",
+        "agi100",
+        "wis100",
+        "str50-agi50",
+        "agi50-wis50",
+        "wis50-str50",
+        "str75-agi25",
+        "agi75-wis25",
+        "wis75-str25",
+        "str25-agi75",
+        "agi25-wis75",
+        "wis25-str75",
+        "balanced"
+      ],
+      "Rows": [
+        {
+          "Archetype": "str100",
+          "Rounds": [
+            26,
+            26,
+            999,
+            999,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "agi100",
+          "Rounds": [
+            503,
+            447,
+            111,
+            182,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "wis100",
+          "Rounds": [
+            503,
+            503,
+            999,
+            999,
+            26,
+            51,
+            21,
+            22
+          ]
+        },
+        {
+          "Archetype": "str50-agi50",
+          "Rounds": [
+            51,
+            46,
+            221,
+            402,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "agi50-wis50",
+          "Rounds": [
+            503,
+            503,
+            221,
+            402,
+            51,
+            90,
+            42,
+            43
+          ]
+        },
+        {
+          "Archetype": "wis50-str50",
+          "Rounds": [
+            51,
+            51,
+            999,
+            999,
+            51,
+            100,
+            42,
+            43
+          ]
+        },
+        {
+          "Archetype": "str75-agi25",
+          "Rounds": [
+            35,
+            33,
+            447,
+            999,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "agi75-wis25",
+          "Rounds": [
+            503,
+            447,
+            147,
+            250,
+            100,
+            172,
+            83,
+            84
+          ]
+        },
+        {
+          "Archetype": "wis75-str25",
+          "Rounds": [
+            100,
+            100,
+            999,
+            999,
+            35,
+            67,
+            28,
+            29
+          ]
+        },
+        {
+          "Archetype": "str25-agi75",
+          "Rounds": [
+            100,
+            86,
+            147,
+            250,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "agi25-wis75",
+          "Rounds": [
+            503,
+            503,
+            447,
+            999,
+            35,
+            64,
+            28,
+            29
+          ]
+        },
+        {
+          "Archetype": "wis25-str75",
+          "Rounds": [
+            35,
+            35,
+            999,
+            999,
+            100,
+            198,
+            83,
+            84
+          ]
+        },
+        {
+          "Archetype": "balanced",
+          "Rounds": [
+            83,
+            79,
+            401,
+            671,
+            83,
+            159,
+            71,
+            71
+          ]
+        }
+      ]
+    },
+    {
+      "Budget": 100,
+      "BossHp": 20000,
+      "Skills": [
+        {
+          "Id": "mace-strike",
+          "Name": "Mace Strike"
+        },
+        {
+          "Id": "sword-strike",
+          "Name": "Sword Strike"
+        },
+        {
+          "Id": "bow-shot",
+          "Name": "Arrow Shot"
+        },
+        {
+          "Id": "dagger-strike",
+          "Name": "Dagger Strike"
+        },
+        {
+          "Id": "mage-bolt",
+          "Name": "Magic Bolt"
+        },
+        {
+          "Id": "spell-missiles",
+          "Name": "Magic Missiles"
+        },
+        {
+          "Id": "spell-burst",
+          "Name": "Arcane Burst"
+        },
+        {
+          "Id": "spell-volley",
+          "Name": "Magic Volley"
+        }
+      ],
+      "Archetypes": [
+        "str100",
+        "agi100",
+        "wis100",
+        "str50-agi50",
+        "agi50-wis50",
+        "wis50-str50",
+        "str75-agi25",
+        "agi75-wis25",
+        "wis75-str25",
+        "str25-agi75",
+        "agi25-wis75",
+        "wis25-str75",
+        "balanced"
+      ],
+      "Rows": [
+        {
+          "Archetype": "str100",
+          "Rounds": [
+            26,
+            26,
+            999,
+            999,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "agi100",
+          "Rounds": [
+            999,
+            999,
+            111,
+            134,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "wis100",
+          "Rounds": [
+            999,
+            999,
+            999,
+            999,
+            26,
+            51,
+            21,
+            22
+          ]
+        },
+        {
+          "Archetype": "str50-agi50",
+          "Rounds": [
+            51,
+            34,
+            222,
+            322,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "agi50-wis50",
+          "Rounds": [
+            999,
+            999,
+            222,
+            322,
+            51,
+            66,
+            42,
+            43
+          ]
+        },
+        {
+          "Archetype": "wis50-str50",
+          "Rounds": [
+            51,
+            51,
+            999,
+            999,
+            51,
+            100,
+            42,
+            43
+          ]
+        },
+        {
+          "Archetype": "str75-agi25",
+          "Rounds": [
+            35,
+            28,
+            446,
+            717,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "agi75-wis25",
+          "Rounds": [
+            999,
+            999,
+            147,
+            196,
+            100,
+            114,
+            83,
+            84
+          ]
+        },
+        {
+          "Archetype": "wis75-str25",
+          "Rounds": [
+            100,
+            100,
+            999,
+            999,
+            35,
+            67,
+            28,
+            29
+          ]
+        },
+        {
+          "Archetype": "str25-agi75",
+          "Rounds": [
+            100,
+            57,
+            147,
+            196,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "agi25-wis75",
+          "Rounds": [
+            999,
+            999,
+            446,
+            717,
+            35,
+            54,
+            28,
+            29
+          ]
+        },
+        {
+          "Archetype": "wis25-str75",
+          "Rounds": [
+            35,
+            35,
+            999,
+            999,
+            100,
+            198,
+            83,
+            84
+          ]
+        },
+        {
+          "Archetype": "balanced",
+          "Rounds": [
+            75,
+            57,
+            339,
+            528,
+            75,
+            114,
+            63,
+            64
+          ]
+        }
+      ]
+    },
+    {
+      "Budget": 200,
+      "BossHp": 40000,
+      "Skills": [
+        {
+          "Id": "mace-strike",
+          "Name": "Mace Strike"
+        },
+        {
+          "Id": "sword-strike",
+          "Name": "Sword Strike"
+        },
+        {
+          "Id": "bow-shot",
+          "Name": "Arrow Shot"
+        },
+        {
+          "Id": "dagger-strike",
+          "Name": "Dagger Strike"
+        },
+        {
+          "Id": "mage-bolt",
+          "Name": "Magic Bolt"
+        },
+        {
+          "Id": "spell-missiles",
+          "Name": "Magic Missiles"
+        },
+        {
+          "Id": "spell-burst",
+          "Name": "Arcane Burst"
+        },
+        {
+          "Id": "spell-volley",
+          "Name": "Magic Volley"
+        }
+      ],
+      "Archetypes": [
+        "str100",
+        "agi100",
+        "wis100",
+        "str50-agi50",
+        "agi50-wis50",
+        "wis50-str50",
+        "str75-agi25",
+        "agi75-wis25",
+        "wis75-str25",
+        "str25-agi75",
+        "agi25-wis75",
+        "wis25-str75",
+        "balanced"
+      ],
+      "Rows": [
+        {
+          "Archetype": "str100",
+          "Rounds": [
+            26,
+            26,
+            999,
+            999,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "agi100",
+          "Rounds": [
+            999,
+            999,
+            111,
+            100,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "wis100",
+          "Rounds": [
+            999,
+            999,
+            999,
+            999,
+            26,
+            51,
+            21,
+            22
+          ]
+        },
+        {
+          "Archetype": "str50-agi50",
+          "Rounds": [
+            25,
+            25,
+            221,
+            268,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "agi50-wis50",
+          "Rounds": [
+            999,
+            999,
+            221,
+            268,
+            25,
+            50,
+            42,
+            43
+          ]
+        },
+        {
+          "Archetype": "wis50-str50",
+          "Rounds": [
+            51,
+            51,
+            999,
+            999,
+            51,
+            100,
+            42,
+            43
+          ]
+        },
+        {
+          "Archetype": "str75-agi25",
+          "Rounds": [
+            35,
+            23,
+            446,
+            646,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "agi75-wis25",
+          "Rounds": [
+            999,
+            999,
+            147,
+            153,
+            50,
+            80,
+            83,
+            84
+          ]
+        },
+        {
+          "Archetype": "wis75-str25",
+          "Rounds": [
+            100,
+            100,
+            999,
+            999,
+            35,
+            67,
+            28,
+            29
+          ]
+        },
+        {
+          "Archetype": "str25-agi75",
+          "Rounds": [
+            50,
+            40,
+            147,
+            153,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "agi25-wis75",
+          "Rounds": [
+            999,
+            999,
+            446,
+            646,
+            35,
+            45,
+            28,
+            29
+          ]
+        },
+        {
+          "Archetype": "wis25-str75",
+          "Rounds": [
+            35,
+            35,
+            999,
+            999,
+            100,
+            198,
+            83,
+            84
+          ]
+        },
+        {
+          "Archetype": "balanced",
+          "Rounds": [
+            75,
+            46,
+            339,
+            466,
+            75,
+            91,
+            63,
+            64
+          ]
+        }
+      ]
+    },
+    {
+      "Budget": 500,
+      "BossHp": 100000,
+      "Skills": [
+        {
+          "Id": "mace-strike",
+          "Name": "Mace Strike"
+        },
+        {
+          "Id": "sword-strike",
+          "Name": "Sword Strike"
+        },
+        {
+          "Id": "bow-shot",
+          "Name": "Arrow Shot"
+        },
+        {
+          "Id": "dagger-strike",
+          "Name": "Dagger Strike"
+        },
+        {
+          "Id": "mage-bolt",
+          "Name": "Magic Bolt"
+        },
+        {
+          "Id": "spell-missiles",
+          "Name": "Magic Missiles"
+        },
+        {
+          "Id": "spell-burst",
+          "Name": "Arcane Burst"
+        },
+        {
+          "Id": "spell-volley",
+          "Name": "Magic Volley"
+        }
+      ],
+      "Archetypes": [
+        "str100",
+        "agi100",
+        "wis100",
+        "str50-agi50",
+        "agi50-wis50",
+        "wis50-str50",
+        "str75-agi25",
+        "agi75-wis25",
+        "wis75-str25",
+        "str25-agi75",
+        "agi25-wis75",
+        "wis25-str75",
+        "balanced"
+      ],
+      "Rows": [
+        {
+          "Archetype": "str100",
+          "Rounds": [
+            26,
+            26,
+            999,
+            999,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "agi100",
+          "Rounds": [
+            999,
+            999,
+            111,
+            57,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "wis100",
+          "Rounds": [
+            999,
+            999,
+            999,
+            999,
+            26,
+            51,
+            21,
+            22
+          ]
+        },
+        {
+          "Archetype": "str50-agi50",
+          "Rounds": [
+            17,
+            15,
+            222,
+            178,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "agi50-wis50",
+          "Rounds": [
+            999,
+            999,
+            222,
+            178,
+            17,
+            29,
+            42,
+            43
+          ]
+        },
+        {
+          "Archetype": "wis50-str50",
+          "Rounds": [
+            51,
+            51,
+            999,
+            999,
+            51,
+            100,
+            42,
+            43
+          ]
+        },
+        {
+          "Archetype": "str75-agi25",
+          "Rounds": [
+            17,
+            15,
+            446,
+            498,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "agi75-wis25",
+          "Rounds": [
+            999,
+            999,
+            147,
+            93,
+            25,
+            42,
+            83,
+            84
+          ]
+        },
+        {
+          "Archetype": "wis75-str25",
+          "Rounds": [
+            100,
+            100,
+            999,
+            999,
+            35,
+            67,
+            28,
+            29
+          ]
+        },
+        {
+          "Archetype": "str25-agi75",
+          "Rounds": [
+            25,
+            21,
+            147,
+            93,
+            999,
+            999,
+            999,
+            999
+          ]
+        },
+        {
+          "Archetype": "agi25-wis75",
+          "Rounds": [
+            999,
+            999,
+            446,
+            498,
+            17,
+            30,
+            28,
+            29
+          ]
+        },
+        {
+          "Archetype": "wis25-str75",
+          "Rounds": [
+            35,
+            35,
+            999,
+            999,
+            100,
+            198,
+            83,
+            84
+          ]
+        },
+        {
+          "Archetype": "balanced",
+          "Rounds": [
+            38,
+            28,
+            335,
+            331,
+            38,
+            56,
+            63,
+            64
+          ]
+        }
+      ]
+    }
+  ]
+}
