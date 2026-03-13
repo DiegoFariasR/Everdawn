@@ -1,0 +1,27 @@
+@*
+  StepControls — watch-mode navigation bar.
+  Lets the user step through snapshots one at a time or jump to start/end.
+  "Take Control" switches from watch mode to live play from the current snapshot.
+*@
+
+<section class="card step-controls">
+    <button @onclick="() => OnJumpStart.InvokeAsync()">⏮</button>
+    <button @onclick="() => OnStepBack.InvokeAsync()">◀</button>
+    <span class="step-label">@(CurrentStep + 1) / @TotalSteps</span>
+    <button @onclick="() => OnStepForward.InvokeAsync()">▶</button>
+    <button @onclick="() => OnJumpEnd.InvokeAsync()">⏭</button>
+    <button class="btn-takeover" @onclick="() => OnTakeControl.InvokeAsync()" title="Play from here">
+        ⚡ Take Control
+    </button>
+</section>
+
+@code {
+    [Parameter] public int CurrentStep { get; set; }
+    [Parameter] public int TotalSteps  { get; set; }
+
+    [Parameter] public EventCallback OnJumpStart   { get; set; }
+    [Parameter] public EventCallback OnStepBack    { get; set; }
+    [Parameter] public EventCallback OnStepForward { get; set; }
+    [Parameter] public EventCallback OnJumpEnd     { get; set; }
+    [Parameter] public EventCallback OnTakeControl { get; set; }
+}

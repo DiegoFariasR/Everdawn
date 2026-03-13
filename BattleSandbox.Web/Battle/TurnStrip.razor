@@ -1,0 +1,53 @@
+@using GameCore.Battle
+@using System.Collections.Generic
+@using System.Linq
+
+@*
+  TurnStrip — shows every unit's portrait in descending Initiative order (alive first).
+  The round badge lives here; CurrentEventCard shows only the event text.
+*@
+
+<section class="card turn-strip">
+    @if (Round > 0)
+    {
+        <span class="round-badge">R@Round</span>
+    }
+    @foreach (var entry in BuildTurnOrder())
+    {
+        <div class="portrait
+            @(entry.IsPlayer ? "player-portrait" : "enemy-portrait")
+            @(entry.UnitId == ActiveUnitId ? "portrait-active" : "")
+            @(!entry.IsAlive ? "portrait-dead" : "")"
+             title="@entry.Name (Init @entry.Initiative)">
+            @entry.Initial
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<BattleUnit> PlayerUnits { get; set; } = null!;
+    [Parameter, EditorRequired] public IReadOnlyList<BattleUnit> EnemyUnits  { get; set; } = null!;
+    [Parameter, EditorRequired] public IReadOnlyList<UnitState>  UnitStates  { get; set; } = null!;
+    [Parameter] public string? ActiveUnitId { get; set; }
+    [Parameter] public int Round { get; set; } = 1;
+
+    private record TurnEntry(string UnitId, char Initial, string Name, int Initiative, bool IsPlayer, bool IsAlive);
+
+    private IEnumerable<TurnEntry> BuildTurnOrder()
+    {
+        var entries = new List<TurnEntry>();
+        foreach (var u in PlayerUnits)
+        {
+            var st = UnitStates.FirstOrDefault(s => s.UnitId == u.Id);
+            entries.Add(new TurnEntry(u.Id, u.Name[0], u.Name, u.Initiative, true, st?.IsAlive ?? true));
+        }
+        foreach (var u in EnemyUnits)
+        {
+            var st = UnitStates.FirstOrDefault(s => s.UnitId == u.Id);
+            entries.Add(new TurnEntry(u.Id, u.Name[0], u.Name, u.Initiative, false, st?.IsAlive ?? true));
+        }
+        return entries
+            .OrderByDescending(e => e.IsAlive)
+            .ThenByDescending(e => e.Initiative);
+    }
+}

@@ -1,0 +1,135 @@
+@using GameCore.Battle
+@using System.Collections.Generic
+@using System.Linq
+
+@*
+  ActiveCharCard — the skill bar for whoever is currently acting.
+
+  Play mode — player turn: shows usable skill buttons.
+    SelectedSkillId = currently selected skill (pre-filled with auto suggestion).
+    AutoSkillId     = skill auto would fire; shown with a dashed outline when different from selected.
+    Clicking a non-AoE skill → OnSkillSelect(skillId)   (caller sets it as pending target skill)
+    Clicking an AoE  skill  → OnAoeFire(skillId)        (caller fires it immediately)
+
+  Play mode — enemy turn: shows enemy skills as info-only (dimmed, not interactive).
+  Battle over: shows victory/defeat banner + Retry button.
+*@
+
+@if (IsOver)
+{
+    <section class="card battle-over @(WinningTeam == "player" ? "over-win" : "over-lose")">
+        @(WinningTeam == "player" ? "⭐ Victory!" : "💀 Defeat...")
+        <button class="btn-run" style="margin-left:1rem" @onclick="() => OnRetry.InvokeAsync()">Retry</button>
+    </section>
+}
+else if (Pending != null)
+{
+    <section class="card action-bar">
+        <div class="acting-label">@(Pending.ActorName)'s turn</div>
+        <div class="action-buttons">
+            @for (int si = 0; si < Pending.Skills.Count; si++)
+            {
+                var skill      = Pending.Skills[si];
+                bool canUse    = !AutoMode && Pending.AvailableSkillIds.Contains(skill.Id);
+                bool isSelected   = skill.Id == SelectedSkillId;
+                bool isAutoNext   = !isSelected && skill.Id == AutoSkillId;
+                bool isAoe        = skill.IsAoe;
+                bool isAllySkill  = skill.Target == BattleSkillTarget.Ally;
+                int  cdLeft       = Pending.SkillCooldowns.TryGetValue(skill.Id, out var cd) ? cd : 0;
+                string skillId    = skill.Id;
+
+                <button class="btn-action @BattleHelpers.SkillSlotClass(si)
+                        @(isAoe        ? "btn-aoe"      : "")
+                        @(isAllySkill  ? "btn-heal"     : "")
+                        @(isSelected   ? "btn-selected" : "")
+                        @(isAutoNext   ? "btn-auto-next": "")"
+                        disabled="@(!canUse)"
+                        @onclick="() => HandleSkillClick(skillId, isAoe, canUse)">
+                    <div class="skill-btn-top">
+                        @skill.Name
+                        @if (isAoe)      { <span class="aoe-badge">ALL</span>  }
+                        @if (isAllySkill){ <span class="ally-badge">ALLY</span> }
+                        @if (cdLeft > 0)          { <span class="cd-badge">CD @cdLeft</span> }
+                        else if (skill.Cost > 0)  { <span class="mp-cost">@(skill.Cost) MP</span> }
+                        @if (cdLeft == 0 && skill.Cooldown > 0) { <span class="cd-cost">@skill.Cooldown</span> }
+                    </div>
+                    <div class="skill-btn-stats">
+                        @if (skill.PrimaryEffectType.HasValue) { <span class="info-badge @BattleHelpers.DmgTypeCss(skill.PrimaryEffectType.Value)">@skill.PrimaryEffectType</span> }
+                        @if (skill.IsBasic)    { <span class="info-badge badge-basic">Basic</span> }
+                        @if (skill.IsUltimate) { <span class="info-badge badge-ult">Ult</span>   }
+                        <span class="info-skill-stat">x@(skill.DamageMultiplier.ToString("0.##"))</span>
+                        @if (skill.BaseHits != 1.0) { <span class="info-skill-stat">@(skill.BaseHits.ToString("0.##"))hits</span> }
+                        <span class="info-skill-stat">~@skill.BaseDmg</span>
+                        @if (skill.EffectiveInitialCooldown > 0) { <span class="info-skill-stat">Init @skill.EffectiveInitialCooldown</span> }
+                    </div>
+                </button>
+            }
+        </div>
+    </section>
+}
+else if (ActiveEnemyUnit != null)
+{
+    <section class="card action-bar">
+        <div class="acting-label enemy-acting">@(ActiveEnemyUnit.Name)'s turn</div>
+        <div class="action-buttons">
+            @for (int si = 0; si < ActiveEnemyUnit.ResolvedSkills.Count; si++)
+            {
+                var sk      = ActiveEnemyUnit.ResolvedSkills[si];
+                int baseDmg = sk.EstimateBaseDmg(ActiveEnemyUnit);
+
+                <button class="btn-action @BattleHelpers.SkillSlotClass(si) btn-enemy-info
+                        @(sk.IsAoe ? "btn-aoe" : "")
+                        @(sk.Target == BattleSkillTarget.Ally ? "btn-heal" : "")
+                        @(sk.Id == LastEventSkillId ? "btn-selected" : "")"
+                        disabled="true">
+                    <div class="skill-btn-top">
+                        @sk.Name
+                        @if (sk.IsAoe)                          { <span class="aoe-badge">ALL</span>  }
+                        @if (sk.Target == BattleSkillTarget.Ally){ <span class="ally-badge">ALLY</span> }
+                        @if (sk.Cooldown > 0)                   { <span class="cd-cost">@sk.Cooldown</span> }
+                    </div>
+                    <div class="skill-btn-stats">
+                        @if (sk.PrimaryEffectType.HasValue) { <span class="info-badge @BattleHelpers.DmgTypeCss(sk.PrimaryEffectType.Value)">@sk.PrimaryEffectType</span> }
+                        @if (sk.IsBasic)    { <span class="info-badge badge-basic">Basic</span> }
+                        @if (sk.IsUltimate) { <span class="info-badge badge-ult">Ult</span>   }
+                        <span class="info-skill-stat">x@(sk.DamageMultiplier.ToString("0.##"))</span>
+                        @if (sk.BaseHits != 1.0) { <span class="info-skill-stat">@(sk.BaseHits.ToString("0.##"))hits</span> }
+                        <span class="info-skill-stat">~@baseDmg</span>
+                    </div>
+                </button>
+            }
+        </div>
+    </section>
+}
+
+@code {
+    /// <summary>Non-null when it is the player's turn and input is required.</summary>
+    [Parameter] public PendingInputView? Pending { get; set; }
+
+    /// <summary>Non-null when it is an enemy's turn (for info display).</summary>
+    [Parameter] public BattleUnit? ActiveEnemyUnit { get; set; }
+
+    /// <summary>Skill ID from the last event — used to highlight the enemy skill being executed.</summary>
+    [Parameter] public string? LastEventSkillId { get; set; }
+
+    [Parameter] public bool    IsOver      { get; set; }
+    [Parameter] public string? WinningTeam { get; set; }
+    [Parameter] public bool    AutoMode    { get; set; }
+
+    /// <summary>The currently selected skill ID (pre-filled by the auto AI suggestion).</summary>
+    [Parameter] public string? SelectedSkillId { get; set; }
+
+    /// <summary>Skill the auto AI would fire next; shown with a dashed highlight when different from SelectedSkillId.</summary>
+    [Parameter] public string? AutoSkillId { get; set; }
+
+    [Parameter] public EventCallback<string> OnSkillSelect { get; set; }
+    [Parameter] public EventCallback<string> OnAoeFire     { get; set; }
+    [Parameter] public EventCallback         OnRetry        { get; set; }
+
+    private void HandleSkillClick(string skillId, bool isAoe, bool canUse)
+    {
+        if (!canUse) return;
+        if (isAoe) OnAoeFire.InvokeAsync(skillId);
+        else       OnSkillSelect.InvokeAsync(skillId);
+    }
+}

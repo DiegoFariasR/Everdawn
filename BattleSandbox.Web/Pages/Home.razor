@@ -1,27 +1,28 @@
 ﻿@page "/battle"
+@using BattleSandbox.Web.Battle
 @using BattleSandbox.Web.Services
 @using GameCore.Battle
 @using GameCore.Content
 @using GameCore.Scenarios
-@inject IJSRuntime JS
+@using System.Collections.Generic
+@using System.Linq
 @inject WebGameClient GameClient
-@implements IAsyncDisposable
 
 <PageTitle>Battle Sandbox</PageTitle>
 
-<div class="sandbox">
+<div class="battle-page">
 
-    <!--  Picker bar  -->
-    <section class="picker">
+    <!-- == Scenario picker card ============================================ -->
+    <section class="card picker">
         <div class="picker-row">
             <label for="scenario">Scenario</label>
             <select id="scenario" @bind="_selectedScenarioId">
                 @foreach (var s in _scenarios)
                 {
-                    <option value="@s.Id">@s.DisplayName @(s.IsPlayable ? "" : "")</option>
+                    <option value="@s.Id">@s.DisplayName</option>
                 }
             </select>
-            <button class="btn-run" @onclick="StartSession"> Start</button>
+            <button class="btn-run" @onclick="StartSession">▶ Start</button>
         </div>
         <div class="picker-row">
             <label for="auto-speed">Speed</label>
@@ -31,7 +32,7 @@
                 <option value="1750">Slow</option>
             </select>
             <button class="btn-auto @(_autoMode ? "btn-auto-on" : "")" @onclick="ToggleAuto">
-                 Auto @(_autoMode ? "ON" : "OFF")
+                Auto @(_autoMode ? "ON" : "OFF")
             </button>
         </div>
     </section>
@@ -41,363 +42,89 @@
         <div class="error-banner">Error: @_startError</div>
     }
 
-    @if (_setup != null)
-    {
-        <div class="info-toggle-row">
-            <button class="btn-info-toggle @(_showInfo ? "btn-info-on" : "")"
-                    @onclick="() => _showInfo = !_showInfo">
-                ℹ @(_showInfo ? "Hide Details" : "Unit Details")
-            </button>
-        </div>
-    }
-
-    @* INFO PANEL  update _renderInfoUnit below whenever BattleUnit or BattleSkill gains
-       a new attribute, derived stat, trait, bar (MP, Focus, etc.), resistance type, or
-       skill modifier/property. Every data point visible in GameCore should appear there. *@
-    @if (_showInfo && _setup != null)
-    {
-        <section class="info-panel">
-            <div class="info-team-label">Players</div>
-            @foreach (var u in _setup.PlayerUnits) { @_renderInfoUnit((u, true))  }
-            <div class="info-team-label info-team-enemies">Enemies</div>
-            @foreach (var u in _setup.EnemyUnits)  { @_renderInfoUnit((u, false)) }
-        </section>
-    }
-
+    <!-- == Play mode ======================================================= -->
     @if (_playMode && _view != null && _setup != null)
     {
-        var state   = _view.Units;
-        var lastEv  = _view.FullLog.LastOrDefault();
-        string evType = lastEv?.Type ?? "start";
-        var pending = _view.PendingInput;
-        var pendingSkill = _pendingAction != null ? pending?.Skills.FirstOrDefault(s => s.Id == _pendingAction) : null;
-        bool pendingTargetIsAlly = pendingSkill?.Target == BattleSkillTarget.Ally;
-        bool pendingIsAoe        = pendingSkill?.IsAoe ?? false;
-        string? activeUnitId = pending?.ActorId ?? lastEv?.ActorId;
+        var  state       = _view.Units;
+        var  lastEv      = _view.FullLog.LastOrDefault();
+        var  pending     = _view.PendingInput;
+        string evType    = lastEv?.Type ?? "start";
+        string? activeId = pending?.ActorId ?? lastEv?.ActorId;
+        bool targetIsAlly = pending != null && (_pendingSkill?.Target == BattleSkillTarget.Ally);
+        bool pendingIsAoe = _pendingSkill?.IsAoe ?? false;
 
-        <section class="portrait-strip">
-            @foreach (var u in _setup.PlayerUnits)
-            {
-                var st = state.First(s => s.UnitId == u.Id);
-                <div class="portrait player-portrait
-                    @(activeUnitId == u.Id ? "portrait-active" : "")
-                    @(!st.IsAlive ? "portrait-dead" : "")">
-                    @u.Name[0]
-                </div>
-            }
-            <div class="portrait-sep"></div>
-            @foreach (var u in _setup.EnemyUnits)
-            {
-                var st = state.First(s => s.UnitId == u.Id);
-                <div class="portrait enemy-portrait
-                    @(activeUnitId == u.Id ? "portrait-active" : "")
-                    @(!st.IsAlive ? "portrait-dead" : "")">
-                    @u.Name[0]
-                </div>
-            }
-        </section>
+        <TurnStrip PlayerUnits="_setup.PlayerUnits" EnemyUnits="_setup.EnemyUnits"
+                   UnitStates="state" ActiveUnitId="activeId" Round="_view.Round" />
 
-        <section class="current-event @evType">
-            <span class="round-badge">R@_view.Round</span>
-            @(lastEv?.Description ?? "Battle begins!")
-        </section>
+        <CurrentEventCard EventType="evType"
+                          Description="@(lastEv?.Description ?? "Battle begins!")" />
 
-        <section class="arena">
-            <div class="team player-team">
-                @{ int _aliveAllyIdx = 0; }
-                @foreach (var u in _setup.PlayerUnits)
-                {
-                    var st = state.First(s => s.UnitId == u.Id);
-                    bool canHealTarget = pendingTargetIsAlly && !pendingIsAoe && _pendingAction != null && st.IsAlive && !_autoMode;
-                    int _myAllyNum = st.IsAlive ? ++_aliveAllyIdx : -1;
-                    @_renderUnitCard((u, st, true, activeUnitId == u.Id, false, canHealTarget, _myAllyNum,
-                        _floats.Where(f => f.UnitId == u.Id), () => { if (canHealTarget) ConfirmTarget(u.Id); }))
-                }
-            </div>
+        <Battleground PlayerUnits="_setup.PlayerUnits" EnemyUnits="_setup.EnemyUnits"
+                      UnitStates="state" ActiveUnitId="activeId"
+                      Floats="_floats" MeleeAnimators="_meleeAnimators"
+                      SelectedSkillId="_pendingAction"
+                      PendingTargetIsAlly="targetIsAlly"
+                      PendingIsAoe="pendingIsAoe"
+                      HasPendingInput="pending != null"
+                      AutoMode="_autoMode"
+                      OnUnitTargeted="ConfirmTarget" />
 
-            <div class="vs-col">vs</div>
+        <ActiveCharCard Pending="pending"
+                        ActiveEnemyUnit="@(pending == null && !_view.IsOver
+                            ? _setup.EnemyUnits.FirstOrDefault(u => u.Id == activeId)
+                            : null)"
+                        LastEventSkillId="lastEv?.SkillId"
+                        IsOver="_view.IsOver" WinningTeam="_view.WinningTeam"
+                        AutoMode="_autoMode"
+                        SelectedSkillId="_pendingAction"
+                        AutoSkillId="_autoSkillId"
+                        OnSkillSelect="@(id => { _pendingAction = id; })"
+                        OnAoeFire="FireAoe"
+                        OnRetry="StartSession" />
 
-            <div class="team enemy-team">
-                @{ int _aliveEnemyIdx = 0; }
-                @foreach (var u in _setup.EnemyUnits)
-                {
-                    var st = state.First(s => s.UnitId == u.Id);
-                    bool canTarget = pending != null && _pendingAction != null && !pendingIsAoe && st.IsAlive && !_autoMode && !pendingTargetIsAlly;
-                    int _myTargetNum = st.IsAlive ? ++_aliveEnemyIdx : -1;
-                    @_renderUnitCard((u, st, false, activeUnitId == u.Id, canTarget, false, _myTargetNum,
-                        _floats.Where(f => f.UnitId == u.Id), () => { if (canTarget) ConfirmTarget(u.Id); }))
-                }
-            </div>
-        </section>
-
-        @if (pending != null)
-        {
-            <section class="action-bar">
-                <div class="acting-label">@(pending.ActorName + "'s turn")</div>
-                <div class="action-buttons">
-                    @{ string[] _skillKeys = ["Q", "W", "E", "R", "T"]; }
-                    @for (int si = 0; si < pending.Skills.Count; si++)
-                    {
-                        var skill        = pending.Skills[si];
-                        bool canUse      = !_autoMode && pending.AvailableSkillIds.Contains(skill.Id);
-                        bool isSelected  = skill.Id == _pendingAction;
-                        string skillId   = skill.Id;
-                        bool isAoe       = skill.IsAoe;
-                        bool isAllySkill = skill.Target == BattleSkillTarget.Ally;
-                        int  cdLeft      = pending.SkillCooldowns.GetValueOrDefault(skill.Id);
-                        string keyHint   = !_autoMode && si < _skillKeys.Length ? _skillKeys[si] : "";
-                        @_renderSkillBtn((skill.Id, skill.Name, skill.PrimaryEffectType, skill.DamageMultiplier, skill.BaseDmg,
-                            isAoe, isAllySkill, skill.IsBasic, skill.IsUltimate,
-                            skill.Cost, skill.Cooldown, cdLeft, skill.EffectiveInitialCooldown,
-                            SkillSlotClass(si), canUse, isSelected, _autoMode,
-                            keyHint, skill.BaseHits,
-                            () => { if (!_autoMode) { if (isAoe) FireAoe(skillId); else _pendingAction = skillId; } }))
-                    }
-                </div>
-            </section>
-        }
-        else if (!_view.IsOver)
-        {
-            var activeEnemy = _setup.EnemyUnits.FirstOrDefault(u => u.Id == activeUnitId);
-            @if (activeEnemy != null)
-            {
-                <section class="action-bar">
-                    <div class="acting-label">@(activeEnemy.Name + "'s turn")</div>
-                    <div class="action-buttons">
-                        @for (int si = 0; si < activeEnemy.ResolvedSkills.Count; si++)
-                        {
-                            var sk      = activeEnemy.ResolvedSkills[si];
-                            int baseDmg = sk.EstimateBaseDmg(activeEnemy);
-                            @_renderSkillBtn((sk.Id, sk.Name, sk.PrimaryEffectType, sk.DamageMultiplier, baseDmg,
-                                sk.IsAoe, sk.Target == BattleSkillTarget.Ally, sk.IsBasic, sk.IsUltimate,
-                                sk.Cost, sk.Cooldown, 0, sk.EffectiveInitialCooldown,
-                                SkillSlotClass(si), false, sk.Id == lastEv?.SkillId, true,
-                                "", sk.BaseHits,
-                                () => { }))
-                        }
-                    </div>
-                </section>
-            }
-        }
-        else
-        {
-            <section class="battle-over @(_view.WinningTeam == "player" ? "over-win" : "over-lose")">
-                @(_view.WinningTeam == "player" ? " Victory!" : " Defeat...")
-                <button class="btn-run" style="margin-left:1rem" @onclick="StartSession">Retry</button>
-            </section>
-        }
-
-        <section class="event-log play-log" id="play-log">
-            @for (int i = 0; i < _view.FullLog.Count; i++)
-            {
-                var ev  = _view.FullLog[i];
-                bool isLast = i == _view.FullLog.Count - 1;
-                bool isNew  = i >= _lastActionEventStart;
-                int  idx = i;
-                <div class="event-entry @ev.Type @(isNew ? "event-new" : "") @(isLast ? "event-current" : "")"
-                     title="@(!_autoMode ? "Click to undo to this point" : "")"
-                     @onclick="() => UndoToEvent(idx)">
-                    @ev.Description
-                    @if (ev.EffectType.HasValue || ev.TotalHits > 1)
-                    {
-                        <span class="ev-meta">
-                            @if (ev.EffectType.HasValue) { <span class="info-badge @DmgTypeCss(ev.EffectType.Value) ev-meta-badge">@ev.EffectType</span> }
-                            @if (ev.TotalHits > 1) { <span class="ev-hit">@(ev.HitIndex + 1)/@ev.TotalHits</span> }
-                        </span>
-                    }
-                </div>
-            }
-        </section>
+        <BattleLogPanel Events="_view.FullLog" IsPlayMode="true" AutoMode="_autoMode"
+                        NewEventsStart="_lastActionEventStart"
+                        OnEntryClick="UndoToEvent" />
     }
 
+    <!-- == Watch mode ======================================================= -->
     @if (!_playMode && _result != null && _setup != null)
     {
-        var snap = CurrentSnapshot!;
+        var snap      = CurrentSnapshot!;
         string? snapActor = snap.Event.ActorId;
+        var emptyFloats   = Enumerable.Empty<FloatNumber>();
+        var emptySet      = new HashSet<string>();
 
-        <section class="portrait-strip">
-            @foreach (var u in _setup.PlayerUnits)
-            {
-                var st = snap.UnitStates.First(s => s.UnitId == u.Id);
-                <div class="portrait player-portrait @(snapActor == u.Id ? "portrait-active" : "") @(!st.IsAlive ? "portrait-dead" : "")">
-                    @u.Name[0]
-                </div>
-            }
-            <div class="portrait-sep"></div>
-            @foreach (var u in _setup.EnemyUnits)
-            {
-                var st = snap.UnitStates.First(s => s.UnitId == u.Id);
-                <div class="portrait enemy-portrait @(snapActor == u.Id ? "portrait-active" : "") @(!st.IsAlive ? "portrait-dead" : "")">
-                    @u.Name[0]
-                </div>
-            }
-        </section>
+        <TurnStrip PlayerUnits="_setup.PlayerUnits" EnemyUnits="_setup.EnemyUnits"
+                   UnitStates="snap.UnitStates" ActiveUnitId="snapActor"
+                   Round="WatchRound" />
 
-        <section class="current-event @snap.Event.Type">@snap.Event.Description</section>
+        <CurrentEventCard EventType="snap.Event.Type" Description="snap.Event.Description" />
 
-        <section class="arena">
-            <div class="team player-team">
-                @foreach (var u in _setup.PlayerUnits)
-                {
-                    var st = snap.UnitStates.First(s => s.UnitId == u.Id);
-                    @_renderUnitCard((u, st, true, snapActor == u.Id, false, false, -1,
-                        Enumerable.Empty<FloatNumber>(), () => { }))
-                }
-            </div>
-            <div class="vs-col">vs</div>
-            <div class="team enemy-team">
-                @foreach (var u in _setup.EnemyUnits)
-                {
-                    var st = snap.UnitStates.First(s => s.UnitId == u.Id);
-                    @_renderUnitCard((u, st, false, snapActor == u.Id, false, false, -1,
-                        Enumerable.Empty<FloatNumber>(), () => { }))
-                }
-            </div>
-        </section>
+        <Battleground PlayerUnits="_setup.PlayerUnits" EnemyUnits="_setup.EnemyUnits"
+                      UnitStates="snap.UnitStates" ActiveUnitId="snapActor"
+                      Floats="emptyFloats" MeleeAnimators="emptySet"
+                      AutoMode="true" HasPendingInput="false" />
 
-        <section class="step-controls">
-            <button @onclick="JumpToStart"></button>
-            <button @onclick="StepBack"></button>
-            <span class="step-label">@(_step + 1) / @_result.Snapshots.Count</span>
-            <button @onclick="StepForward"></button>
-            <button @onclick="JumpToEnd"></button>
-            <button class="btn-takeover" @onclick="TakeControlFromHere" title="Play from here"> Take Control</button>
-        </section>
+        <StepControls CurrentStep="_step" TotalSteps="_result.Snapshots.Count"
+                      OnJumpStart="JumpToStart" OnStepBack="StepBack"
+                      OnStepForward="StepForward" OnJumpEnd="JumpToEnd"
+                      OnTakeControl="TakeControlFromHere" />
 
-        <section class="event-log">
-            @for (int i = 0; i < _result.Snapshots.Count; i++)
-            {
-                int idx = i;
-                var s = _result.Snapshots[i];
-                <div class="event-entry @(idx == _step ? "event-current" : "") @s.Event.Type" @onclick="() => _step = idx">
-                    <span class="event-num">@(i + 1).</span> @s.Event.Description
-                    @if (s.Event.EffectType.HasValue || s.Event.TotalHits > 1)
-                    {
-                        <span class="ev-meta">
-                            @if (s.Event.EffectType.HasValue) { <span class="info-badge @DmgTypeCss(s.Event.EffectType.Value) ev-meta-badge">@s.Event.EffectType</span> }
-                            @if (s.Event.TotalHits > 1) { <span class="ev-hit">@(s.Event.HitIndex + 1)/@s.Event.TotalHits</span> }
-                        </span>
-                    }
-                </div>
-            }
-        </section>
+        <BattleLogPanel Events="_watchEvents" IsPlayMode="false" CurrentStep="_step"
+                        OnEntryClick="@(idx => _step = idx)" />
     }
 
 </div>
 
 @code {
-    //  Shared 
-    private List<IBattleScenario> _scenarios = [];
+    // Shared
+    private List<IBattleScenario> _scenarios = new List<IBattleScenario>();
     private string _selectedScenarioId = "";
     private IBattleScenario? _currentScenario;
     private BattleSetup? _setup;
     private bool _playMode;
-    private bool _showInfo;
-
-    //  JS keyboard interop 
-    private DotNetObjectReference<Home>? _dotNetRef;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            _dotNetRef = DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync("window.everdawnKeys.init", _dotNetRef);
-        }
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await JS.InvokeVoidAsync("window.everdawnKeys.dispose");
-        _dotNetRef?.Dispose();
-    }
-
-    [JSInvokable]
-    public void OnKeyDown(string key)
-    {
-        if (_engine == null || _view == null || _autoMode || !_playMode) return;
-        var pending = _view.PendingInput;
-        if (pending == null) return;
-
-        int? skillIndex = key switch
-        {
-            "q" or "Q" => 0,
-            "w" or "W" => 1,
-            "e" or "E" => 2,
-            "r" or "R" => 3,
-            "t" or "T" => 4,
-            _ => null
-        };
-
-        if (skillIndex is int si && si < pending.Skills.Count)
-        {
-            var skill = pending.Skills[si];
-            if (pending.AvailableSkillIds.Contains(skill.Id))
-            {
-                if (skill.IsAoe)
-                    FireAoe(skill.Id);
-                else
-                    _pendingAction = skill.Id;
-                StateHasChanged();
-            }
-            return;
-        }
-
-        int? targetIndex = key switch
-        {
-            "1" => 0, "2" => 1, "3" => 2, "4" => 3, "5" => 4,
-            _ => null
-        };
-
-        if (targetIndex is int ti && _pendingAction != null && _setup != null)
-        {
-            var sel = pending.Skills.FirstOrDefault(s => s.Id == _pendingAction);
-            bool isAllySkill = sel?.Target == BattleSkillTarget.Ally;
-            if (!isAllySkill)
-            {
-                var living = _setup.EnemyUnits
-                    .Where(u => _view.Units.First(s => s.UnitId == u.Id).IsAlive)
-                    .Select(u => u.Id)
-                    .ToList();
-                if (ti < living.Count)
-                {
-                    ConfirmTarget(living[ti]);
-                    StateHasChanged();
-                }
-            }
-            else
-            {
-                var living = _setup.PlayerUnits
-                    .Where(u => _view.Units.First(s => s.UnitId == u.Id).IsAlive)
-                    .Select(u => u.Id)
-                    .ToList();
-                if (ti < living.Count)
-                {
-                    ConfirmTarget(living[ti]);
-                    StateHasChanged();
-                }
-            }
-        }
-    }
-
-    //  Play mode 
-    private IBattleEngine? _engine;
-    private BattleView? _view;
-    private string? _pendingAction;   // skill ID selected, waiting for target
-    private bool _autoMode;
-    private int _autoDelay = 1750;
-    // Index into FullLog where the last player action's events begin — used to highlight new events.
-    private int _lastActionEventStart;
-
-    //  Command history (for undo) 
-    private record CommandRecord(BattleCommand Cmd, int LogCountBefore);
-    private List<CommandRecord> _commandHistory = [];
-    // Set when "Take Control From Here" is used; null for a normal start.
-    private ResumeFromSnapshotCommand? _resumeCommand;
-
-    //  Watch mode 
-    private BattleResult? _result;
-    private int _step;
+    private string? _startError;
 
     protected override void OnInitialized()
     {
@@ -405,43 +132,78 @@
         _selectedScenarioId = _scenarios[0].Id;
     }
 
-    private string? _startError;
+    // Play mode
+    private IBattleEngine? _engine;
+    private BattleView?    _view;
+    private string?        _pendingAction;
+    private bool           _autoMode;
+    private int            _autoDelay = 1750;
+    private int            _lastActionEventStart;
 
+    private SkillView? _pendingSkill =>
+        _view?.PendingInput?.Skills.FirstOrDefault(s => s.Id == _pendingAction);
+
+    private string? _autoSkillId
+    {
+        get
+        {
+            var p = _view?.PendingInput;
+            if (p is null) return null;
+            return p.Skills.LastOrDefault(s => p.AvailableSkillIds.Contains(s.Id))?.Id;
+        }
+    }
+
+    // Command history (undo)
+    private record CommandRecord(BattleCommand Cmd, int LogCountBefore);
+    private List<CommandRecord> _commandHistory = new List<CommandRecord>();
+    private ResumeFromSnapshotCommand? _resumeCommand;
+
+    // Watch mode
+    private BattleResult? _result;
+    private int           _step;
+
+    private BattleSnapshot? CurrentSnapshot => _result?.Snapshots[_step];
+
+    private IReadOnlyList<BattleEvent> _watchEvents =>
+        _result != null
+            ? (IReadOnlyList<BattleEvent>)_result.Snapshots.Select(s => s.Event).ToList()
+            : System.Array.Empty<BattleEvent>();
+
+    private int WatchRound =>
+        _result == null ? 0
+        : 1 + _result.Snapshots.Take(_step).Count(s => s.Event.Type == "round");
+
+    // Session start
     private void StartSession()
     {
         _startError = null;
-        try
+        try { StartSessionInner(); }
+        catch (System.Exception ex)
         {
-        StartSessionInner();
-        }
-        catch (Exception ex)
-        {
-            _startError = ex.Message + (ex.InnerException != null ? " → " + ex.InnerException.Message : "");
+            _startError = ex.Message
+                + (ex.InnerException != null ? " → " + ex.InnerException.Message : "");
         }
     }
 
     private void StartSessionInner()
     {
         _currentScenario = _scenarios.First(s => s.Id == _selectedScenarioId);
-        _setup         = _currentScenario.CreateSetup(GameClient.ContentSource);
-        _playMode      = _currentScenario.IsPlayable;
-        _engine        = null;
-        _view          = null;
-        _result        = null;
-        _pendingAction = null;
+        _setup           = _currentScenario.CreateSetup(GameClient.ContentSource);
+        _playMode        = _currentScenario.IsPlayable;
+        _engine          = null;
+        _view            = null;
+        _result          = null;
+        _pendingAction   = null;
 
-        _skillRanges = _setup.PlayerUnits
-            .Concat(_setup.EnemyUnits)
-            .SelectMany(u => u.ResolvedSkills)
-            .GroupBy(s => s.Id)
-            .ToDictionary(g => g.Key, g => g.First().Range);
-        _playerUnitIds = _setup.PlayerUnits.Select(u => u.Id).ToHashSet();
+        BuildSkillRanges();
+        _playerUnitIds.Clear();
+        foreach (var u in _setup.PlayerUnits) _playerUnitIds.Add(u.Id);
         _meleeAnimators.Clear();
 
         if (_playMode)
         {
             _resumeCommand  = null;
-            _commandHistory = [];
+            _commandHistory = new List<CommandRecord>();
             _engine = new BattleSession(_currentScenario.Seed);
             _view   = _engine.Start(_setup).View;
             SelectDefaultSkill();
@@ -459,28 +221,29 @@
         if (_result == null || _setup == null || _currentScenario == null) return;
         var snap        = _result.Snapshots[_step];
         _resumeCommand  = new ResumeFromSnapshotCommand(snap.UnitStates, snap.Event.ActorId, _step + 1);
-        _commandHistory = [];
+        _commandHistory = new List<CommandRecord>();
         _engine = new BattleSession(_currentScenario.Seed);
         _engine.Start(_setup);
-        _view = _engine.TryExecute(_resumeCommand).View;
-        SelectDefaultSkill();
+        _view     = _engine.TryExecute(_resumeCommand).View;
         _playMode = true;
         _result   = null;
+        SelectDefaultSkill();
         if (_autoMode) _ = RunAutoAsync();
     }
 
+    // Auto-play
     private void ToggleAuto()
     {
         _autoMode = !_autoMode;
-        if (_autoMode && _engine != null && _view?.PendingInput != null && !(_view.IsOver))
+        if (_autoMode && _engine != null && _view?.PendingInput != null && !_view.IsOver)
             _ = RunAutoAsync();
     }
 
-    private async Task RunAutoAsync()
+    private async System.Threading.Tasks.Task RunAutoAsync()
     {
         while (_autoMode && _engine != null && !(_view?.IsOver ?? true))
         {
-            await Task.Delay(_autoDelay);
+            await System.Threading.Tasks.Task.Delay(_autoDelay);
             if (!_autoMode || _engine == null) break;
             var cmd = new AdvanceTurnCommand();
             _commandHistory.Add(new CommandRecord(cmd, _view!.FullLog.Count));
@@ -493,12 +256,13 @@
         }
     }
 
+    // Player actions
     private void FireAoe(string skillId)
     {
         if (_engine is null) return;
-        var cmd = new PlayerActionCommand(skillId, null);
-        _commandHistory.Add(new CommandRecord(cmd, _view!.FullLog.Count));
         _lastActionEventStart = _view!.FullLog.Count;
+        var cmd = new PlayerActionCommand(skillId, null);
+        _commandHistory.Add(new CommandRecord(cmd, _view.FullLog.Count));
         var result = _engine.TryExecute(cmd);
         _view = result.View;
         TriggerMeleeAnims(result.Events);
@@ -510,9 +274,9 @@
     private void ConfirmTarget(string targetId)
     {
         if (_engine is null || _pendingAction is null) return;
-        var cmd = new PlayerActionCommand(_pendingAction, targetId);
-        _commandHistory.Add(new CommandRecord(cmd, _view!.FullLog.Count));
         _lastActionEventStart = _view!.FullLog.Count;
+        var cmd = new PlayerActionCommand(_pendingAction, targetId);
+        _commandHistory.Add(new CommandRecord(cmd, _view.FullLog.Count));
         var result = _engine.TryExecute(cmd);
         _view = result.View;
         TriggerMeleeAnims(result.Events);
@@ -521,13 +285,11 @@
         if (!_autoMode) _ = AdvanceNonPlayerTurnsAsync();
     }
 
-    /// <summary>After a manual player action, auto-advance enemy/neutral turns with the
-    /// configured speed delay, stopping as soon as a player input is needed or battle ends.</summary>
-    private async Task AdvanceNonPlayerTurnsAsync()
+    private async System.Threading.Tasks.Task AdvanceNonPlayerTurnsAsync()
     {
         while (_engine != null && !(_view?.IsOver ?? true) && _view?.PendingInput == null)
         {
-            await Task.Delay(_autoDelay);
+            await System.Threading.Tasks.Task.Delay(_autoDelay);
             if (_engine == null || _autoMode) break;
             var cmd = new AdvanceTurnCommand();
             _commandHistory.Add(new CommandRecord(cmd, _view!.FullLog.Count));
@@ -540,43 +302,35 @@
         }
     }
 
-    //  Undo 
+    // Undo
     private void UndoToEvent(int logIndex)
     {
-        if (_engine == null || _setup == null || _currentScenario == null) return;
-        if (_autoMode) return;
+        if (_engine == null || _setup == null || _currentScenario == null || _autoMode) return;
 
-        // Count how many commands to replay: command j is replayed only if ALL its
-        // produced events are strictly before logIndex (next command's LogCountBefore <= logIndex).
         int actionsToReplay = 0;
         for (int j = 0; j < _commandHistory.Count; j++)
         {
             int nextLogCount = j + 1 < _commandHistory.Count
                 ? _commandHistory[j + 1].LogCountBefore
                 : _view!.FullLog.Count;
-            if (nextLogCount <= logIndex)
-                actionsToReplay = j + 1;
-            else
-                break;
+            if (nextLogCount <= logIndex) actionsToReplay = j + 1;
+            else break;
         }
 
-        var newEngine = new BattleSession(_currentScenario.Seed);
-        BattleView currentView = newEngine.Start(_setup).View;
-        if (_resumeCommand != null) currentView = newEngine.TryExecute(_resumeCommand).View;
+        var newEng = new BattleSession(_currentScenario.Seed);
+        BattleView v = newEng.Start(_setup).View;
+        if (_resumeCommand != null) v = newEng.TryExecute(_resumeCommand).View;
         for (int j = 0; j < actionsToReplay; j++)
-            currentView = newEngine.TryExecute(_commandHistory[j].Cmd).View;
+            v = newEng.TryExecute(_commandHistory[j].Cmd).View;
 
-        _engine         = newEngine;
-        _view           = currentView;
+        _engine         = newEng;
+        _view           = v;
         _commandHistory = _commandHistory.Take(actionsToReplay).ToList();
         _lastActionEventStart = 0;
         _floats.Clear();
         SelectDefaultSkill();
     }
 
-    //  Default skill selection 
-    /// <summary>Pre-selects the same skill the auto AI would pick (last available).
-    /// Called whenever _view changes in play mode.</summary>
     private void SelectDefaultSkill()
     {
         var p = _view?.PendingInput;
@@ -585,17 +339,26 @@
         _pendingAction = def?.Id;
     }
 
-    //  Watch mode helpers 
-    private BattleSnapshot? CurrentSnapshot => _result?.Snapshots[_step];
-    private void StepForward() => _step = Math.Min(_step + 1, (_result?.Snapshots.Count ?? 1) - 1);
-    private void StepBack()    => _step = Math.Max(0, _step - 1);
+    // Watch mode
+    private void StepForward() => _step = System.Math.Min(_step + 1, (_result?.Snapshots.Count ?? 1) - 1);
+    private void StepBack()    => _step = System.Math.Max(0, _step - 1);
     private void JumpToStart() => _step = 0;
     private void JumpToEnd()   => _step = (_result?.Snapshots.Count ?? 1) - 1;
 
-    //  Melee attack animation 
-    private readonly HashSet<string> _meleeAnimators = [];
-    private Dictionary<string, SkillRange> _skillRanges = [];
-    private HashSet<string> _playerUnitIds = [];
+    // Melee animations
+    private readonly HashSet<string> _meleeAnimators = new HashSet<string>();
+    private Dictionary<string, SkillRange> _skillRanges = new Dictionary<string, SkillRange>();
+    private readonly HashSet<string> _playerUnitIds = new HashSet<string>();
+
+    private void BuildSkillRanges()
+    {
+        if (_setup == null) return;
+        _skillRanges = _setup.PlayerUnits
+            .Concat(_setup.EnemyUnits)
+            .SelectMany(u => u.ResolvedSkills)
+            .GroupBy(s => s.Id)
+            .ToDictionary(g => g.Key, g => g.First().Range);
+    }
 
     private void TriggerMeleeAnims(IReadOnlyList<BattleEvent>? events)
     {
@@ -606,21 +369,19 @@
             if (!_skillRanges.TryGetValue(ev.SkillId, out var range) || range != SkillRange.Melee) continue;
             _meleeAnimators.Add(ev.ActorId);
         }
-        if (_meleeAnimators.Count > 0)
-            _ = ExpireMeleeAnimsAsync();
+        if (_meleeAnimators.Count > 0) _ = ExpireMeleeAnimsAsync();
     }
 
-    private async Task ExpireMeleeAnimsAsync()
+    private async System.Threading.Tasks.Task ExpireMeleeAnimsAsync()
     {
-        await Task.Delay(700);
+        await System.Threading.Tasks.Task.Delay(700);
         _meleeAnimators.Clear();
         StateHasChanged();
     }
 
-    //  Floating numbers 
-    private record FloatNumber(string UnitId, int Value, bool IsHeal, int OffsetPct, int Key);
-    private readonly List<FloatNumber> _floats = [];
-    private int _floatKey = 0;
+    // Floating numbers
+    private readonly List<FloatNumber> _floats = new List<FloatNumber>();
+    private int _floatKey;
 
     private void SpawnFloats(IReadOnlyList<BattleEvent>? events)
     {
@@ -628,227 +389,17 @@
         foreach (var ev in events)
         {
             if (ev.TargetId is null || ev.Value <= 0) continue;
-            // Heal: has a skillId but no damage type. Damage: has both.
             bool isHeal = ev.SkillId != null && ev.EffectType == null;
-            int offset  = 20 + (_floatKey % 5) * 12;   // spread horizontally so multi-hits don't stack
+            int  offset = 20 + (_floatKey % 5) * 12;
             _floats.Add(new FloatNumber(ev.TargetId, ev.Value, isHeal, offset, _floatKey++));
         }
-        if (_floats.Count > 0)
-            _ = ExpireFloatsAsync();
+        if (_floats.Count > 0) _ = ExpireFloatsAsync();
     }
 
-    private async Task ExpireFloatsAsync()
+    private async System.Threading.Tasks.Task ExpireFloatsAsync()
     {
-        await Task.Delay(1100);   // matches CSS animation duration
+        await System.Threading.Tasks.Task.Delay(1100);
         _floats.Clear();
         StateHasChanged();
     }
-
-    // 
-    //  Render helpers 
-    //    Centralised so adding new attributes, damage types, skill
-    //    modifiers, or resource bars touches ONE place per concern.
-    // 
-
-    /// <summary>
-    /// Maps an EffectType to its CSS badge class.
-    /// To add a new effect type: add an enum member in EffectType in DamageType.cs, add a case here,
-    /// and add a .badge-xxx rule in app.css. No other template code changes.
-    /// </summary>
-    private static string DmgTypeCss(EffectType t) => t switch
-    {
-        EffectType.Physical  => "badge-phys",
-        EffectType.Fire      => "badge-fire",
-        EffectType.Cold      => "badge-cold",
-        EffectType.Lightning => "badge-lightning",
-        EffectType.Holy      => "badge-holy",
-        EffectType.Void      => "badge-void",
-        _ => "badge-phys",
-    };
-
-    /// <summary>Maps a skill slot index to its action button style class.</summary>
-    private static string SkillSlotClass(int index) => index switch
-    {
-        0 => "btn-attack",
-        1 => "btn-skill",
-        _ => "btn-soulburn",
-    };
-
-    //  _renderUnitCard 
-    // Shared by play mode (player + enemy teams) and watch mode (both teams).
-    // New secondary bars (e.g. Focus, Rage) automatically appear here once
-    // BattleUnit.MaxBars returns them  no template change needed.
-    // New stats shown in stat-text: edit the stat-text div below.
-    private RenderFragment<(BattleUnit u, UnitState st, bool isPlayer, bool isActive,
-        bool canTarget, bool canHealTarget, int targetNum,
-        IEnumerable<FloatNumber> floats, Action onClick)> _renderUnitCard =>
-        ctx =>
-        {
-            var (u, st, isPlayer, isActive, canTarget, canHealTarget, targetNum, floats, onClick) = ctx;
-            int hpPct     = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
-            string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
-            return @<div class="unit-card
-        @(isPlayer      ? "card-player"                     : "")
-        @(isActive      ? "card-active"                      : "")
-        @(!st.IsAlive   ? "card-dead"                        : "")
-        @(canTarget     ? "card-targetable"                  : "")
-        @(canHealTarget ? "card-targetable card-heal-target" : "")"
-          style="position:relative"
-          @onclick="onClick">
-        @if (canTarget && targetNum >= 1 && targetNum <= 5)
-        {
-            <div class="target-key">@targetNum</div>
-        }
-        @if (canHealTarget && targetNum >= 1 && targetNum <= 5)
-        {
-            <div class="target-key target-key-ally">@targetNum</div>
-        }
-        @foreach (var f in floats)
-        {
-            <span class="float-num @(f.IsHeal ? "float-heal" : "float-dmg")"
-                  style="left:@(f.OffsetPct)%" @key="f.Key">@(f.IsHeal ? "+" : "-")@f.Value</span>
-        }
-        <div class="avatar @(isPlayer ? "player-avatar" : "enemy-avatar")
-             @(_meleeAnimators.Contains(u.Id) ? (isPlayer ? "melee-fwd-r" : "melee-fwd-l") : "")"
-             aria-hidden="true">
-            <svg viewBox="0 0 20 30" width="22" height="22">
-                <circle cx="10" cy="4" r="3.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <line x1="10" y1="7.5" x2="10" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                <line x1="4" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                <line x1="10" y1="17" x2="5" y2="27" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                <line x1="10" y1="17" x2="15" y2="27" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-        </div>
-        <div class="unit-info">
-            <div class="unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
-            <div class="bar-wrap"><div class="hp-bar" style="width:@hpPct%;background:@hpColor"></div></div>
-            @foreach (var bar in u.MaxBars)
-            {
-                int barPct = bar.Value > 0 ? st.GetBar(bar.Key) * 100 / bar.Value : 0;
-                <div class="bar-wrap"><div class="@(bar.Key)-bar" style="width:@barPct%"></div></div>
-            }
-            @if (st.StatusEffects is { Count: > 0 })
-            {
-                <div class="status-effects">
-                    @foreach (var eff in st.StatusEffects) { <span class="status-badge">@eff</span> }
-                </div>
-            }
-            <div class="stat-text">@st.CurrentHp/@u.MaxHp HP</div>
-        </div>
-    </div>;
-        };
-
-    //  _renderInfoUnit 
-    // Renders one unit row in the info panel.
-    // To add a new base stat (DEF, SPD, ): add an info-attr div in the attrs block.
-    // To add a new skill modifier badge: add an @if in the skill-row loop.
-    // Resistances and secondary bars are already driven by data  no change needed.
-    private RenderFragment<(BattleUnit u, bool isPlayer)> _renderInfoUnit =>
-        ctx =>
-        {
-            var (u, _) = ctx;
-            return @<div class="info-unit">
-        <div class="info-unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
-        <div class="info-attrs">
-            <div class="info-attr"><span class="info-attr-key">HP</span><span class="info-attr-val">@u.MaxHp</span></div>
-            <div class="info-attr"><span class="info-attr-key">STR</span><span class="info-attr-val">@u.Str</span></div>
-            <div class="info-attr"><span class="info-attr-key">WIS</span><span class="info-attr-val">@u.Wis</span></div>
-            <div class="info-attr"><span class="info-attr-key">AGI</span><span class="info-attr-val">@u.Agi</span></div>
-            <div class="info-attr"><span class="info-attr-key">P.Atk</span><span class="info-attr-val">@u.PhysAttack</span></div>
-            <div class="info-attr"><span class="info-attr-key">M.Atk</span><span class="info-attr-val">@u.MagicAttack</span></div>
-            <div class="info-attr"><span class="info-attr-key">Init</span><span class="info-attr-val">@u.Initiative</span></div>
-            <div class="info-attr"><span class="info-attr-key">Hits</span><span class="info-attr-val">@u.HitCount</span></div>
-            @foreach (var bar in u.MaxBars)
-            {
-                string label = bar.Key == "mp" ? "MP" : char.ToUpper(bar.Key[0]) + bar.Key[1..];
-                <div class="info-attr"><span class="info-attr-key">@label</span><span class="info-attr-val">@bar.Value</span></div>
-            }
-        </div>
-        @if (u.Traits is { Count: > 0 })
-        {
-            <div class="info-badges">
-                @foreach (var t in u.Traits) { <span class="info-badge badge-trait">@t</span> }
-            </div>
-        }
-        @if (u.Resistances is { Count: > 0 })
-        {
-            <div class="info-badges">
-                @foreach (var kvp in u.Resistances)
-                {
-                    <span class="info-badge @(kvp.Value > 0 ? "badge-resist" : "badge-weak")">
-                        @kvp.Key @(kvp.Value > 0 ? $"+{kvp.Value}%" : $"{kvp.Value}%")
-                    </span>
-                }
-            </div>
-        }
-        <div class="info-skills">
-            @foreach (var sk in u.ResolvedSkills)
-            {
-                int baseDmg = sk.EstimateBaseDmg(u);
-                <div class="info-skill-row">
-                    <span class="info-skill-name">@sk.Name</span>
-                    @if (sk.IsBasic)    { <span class="info-badge badge-basic">Basic</span> }
-                    @if (sk.IsUltimate) { <span class="info-badge badge-ult">Ult</span>   }
-                    @if (sk.PrimaryEffectType.HasValue) { <span class="info-badge @DmgTypeCss(sk.PrimaryEffectType.Value)">@sk.PrimaryEffectType</span> }
-                    <span class="info-skill-stat">x@(sk.DamageMultiplier.ToString("0.##"))</span>
-                    @if (sk.BaseHits != 1.0) { <span class="info-skill-stat">@(sk.BaseHits.ToString("0.##"))hits</span> }
-                    <span class="info-skill-stat">~@baseDmg</span>
-                    @if (sk.Cost > 0)                   { <span class="info-skill-stat">@sk.Cost MP</span> }
-                    @if (sk.IsAoe)                        { <span class="info-badge badge-aoe">AoE</span> }
-                    @if (sk.Cooldown > 0)                 { <span class="info-skill-stat">CD @sk.Cooldown</span> }
-                    @if (sk.EffectiveInitialCooldown > 0) { <span class="info-skill-stat">Init.CD @sk.EffectiveInitialCooldown</span> }
-                </div>
-            }
-        </div>
-    </div>;
-        };
-
-    //  _renderSkillBtn 
-    // Renders one action-bar button. Used for:
-    //    player turn (interactive)
-    //    auto / enemy-info display (dimmed, isInfoOnly=true)
-    //    enemy action bar (dimmed)
-    // To add a new skill property (DoT, Piercing, Stagger):
-    //   1. Add field to BattleSkill / SkillView.
-    //   2. Add one @if badge line in the skill-btn-top or skill-btn-stats block below.
-    //   3. Pass the field in every _renderSkillBtn call site (two loops above).
-    private RenderFragment<(string id, string name, EffectType? dmgType, double damageMultiplier, int baseDmg,
-        bool isAoe, bool isAllySkill, bool isBasic, bool isUltimate,
-        int cost, int cooldown, int cdLeft, int effectiveInitCd,
-        string btnClass, bool canUse, bool isSelected, bool isInfoOnly,
-        string keyHint, double baseHits, Action onClick)> _renderSkillBtn =>
-        ctx =>
-        {
-            var (id, name, dmgType, damageMultiplier, baseDmg,
-                isAoe, isAllySkill, isBasic, isUltimate,
-                cost, cooldown, cdLeft, effectiveInitCd,
-                btnClass, canUse, isSelected, isInfoOnly,
-                keyHint, baseHits, onClick) = ctx;
-            return @<button class="btn-action @btnClass
-              @(isAoe       ? "btn-aoe"       : "")
-              @(isAllySkill ? "btn-heal"       : "")
-              @(isSelected  ? "btn-selected"   : "")
-              @(isInfoOnly  ? "btn-enemy-info" : "")"
-             disabled="@(!canUse)"
-             @onclick="onClick">
-        <div class="skill-btn-top">
-            @if (!string.IsNullOrEmpty(keyHint)) { <span class="key-hint">@keyHint</span> }
-            @name
-            @if (isAoe)       { <span class="aoe-badge">ALL</span>  }
-            @if (isAllySkill) { <span class="ally-badge">ALLY</span> }
-            @if (cdLeft > 0)        { <span class="cd-badge">CD @cdLeft</span> }
-            else if (cost > 0)    { <span class="mp-cost">@cost MP</span>  }
-            @if (cdLeft == 0 && cooldown > 0) { <span class="cd-cost">@("")@cooldown</span> }
-        </div>
-        <div class="skill-btn-stats">
-            @if (dmgType.HasValue) { <span class="info-badge @DmgTypeCss(dmgType.Value)">@dmgType</span> }
-            @if (isBasic)    { <span class="info-badge badge-basic">Basic</span> }
-            @if (isUltimate) { <span class="info-badge badge-ult">Ult</span>   }
-            <span class="info-skill-stat">x@(damageMultiplier.ToString("0.##"))</span>
-            @if (baseHits != 1.0) { <span class="info-skill-stat">@(baseHits.ToString("0.##"))hits</span> }
-            <span class="info-skill-stat">~@baseDmg</span>
-            @if (effectiveInitCd > 0) { <span class="info-skill-stat">Init@("")@effectiveInitCd</span> }
-        </div>
-    </button>;
-        };
 }

@@ -1,0 +1,59 @@
+@using GameCore.Battle
+@using System.Collections.Generic
+
+@*
+  BattleLogPanel — scrollable event log.
+
+  Play mode (IsPlayMode=true):
+    Most-recent event highlighted gold. Events from the last player action highlighted green.
+    Clicking any entry undoes back to just before that action (OnEntryClick(index)).
+
+  Watch mode (IsPlayMode=false):
+    Current snapshot entry highlighted. Clicking sets the active step (OnEntryClick(index)).
+*@
+
+<section class="card event-log @(IsPlayMode ? "play-log" : "")" id="@(IsPlayMode ? "play-log" : "watch-log")">
+    @for (int i = 0; i < Events.Count; i++)
+    {
+        var  ev       = Events[i];
+        bool isLast   = IsPlayMode  && i == Events.Count - 1;
+        bool isNew    = IsPlayMode  && i >= NewEventsStart;
+        bool isCurrent = !IsPlayMode && i == CurrentStep;
+        int  idx      = i;
+
+        <div class="event-entry @ev.Type
+            @(isNew               ? "event-new"     : "")
+            @(isLast || isCurrent ? "event-current" : "")"
+             title="@(IsPlayMode && !AutoMode ? "Click to undo to this point" : "")"
+             @onclick="() => OnEntryClick.InvokeAsync(idx)">
+
+            @if (!IsPlayMode) { <span class="event-num">@(i + 1).</span> }
+            @ev.Description
+
+            @if (ev.EffectType.HasValue || ev.TotalHits > 1)
+            {
+                <span class="ev-meta">
+                    @if (ev.EffectType.HasValue) { <span class="info-badge @BattleHelpers.DmgTypeCss(ev.EffectType.Value) ev-meta-badge">@ev.EffectType</span> }
+                    @if (ev.TotalHits > 1) { <span class="ev-hit">@(ev.HitIndex + 1)/@ev.TotalHits</span> }
+                </span>
+            }
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<BattleEvent> Events { get; set; } = null!;
+
+    /// <summary>True for live play mode; false for watch/snapshot mode.</summary>
+    [Parameter] public bool IsPlayMode     { get; set; }
+    [Parameter] public bool AutoMode       { get; set; }
+
+    /// <summary>Play mode: index in Events where the last player action's events begin.</summary>
+    [Parameter] public int NewEventsStart  { get; set; }
+
+    /// <summary>Watch mode: index of the currently displayed snapshot.</summary>
+    [Parameter] public int CurrentStep     { get; set; }
+
+    /// <summary>Called with the clicked entry index. Play mode = undo; watch mode = jump to step.</summary>
+    [Parameter] public EventCallback<int> OnEntryClick { get; set; }
+}

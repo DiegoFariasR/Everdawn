@@ -1,0 +1,86 @@
+@using GameCore.Battle
+@using System.Collections.Generic
+@using System.Linq
+
+@*
+  BattleUnitCard — one unit in the arena.
+
+  Layout mirrors direction:
+    Player team: avatar on the right (flex-direction: row-reverse via card-player).
+    Enemy team:  avatar on the left.
+
+  The small ◂ / ▸ button opens the unit details panel without triggering target selection.
+  OnClick handles targeting; OnDetailsClick opens the slide panel.
+*@
+
+<div class="unit-card
+    @(IsPlayer      ? "card-player"                     : "")
+    @(IsActive      ? "card-active"                     : "")
+    @(!State.IsAlive ? "card-dead"                      : "")
+    @(CanTarget     ? "card-targetable"                 : "")
+    @(CanHealTarget ? "card-targetable card-heal-target": "")"
+     style="position:relative"
+     @onclick="() => OnClick.InvokeAsync()">
+
+    @foreach (var f in Floats)
+    {
+        <span class="float-num @(f.IsHeal ? "float-heal" : "float-dmg")"
+              style="left:@(f.OffsetPct)%" @key="f.Key">@(f.IsHeal ? "+" : "-")@f.Value</span>
+    }
+
+    <div class="avatar @(IsPlayer ? "player-avatar" : "enemy-avatar")
+         @(IsMeleeAnimating ? (IsPlayer ? "melee-fwd-r" : "melee-fwd-l") : "")"
+         aria-hidden="true">
+        <svg viewBox="0 0 20 30" width="22" height="22">
+            <circle cx="10" cy="4" r="3.5" stroke="currentColor" stroke-width="1.5" fill="none" />
+            <line x1="10" y1="7.5"  x2="10" y2="17"  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <line x1="4"  y1="12"   x2="16" y2="12"   stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <line x1="10" y1="17"   x2="5"  y2="27"   stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <line x1="10" y1="17"   x2="15" y2="27"   stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
+    </div>
+
+    <div class="unit-info">
+        <div class="unit-name-row">
+            <div class="unit-name">@Unit.Name <span class="unit-lv">Lv.@Unit.Level</span></div>
+            <button class="btn-details-toggle"
+                    @onclick:stopPropagation="true"
+                    @onclick="() => OnDetailsClick.InvokeAsync()"
+                    title="Unit details">@(IsPlayer ? "◂" : "▸")</button>
+        </div>
+        <div class="bar-wrap">
+            <div class="hp-bar" style="width:@HpPct%;background:@HpColor"></div>
+        </div>
+        @foreach (var bar in Unit.MaxBars)
+        {
+            int barPct = bar.Value > 0 ? State.GetBar(bar.Key) * 100 / bar.Value : 0;
+            <div class="bar-wrap"><div class="@(bar.Key)-bar" style="width:@barPct%"></div></div>
+        }
+        @if (State.StatusEffects is { Count: > 0 })
+        {
+            <div class="status-effects">
+                @foreach (var eff in State.StatusEffects) { <span class="status-badge">@eff</span> }
+            </div>
+        }
+        <div class="stat-text">@State.CurrentHp/@Unit.MaxHp HP</div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public BattleUnit Unit  { get; set; } = null!;
+    [Parameter, EditorRequired] public UnitState  State { get; set; } = null!;
+
+    [Parameter] public bool IsPlayer        { get; set; }
+    [Parameter] public bool IsActive        { get; set; }
+    [Parameter] public bool CanTarget       { get; set; }
+    [Parameter] public bool CanHealTarget   { get; set; }
+    [Parameter] public bool IsMeleeAnimating { get; set; }
+
+    [Parameter] public IEnumerable<FloatNumber> Floats { get; set; } = Enumerable.Empty<FloatNumber>();
+
+    [Parameter] public EventCallback OnClick       { get; set; }
+    [Parameter] public EventCallback OnDetailsClick { get; set; }
+
+    private int    HpPct  => Unit.MaxHp > 0 ? State.CurrentHp * 100 / Unit.MaxHp : 0;
+    private string HpColor => HpPct > 50 ? "#44cc44" : HpPct > 25 ? "#ffaa00" : "#cc4444";
+}

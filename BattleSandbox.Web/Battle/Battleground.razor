@@ -1,0 +1,101 @@
+@using GameCore.Battle
+@using System.Collections.Generic
+@using System.Linq
+
+@*
+  Battleground — the arena: ally team | vs | enemy team, plus the slideable unit detail panels.
+
+  Detail panel state is local: clicking ◂/▸ on a unit card toggles its details panel.
+  On PC (≥640px) the panels sit to the left/right of the arena.
+  On mobile they overlay as fixed side drawers.
+
+  Targeting logic:
+    CanTargetEnemy  → enemy card clickable to confirm as target
+    CanHealTarget   → ally card clickable to confirm as heal target
+  Both require HasPendingInput + SelectedSkillId set on the parent.
+*@
+
+<div class="battleground-layout">
+
+    <UnitDetailsPanel Unit="@(_detail.HasValue && _detail.Value.IsPlayer ? _detail.Value.Unit : null)"
+                      IsPlayer="true"
+                      OnClose="@(() => _detail = null)" />
+
+    <section class="card arena">
+        <div class="team player-team">
+            @foreach (var u in PlayerUnits)
+            {
+                var st = UnitStates.First(s => s.UnitId == u.Id);
+                bool healable = PendingTargetIsAlly && !PendingIsAoe && SelectedSkillId != null && st.IsAlive && !AutoMode;
+                <BattleUnitCard Unit="u" State="st"
+                                IsPlayer="true"
+                                IsActive="@(ActiveUnitId == u.Id)"
+                                CanTarget="false"
+                                CanHealTarget="healable"
+                                Floats="@Floats.Where(f => f.UnitId == u.Id)"
+                                IsMeleeAnimating="@MeleeAnimators.Contains(u.Id)"
+                                OnClick="@(() => HandleUnitClick(u.Id, targetable: false, healable: healable))"
+                                OnDetailsClick="@(() => ToggleDetail(u, isPlayer: true))" />
+            }
+        </div>
+
+        <div class="vs-col">vs</div>
+
+        <div class="team enemy-team">
+            @foreach (var u in EnemyUnits)
+            {
+                var st = UnitStates.First(s => s.UnitId == u.Id);
+                bool targetable = HasPendingInput && SelectedSkillId != null && !PendingIsAoe
+                                  && st.IsAlive && !AutoMode && !PendingTargetIsAlly;
+                <BattleUnitCard Unit="u" State="st"
+                                IsPlayer="false"
+                                IsActive="@(ActiveUnitId == u.Id)"
+                                CanTarget="targetable"
+                                CanHealTarget="false"
+                                Floats="@Floats.Where(f => f.UnitId == u.Id)"
+                                IsMeleeAnimating="@MeleeAnimators.Contains(u.Id)"
+                                OnClick="@(() => HandleUnitClick(u.Id, targetable: targetable, healable: false))"
+                                OnDetailsClick="@(() => ToggleDetail(u, isPlayer: false))" />
+            }
+        </div>
+    </section>
+
+    <UnitDetailsPanel Unit="@(_detail.HasValue && !_detail.Value.IsPlayer ? _detail.Value.Unit : null)"
+                      IsPlayer="false"
+                      OnClose="@(() => _detail = null)" />
+
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<BattleUnit> PlayerUnits { get; set; } = null!;
+    [Parameter, EditorRequired] public IReadOnlyList<BattleUnit> EnemyUnits  { get; set; } = null!;
+    [Parameter, EditorRequired] public IReadOnlyList<UnitState>  UnitStates  { get; set; } = null!;
+
+    [Parameter] public string?  ActiveUnitId      { get; set; }
+    [Parameter] public string?  SelectedSkillId   { get; set; }
+    [Parameter] public bool     PendingTargetIsAlly { get; set; }
+    [Parameter] public bool     PendingIsAoe       { get; set; }
+    [Parameter] public bool     HasPendingInput    { get; set; }
+    [Parameter] public bool     AutoMode           { get; set; }
+
+    [Parameter] public IEnumerable<FloatNumber>   Floats         { get; set; } = Enumerable.Empty<FloatNumber>();
+    [Parameter] public IReadOnlySet<string>        MeleeAnimators { get; set; } = new System.Collections.Generic.HashSet<string>();
+
+    [Parameter] public EventCallback<string> OnUnitTargeted { get; set; }
+
+    private (BattleUnit Unit, bool IsPlayer)? _detail;
+
+    private void ToggleDetail(BattleUnit unit, bool isPlayer)
+    {
+        if (_detail.HasValue && _detail.Value.Unit.Id == unit.Id)
+            _detail = null;
+        else
+            _detail = (unit, isPlayer);
+    }
+
+    private void HandleUnitClick(string unitId, bool targetable, bool healable)
+    {
+        if (targetable || healable)
+            OnUnitTargeted.InvokeAsync(unitId);
+    }
+}

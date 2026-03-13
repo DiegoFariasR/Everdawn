@@ -1,0 +1,11 @@
+@*
+  CurrentEventCard — displays the description of the most recent battle event.
+  Round number has moved to TurnStrip; this card shows only the event text.
+*@
+
+<section class="card current-event @EventType" id="current-event">@Description</section>
+
+@code {
+    [Parameter] public string EventType   { get; set; } = "";
+    [Parameter] public string Description { get; set; } = "Battle begins!";
+}

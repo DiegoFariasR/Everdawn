@@ -1,0 +1,87 @@
+@using GameCore.Battle
+@using System.Collections.Generic
+
+@*
+  UnitDetailsPanel — full stat/skill sheet for one unit.
+
+  IsPlayer = true  → panel-ally  (left on PC, left overlay on mobile)
+  IsPlayer = false → panel-enemy (right on PC, right overlay on mobile)
+
+  Unit = null means the panel is closed (renders nothing).
+  To add a new stat: add an info-attr div. Bars are data-driven — no change needed.
+  To add a new skill badge/modifier: add an @if line inside the skill loop.
+*@
+
+@if (Unit != null)
+{
+    <aside class="unit-details-panel @(IsPlayer ? "panel-ally" : "panel-enemy")">
+        <div class="panel-header">
+            <span class="info-unit-name">@Unit.Name <span class="unit-lv">Lv.@Unit.Level</span></span>
+            <button class="btn-close-panel" @onclick="() => OnClose.InvokeAsync()">✕</button>
+        </div>
+
+        <div class="info-attrs">
+            <div class="info-attr"><span class="info-attr-key">HP</span>    <span class="info-attr-val">@Unit.MaxHp</span></div>
+            <div class="info-attr"><span class="info-attr-key">STR</span>   <span class="info-attr-val">@Unit.Str</span></div>
+            <div class="info-attr"><span class="info-attr-key">WIS</span>   <span class="info-attr-val">@Unit.Wis</span></div>
+            <div class="info-attr"><span class="info-attr-key">AGI</span>   <span class="info-attr-val">@Unit.Agi</span></div>
+            <div class="info-attr"><span class="info-attr-key">P.Atk</span> <span class="info-attr-val">@Unit.PhysAttack</span></div>
+            <div class="info-attr"><span class="info-attr-key">M.Atk</span> <span class="info-attr-val">@Unit.MagicAttack</span></div>
+            <div class="info-attr"><span class="info-attr-key">Init</span>  <span class="info-attr-val">@Unit.Initiative</span></div>
+            <div class="info-attr"><span class="info-attr-key">Hits</span>  <span class="info-attr-val">@Unit.HitCount</span></div>
+            @foreach (var bar in Unit.MaxBars)
+            {
+                string label = bar.Key == "mp" ? "MP" : char.ToUpper(bar.Key[0]) + bar.Key[1..];
+                <div class="info-attr">
+                    <span class="info-attr-key">@label</span>
+                    <span class="info-attr-val">@bar.Value</span>
+                </div>
+            }
+        </div>
+
+        @if (Unit.Traits is { Count: > 0 })
+        {
+            <div class="info-badges">
+                @foreach (var t in Unit.Traits) { <span class="info-badge badge-trait">@t</span> }
+            </div>
+        }
+
+        @if (Unit.Resistances is { Count: > 0 })
+        {
+            <div class="info-badges">
+                @foreach (var kvp in Unit.Resistances)
+                {
+                    <span class="info-badge @(kvp.Value > 0 ? "badge-resist" : "badge-weak")">
+                        @kvp.Key @(kvp.Value > 0 ? $"+{kvp.Value}%" : $"{kvp.Value}%")
+                    </span>
+                }
+            </div>
+        }
+
+        <div class="info-skills">
+            @foreach (var sk in Unit.ResolvedSkills)
+            {
+                int baseDmg = sk.EstimateBaseDmg(Unit);
+                <div class="info-skill-row">
+                    <span class="info-skill-name">@sk.Name</span>
+                    @if (sk.IsBasic)    { <span class="info-badge badge-basic">Basic</span> }
+                    @if (sk.IsUltimate) { <span class="info-badge badge-ult">Ult</span>   }
+                    @if (sk.PrimaryEffectType.HasValue) { <span class="info-badge @BattleHelpers.DmgTypeCss(sk.PrimaryEffectType.Value)">@sk.PrimaryEffectType</span> }
+                    <span class="info-skill-stat">x@(sk.DamageMultiplier.ToString("0.##"))</span>
+                    @if (sk.BaseHits != 1.0) { <span class="info-skill-stat">@(sk.BaseHits.ToString("0.##"))hits</span> }
+                    <span class="info-skill-stat">~@baseDmg</span>
+                    @if (sk.Cost > 0)                    { <span class="info-skill-stat">@sk.Cost MP</span> }
+                    @if (sk.IsAoe)                       { <span class="info-badge badge-aoe">AoE</span>  }
+                    @if (sk.Cooldown > 0)                { <span class="info-skill-stat">CD @sk.Cooldown</span> }
+                    @if (sk.EffectiveInitialCooldown > 0){ <span class="info-skill-stat">Init.CD @sk.EffectiveInitialCooldown</span> }
+                </div>
+            }
+        </div>
+    </aside>
+}
+
+@code {
+    [Parameter] public BattleUnit?    Unit     { get; set; }
+    [Parameter] public bool           IsPlayer { get; set; }
+    [Parameter] public EventCallback  OnClose  { get; set; }
+}
