@@ -89,18 +89,18 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void ShieldSkill_GrantsBarrierToSingleTarget()
         {
-            var mage  = new BattleUnit("mage",  "Mage",  "player", Level: 1, Str: 10, Wis: 50, Agi: 100,
+            var mage = new BattleUnit("mage", "Mage", "player", Level: 1, Str: 10, Wis: 50, Agi: 100,
                 Skills: new BattleSkill[] { MakeShieldSkill("shield") });
-            var ally  = new BattleUnit("ally",  "Ally",  "player", Level: 1, Str: 50, Wis: 0,  Agi: 1,
+            var ally = new BattleUnit("ally", "Ally", "player", Level: 1, Str: 50, Wis: 0, Agi: 1,
                 Skills: new BattleSkill[] { MakeDamageSkill("ally-basic") });
-            var enemy = new BattleUnit("enemy", "Enemy", "enemy",  Level: 1, Str: 1,  Wis: 0,  Agi: 1,
+            var enemy = new BattleUnit("enemy", "Enemy", "enemy", Level: 1, Str: 1, Wis: 0, Agi: 1,
                 Skills: new BattleSkill[] { MakeDamageSkill("e-basic") });
 
             var session = new BattleSession(seed: 1);
             session.Start(new BattleSetup
             {
                 PlayerUnits = new List<BattleUnit> { mage, ally },
-                EnemyUnits  = new List<BattleUnit> { enemy },
+                EnemyUnits = new List<BattleUnit> { enemy },
             });
 
             var result = session.TryExecute(new PlayerActionCommand("shield", "ally"));
@@ -113,26 +113,26 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void ShieldSkill_AoE_GrantsBarrierToAllAllies()
         {
-            var mage  = new BattleUnit("mage",  "Mage",  "player", Level: 1, Str: 10, Wis: 50, Agi: 100,
+            var mage = new BattleUnit("mage", "Mage", "player", Level: 1, Str: 10, Wis: 50, Agi: 100,
                 Skills: new BattleSkill[] { MakeAoeShieldSkill("shield-aoe") });
-            var ally1 = new BattleUnit("ally1", "Ally1", "player", Level: 1, Str: 50, Wis: 0,  Agi: 5,
+            var ally1 = new BattleUnit("ally1", "Ally1", "player", Level: 1, Str: 50, Wis: 0, Agi: 5,
                 Skills: new BattleSkill[] { MakeDamageSkill("a1-basic") });
-            var ally2 = new BattleUnit("ally2", "Ally2", "player", Level: 1, Str: 50, Wis: 0,  Agi: 4,
+            var ally2 = new BattleUnit("ally2", "Ally2", "player", Level: 1, Str: 50, Wis: 0, Agi: 4,
                 Skills: new BattleSkill[] { MakeDamageSkill("a2-basic") });
-            var enemy = new BattleUnit("enemy", "Enemy", "enemy",  Level: 1, Str: 1,  Wis: 0,  Agi: 1,
+            var enemy = new BattleUnit("enemy", "Enemy", "enemy", Level: 1, Str: 1, Wis: 0, Agi: 1,
                 Skills: new BattleSkill[] { MakeDamageSkill("e-basic") });
 
             var session = new BattleSession(seed: 1);
             session.Start(new BattleSetup
             {
                 PlayerUnits = new List<BattleUnit> { mage, ally1, ally2 },
-                EnemyUnits  = new List<BattleUnit> { enemy },
+                EnemyUnits = new List<BattleUnit> { enemy },
             });
 
             var result = session.TryExecute(new PlayerActionCommand("shield-aoe", null));
             Assert.True(result.Accepted, "AoE shield skill should be accepted without a target");
 
-            Assert.True(result.View.Units.First(u => u.UnitId == "mage").GetBar("barrier")  > 0, "Mage should have gained barrier");
+            Assert.True(result.View.Units.First(u => u.UnitId == "mage").GetBar("barrier") > 0, "Mage should have gained barrier");
             Assert.True(result.View.Units.First(u => u.UnitId == "ally1").GetBar("barrier") > 0, "Ally1 should have gained barrier");
             Assert.True(result.View.Units.First(u => u.UnitId == "ally2").GetBar("barrier") > 0, "Ally2 should have gained barrier");
         }
@@ -164,7 +164,7 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void Barrier_DecaysSlowerWithHighWis()
         {
-            int remainingLowWis  = GetBarrierAfterRounds(wisOnShieldedUnit: 0,   rounds: 5);
+            int remainingLowWis = GetBarrierAfterRounds(wisOnShieldedUnit: 0, rounds: 5);
             int remainingHighWis = GetBarrierAfterRounds(wisOnShieldedUnit: 100, rounds: 5);
 
             Assert.True(remainingHighWis > remainingLowWis,
@@ -178,14 +178,14 @@ namespace GameCore.Tests.Battle
         {
             var player = new BattleUnit("player", "Player", "player", Level: 1, Str: 10, Wis: 50, Agi: 100,
                 Skills: new BattleSkill[] { MakeShieldSkill("shield", wisScale: 0.1), MakeHealSkill("heal", wisScale: 100.0) });
-            var enemy  = new BattleUnit("enemy",  "Enemy",  "enemy",  Level: 1, Str: 10, Wis: 50, Agi: 5,
+            var enemy = new BattleUnit("enemy", "Enemy", "enemy", Level: 1, Str: 10, Wis: 50, Agi: 5,
                 Skills: new BattleSkill[] { MakeDamageSkill("e-basic", wisScale: 1.0) });
 
             var session = new BattleSession(seed: 5);
             session.Start(new BattleSetup
             {
                 PlayerUnits = new List<BattleUnit> { player },
-                EnemyUnits  = new List<BattleUnit> { enemy },
+                EnemyUnits = new List<BattleUnit> { enemy },
             });
 
             // Cast shield. AutoAdvance plays enemy's attack before returning.
@@ -232,8 +232,8 @@ namespace GameCore.Tests.Battle
 
             // Use the three standard player units from the SampleScenario.
             var paladin = db.GetUnit("paladin") with { Team = "player" };
-            var mage    = db.GetUnit("mage")    with { Team = "player" };
-            var rogue   = db.GetUnit("rogue")   with { Team = "player" };
+            var mage = db.GetUnit("mage") with { Team = "player" };
+            var rogue = db.GetUnit("rogue") with { Team = "player" };
 
             // Harmless enemy so the battle doesn't end before we check.
             // Str=500 → MaxHp=50,000. It deals negligible void damage (Wis=0 → 0 magic attack).
@@ -249,7 +249,7 @@ namespace GameCore.Tests.Battle
             session.Start(new BattleSetup
             {
                 PlayerUnits = new System.Collections.Generic.List<BattleUnit> { paladin, mage, rogue },
-                EnemyUnits  = new System.Collections.Generic.List<BattleUnit> { enemy },
+                EnemyUnits = new System.Collections.Generic.List<BattleUnit> { enemy },
             });
 
             // Drive turns until the mage casts mage-barrier (AoE shield).
@@ -270,12 +270,12 @@ namespace GameCore.Tests.Battle
             Assert.NotNull(viewAfterBarrier);
 
             var paladinState = viewAfterBarrier!.Units.First(u => u.UnitId == paladin.Id);
-            var mageState    = viewAfterBarrier.Units.First(u => u.UnitId == mage.Id);
-            var rogueState   = viewAfterBarrier.Units.First(u => u.UnitId == rogue.Id);
+            var mageState = viewAfterBarrier.Units.First(u => u.UnitId == mage.Id);
+            var rogueState = viewAfterBarrier.Units.First(u => u.UnitId == rogue.Id);
 
             Assert.True(paladinState.GetBar("barrier") > 0, "Paladin should have received barrier from mage-barrier");
-            Assert.True(mageState.GetBar("barrier")    > 0, "Mage should have received barrier from mage-barrier");
-            Assert.True(rogueState.GetBar("barrier")   > 0, "Rogue should have received barrier from mage-barrier");
+            Assert.True(mageState.GetBar("barrier") > 0, "Mage should have received barrier from mage-barrier");
+            Assert.True(rogueState.GetBar("barrier") > 0, "Rogue should have received barrier from mage-barrier");
         }
 
         // ── Helpers ──────────────────────────────────────────────────────────
@@ -321,14 +321,14 @@ namespace GameCore.Tests.Battle
         {
             var player = new BattleUnit("player", "Player", "player", Level: 1, Str: 10, Wis: 50, Agi: 100,
                 Skills: new BattleSkill[] { MakeShieldSkill("shield", shieldWisScale) });
-            var enemy  = new BattleUnit("enemy",  "Enemy",  "enemy",  Level: 1, Str: 10, Wis: 50, Agi: 5,
+            var enemy = new BattleUnit("enemy", "Enemy", "enemy", Level: 1, Str: 10, Wis: 50, Agi: 5,
                 Skills: new BattleSkill[] { MakeDamageSkill("e-basic", damageWisScale) });
 
             var session = new BattleSession(seed: 42);
             session.Start(new BattleSetup
             {
                 PlayerUnits = new List<BattleUnit> { player },
-                EnemyUnits  = new List<BattleUnit> { enemy },
+                EnemyUnits = new List<BattleUnit> { enemy },
             });
 
             // PlayerActionCommand auto-advances enemy turns (AutoAdvance) before returning.
@@ -350,13 +350,13 @@ namespace GameCore.Tests.Battle
                 Cost: 0, DamageMultiplier: 1.0, Cooldown: 100, IsAoe: true,
                 Effects: ShieldEffect(wisScale: 500.0));
 
-            var mage     = new BattleUnit("mage",     "Mage",     "player",
+            var mage = new BattleUnit("mage", "Mage", "player",
                 Level: 1, Str: 10, Wis: 50, Agi: 100,
                 Skills: new BattleSkill[] { MakeDamageSkill("mage-basic"), oneTimeShield });
             var shielded = new BattleUnit("shielded", "Shielded", "player",
                 Level: 1, Str: 50, Wis: wisOnShieldedUnit, Agi: 1,
                 Skills: new BattleSkill[] { MakeDamageSkill("s-basic") });
-            var enemy    = new BattleUnit("enemy",    "Enemy",    "enemy",
+            var enemy = new BattleUnit("enemy", "Enemy", "enemy",
                 Level: 1, Str: 1, Wis: 0, Agi: 2,
                 Skills: new BattleSkill[] { MakeDamageSkill("e-basic") });
 
@@ -364,7 +364,7 @@ namespace GameCore.Tests.Battle
             session.Start(new BattleSetup
             {
                 PlayerUnits = new List<BattleUnit> { mage, shielded },
-                EnemyUnits  = new List<BattleUnit> { enemy },
+                EnemyUnits = new List<BattleUnit> { enemy },
             });
 
             // Mage casts AoE barrier (once — then it's on 100-turn cooldown).
