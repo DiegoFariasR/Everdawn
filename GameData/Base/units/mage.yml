@@ -9,5 +9,6 @@ skills:
   - id: mage-bolt
     modifiers: [Basic]
   - id: mage-burst
+  - id: mage-barrier
   - id: mage-meteor
     modifiers: [Ultimate]

@@ -247,14 +247,15 @@ namespace GameCore.Battle
                 _bars[actor.Id]["mp"] = Math.Max(0, _bars[actor.Id]["mp"] - skill.Cost);
 
             // Determine event type from skill modifier
-            string evType = skill.IsHeal ? "skill"
+            string evType = (skill.IsHeal || skill.IsShield) ? "skill"
                            : skill.IsBasic ? "attack" : skill.IsUltimate ? "soulburn" : "skill";
 
             // Focus empowerment: fires when focus is full and the actor uses a non-basic offensive skill
             bool isFocusEmpowered = actor.HasTrait(BattleTrait.Focus)
                 && GetBar(actor.Id, "focus") == 100
                 && !skill.IsBasic
-                && !skill.IsHeal;
+                && !skill.IsHeal
+                && !skill.IsShield;
             if (isFocusEmpowered)
             {
                 _bars[actor.Id]["focus"] = 50;
@@ -264,7 +265,8 @@ namespace GameCore.Battle
             bool isFuryEmpowered = actor.HasTrait(BattleTrait.Fury)
                 && GetBar(actor.Id, "fury") == 100
                 && !skill.IsBasic
-                && !skill.IsHeal;
+                && !skill.IsHeal
+                && !skill.IsShield;
             if (isFuryEmpowered)
             {
                 _bars[actor.Id]["fury"] = 0;
@@ -275,7 +277,12 @@ namespace GameCore.Battle
             if (isFuryEmpowered) empowerMult *= 1.5;
 
             if (skill.IsAoe && targets.Count > 1)
-                produced.Add(AddEvent(actor.Id, $"{actor.Name} unleashes {skill.Name} on all enemies!", evType));
+            {
+                string aoeDesc = skill.IsShield
+                    ? $"{actor.Name} conjures {skill.Name} on all allies!"
+                    : $"{actor.Name} unleashes {skill.Name} on all enemies!";
+                produced.Add(AddEvent(actor.Id, aoeDesc, evType));
+            }
 
             // Determine effective hit count and per-hit damage multiplier.
             // When skill.BaseHits != 1.0 or ScalingHits is set, the skill controls hit count:
@@ -286,7 +293,7 @@ namespace GameCore.Battle
             int effectiveHits;
             double perHitHitsMult;
             bool hasHitsOverride = skill.BaseHits != 1.0 || (skill.ScalingHits != null && skill.ScalingHits.Count > 0);
-            if (!skill.IsHeal && hasHitsOverride)
+            if (!skill.IsHeal && !skill.IsShield && hasHitsOverride)
             {
                 double rawHits = skill.BaseHits;
                 if (skill.ScalingHits != null)
@@ -298,7 +305,7 @@ namespace GameCore.Battle
             }
             else
             {
-                effectiveHits = skill.IsHeal ? 1 : actor.HitCount;
+                effectiveHits = (skill.IsHeal || skill.IsShield) ? 1 : actor.HitCount;
                 perHitHitsMult = 1.0;
             }
 
@@ -326,6 +333,27 @@ namespace GameCore.Battle
                             evType, target.Id, healed,
                             skillId: skill.Id));
                     }
+                    else if (effect?.Kind == EffectKind.Shield)
+                    {
+                        // Shield: grant barrier using the same scaling formula as healing.
+                        // Barrier absorbs damage before HP. Cannot be healed; decays each round based on WIS.
+                        double shieldRaw = 0;
+                        foreach (var comp in effect.DamagePerHit)
+                            foreach (var s in comp.Scaling)
+                                shieldRaw += actor.GetStat(s.Stat) * s.Scale;
+                        shieldRaw *= skill.DamageMultiplier * empowerMult;
+                        int shieldVariance = Math.Max(1, (int)shieldRaw / 5);
+                        int amount = Math.Max(0, (int)shieldRaw + _rng.Next(-shieldVariance, shieldVariance + 1));
+                        if (!_bars[target.Id].ContainsKey("barrier"))
+                            _bars[target.Id]["barrier"] = 0;
+                        _bars[target.Id]["barrier"] += amount;
+                        produced.Add(AddEvent(actor.Id,
+                            skill.IsAoe
+                                ? $"  \u2192 {target.Name} gains {amount} barrier."
+                                : $"{actor.Name} grants {amount} barrier to {target.Name}.",
+                            evType, target.Id, amount,
+                            skillId: skill.Id));
+                    }
                     else
                     {
                         var components = effect?.DamagePerHit ?? System.Array.Empty<DamageComponent>();
@@ -333,7 +361,14 @@ namespace GameCore.Battle
                         int totalDamage = 0;
                         foreach (var r in hitResults) totalDamage += r.FinalDamage;
                         var primaryType = skill.PrimaryEffectType;
-                        _hp[target.Id] = Math.Max(0, _hp[target.Id] - totalDamage);
+
+                        // Barrier absorbs damage before HP.
+                        int barrierCurrent = GetBar(target.Id, "barrier");
+                        int barrierAbsorbed = Math.Min(barrierCurrent, totalDamage);
+                        if (barrierAbsorbed > 0)
+                            _bars[target.Id]["barrier"] = barrierCurrent - barrierAbsorbed;
+                        _hp[target.Id] = Math.Max(0, _hp[target.Id] - (totalDamage - barrierAbsorbed));
+
                         string hitLabel = effectiveHits > 1 ? $" (hit {i + 1}/{effectiveHits})" : "";
                         produced.Add(AddEvent(actor.Id,
                             skill.IsAoe
@@ -364,8 +399,8 @@ namespace GameCore.Battle
             // Apply cooldown for the used skill
             if (skill.Cooldown > 0)
                 _skillCooldowns[skill.Id] = skill.Cooldown;
-            // Fury: actor gains 10–50 per action (excludes heals)
-            if (actor.HasTrait(BattleTrait.Fury) && !skill.IsHeal)
+            // Fury: actor gains 10–50 per action (excludes heals and shields)
+            if (actor.HasTrait(BattleTrait.Fury) && !skill.IsHeal && !skill.IsShield)
                 _bars[actor.Id]["fury"] = Math.Min(100, GetBar(actor.Id, "fury") + _rng.Next(10, 51));
 
             CheckEnd();
@@ -386,12 +421,24 @@ namespace GameCore.Battle
             return false;
         }
 
-        /// <summary>Called when the turn order wraps. Increments round, regenerates mana.</summary>
+        /// <summary>Called when the turn order wraps. Increments round, regenerates mana, decays barrier.</summary>
         private IReadOnlyList<BattleEvent> StartOfRound()
         {
             _round++;
             var events = new List<BattleEvent>();
             events.Add(AddEvent("system", $"\u2500\u2500 Round {_round} \u2500\u2500", "round"));
+            // Barrier decay: each living unit loses a portion of their barrier based on WIS.
+            // decay = max(5, 20 - WIS/10) % of remaining barrier, minimum 1.
+            // Higher WIS → slower decay (WIS=60 → 14%, WIS=100 → 10%, WIS=0 → 20%).
+            foreach (var u in _allUnits.Where(u => _hp[u.Id] > 0))
+            {
+                int barrier = GetBar(u.Id, "barrier");
+                if (barrier <= 0) continue;
+                int decayPct = Math.Max(5, 20 - u.Wis / 10);
+                int decay = Math.Max(1, barrier * decayPct / 100);
+                _bars[u.Id]["barrier"] = Math.Max(0, barrier - decay);
+                events.Add(AddEvent(u.Id, $"{u.Name}'s barrier fades by {decay}.", "round"));
+            }
             foreach (var u in _allUnits.Where(u => _bars[u.Id].ContainsKey("mp") && _hp[u.Id] > 0))
             {
                 int maxMp = u.MaxBars["mp"];
