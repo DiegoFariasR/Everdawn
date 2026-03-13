@@ -523,12 +523,35 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 800;
-    font-size: 0.75rem;
     flex-shrink: 0;
+    position: relative;
+    z-index: 1;
 }
+.avatar svg { display: block; overflow: visible; }
 .player-avatar { background: #1e4080; color: #88bbff; }
 .enemy-avatar  { background: #5a1a1a; color: #ff9988; }
+
+/* ── Melee lunge animations ──────────────────────── */
+@keyframes melee-fwd-r {
+    0%   { transform: translateX(0)    scale(1);    }
+    35%  { transform: translateX(52px) scale(1.15); }
+    65%  { transform: translateX(52px) scale(1.15); }
+    100% { transform: translateX(0)    scale(1);    }
+}
+@keyframes melee-fwd-l {
+    0%   { transform: translateX(0)     scale(1);    }
+    35%  { transform: translateX(-52px) scale(1.15); }
+    65%  { transform: translateX(-52px) scale(1.15); }
+    100% { transform: translateX(0)     scale(1);    }
+}
+.melee-fwd-r {
+    animation: melee-fwd-r 0.55s ease-in-out forwards;
+    z-index: 30;
+}
+.melee-fwd-l {
+    animation: melee-fwd-l 0.55s ease-in-out forwards;
+    z-index: 30;
+}
 
 .unit-info { flex: 1; min-width: 0; }
 

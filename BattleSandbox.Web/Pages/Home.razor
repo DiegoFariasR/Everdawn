@@ -429,6 +429,14 @@
         _result        = null;
         _pendingAction = null;
 
+        _skillRanges = _setup.PlayerUnits
+            .Concat(_setup.EnemyUnits)
+            .SelectMany(u => u.ResolvedSkills)
+            .GroupBy(s => s.Id)
+            .ToDictionary(g => g.Key, g => g.First().Range);
+        _playerUnitIds = _setup.PlayerUnits.Select(u => u.Id).ToHashSet();
+        _meleeAnimators.Clear();
+
         if (_playMode)
         {
             _resumeCommand  = null;
@@ -477,6 +485,7 @@
             _commandHistory.Add(new CommandRecord(cmd, _view!.FullLog.Count));
             var result = _engine.TryExecute(cmd);
             _view = result.View;
+            TriggerMeleeAnims(result.Events);
             SpawnFloats(result.Events);
             SelectDefaultSkill();
             StateHasChanged();
@@ -491,6 +500,7 @@
         _lastActionEventStart = _view!.FullLog.Count;
         var result = _engine.TryExecute(cmd);
         _view = result.View;
+        TriggerMeleeAnims(result.Events);
         SpawnFloats(result.Events);
         SelectDefaultSkill();
         if (!_autoMode) _ = AdvanceNonPlayerTurnsAsync();
@@ -504,6 +514,7 @@
         _lastActionEventStart = _view!.FullLog.Count;
         var result = _engine.TryExecute(cmd);
         _view = result.View;
+        TriggerMeleeAnims(result.Events);
         SpawnFloats(result.Events);
         SelectDefaultSkill();
         if (!_autoMode) _ = AdvanceNonPlayerTurnsAsync();
@@ -521,6 +532,7 @@
             _commandHistory.Add(new CommandRecord(cmd, _view!.FullLog.Count));
             var result = _engine.TryExecute(cmd);
             _view = result.View;
+            TriggerMeleeAnims(result.Events);
             SpawnFloats(result.Events);
             SelectDefaultSkill();
             StateHasChanged();
@@ -578,6 +590,31 @@
     private void StepBack()    => _step = Math.Max(0, _step - 1);
     private void JumpToStart() => _step = 0;
     private void JumpToEnd()   => _step = (_result?.Snapshots.Count ?? 1) - 1;
+
+    //  Melee attack animation 
+    private readonly HashSet<string> _meleeAnimators = [];
+    private Dictionary<string, SkillRange> _skillRanges = [];
+    private HashSet<string> _playerUnitIds = [];
+
+    private void TriggerMeleeAnims(IReadOnlyList<BattleEvent>? events)
+    {
+        if (events is null) return;
+        foreach (var ev in events)
+        {
+            if (ev.SkillId is null || ev.TargetId is null) continue;
+            if (!_skillRanges.TryGetValue(ev.SkillId, out var range) || range != SkillRange.Melee) continue;
+            _meleeAnimators.Add(ev.ActorId);
+        }
+        if (_meleeAnimators.Count > 0)
+            _ = ExpireMeleeAnimsAsync();
+    }
+
+    private async Task ExpireMeleeAnimsAsync()
+    {
+        await Task.Delay(700);
+        _meleeAnimators.Clear();
+        StateHasChanged();
+    }
 
     //  Floating numbers 
     private record FloatNumber(string UnitId, int Value, bool IsHeal, int OffsetPct, int Key);
@@ -669,7 +706,17 @@
             <span class="float-num @(f.IsHeal ? "float-heal" : "float-dmg")"
                   style="left:@(f.OffsetPct)%" @key="f.Key">@(f.IsHeal ? "+" : "-")@f.Value</span>
         }
-        <div class="avatar @(isPlayer ? "player-avatar" : "enemy-avatar")">@u.Name[0]</div>
+        <div class="avatar @(isPlayer ? "player-avatar" : "enemy-avatar")
+             @(_meleeAnimators.Contains(u.Id) ? (isPlayer ? "melee-fwd-r" : "melee-fwd-l") : "")"
+             aria-hidden="true">
+            <svg viewBox="0 0 20 30" width="22" height="22">
+                <circle cx="10" cy="4" r="3.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <line x1="10" y1="7.5" x2="10" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="4" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="10" y1="17" x2="5" y2="27" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="10" y1="17" x2="15" y2="27" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+        </div>
         <div class="unit-info">
             <div class="unit-name">@u.Name <span class="unit-lv">Lv.@u.Level</span></div>
             <div class="bar-wrap"><div class="hp-bar" style="width:@hpPct%;background:@hpColor"></div></div>
