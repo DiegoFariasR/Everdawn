@@ -128,7 +128,7 @@ namespace GameCore.Tests.Battle
             DurationKind: EffectDurationKind.ForTargetTurns,
             Duration: 2,
             SkillModifier: new RuntimeSkillModifier(
-                Modify: new Dictionary<string, double> { { "damageMultiplier", 0.5 } }
+                Modify: new Dictionary<ModifierVariable, double> { { ModifierVariable.DamageMultiplier, 0.5 } }
             )
         );
 

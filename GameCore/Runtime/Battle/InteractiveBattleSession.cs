@@ -877,13 +877,13 @@ namespace GameCore.Battle
             foreach (var mod in modifiers)
             {
                 if (mod.Set == null) continue;
-                if (mod.Set.TryGetValue("damageMultiplier", out var dm))
+                if (mod.Set.TryGetValue(ModifierVariable.DamageMultiplier, out var dm))
                     damageMultiplier = System.Convert.ToDouble(dm);
-                if (mod.Set.TryGetValue("cost", out var c))
+                if (mod.Set.TryGetValue(ModifierVariable.Cost, out var c))
                     cost = System.Convert.ToInt32(c);
-                if (mod.Set.TryGetValue("isAoe", out var aoe))
+                if (mod.Set.TryGetValue(ModifierVariable.IsAoe, out var aoe))
                     isAoe = System.Convert.ToBoolean(aoe);
-                if (mod.Set.TryGetValue("cooldown", out var cd))
+                if (mod.Set.TryGetValue(ModifierVariable.Cooldown, out var cd))
                     cooldown = System.Convert.ToInt32(cd);
             }
 
@@ -891,11 +891,11 @@ namespace GameCore.Battle
             foreach (var mod in modifiers)
             {
                 if (mod.Modify == null) continue;
-                if (mod.Modify.TryGetValue("damageMultiplier", out var dm))
+                if (mod.Modify.TryGetValue(ModifierVariable.DamageMultiplier, out var dm))
                     damageMultiplier += dm;
-                if (mod.Modify.TryGetValue("cost", out var c))
+                if (mod.Modify.TryGetValue(ModifierVariable.Cost, out var c))
                     cost += (int)c;
-                if (mod.Modify.TryGetValue("cooldown", out var cd))
+                if (mod.Modify.TryGetValue(ModifierVariable.Cooldown, out var cd))
                     cooldown += (int)cd;
             }
 
