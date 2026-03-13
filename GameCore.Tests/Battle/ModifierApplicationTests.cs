@@ -341,6 +341,76 @@ skills:
             Assert.Contains(skill.Effects[0].DamagePerHit, c => c.DamageType == EffectType.Fire);
         }
 
+        // ── Unit-level penetration modifiers ─────────────────────────────────
+
+        private const string UnitYamlWithUnitMod = @"
+id: test-unit
+name: Test Unit
+level: 1
+str: 100
+wis: 80
+agi: 50
+modifiers:
+  - {0}
+skills:
+  - id: sword-strike
+";
+
+        [Fact]
+        public void UnitModifier_SetPhysicalPenetration_AppliedToUnit()
+        {
+            var db = BuildDb(@"
+- id: test-mod
+  set:
+    physicalPenetration: 30
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(30, unit.GetPenetration(EffectType.Physical));
+        }
+
+        [Fact]
+        public void UnitModifier_ModifyPenetration_AddedToBase()
+        {
+            // Base YAML penetration 20, modifier adds 10 → 30.
+            const string unitYaml = @"
+id: test-unit
+name: Test Unit
+level: 1
+str: 100
+wis: 80
+agi: 50
+penetrations:
+  physical: 20
+modifiers:
+  - test-mod
+skills:
+  - id: sword-strike
+";
+            var db = BuildDb(@"
+- id: test-mod
+  modify:
+    physicalPenetration: 10
+", unitYaml);
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(30, unit.GetPenetration(EffectType.Physical));
+        }
+
+        [Fact]
+        public void UnitModifier_SkillVariables_DoNotAffectPenetration()
+        {
+            // A cost modifier in the unit modifier list should not affect penetration.
+            var db = BuildDb(@"
+- id: test-mod
+  set:
+    cost: 0
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(0, unit.GetPenetration(EffectType.Physical));
+        }
+
         // ── Helpers ───────────────────────────────────────────────────────────
 
         private static ContentDatabase BuildDb(string modifiersYaml, string unitYaml)

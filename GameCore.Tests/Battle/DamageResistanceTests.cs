@@ -9,8 +9,8 @@ namespace GameCore.Tests.Battle
     {
         // ── Helpers ───────────────────────────────────────────────────────────
 
-        private static BattleUnit MakeActor(int str = 100, int wis = 0) =>
-            new("actor", "Actor", "player", Level: 1, Str: str, Wis: wis, Agi: 50);
+        private static BattleUnit MakeActor(int str = 100, int wis = 0, IReadOnlyDictionary<EffectType, int>? penetrations = null) =>
+            new("actor", "Actor", "player", Level: 1, Str: str, Wis: wis, Agi: 50, Penetrations: penetrations);
 
         private static BattleUnit MakeTarget(IReadOnlyDictionary<EffectType, int>? resistances = null) =>
             new("target", "Target", "enemy", Level: 1, Str: 100, Wis: 0, Agi: 50, Resistances: resistances);
@@ -182,6 +182,67 @@ namespace GameCore.Tests.Battle
         {
             var warrior = MakeActor(str: 100, wis: 10);
             Assert.Equal(EffectType.Physical, warrior.NaturalEffectType);
+        }
+
+        // ── Penetration ───────────────────────────────────────────────────────
+
+        [Fact]
+        public void GetPenetration_ReturnsZeroWhenNoPenetrationDefined()
+        {
+            var actor = MakeActor();
+            Assert.Equal(0, actor.GetPenetration(EffectType.Physical));
+            Assert.Equal(0, actor.GetPenetration(EffectType.Fire));
+        }
+
+        [Fact]
+        public void Penetration_ReducesEffectiveResistance()
+        {
+            // 50% resistance + 20% penetration → 30% effective resistance → 70% of raw damage.
+            var actor = MakeActor(str: 100, penetrations: new Dictionary<EffectType, int> { [EffectType.Physical] = 20 });
+            var target = MakeTarget(new Dictionary<EffectType, int> { [EffectType.Physical] = 50 });
+            var result = Compute(actor, target, EffectType.Physical);
+            Assert.Equal((int)(result.RawDamage * 0.70), result.FinalDamage);
+        }
+
+        [Fact]
+        public void FullPenetration_IgnoresAllResistance()
+        {
+            // 100% penetration cancels 100% resistance → same as no resistance.
+            var actor = MakeActor(str: 100, penetrations: new Dictionary<EffectType, int> { [EffectType.Physical] = 100 });
+            var target = MakeTarget(new Dictionary<EffectType, int> { [EffectType.Physical] = 100 });
+            var result = Compute(actor, target, EffectType.Physical);
+            Assert.Equal(result.RawDamage, result.FinalDamage);
+        }
+
+        [Fact]
+        public void Penetration_DoesNotAffectOtherDamageTypes()
+        {
+            // Physical penetration should not reduce the target's void resistance.
+            var actor = MakeActor(str: 100, wis: 100, penetrations: new Dictionary<EffectType, int> { [EffectType.Physical] = 50 });
+            var target = MakeTarget(new Dictionary<EffectType, int> { [EffectType.Void] = 100 });
+            var result = Compute(actor, target, EffectType.Void);
+            Assert.Equal(0, result.FinalDamage);
+        }
+
+        [Fact]
+        public void Penetration_ExceedsResistance_CreatesWeakness()
+        {
+            // 50% penetration against 0% resistance → effective resistance = 0 - 50 = -50
+            // This means the target takes 150% damage (penetration can create weakness when it exceeds resistance).
+            var actor = MakeActor(str: 100, penetrations: new Dictionary<EffectType, int> { [EffectType.Physical] = 50 });
+            var target = MakeTarget();
+            var result = Compute(actor, target, EffectType.Physical);
+            Assert.Equal((int)(result.RawDamage * 1.5), result.FinalDamage);
+        }
+
+        [Fact]
+        public void Penetration_StepIsStillNamedResistance()
+        {
+            // The pipeline step that applies resistance (and penetration) is named "Resistance".
+            var actor = MakeActor(str: 100, penetrations: new Dictionary<EffectType, int> { [EffectType.Physical] = 20 });
+            var target = MakeTarget(new Dictionary<EffectType, int> { [EffectType.Physical] = 50 });
+            var result = Compute(actor, target, EffectType.Physical);
+            Assert.Equal("Resistance", result.Steps[1].Name);
         }
     }
 }

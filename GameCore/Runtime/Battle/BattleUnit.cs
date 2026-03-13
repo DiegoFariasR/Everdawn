@@ -20,6 +20,11 @@ namespace GameCore.Battle
         /// <summary>Effect type → resistance percentage. Negative values are weaknesses.</summary>
         IReadOnlyDictionary<EffectType, int>? Resistances = null,
         /// <summary>
+        /// Effect type → penetration percentage. Reduces the target's effective resistance of that type.
+        /// 0 = no penetration, 50 = ignore half the target's resistance, 100 = ignore all resistance.
+        /// </summary>
+        IReadOnlyDictionary<EffectType, int>? Penetrations = null,
+        /// <summary>
         /// Reduces disruption bar gain (0 = none, 50 = half, 100 = immune, negative = weakness).
         /// Kept separate from element resistances because disruption is a bar mechanic, not a damage type.
         /// </summary>
@@ -37,6 +42,14 @@ namespace GameCore.Battle
         /// </summary>
         public int GetResistance(EffectType type) =>
             Resistances != null && Resistances.TryGetValue(type, out int r) ? r : 0;
+
+        /// <summary>
+        /// Returns this unit's penetration percentage for <paramref name="type"/>.
+        /// Subtracted from the target's resistance when this unit attacks.
+        /// 0 = no penetration. 50 = ignore half the target's resistance. 100 = ignore all resistance.
+        /// </summary>
+        public int GetPenetration(EffectType type) =>
+            Penetrations != null && Penetrations.TryGetValue(type, out int p) ? p : 0;
 
         // ── Derived stats ────────────────────────────────────────────────
         /// <summary>Max HP derived from STR.</summary>

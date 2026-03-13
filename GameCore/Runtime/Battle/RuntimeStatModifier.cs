@@ -34,6 +34,26 @@ namespace GameCore.Battle
         /// 0 = none, 50 = half buildup, 100 = immune, negative = weakness.
         /// </summary>
         DisruptionResistance,
+
+        // ── Penetration stats ─────────────────────────────────────────────────
+
+        /// <summary>Physical resistance penetration percentage. Reduces the target's effective physical resistance.</summary>
+        PhysicalPenetration,
+
+        /// <summary>Fire resistance penetration percentage.</summary>
+        FirePenetration,
+
+        /// <summary>Cold resistance penetration percentage.</summary>
+        ColdPenetration,
+
+        /// <summary>Lightning resistance penetration percentage.</summary>
+        LightningPenetration,
+
+        /// <summary>Holy resistance penetration percentage.</summary>
+        HolyPenetration,
+
+        /// <summary>Void resistance penetration percentage.</summary>
+        VoidPenetration,
     }
 
     /// <summary>

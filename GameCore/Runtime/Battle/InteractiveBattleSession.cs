@@ -479,10 +479,11 @@ namespace GameCore.Battle
                     else
                     {
                         var components = effect?.DamagePerHit ?? System.Array.Empty<DamageComponent>();
-                        // Pass effective resistance resolver so runtime resistance modifiers are applied.
+                        // Pass effective resistance resolver: combines runtime resistance modifiers with
+                        // the actor's penetration so that both are factored into the resistance step.
                         var hitResults = DamageCalc.Compute(actor, target, components, effectiveSkill.DamageMultiplier,
                             empowerMult * perHitHitsMult, _rng,
-                            et => GetEffectiveResistance(target.Id, et));
+                            et => GetEffectiveResistance(target.Id, et) - GetEffectivePenetration(actor.Id, et));
                         int totalDamage = 0;
                         foreach (var r in hitResults) totalDamage += r.FinalDamage;
 
@@ -1060,6 +1061,29 @@ namespace GameCore.Battle
                     return e;
             return null;
         }
+
+        /// <summary>
+        /// Returns the effective penetration percentage for an attacker and damage type, combining the
+        /// unit's compiled base penetration with any runtime stat modifiers from active effects.
+        /// </summary>
+        private int GetEffectivePenetration(string unitId, EffectType effectType)
+        {
+            var unit = _allUnits.First(u => u.Id == unitId);
+            int basePenetration = unit.GetPenetration(effectType);
+            RuntimeStatKey key = EffectTypeToPenetrationKey(effectType);
+            return (int)ResolveStatModifier(unitId, key, baseValue: basePenetration);
+        }
+
+        private static RuntimeStatKey EffectTypeToPenetrationKey(EffectType effectType) => effectType switch
+        {
+            EffectType.Physical => RuntimeStatKey.PhysicalPenetration,
+            EffectType.Fire => RuntimeStatKey.FirePenetration,
+            EffectType.Cold => RuntimeStatKey.ColdPenetration,
+            EffectType.Lightning => RuntimeStatKey.LightningPenetration,
+            EffectType.Holy => RuntimeStatKey.HolyPenetration,
+            EffectType.Void => RuntimeStatKey.VoidPenetration,
+            _ => RuntimeStatKey.PhysicalPenetration,
+        };
 
         private static RuntimeStatKey EffectTypeToResistanceKey(EffectType effectType) => effectType switch
         {

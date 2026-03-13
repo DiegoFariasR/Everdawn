@@ -43,10 +43,13 @@ namespace GameCore.Battle
             int value = rolled;
 
             // ── Layer 2: Resistance ──────────────────────────────────────────
-            // Reduce damage by the defender's resistance percentage for this damage type.
+            // Reduce damage by the defender's resistance percentage for this damage type,
+            // minus the attacker's penetration for this damage type.
             // 0 = no change. 50 = half damage. 100 = immune. Negative = weakness (extra damage).
             int resistance = target.GetResistance(effectType);
-            int afterResistance = Math.Max(0, (int)(value * (1.0 - resistance / 100.0)));
+            int penetration = actor.GetPenetration(effectType);
+            int effectiveResistance = resistance - penetration;
+            int afterResistance = Math.Max(0, (int)(value * (1.0 - effectiveResistance / 100.0)));
             steps.Add(new DamageStep("Resistance", value, afterResistance));
             value = afterResistance;
 

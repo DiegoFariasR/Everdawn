@@ -174,6 +174,45 @@ namespace GameCore.Content
                     kvp => kvp.Value);
             }
 
+            // ── Unit-level modifiers ──────────────────────────────────────────
+            // Look up unit-level modifiers (e.g. to adjust penetration values).
+            var unitMods = raw.Modifiers.Count == 0
+                ? System.Array.Empty<BattleModifier>()
+                : raw.Modifiers
+                    .Select(modId => modifierDict.TryGetValue(modId, out var mod)
+                        ? mod
+                        : throw new KeyNotFoundException(
+                            $"Unit '{raw.Id}' references unknown unit modifier '{modId}'."))
+                    .ToArray();
+
+            // ── Penetrations ──────────────────────────────────────────────────
+            // Compile raw YAML penetrations, then apply unit-level modifier Set/Modify.
+            var mergedPenetrations = raw.Penetrations.ToDictionary(
+                kvp => Enum.Parse<EffectType>(kvp.Key, ignoreCase: true),
+                kvp => kvp.Value);
+
+            var penetrationKeys = new (EffectType Type, ModifierVariable Key)[]
+            {
+                (EffectType.Physical, ModifierVariable.PhysicalPenetration),
+                (EffectType.Fire, ModifierVariable.FirePenetration),
+                (EffectType.Cold, ModifierVariable.ColdPenetration),
+                (EffectType.Lightning, ModifierVariable.LightningPenetration),
+                (EffectType.Holy, ModifierVariable.HolyPenetration),
+                (EffectType.Void, ModifierVariable.VoidPenetration),
+            };
+
+            IReadOnlyDictionary<EffectType, int>? penetrations = null;
+            var compiledPenetrations = new Dictionary<EffectType, int>();
+            foreach (var (type, key) in penetrationKeys)
+            {
+                int baseVal = mergedPenetrations.TryGetValue(type, out int p) ? p : 0;
+                int finalVal = GetLastSet<int>(unitMods, key, baseVal) + SumModifyInt(unitMods, key);
+                if (finalVal != 0)
+                    compiledPenetrations[type] = finalVal;
+            }
+            if (compiledPenetrations.Count > 0)
+                penetrations = compiledPenetrations;
+
             return new BattleUnit(
                 raw.Id, raw.Name,
                 Team: "",           // team is assigned by the scenario, not the data file
@@ -183,7 +222,8 @@ namespace GameCore.Content
                 Agi: raw.Agi,
                 Skills: skills,
                 Traits: traits,
-                Resistances: resistances);
+                Resistances: resistances,
+                Penetrations: penetrations);
         }
 
         private static BattleSkill CompileSkill(RawSkill raw)
