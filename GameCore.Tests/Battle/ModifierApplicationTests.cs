@@ -359,5 +359,223 @@ skills:
             var unit = db.GetUnit(unitId);
             return unit.ResolvedSkills.First(s => s.Id == skillId);
         }
+
+        // ── Unit-level resistance modifiers ───────────────────────────────────
+
+        private const string UnitYamlWithUnitMod = @"
+id: test-unit
+name: Test Unit
+level: 1
+str: 100
+wis: 80
+agi: 50
+modifiers:
+  - {0}
+skills:
+  - id: sword-strike
+";
+
+        [Fact]
+        public void UnitModifier_Set_OverridesPhysicalResistance()
+        {
+            var db = BuildDb(@"
+- id: test-mod
+  set:
+    physicalResistance: 50
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(50, unit.GetResistance(EffectType.Physical));
+        }
+
+        [Fact]
+        public void UnitModifier_Set_OverridesVoidResistance()
+        {
+            var db = BuildDb(@"
+- id: test-mod
+  set:
+    voidResistance: 100
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(100, unit.GetResistance(EffectType.Void));
+        }
+
+        [Fact]
+        public void UnitModifier_Modify_AddsToExistingResistance()
+        {
+            // Unit has physical: 30 in raw data; modifier adds +20 → final 50.
+            const string unitYaml = @"
+id: test-unit
+name: Test Unit
+level: 1
+str: 100
+wis: 80
+agi: 50
+resistances:
+  physical: 30
+modifiers:
+  - test-mod
+skills:
+  - id: sword-strike
+";
+            var db = BuildDb(@"
+- id: test-mod
+  modify:
+    physicalResistance: 20
+", unitYaml);
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(50, unit.GetResistance(EffectType.Physical));
+        }
+
+        [Fact]
+        public void UnitModifier_Modify_AddsNegativeResistance_Weakness()
+        {
+            var db = BuildDb(@"
+- id: test-mod
+  modify:
+    fireResistance: -25
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(-25, unit.GetResistance(EffectType.Fire));
+        }
+
+        [Fact]
+        public void UnitModifier_Set_OverridesDisruptionResistance()
+        {
+            var db = BuildDb(@"
+- id: test-mod
+  set:
+    disruptionResistance: 50
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(50, unit.DisruptionResistance);
+        }
+
+        [Fact]
+        public void UnitModifier_Modify_AddsToDisruptionResistance()
+        {
+            var db = BuildDb(@"
+- id: test-mod
+  modify:
+    disruptionResistance: 30
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(30, unit.DisruptionResistance);
+        }
+
+        [Fact]
+        public void UnitModifier_LastSetWins_WhenMultipleModsSetSameResistance()
+        {
+            const string unitYaml = @"
+id: test-unit
+name: Test Unit
+level: 1
+str: 100
+wis: 80
+agi: 50
+modifiers:
+  - mod-a
+  - mod-b
+skills:
+  - id: sword-strike
+";
+            var db = BuildDb(@"
+- id: mod-a
+  set:
+    physicalResistance: 25
+- id: mod-b
+  set:
+    physicalResistance: 75
+", unitYaml);
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(75, unit.GetResistance(EffectType.Physical)); // last mod wins
+        }
+
+        [Fact]
+        public void UnitModifier_SetThenModify_ModifyAppliedAfterSet()
+        {
+            // Set physical resistance to 40, then add +10 → should be 50, not base + 10.
+            const string unitYaml = @"
+id: test-unit
+name: Test Unit
+level: 1
+str: 100
+wis: 80
+agi: 50
+modifiers:
+  - set-mod
+  - add-mod
+skills:
+  - id: sword-strike
+";
+            var db = BuildDb(@"
+- id: set-mod
+  set:
+    physicalResistance: 40
+- id: add-mod
+  modify:
+    physicalResistance: 10
+", unitYaml);
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(50, unit.GetResistance(EffectType.Physical));
+        }
+
+        [Fact]
+        public void UnitModifier_DoesNotAffectSkillVariables()
+        {
+            // A resistance modifier on a unit should not change skill cost.
+            var db = BuildDb(@"
+- id: test-mod
+  set:
+    physicalResistance: 50
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var skill = GetSkill(db, "test-unit", "sword-strike");
+            Assert.Equal(3, skill.Cost); // base cost unchanged
+        }
+
+        [Fact]
+        public void UnitModifier_SkillVariables_DoNotAffectUnitResistances()
+        {
+            // A cost modifier in the unit modifier list should not affect resistances.
+            var db = BuildDb(@"
+- id: test-mod
+  set:
+    cost: 0
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(0, unit.GetResistance(EffectType.Physical)); // no resistance set
+        }
+
+        [Fact]
+        public void UnitModifier_AllElementTypes_AreAppliedIndependently()
+        {
+            var db = BuildDb(@"
+- id: test-mod
+  set:
+    physicalResistance: 10
+    fireResistance: 20
+    coldResistance: 30
+    lightningResistance: 40
+    holyResistance: 50
+    voidResistance: 60
+", string.Format(UnitYamlWithUnitMod, "test-mod"));
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(10, unit.GetResistance(EffectType.Physical));
+            Assert.Equal(20, unit.GetResistance(EffectType.Fire));
+            Assert.Equal(30, unit.GetResistance(EffectType.Cold));
+            Assert.Equal(40, unit.GetResistance(EffectType.Lightning));
+            Assert.Equal(50, unit.GetResistance(EffectType.Holy));
+            Assert.Equal(60, unit.GetResistance(EffectType.Void));
+        }
     }
 }

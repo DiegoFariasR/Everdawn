@@ -13,5 +13,12 @@ namespace GameCore.Content.Raw
         public List<string> Traits { get; set; } = new List<string>();
         public List<RawUnitSkill> Skills { get; set; } = new List<RawUnitSkill>();  // resolved by ContentPipeline
         public Dictionary<string, int> Resistances { get; set; } = new Dictionary<string, int>();
+
+        /// <summary>
+        /// Unit-level modifier IDs applied to this unit's resistances.
+        /// Only resistance-related <see cref="GameCore.Battle.ModifierVariable"/> keys are used;
+        /// skill variables (Cost, DamageMultiplier, etc.) in these modifiers are ignored.
+        /// </summary>
+        public List<string> Modifiers { get; set; } = new List<string>();
     }
 }
