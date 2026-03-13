@@ -62,10 +62,52 @@ namespace GameCore.Content
 
             var list = ParseYaml<List<RawModifier>>(source.ReadAllText(path));
             foreach (var raw in list)
+            {
+                // ── Scalar Set (skill variables + disruption) ─────────────────
+                var scalarSet = new Dictionary<ModifierVariable, object>();
+                if (raw.Set.Cost != null) scalarSet[ModifierVariable.Cost] = raw.Set.Cost.Value;
+                if (raw.Set.DamageMultiplier != null) scalarSet[ModifierVariable.DamageMultiplier] = raw.Set.DamageMultiplier.Value;
+                if (raw.Set.IsAoe != null) scalarSet[ModifierVariable.IsAoe] = raw.Set.IsAoe.Value;
+                if (raw.Set.Cooldown != null) scalarSet[ModifierVariable.Cooldown] = raw.Set.Cooldown.Value;
+                if (raw.Set.InitialCooldown != null) scalarSet[ModifierVariable.InitialCooldown] = raw.Set.InitialCooldown.Value;
+                if (raw.Set.DisruptionResistance != null) scalarSet[ModifierVariable.DisruptionResistance] = raw.Set.DisruptionResistance.Value;
+                if (raw.Set.DisruptionPenetration != null) scalarSet[ModifierVariable.DisruptionPenetration] = raw.Set.DisruptionPenetration.Value;
+
+                // ── Scalar Modify ────────────────────────────────────────────
+                var scalarModify = new Dictionary<ModifierVariable, double>();
+                if (raw.Modify.Cost.HasValue) scalarModify[ModifierVariable.Cost] = raw.Modify.Cost.Value;
+                if (raw.Modify.DamageMultiplier.HasValue) scalarModify[ModifierVariable.DamageMultiplier] = raw.Modify.DamageMultiplier.Value;
+                if (raw.Modify.Cooldown.HasValue) scalarModify[ModifierVariable.Cooldown] = raw.Modify.Cooldown.Value;
+                if (raw.Modify.InitialCooldown.HasValue) scalarModify[ModifierVariable.InitialCooldown] = raw.Modify.InitialCooldown.Value;
+                if (raw.Modify.DisruptionResistance.HasValue) scalarModify[ModifierVariable.DisruptionResistance] = raw.Modify.DisruptionResistance.Value;
+                if (raw.Modify.DisruptionPenetration.HasValue) scalarModify[ModifierVariable.DisruptionPenetration] = raw.Modify.DisruptionPenetration.Value;
+
+                // ── Typed resistance/penetration dictionaries ─────────────────
+                Dictionary<EffectType, int>? setResistances = raw.Set.Resistance.Count > 0
+                    ? raw.Set.Resistance.ToDictionary(
+                        kvp => Enum.Parse<EffectType>(kvp.Key, ignoreCase: true), kvp => kvp.Value)
+                    : null;
+                Dictionary<EffectType, double>? modifyResistances = raw.Modify.Resistance.Count > 0
+                    ? raw.Modify.Resistance.ToDictionary(
+                        kvp => Enum.Parse<EffectType>(kvp.Key, ignoreCase: true), kvp => kvp.Value)
+                    : null;
+                Dictionary<EffectType, int>? setPenetrations = raw.Set.Penetration.Count > 0
+                    ? raw.Set.Penetration.ToDictionary(
+                        kvp => Enum.Parse<EffectType>(kvp.Key, ignoreCase: true), kvp => kvp.Value)
+                    : null;
+                Dictionary<EffectType, double>? modifyPenetrations = raw.Modify.Penetration.Count > 0
+                    ? raw.Modify.Penetration.ToDictionary(
+                        kvp => Enum.Parse<EffectType>(kvp.Key, ignoreCase: true), kvp => kvp.Value)
+                    : null;
+
                 yield return new BattleModifier(
                     raw.Id, raw.Name, raw.Description,
-                    Set: raw.Set.Count == 0 ? null : raw.Set,
-                    Modify: raw.Modify.Count == 0 ? null : raw.Modify,
+                    Set: scalarSet.Count > 0 ? scalarSet : null,
+                    Modify: scalarModify.Count > 0 ? scalarModify : null,
+                    SetResistances: setResistances,
+                    ModifyResistances: modifyResistances,
+                    SetPenetrations: setPenetrations,
+                    ModifyPenetrations: modifyPenetrations,
                     AddDamagePerHit: raw.Add.DamagePerHit.Count == 0
                         ? null
                         : raw.Add.DamagePerHit
@@ -73,6 +115,7 @@ namespace GameCore.Content
                                 c.DamageType != null ? Enum.Parse<EffectType>(c.DamageType, ignoreCase: true) : (EffectType?)null,
                                 c.Scaling.Select(s => new DamageScaling(s.Stat, s.Scale)).ToArray()))
                             .ToArray());
+            }
         }
 
         // ── Skills ────────────────────────────────────────────────────────────
@@ -189,20 +232,10 @@ namespace GameCore.Content
                     ? new Dictionary<EffectType, int>(resistances)
                     : new Dictionary<EffectType, int>();
 
-                var resistanceKeys = new (EffectType Type, ModifierVariable Key)[]
-                {
-                    (EffectType.Physical, ModifierVariable.PhysicalResistance),
-                    (EffectType.Fire, ModifierVariable.FireResistance),
-                    (EffectType.Cold, ModifierVariable.ColdResistance),
-                    (EffectType.Lightning, ModifierVariable.LightningResistance),
-                    (EffectType.Holy, ModifierVariable.HolyResistance),
-                    (EffectType.Void, ModifierVariable.VoidResistance),
-                };
-
-                foreach (var (type, key) in resistanceKeys)
+                foreach (EffectType type in new[] { EffectType.Physical, EffectType.Fire, EffectType.Cold, EffectType.Lightning, EffectType.Holy, EffectType.Void })
                 {
                     int baseVal = mergedResistances.TryGetValue(type, out int r) ? r : 0;
-                    int finalVal = GetLastSet<int>(unitMods, key, baseVal) + SumModifyInt(unitMods, key);
+                    int finalVal = GetLastSetResistance(unitMods, type, baseVal) + SumModifyResistance(unitMods, type);
                     if (finalVal != 0)
                         mergedResistances[type] = finalVal;
                     else
@@ -221,19 +254,9 @@ namespace GameCore.Content
             {
                 var mergedPenetrations = new Dictionary<EffectType, int>();
 
-                var penetrationKeys = new (EffectType Type, ModifierVariable Key)[]
+                foreach (EffectType type in new[] { EffectType.Physical, EffectType.Fire, EffectType.Cold, EffectType.Lightning, EffectType.Holy, EffectType.Void })
                 {
-                    (EffectType.Physical, ModifierVariable.PhysicalPenetration),
-                    (EffectType.Fire, ModifierVariable.FirePenetration),
-                    (EffectType.Cold, ModifierVariable.ColdPenetration),
-                    (EffectType.Lightning, ModifierVariable.LightningPenetration),
-                    (EffectType.Holy, ModifierVariable.HolyPenetration),
-                    (EffectType.Void, ModifierVariable.VoidPenetration),
-                };
-
-                foreach (var (type, key) in penetrationKeys)
-                {
-                    int finalVal = GetLastSet<int>(unitMods, key, 0) + SumModifyInt(unitMods, key);
+                    int finalVal = GetLastSetPenetration(unitMods, type) + SumModifyPenetration(unitMods, type);
                     if (finalVal != 0)
                         mergedPenetrations[type] = finalVal;
                 }
@@ -338,6 +361,44 @@ namespace GameCore.Content
         /// <summary>Sums Modify deltas as an integer (rounds to nearest).</summary>
         private static int SumModifyInt(IReadOnlyList<BattleModifier> mods, ModifierVariable key) =>
             (int)Math.Round(SumModify(mods, key));
+
+        // ── Typed resistance helpers ─────────────────────────────────────────
+
+        private static int GetLastSetResistance(IReadOnlyList<BattleModifier> mods, EffectType type, int fallback)
+        {
+            for (int i = mods.Count - 1; i >= 0; i--)
+                if (mods[i].SetResistances != null && mods[i].SetResistances!.TryGetValue(type, out int val))
+                    return val;
+            return fallback;
+        }
+
+        private static int SumModifyResistance(IReadOnlyList<BattleModifier> mods, EffectType type)
+        {
+            double total = 0;
+            foreach (var m in mods)
+                if (m.ModifyResistances != null && m.ModifyResistances.TryGetValue(type, out double delta))
+                    total += delta;
+            return (int)Math.Round(total);
+        }
+
+        // ── Typed penetration helpers ────────────────────────────────────────
+
+        private static int GetLastSetPenetration(IReadOnlyList<BattleModifier> mods, EffectType type)
+        {
+            for (int i = mods.Count - 1; i >= 0; i--)
+                if (mods[i].SetPenetrations != null && mods[i].SetPenetrations!.TryGetValue(type, out int val))
+                    return val;
+            return 0;
+        }
+
+        private static int SumModifyPenetration(IReadOnlyList<BattleModifier> mods, EffectType type)
+        {
+            double total = 0;
+            foreach (var m in mods)
+                if (m.ModifyPenetrations != null && m.ModifyPenetrations.TryGetValue(type, out double delta))
+                    total += delta;
+            return (int)Math.Round(total);
+        }
 
         private static T ParseYaml<T>(string yamlText)
         {

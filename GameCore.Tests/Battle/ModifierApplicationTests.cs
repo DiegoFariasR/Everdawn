@@ -381,7 +381,8 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   set:
-    physicalResistance: 50
+    resistance:
+      physical: 50
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
             var unit = db.GetUnit("test-unit");
@@ -394,7 +395,8 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   set:
-    voidResistance: 100
+    resistance:
+      void: 100
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
             var unit = db.GetUnit("test-unit");
@@ -422,7 +424,8 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   modify:
-    physicalResistance: 20
+    resistance:
+      physical: 20
 ", unitYaml);
 
             var unit = db.GetUnit("test-unit");
@@ -435,7 +438,8 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   modify:
-    fireResistance: -25
+    resistance:
+      fire: -25
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
             var unit = db.GetUnit("test-unit");
@@ -487,10 +491,12 @@ skills:
             var db = BuildDb(@"
 - id: mod-a
   set:
-    physicalResistance: 25
+    resistance:
+      physical: 25
 - id: mod-b
   set:
-    physicalResistance: 75
+    resistance:
+      physical: 75
 ", unitYaml);
 
             var unit = db.GetUnit("test-unit");
@@ -517,10 +523,12 @@ skills:
             var db = BuildDb(@"
 - id: set-mod
   set:
-    physicalResistance: 40
+    resistance:
+      physical: 40
 - id: add-mod
   modify:
-    physicalResistance: 10
+    resistance:
+      physical: 10
 ", unitYaml);
 
             var unit = db.GetUnit("test-unit");
@@ -534,7 +542,8 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   set:
-    physicalResistance: 50
+    resistance:
+      physical: 50
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
             var skill = GetSkill(db, "test-unit", "sword-strike");
@@ -561,12 +570,13 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   set:
-    physicalResistance: 10
-    fireResistance: 20
-    coldResistance: 30
-    lightningResistance: 40
-    holyResistance: 50
-    voidResistance: 60
+    resistance:
+      physical: 10
+      fire: 20
+      cold: 30
+      lightning: 40
+      holy: 50
+      void: 60
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
             var unit = db.GetUnit("test-unit");
@@ -586,7 +596,8 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   set:
-    physicalPenetration: 30
+    penetration:
+      physical: 30
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
             var unit = db.GetUnit("test-unit");
@@ -599,7 +610,8 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   set:
-    voidPenetration: 50
+    penetration:
+      void: 50
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
             var unit = db.GetUnit("test-unit");
@@ -612,7 +624,8 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   modify:
-    firePenetration: 25
+    penetration:
+      fire: 25
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
             var unit = db.GetUnit("test-unit");
@@ -651,12 +664,13 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   set:
-    physicalPenetration: 10
-    firePenetration: 20
-    coldPenetration: 30
-    lightningPenetration: 40
-    holyPenetration: 50
-    voidPenetration: 60
+    penetration:
+      physical: 10
+      fire: 20
+      cold: 30
+      lightning: 40
+      holy: 50
+      void: 60
     disruptionPenetration: 70
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
@@ -677,7 +691,8 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   set:
-    physicalPenetration: 50
+    penetration:
+      physical: 50
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
             var unit = db.GetUnit("test-unit");
@@ -691,7 +706,8 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   set:
-    physicalResistance: 50
+    resistance:
+      physical: 50
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
             var unit = db.GetUnit("test-unit");
@@ -704,7 +720,8 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   set:
-    physicalResistance: 50
+    resistance:
+      physical: 50
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
             var unit = db.GetUnit("test-unit");
