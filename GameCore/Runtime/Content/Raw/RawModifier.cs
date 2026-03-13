@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using GameCore.Battle;
 namespace GameCore.Content.Raw
 {
     /// <summary>
@@ -20,7 +21,7 @@ namespace GameCore.Content.Raw
     ///   1. Set    — override/replace variable values (last modifier with a key wins).
     ///   2. Modify — additive numeric delta applied after Set (all deltas for a key are summed).
     ///   3. Add    — append typed damage components to the first effect's DamagePerHit.
-    /// Supported Set/Modify variable keys: cost, damageMultiplier, isAoe, cooldown, initialCooldown.
+    /// Supported Set/Modify variable keys: see <see cref="GameCore.Battle.ModifierVariable"/>.
     /// </summary>
     public class RawModifier
     {
@@ -29,17 +30,17 @@ namespace GameCore.Content.Raw
         public string Description { get; set; } = "";
 
         /// <summary>
-        /// Override variable values. Keys: cost, damageMultiplier, isAoe, cooldown, initialCooldown.
+        /// Override variable values. Keys: <see cref="ModifierVariable"/> members.
         /// Applied first; last modifier with a given key wins.
         /// </summary>
-        public Dictionary<string, object> Set { get; set; } = new Dictionary<string, object>();
+        public Dictionary<ModifierVariable, object> Set { get; set; } = new Dictionary<ModifierVariable, object>();
 
         /// <summary>
         /// Additive numeric deltas applied after Set overrides. Can be negative.
-        /// Keys: cost, damageMultiplier, cooldown, initialCooldown.
+        /// Keys: <see cref="ModifierVariable"/> members (except <see cref="ModifierVariable.IsAoe"/>).
         /// All deltas for the same key are summed across all modifiers.
         /// </summary>
-        public Dictionary<string, double> Modify { get; set; } = new Dictionary<string, double>();
+        public Dictionary<ModifierVariable, double> Modify { get; set; } = new Dictionary<ModifierVariable, double>();
 
         /// <summary>
         /// Typed Add actions — appends damage components to the first effect's DamagePerHit

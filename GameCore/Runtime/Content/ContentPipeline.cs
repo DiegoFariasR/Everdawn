@@ -133,11 +133,11 @@ namespace GameCore.Content
 
                     // Apply modifier action groups in deterministic order: Set → Modify → Add.
                     // Set: last modifier with a given key wins (override/replace).
-                    var setCost = GetLastSet<int>(compiledMods, "cost", sk.Cost);
-                    var setDmgMult = GetLastSet<double>(compiledMods, "damageMultiplier", sk.DamageMultiplier);
-                    var setIsAoe = GetLastSet<bool>(compiledMods, "isAoe", sk.IsAoe);
-                    var setCooldown = GetLastSet<int>(compiledMods, "cooldown", sk.Cooldown);
-                    var setInitCd = GetLastSet<int>(compiledMods, "initialCooldown", sk.InitialCooldown);
+                    var setCost = GetLastSet<int>(compiledMods, ModifierVariable.Cost, sk.Cost);
+                    var setDmgMult = GetLastSet<double>(compiledMods, ModifierVariable.DamageMultiplier, sk.DamageMultiplier);
+                    var setIsAoe = GetLastSet<bool>(compiledMods, ModifierVariable.IsAoe, sk.IsAoe);
+                    var setCooldown = GetLastSet<int>(compiledMods, ModifierVariable.Cooldown, sk.Cooldown);
+                    var setInitCd = GetLastSet<int>(compiledMods, ModifierVariable.InitialCooldown, sk.InitialCooldown);
 
                     // Modify: all deltas for a key are summed on top of the Set result.
                     var extraComponents = compiledMods
@@ -148,11 +148,11 @@ namespace GameCore.Content
                     return sk with
                     {
                         Modifiers = compiledMods.Select(m => m.Id).ToArray(),
-                        Cost = setCost + SumModifyInt(compiledMods, "cost"),
-                        DamageMultiplier = setDmgMult + SumModify(compiledMods, "damageMultiplier"),
+                        Cost = setCost + SumModifyInt(compiledMods, ModifierVariable.Cost),
+                        DamageMultiplier = setDmgMult + SumModify(compiledMods, ModifierVariable.DamageMultiplier),
                         IsAoe = setIsAoe,
-                        Cooldown = setCooldown + SumModifyInt(compiledMods, "cooldown"),
-                        InitialCooldown = setInitCd + SumModifyInt(compiledMods, "initialCooldown"),
+                        Cooldown = setCooldown + SumModifyInt(compiledMods, ModifierVariable.Cooldown),
+                        InitialCooldown = setInitCd + SumModifyInt(compiledMods, ModifierVariable.InitialCooldown),
                         Effects = extraComponents.Length == 0 || sk.Effects.Count == 0
                             ? sk.Effects
                             : new SkillEffect[]
@@ -231,7 +231,7 @@ namespace GameCore.Content
         /// if none does. Converts via <see cref="System.Convert.ChangeType"/> to handle YAML
         /// type variance (e.g. int stored as string).
         /// </summary>
-        private static T GetLastSet<T>(IReadOnlyList<BattleModifier> mods, string key, T fallback)
+        private static T GetLastSet<T>(IReadOnlyList<BattleModifier> mods, ModifierVariable key, T fallback)
         {
             for (int i = mods.Count - 1; i >= 0; i--)
             {
@@ -253,7 +253,7 @@ namespace GameCore.Content
         }
 
         /// <summary>Sums all Modify deltas across modifiers for the given key.</summary>
-        private static double SumModify(IReadOnlyList<BattleModifier> mods, string key)
+        private static double SumModify(IReadOnlyList<BattleModifier> mods, ModifierVariable key)
         {
             double total = 0;
             foreach (var m in mods)
@@ -263,7 +263,7 @@ namespace GameCore.Content
         }
 
         /// <summary>Sums Modify deltas as an integer (rounds to nearest).</summary>
-        private static int SumModifyInt(IReadOnlyList<BattleModifier> mods, string key) =>
+        private static int SumModifyInt(IReadOnlyList<BattleModifier> mods, ModifierVariable key) =>
             (int)Math.Round(SumModify(mods, key));
 
         private static T ParseYaml<T>(string yamlText)

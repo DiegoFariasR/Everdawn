@@ -7,8 +7,7 @@ namespace GameCore.Battle
     /// at action-resolution time rather than at content-compile time.
     /// <para>
     /// Applied in the same deterministic order as the content pipeline: Set → Modify → Add.
-    /// Supported Set/Modify variable keys: <c>damageMultiplier</c>, <c>cost</c>,
-    /// <c>isAoe</c>, <c>cooldown</c>.
+    /// Supported Set/Modify variable keys: see <see cref="ModifierVariable"/>.
     /// </para>
     /// <para>
     /// The effective skill is resolved as an immutable overlay for the current action.
@@ -20,12 +19,12 @@ namespace GameCore.Battle
         /// Override variable values. Applied first; when multiple Set modifiers target the same key,
         /// the last modifier (in application order) wins.
         /// </summary>
-        IReadOnlyDictionary<string, object>? Set = null,
+        IReadOnlyDictionary<ModifierVariable, object>? Set = null,
 
         /// <summary>
         /// Additive numeric deltas. Applied after Set. All deltas for a key are summed.
         /// </summary>
-        IReadOnlyDictionary<string, double>? Modify = null,
+        IReadOnlyDictionary<ModifierVariable, double>? Modify = null,
 
         /// <summary>
         /// Damage components appended to the first effect's DamagePerHit after Set and Modify.
