@@ -97,7 +97,7 @@ namespace GameCore.Battle
 
             var actor = _turnOrder[_turnIndex];
 
-            // Start-of-turn phase: burn DOT, thermal decay.
+            // Start-of-turn phase.
             var newEvents = new List<BattleEvent>(StartOfTurn(actor));
 
             // If the player is frozen, their chosen action is skipped and the turn is consumed.
@@ -169,7 +169,7 @@ namespace GameCore.Battle
 
             var actor = _turnOrder[_turnIndex];
 
-            // Start-of-turn phase: burn DOT, thermal decay.
+            // Start-of-turn phase.
             var newEvents = new List<BattleEvent>(StartOfTurn(actor));
             if (_isOver) return BuildResponse(newEvents);
 

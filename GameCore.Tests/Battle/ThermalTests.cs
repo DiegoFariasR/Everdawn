@@ -16,8 +16,8 @@ namespace GameCore.Tests.Battle
     /// 3.  Opposite-bar removal ignores resistance.
     /// 4.  Cold resistance reduces only Cold buildup, not Burn removal.
     /// 5.  Fire resistance reduces only Burn buildup, not Cold removal.
-    /// 6.  Cold bar &gt;= 50 → "slow" status effect.
-    /// 7.  Burn bar &gt;= 50 → "burning" status effect.
+    /// 6.  Cold bar >= 50 → "slow" status effect.
+    /// 7.  Burn bar >= 50 → "burning" status effect.
     /// 8.  Cold bar = 100 → frozen, unit loses exactly 1 turn.
     /// 9.  Freeze retains Cold bar at 40 after trigger.
     /// 10. Burning deals deterministic start-of-turn DOT.
@@ -398,26 +398,15 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void Integration_ColdBar50_AppliesSlowStatus()
         {
-            // Massive cold skill ensures enemy's cold bar hits 100 (and freezes).
-            // After the freeze, bar is retained at 40 (below 50 → no slow).
-            // Use a moderate cold skill to land exactly in the 50-99 range.
-            // Strategy: apply cold once with moderate damage and check status.
-            // We build the cold bar step by step with tiny cold hits (low wis) against immune-to-freeze enemy.
-
-            // Use wis=1, scale=1 → MagicAttack=8, variance=max(1, 8/5)=1 → raw ≈ 8±1 per hit.
-            // After ~7 hits the cold bar would reach ~50. Enemy has no cold resistance.
-            // But 7 player turns means 7 enemy attacks too — we need the enemy to be very weak.
-            // Easier: Use an intermediate scaling that reliably lands ≥50 but <100.
-            // wis=10 → MagicAttack=80. scale=1, mult=1, variance≈16. raw ≈ 80±16.
-            // One hit gives ~80 → cold bar = 80 ≥ 50 AND < 100 only if we cap the cold bar... 
-            // Actually 80 < 100 so no freeze, but ≥ 50 → slow. 
-
+            // Use a moderate cold skill (wis=10, scale=1.0) to produce raw damage ≈ 80±16,
+            // which lands the cold bar in the 50–99 range (slow, no freeze) for seed=10.
+            // The test validates conditionally: only asserts when the bar is actually ≥ 50.
             var coldSkill = new BattleSkill("cold-med", "Cold", Cost: 0, DamageMultiplier: 1.0,
                 Effects: ColdDamageEffect(wisScale: 1.0));  // wis=10 → ~80 raw damage
 
             var session = BuildSession(coldSkill, TinyPhysicalSkill(), playerWis: 10, seed: 10);
 
-            // Player attacks with cold. AutoAdvance also runs enemy turn.
+            // Player attacks with cold. AutoAdvance also runs enemy turn (decay applies).
             var result = session.TryExecute(new PlayerActionCommand("cold-med", "enemy"));
             Assert.True(result.Accepted);
 
@@ -553,24 +542,7 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void Integration_Fire_ThawsNearlyFrozenTarget_BeforeCreatingBurn()
         {
-            // Setup: enemy has high cold bar (e.g. 70). Apply fire.
-            // Cold bar should decrease. Burn bar may stay 0 if cold > firePower.
-            // We test: after fire, cold bar decreased AND if firePower > coldBar, burn bar > 0.
-
-            // Build cold bar by applying cold first.
-            var session = BuildSession(
-                playerSkill: new BattleSkill("fire-med", "Fire", Cost: 0, DamageMultiplier: 1.0,
-                    Effects: FireDamageEffect(wisScale: 1.0)),  // moderate fire
-                enemySkill: TinyPhysicalSkill(),
-                playerWis: 10, seed: 42);
-
-            // First: manually build cold bar using AdvanceTurn with a cold player, then switch perspective.
-            // Easier: set up two separate sessions — one to show cold bar state, one to show fire thawing.
-            // Use ThermalSystem pure math for this assertion instead.
-
-            // If cold = 70, fire power = 80 (raw):
-            // coldRemoved = 70, newCold = 0
-            // leftover = 10, resistance = 0 → burnBuilt = 10
+            // Verify opposition math directly: cold=70, firePower=80 → cold fully thawed, 10 burn built.
             ThermalSystem.ApplyFire(
                 firePower: 80, fireResistance: 0,
                 currentColdBar: 70, currentBurnBar: 0,
