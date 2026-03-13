@@ -16,7 +16,7 @@ namespace GameCore.Tests.Battle
         private readonly ITestOutputHelper _output;
         public ArchetypeDamageTests(ITestOutputHelper output) => _output = output;
 
-        private static readonly int[] Budgets = { 15, 47, 151, 301, 451 };
+        private static readonly int[] Budgets = { 20, 100, 200, 500 };
 
         private static readonly (string Id, double Str, double Agi, double Wis)[] Archetypes =
         {
@@ -86,7 +86,7 @@ namespace GameCore.Tests.Battle
                 PlayerUnits = new List<BattleUnit> { attacker },
                 EnemyUnits = new List<BattleUnit> { boss },
             };
-            var result = BattleEngine.Run(setup, seed: 42);
+            var result = BattleEngine.Run(setup, seed: 42, maxRounds: 999);
             Assert.Equal("player", result.WinningTeam);
         }
 
@@ -111,7 +111,7 @@ namespace GameCore.Tests.Battle
                         PlayerUnits = new List<BattleUnit> { attacker },
                         EnemyUnits = new List<BattleUnit> { boss },
                     };
-                    var result = BattleEngine.Run(setup, seed: 42);
+                    var result = BattleEngine.Run(setup, seed: 42, maxRounds: 999);
                     int rounds = result.Snapshots.Count(s => s.Event.Type == "round");
                     string group = WeaponSkillIds.Contains(skill.Id) ? "Weapon" : "Spell";
                     entries.Add((id, skill.Id, group, rounds));
@@ -123,7 +123,7 @@ namespace GameCore.Tests.Battle
 
             const int colW = 7;
             string hdr = $"{"Archetype",-16}";
-            foreach (var s in allSkills) hdr += $"  {Abbrev(s.Id),colW}";
+            foreach (var s in allSkills) hdr += $"  {(s.Name.Length > colW ? s.Name[..colW] : s.Name),colW}";
             sb.AppendLine();
             sb.AppendLine("ROUNDS-TO-KILL  (lower = faster kill)");
             sb.AppendLine(hdr);
@@ -150,7 +150,7 @@ namespace GameCore.Tests.Battle
                     .ToList();
                 int best = ranked.First().Rounds;
                 int worst = ranked.Last().Rounds;
-                sb.Append($"  {Abbrev(skill.Id),-12}: ");
+                sb.Append($"  {(skill.Name.Length > 12 ? skill.Name[..12] : skill.Name),-12}: ");
                 sb.Append(string.Join(", ", ranked.Take(3).Select(e => $"{e.Archetype}({e.Rounds}r)")));
                 sb.Append($"  ...  worst: {ranked.Last().Archetype}({worst}r)");
                 sb.Append($"  spread: {worst - best}r");
@@ -166,7 +166,7 @@ namespace GameCore.Tests.Battle
                     .OrderBy(e => e.Rounds)
                     .ToList();
                 sb.Append($"  {id,-16}: ");
-                sb.AppendLine(string.Join("  >  ", ranked.Take(3).Select(e => $"{Abbrev(e.Skill)}({e.Rounds}r)")));
+                sb.AppendLine(string.Join("  >  ", ranked.Take(3).Select(e => { var sk = allSkills.First(s => s.Id == e.Skill); return $"{(sk.Name.Length > 7 ? sk.Name[..7] : sk.Name)}({e.Rounds}r)"; })));
             }
 
             int maceRounds = entries.First(e => e.Archetype == "str100" && e.Skill == "mace-strike").Rounds;
@@ -177,17 +177,5 @@ namespace GameCore.Tests.Battle
             Assert.Equal(26, maceRounds);
         }
 
-        private static string Abbrev(string id) => id switch
-        {
-            "mace-strike" => "Mace",
-            "sword-strike" => "Sword",
-            "bow-shot" => "Bow",
-            "dagger-strike" => "Dagger",
-            "mage-bolt" => "Bolt",
-            "spell-missiles" => "Missile",
-            "spell-burst" => "Burst",
-            "spell-volley" => "Volley",
-            _ => id.Length > 7 ? id[..7] : id,
-        };
     }
 }

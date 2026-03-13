@@ -15,7 +15,11 @@ namespace GameCore.Battle
         /// Delegates to <see cref="BattleSession.RunFull"/> which is the single authoritative
         /// execution path.
         /// </summary>
-        public static BattleResult Run(BattleSetup setup, int seed) =>
-            BattleSession.RunFull(setup, seed);
+        /// <param name="maxRounds">
+        /// If positive, the battle is stopped after this many rounds and counted as an enemy win.
+        /// When 0 (default), the battle runs until a team is eliminated.
+        /// </param>
+        public static BattleResult Run(BattleSetup setup, int seed, int maxRounds = 0) =>
+            BattleSession.RunFull(setup, seed, maxRounds);
     }
 }

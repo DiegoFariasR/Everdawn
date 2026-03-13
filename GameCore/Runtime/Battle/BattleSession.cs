@@ -70,12 +70,17 @@ namespace GameCore.Battle
         /// with one snapshot per event — suitable for watch-mode replay.
         /// This is the single authoritative execution path; <see cref="BattleEngine"/> delegates here.
         /// </summary>
-        public static BattleResult RunFull(BattleSetup setup, int seed)
+        /// <param name="maxRounds">
+        /// If positive, the battle is stopped after this many rounds and counted as an enemy win.
+        /// When 0 (default), the battle runs until a team is eliminated.
+        /// </param>
+        public static BattleResult RunFull(BattleSetup setup, int seed, int maxRounds = 0)
         {
             var session = new BattleSession(seed);
             var snapshots = new List<BattleSnapshot>();
             int step = 0;
             int logOffset = 0;
+            int roundsElapsed = 0;
 
             var startResult = session.Start(setup);
             // Use FullLog to capture the "start" event, which is added to the log inside
@@ -93,8 +98,15 @@ namespace GameCore.Battle
                 // CheckEnd(), which is also not in NewEvents.
                 var fullLog = result.View.FullLog;
                 for (int i = logOffset; i < fullLog.Count; i++)
-                    snapshots.Add(new BattleSnapshot { Step = step++, Event = fullLog[i], UnitStates = unitStates });
+                {
+                    var ev = fullLog[i];
+                    snapshots.Add(new BattleSnapshot { Step = step++, Event = ev, UnitStates = unitStates });
+                    if (ev.Type == "round") roundsElapsed++;
+                }
                 logOffset = fullLog.Count;
+
+                if (maxRounds > 0 && roundsElapsed >= maxRounds)
+                    return new BattleResult { Snapshots = snapshots, WinningTeam = "enemy", Seed = seed };
             }
 
             var view = session.GetView();
