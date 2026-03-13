@@ -6,6 +6,7 @@
     Produces an "attack" event type.
   setCost: 0
   setCooldown: 0
+  setInitialCooldown: 0
 
 - id: ultimate
   name: Ultimate
