@@ -27,9 +27,9 @@
         <div class="picker-row">
             <label for="auto-speed">Speed</label>
             <select id="auto-speed" @bind="_autoDelay">
-                <option value="1000">1× (1 s/turn)</option>
-                <option value="333">3× (0.33 s)</option>
-                <option value="200">5× (0.2 s)</option>
+                <option value="1000">1×</option>
+                <option value="333">3×</option>
+                <option value="200">5×</option>
             </select>
             <button class="btn-auto @(_autoMode ? "btn-auto-on" : "")" @onclick="ToggleAuto">
                 Auto @(_autoMode ? "ON" : "OFF")
@@ -306,6 +306,7 @@
     {
         while (_engine != null && !(_view?.IsOver ?? true) && _view?.PendingInput == null)
         {
+            StateHasChanged();
             await System.Threading.Tasks.Task.Delay(_autoDelay);
             if (_engine == null || _autoMode) break;
             var cmd = new AdvanceTurnCommand();

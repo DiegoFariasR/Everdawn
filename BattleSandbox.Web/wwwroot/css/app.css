@@ -168,6 +168,13 @@ html, body {
     border-radius: 6px;
 }
 
+#auto-speed {
+    flex: none;
+    width: auto;
+    padding: 0.3rem 0.4rem;
+    font-size: 0.82rem;
+}
+
 .btn-run {
     padding: 0.45rem 1.25rem;
     font-size: 0.95rem;
@@ -351,8 +358,14 @@ html, body {
 .btn-aoe:not(:disabled):hover { outline-color: #ffcc70; }
 
 /* Selected skill highlight */
-.btn-selected { box-shadow: 0 0 0 2px #fff, 0 0 8px 1px rgba(255,255,255,0.35); }
-.btn-selected.btn-aoe { box-shadow: 0 0 0 2px #fff, 0 0 8px 1px rgba(255,255,255,0.35); outline: none; }
+.btn-selected {
+    box-shadow: 0 0 0 2px #ffd700, 0 0 10px 2px rgba(255, 215, 0, 0.4);
+    background-color: rgba(255, 215, 0, 0.12) !important;
+}
+.btn-selected.btn-aoe {
+    box-shadow: 0 0 0 2px #ffd700, 0 0 10px 2px rgba(255, 215, 0, 0.4);
+    bg: none; outline: none;
+}
 
 .aoe-badge {
     display: inline-block;
@@ -564,7 +577,11 @@ html, body {
 }
 .player-portrait  { background: #1e4080; color: #88bbff; }
 .enemy-portrait   { background: #5a1a1a; color: #ff9988; }
-.portrait-active  { border-color: #ffd700; box-shadow: 0 0 6px #ffd70066; }
+.portrait-active  {
+    border-color: #ffd700;
+    box-shadow: 0 0 0 2px #ffd700, 0 0 10px 3px rgba(255, 215, 0, 0.5);
+    background-color: rgba(255, 215, 0, 0.12);
+}
 .portrait-dead    { opacity: 0.3; filter: grayscale(1); }
 .portrait-sep     { color: #445; font-size: 1rem; margin: 0 0.1rem; flex-shrink: 0; }
 
