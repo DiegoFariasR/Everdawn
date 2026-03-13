@@ -1,30 +1,50 @@
 using System.Collections.Generic;
 namespace GameCore.Content.Raw
 {
-    /// <summary>Raw modifier data as parsed directly from YAML.</summary>
+    /// <summary>
+    /// Container for typed Add actions supported by a modifier.
+    /// Currently supports appending damage components to the first effect's DamagePerHit list.
+    /// </summary>
+    public class RawModifierAdd
+    {
+        /// <summary>
+        /// Damage components appended to the first effect's DamagePerHit list.
+        /// Applied after all Set and Modify operations. Only affects Attack skills, not Spells.
+        /// </summary>
+        public List<RawDamageComponent> DamagePerHit { get; set; } = new List<RawDamageComponent>();
+    }
+
+    /// <summary>
+    /// Raw modifier data as parsed directly from YAML.
+    /// A modifier applies three ordered action groups to skill variables:
+    ///   1. Set    — override/replace variable values (last modifier with a key wins).
+    ///   2. Modify — additive numeric delta applied after Set (all deltas for a key are summed).
+    ///   3. Add    — append typed damage components to the first effect's DamagePerHit.
+    /// Supported Set/Modify variable keys: cost, damageMultiplier, isAoe, cooldown, initialCooldown.
+    /// </summary>
     public class RawModifier
     {
         public string Id { get; set; } = "";
         public string Name { get; set; } = "";
         public string Description { get; set; } = "";
 
-        // Nullable stat overrides — only fields explicitly set in YAML will override the base skill.
-        public int? SetCost { get; set; }
-        public double? SetDamageMultiplier { get; set; }
-        public bool? SetIsAoe { get; set; }
-        public int? SetCooldown { get; set; }
-        public int? SetInitialCooldown { get; set; }
-
-        // Additive adjustments — applied after all Set overrides. Can be negative.
-        public int? ModifyCost { get; set; }
-        public double? ModifyDamageMultiplier { get; set; }
-        public int? ModifyCooldown { get; set; }
-        public int? ModifyInitialCooldown { get; set; }
+        /// <summary>
+        /// Override variable values. Keys: cost, damageMultiplier, isAoe, cooldown, initialCooldown.
+        /// Applied first; last modifier with a given key wins.
+        /// </summary>
+        public Dictionary<string, object> Set { get; set; } = new Dictionary<string, object>();
 
         /// <summary>
-        /// Extra damage components injected into the first effect's DamagePerHit list.
-        /// Used by Enchanting modifiers to add elemental damage to weapon attacks.
+        /// Additive numeric deltas applied after Set overrides. Can be negative.
+        /// Keys: cost, damageMultiplier, cooldown, initialCooldown.
+        /// All deltas for the same key are summed across all modifiers.
         /// </summary>
-        public List<RawDamageComponent> AddDamageComponents { get; set; } = new List<RawDamageComponent>();
+        public Dictionary<string, double> Modify { get; set; } = new Dictionary<string, double>();
+
+        /// <summary>
+        /// Typed Add actions — appends damage components to the first effect's DamagePerHit
+        /// after Set and Modify are applied.
+        /// </summary>
+        public RawModifierAdd Add { get; set; } = new RawModifierAdd();
     }
 }
