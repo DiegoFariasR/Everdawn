@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace GameCore.Scenarios
 {
     /// <summary>
@@ -11,11 +14,11 @@ namespace GameCore.Scenarios
     /// </summary>
     public static class ScenarioRegistry
     {
-        private static readonly IBattleScenario[] _all =
-        [
+        private static readonly IBattleScenario[] _all = new IBattleScenario[]
+        {
             new SampleScenario(),
             new WatchScenario(new SampleScenario()),
-        ];
+        };
 
         /// <summary>All registered scenarios, in display order.</summary>
         public static IReadOnlyList<IBattleScenario> All => _all;

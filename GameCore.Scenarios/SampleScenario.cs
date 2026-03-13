@@ -1,3 +1,4 @@
+using System.Linq;
 using GameCore.Battle;
 using GameCore.Content;
 

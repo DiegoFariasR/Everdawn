@@ -1,21 +1,23 @@
+using System.Collections.Generic;
 using GameCore.World;
+using Xunit;
 
 namespace GameCore.Tests.World
 {
     public class WorldMapTests
     {
         private static WorldMap MakeMap() => new(
-            locations:
-            [
-                new Location("loc-town", "Riverside Town", ["act-inn", "act-market"]),
-                new Location("loc-cave", "Dark Cave", ["act-explore"]),
-            ],
-            activities:
-            [
+            locations: new[]
+            {
+                new Location("loc-town", "Riverside Town", new[] { "act-inn", "act-market" }),
+                new Location("loc-cave", "Dark Cave", new[] { "act-explore" }),
+            },
+            activities: new[]
+            {
                 new Activity("act-inn", "Rest at the Inn"),
                 new Activity("act-market", "Visit Market"),
                 new Activity("act-explore", "Explore Cave"),
-            ]
+            }
         );
 
         [Fact]

@@ -1,7 +1,11 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using GameCore;
 using GameCore.Scenarios;
+using Xunit;
 
 namespace GameCore.Tests
 {
@@ -54,7 +58,7 @@ namespace GameCore.Tests
         {
             var indexPath = Path.Combine(ContentBase, "content-index.json");
             var listed = JsonSerializer.Deserialize<string[]>(File.ReadAllText(indexPath))
-                ?? [];
+                ?? Array.Empty<string>();
 
             var missing = listed
                 .Where(rel => !File.Exists(Path.Combine(ContentBase, rel.Replace('/', Path.DirectorySeparatorChar))))
@@ -70,7 +74,7 @@ namespace GameCore.Tests
         {
             var indexPath = Path.Combine(ContentBase, "content-index.json");
             var listed = new HashSet<string>(
-                JsonSerializer.Deserialize<string[]>(File.ReadAllText(indexPath)) ?? [],
+                JsonSerializer.Deserialize<string[]>(File.ReadAllText(indexPath)) ?? Array.Empty<string>(),
                 StringComparer.OrdinalIgnoreCase);
 
             var unlisted = Directory

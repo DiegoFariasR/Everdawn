@@ -1,4 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using GameCore.Battle;
+using Xunit;
 
 namespace GameCore.Tests.Battle
 {
@@ -9,14 +13,14 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void Focus_MaxFocus_IsOneHundred()
         {
-            var unit = MakeUnit(traits: [BattleTrait.Focus]);
+            var unit = MakeUnit(traits: new[] { BattleTrait.Focus });
             Assert.Equal(100, unit.MaxBars.TryGetValue("focus", out int v) ? v : 0);
         }
 
         [Fact]
         public void Focus_InitialFocus_IsFifty()
         {
-            var unit = MakeUnit(traits: [BattleTrait.Focus]);
+            var unit = MakeUnit(traits: new[] { BattleTrait.Focus });
             Assert.Equal(50, unit.InitialBars.TryGetValue("focus", out int v) ? v : 0);
         }
 
@@ -114,18 +118,18 @@ namespace GameCore.Tests.Battle
             // the initial AutoAdvance inside Start(), before player ever moves.
             var setup = new BattleSetup
             {
-                PlayerUnits =
-                [
+                PlayerUnits = new List<BattleUnit>
+                {
                     new("focus-unit", "Fighter", "player", Level: 1, Str: 200, Wis: 0, Agi: 1,
-                        Skills: [new("basic", "Strike", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect())],
-                        Traits: [BattleTrait.Focus]),
-                ],
-                EnemyUnits =
-                [
+                        Skills: new BattleSkill[] { new("basic", "Strike", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect()) },
+                        Traits: new[] { BattleTrait.Focus }),
+                },
+                EnemyUnits = new List<BattleUnit>
+                {
                     // Agi 2 > player Agi 1 (enemy goes first) but HitCount = 1 + 2/100 = 1 (single hit).
                     new("attacker", "Enemy", "enemy", Level: 1, Str: 10, Wis: 0, Agi: 2,
-                        Skills: [new("e-basic", "Hit", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect())]),
-                ],
+                        Skills: new BattleSkill[] { new("e-basic", "Hit", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect()) }),
+                },
             };
             var session = new BattleSession(seed: 0);
             session.Start(setup);
@@ -145,21 +149,21 @@ namespace GameCore.Tests.Battle
         {
             var setup = new BattleSetup
             {
-                PlayerUnits =
-                [
+                PlayerUnits = new List<BattleUnit>
+                {
                     new("focus-unit", "Fighter", "player", Level: 1, Str: 200, Wis: 0, Agi: playerAgi,
-                        Skills:
-                        [
-                            new("basic",   "Strike",     Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(), Modifiers: ["basic"]),
+                        Skills: new BattleSkill[]
+                        {
+                            new("basic",   "Strike",     Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(), Modifiers: new[] { "basic" }),
                             new("special", "Power Blow", Cost: 0, DamageMultiplier: 1.5, Effects: PhysEffect(1.5), Cooldown: 2),
-                        ],
-                        Traits: [BattleTrait.Focus]),
-                ],
-                EnemyUnits =
-                [
+                        },
+                        Traits: new[] { BattleTrait.Focus }),
+                },
+                EnemyUnits = new List<BattleUnit>
+                {
                     new("target", "Dummy", "enemy", Level: 1, Str: enemyStr, Wis: 0, Agi: 1,
-                        Skills: [new("def-basic", "Slash", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect())]),
-                ],
+                        Skills: new BattleSkill[] { new("def-basic", "Slash", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect()) }),
+                },
             };
             var session = new BattleSession(seed: 0);
             session.Start(setup);
@@ -176,30 +180,30 @@ namespace GameCore.Tests.Battle
             const int enemyStr = 1;
             var setup = new BattleSetup
             {
-                PlayerUnits =
-                [
+                PlayerUnits = new List<BattleUnit>
+                {
                     new("focus-unit", "Fighter", "player", Level: 1, Str: playerStr, Wis: 0, Agi: 50,
-                        Skills:
-                        [
-                            new("basic",   "Strike",     Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(), Modifiers: ["basic"]),
+                        Skills: new BattleSkill[]
+                        {
+                            new("basic",   "Strike",     Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(), Modifiers: new[] { "basic" }),
                             new("special", "Power Blow", Cost: 0, DamageMultiplier: 1.5, Effects: PhysEffect(1.5), Cooldown: 2),
-                        ],
-                        Traits: [BattleTrait.Focus]),
-                ],
-                EnemyUnits =
-                [
+                        },
+                        Traits: new[] { BattleTrait.Focus }),
+                },
+                EnemyUnits = new List<BattleUnit>
+                {
                     new("target", "Dummy", "enemy", Level: 1, Str: enemyStr, Wis: 0, Agi: 1,
-                        Skills: [new("def-basic", "Slash", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect())]),
-                ],
+                        Skills: new BattleSkill[] { new("def-basic", "Slash", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect()) }),
+                },
             };
             var session = new BattleSession(seed: 0);
             session.Start(setup);
             // Inject full-focus state: player at max HP with focus 100, enemy at max HP.
-            UnitState[] state =
-            [
-                new("focus-unit", playerStr * 100, true, new Dictionary<string, int> { ["focus"] = 100 }),
-                new("target",     enemyStr  * 100, true, null),
-            ];
+            UnitState[] state = new[]
+            {
+                new UnitState("focus-unit", playerStr * 100, true, new Dictionary<string, int> { ["focus"] = 100 }),
+                new UnitState("target",     enemyStr  * 100, true, null),
+            };
             // Resume as if the enemy (last in turn order by Agi) just acted → player goes next.
             session.TryExecute(new ResumeFromSnapshotCommand(state, LastActorId: "target", AtStep: 0));
             return session;
@@ -210,7 +214,7 @@ namespace GameCore.Tests.Battle
 
         /// <summary>Minimal physical/str effect list for test skill construction.</summary>
         private static SkillEffect[] PhysEffect(double mult = 1.0) =>
-            [new(EffectKind.Damage, BattleSkillTarget.Enemy,
-                [new(EffectType.Physical, [new DamageScaling("str", mult)])])];
+            new SkillEffect[] { new(EffectKind.Damage, BattleSkillTarget.Enemy,
+                new DamageComponent[] { new(EffectType.Physical, new DamageScaling[] { new("str", mult) }) }) };
     }
 }

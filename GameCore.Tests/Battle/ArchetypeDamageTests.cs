@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using GameCore.Battle;
 using GameCore.Content;
+using GameCore.Tests;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace GameCore.Tests.Battle

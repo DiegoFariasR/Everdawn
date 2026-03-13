@@ -1,4 +1,6 @@
+using System;
 using GameCore.Battle;
+using Xunit;
 
 namespace GameCore.Tests.Battle
 {

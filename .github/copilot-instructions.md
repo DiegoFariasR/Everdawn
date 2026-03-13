@@ -58,6 +58,20 @@ GameCore contains:
 
 ---
 
+## C# Language Version
+
+All projects in the solution use **C# 9.0**, set explicitly via `<LangVersion>9.0</LangVersion>` in every `.csproj`.
+
+**Rationale:** Unity 6.3 uses Roslyn with C# 9.0. `GameCore` is shared with UnityClient, so it must stay within C# 9 syntax. The whole solution uses the same version for consistency — tests, scenarios, and the web sandbox do not use newer language features even though their target frameworks would allow it.
+
+**Rules:**
+- Never use C# 10+ syntax anywhere in the solution (file-scoped namespaces, global usings declared in code, record structs, `CallerArgumentExpression`, etc.).
+- `GameCore` already enforces `LangVersion>9</LangVersion>` and `ImplicitUsings>disable</ImplicitUsings>`. Other projects set `LangVersion>9.0</LangVersion>` and may use `ImplicitUsings>enable</ImplicitUsings>`.
+- **Exception:** `BattleSandbox.Web` uses `LangVersion=12.0`. The Blazor WebAssembly SDK generates `global using` directives (C# 10 feature) from its package dependencies, and `Home.razor` uses C# 12 collection expressions. Since the web sandbox shares no source files with Unity and is fully isolated from the Unity build chain, it may use a higher language version. Its `.cs` files use explicit usings (no `ImplicitUsings`) for consistency with the rest of the solution.
+- If Unity bumps its supported C# version, update all projects together and update this section.
+
+---
+
 ## Game Flow Model
 
 - The game is **action-driven, not time-driven**. Nothing evolves by time alone.

@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>9.0</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -14,10 +15,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Using Include="Xunit" />
-    <Using Include="GameCore.Tests" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\GameCore\GameCore.csproj" />

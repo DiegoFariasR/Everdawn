@@ -1,0 +1,1138 @@
+﻿Build started 3/13/2026 11:04:28 AM.
+Test run for c:\Users\Diego\Projects\Everdawn\GameCore.Tests\bin\Debug\net10.0\GameCore.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.4)
+[xUnit.net 00:00:00.24]   Discovering: GameCore.Tests
+[xUnit.net 00:00:00.41]   Discovered:  GameCore.Tests
+[xUnit.net 00:00:00.56]   Starting:    GameCore.Tests
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 15, skillId: "mage-bolt") [175 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 301, skillId: "spell-volley") [642 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 47, skillId: "bow-shot") [6 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 47, skillId: "mage-bolt") [3 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 15, skillId: "bow-shot") [60 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 15, skillId: "spell-missiles") [57 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 47, skillId: "dagger-strike") [8 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 15, skillId: "mage-bolt") [4 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 151, skillId: "bow-shot") [530 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 151, skillId: "sword-strike") [5 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 151, skillId: "spell-volley") [243 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 301, skillId: "bow-shot") [973 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 451, skillId: "mage-bolt") [572 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 15, skillId: "sword-strike") [9 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 47, skillId: "dagger-strike") [81 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 451, skillId: "dagger-strike") [924 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 47, skillId: "bow-shot") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 151, skillId: "mace-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 301, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 301, skillId: "spell-burst") [617 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 451, skillId: "sword-strike") [24 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 451, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 451, skillId: "bow-shot") [5 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 151, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 451, skillId: "spell-missiles") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 301, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 15, skillId: "spell-volley") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 15, skillId: "spell-volley") [14 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 301, skillId: "mace-strike") [23 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 151, skillId: "spell-missiles") [542 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 301, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 47, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 47, skillId: "spell-volley") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 151, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 15, skillId: "spell-burst") [25 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 451, skillId: "spell-volley") [677 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 301, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 451, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 301, skillId: "spell-burst") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 47, skillId: "sword-strike") [33 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 47, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 47, skillId: "spell-volley") [61 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 451, skillId: "dagger-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 47, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 451, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 47, skillId: "sword-strike") [11 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 151, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 301, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 151, skillId: "mace-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 151, skillId: "spell-burst") [301 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 15, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 47, skillId: "dagger-strike") [88 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 15, skillId: "dagger-strike") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 451, skillId: "spell-missiles") [521 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 15, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 451, skillId: "mage-bolt") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 301, skillId: "sword-strike") [19 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 451, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 301, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 301, skillId: "spell-volley") [464 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 451, skillId: "spell-volley") [20 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 151, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 15, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 451, skillId: "mace-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 151, skillId: "bow-shot") [484 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 451, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 15, skillId: "dagger-strike") [3 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 151, skillId: "dagger-strike") [4 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 15, skillId: "bow-shot") [41 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 47, skillId: "dagger-strike") [83 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 15, skillId: "mace-strike") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 451, skillId: "mage-bolt") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 15, skillId: "dagger-strike") [15 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 47, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 151, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 15, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 451, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 451, skillId: "spell-burst") [943 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 451, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 451, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 451, skillId: "spell-burst") [928 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 151, skillId: "dagger-strike") [274 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 451, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 47, skillId: "spell-burst") [9 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 47, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 47, skillId: "mage-bolt") [134 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 151, skillId: "spell-burst") [334 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 151, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 301, skillId: "bow-shot") [988 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 151, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 47, skillId: "mage-bolt") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 151, skillId: "sword-strike") [10 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 301, skillId: "mage-bolt") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 151, skillId: "dagger-strike") [327 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 451, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 47, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 301, skillId: "spell-missiles") [1 s]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 451, skillId: "spell-missiles") [631 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 301, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 301, skillId: "spell-volley") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 47, skillId: "bow-shot") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 301, skillId: "dagger-strike") [597 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 451, skillId: "mage-bolt") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 47, skillId: "mage-bolt") [166 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 15, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 151, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 15, skillId: "mace-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 151, skillId: "sword-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 47, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 151, skillId: "spell-volley") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 15, skillId: "bow-shot") [51 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 47, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 47, skillId: "bow-shot") [159 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 151, skillId: "spell-missiles") [296 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 47, skillId: "bow-shot") [151 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 15, skillId: "sword-strike") [18 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 301, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 15, skillId: "spell-volley") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 15, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 451, skillId: "mace-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 151, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 151, skillId: "bow-shot") [485 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 15, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 47, skillId: "mace-strike") [7 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 151, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 151, skillId: "mace-strike") [18 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 301, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 47, skillId: "mace-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 15, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 301, skillId: "sword-strike") [37 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 151, skillId: "sword-strike") [36 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 451, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 301, skillId: "sword-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 451, skillId: "mage-bolt") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 301, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 15, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 151, skillId: "spell-volley") [223 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 47, skillId: "spell-volley") [73 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 301, skillId: "mage-bolt") [615 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 451, skillId: "dagger-strike") [939 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 15, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 451, skillId: "bow-shot") [1 s]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 15, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 301, skillId: "sword-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 151, skillId: "mace-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 15, skillId: "spell-volley") [15 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 151, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 301, skillId: "mage-bolt") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 301, skillId: "dagger-strike") [10 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 15, skillId: "dagger-strike") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 47, skillId: "mage-bolt") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 47, skillId: "mace-strike") [7 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 47, skillId: "spell-missiles") [147 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 47, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 151, skillId: "dagger-strike") [3 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 15, skillId: "mage-bolt") [43 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 15, skillId: "spell-burst") [6 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 301, skillId: "mage-bolt") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 47, skillId: "mace-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 301, skillId: "spell-missiles") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 15, skillId: "spell-missiles") [44 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 47, skillId: "dagger-strike") [11 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 151, skillId: "mage-bolt") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 15, skillId: "dagger-strike") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 47, skillId: "spell-burst") [86 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 151, skillId: "sword-strike") [15 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 151, skillId: "spell-burst") [11 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 451, skillId: "sword-strike") [20 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 451, skillId: "mage-bolt") [662 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 15, skillId: "spell-burst") [26 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 301, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 15, skillId: "spell-burst") [83 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 15, skillId: "mage-bolt") [51 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 151, skillId: "spell-burst") [314 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 15, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 301, skillId: "spell-missiles") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 301, skillId: "bow-shot") [958 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 151, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 151, skillId: "mage-bolt") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 15, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 47, skillId: "spell-burst") [79 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 47, skillId: "bow-shot") [144 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 15, skillId: "spell-burst") [25 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 47, skillId: "dagger-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 301, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 151, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 15, skillId: "spell-volley") [23 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 151, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 47, skillId: "sword-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 301, skillId: "mage-bolt") [472 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 47, skillId: "sword-strike") [5 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 151, skillId: "mage-bolt") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 451, skillId: "spell-missiles") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 151, skillId: "spell-missiles") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 151, skillId: "dagger-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 451, skillId: "spell-missiles") [699 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 451, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 15, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 151, skillId: "sword-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 451, skillId: "mace-strike") [47 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 451, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 301, skillId: "mage-bolt") [990 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 15, skillId: "mage-bolt") [44 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 301, skillId: "spell-volley") [484 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 451, skillId: "mace-strike") [15 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 151, skillId: "spell-volley") [260 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 301, skillId: "mage-bolt") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 47, skillId: "dagger-strike") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 15, skillId: "spell-volley") [31 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 151, skillId: "dagger-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 301, skillId: "spell-missiles") [459 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 15, skillId: "sword-strike") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 47, skillId: "mace-strike") [4 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 151, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 451, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 301, skillId: "dagger-strike") [7 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 15, skillId: "spell-missiles") [49 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 151, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 451, skillId: "mage-bolt") [1 s]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 301, skillId: "dagger-strike") [587 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 301, skillId: "sword-strike") [5 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 47, skillId: "spell-burst") [88 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 15, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 47, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 47, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 301, skillId: "spell-missiles") [1 s]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 451, skillId: "dagger-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 15, skillId: "sword-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 301, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 451, skillId: "mage-bolt") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 15, skillId: "dagger-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 15, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 151, skillId: "dagger-strike") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 301, skillId: "mace-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 451, skillId: "dagger-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 151, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 47, skillId: "dagger-strike") [83 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 151, skillId: "dagger-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 15, skillId: "spell-burst") [52 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 47, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 47, skillId: "spell-volley") [60 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 15, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 151, skillId: "mage-bolt") [314 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 451, skillId: "spell-volley") [693 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 451, skillId: "spell-burst") [938 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 15, skillId: "mage-bolt") [48 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 47, skillId: "dagger-strike") [3 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 47, skillId: "dagger-strike") [6 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 151, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 151, skillId: "mage-bolt") [519 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 151, skillId: "mage-bolt") [486 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 15, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 47, skillId: "mage-bolt") [157 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 151, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 151, skillId: "spell-burst") [316 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 15, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 151, skillId: "dagger-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 15, skillId: "sword-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 301, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 451, skillId: "dagger-strike") [4 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 47, skillId: "bow-shot") [134 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 15, skillId: "spell-missiles") [9 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 451, skillId: "spell-missiles") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 15, skillId: "mage-bolt") [40 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 15, skillId: "mace-strike") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 151, skillId: "mage-bolt") [325 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 301, skillId: "dagger-strike") [635 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 47, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 451, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 451, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 301, skillId: "dagger-strike") [634 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 47, skillId: "spell-volley") [89 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 151, skillId: "sword-strike") [13 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 451, skillId: "spell-volley") [737 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 47, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 451, skillId: "spell-volley") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 451, skillId: "sword-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 151, skillId: "spell-burst") [299 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 301, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 47, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 47, skillId: "dagger-strike") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 451, skillId: "spell-missiles") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 47, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 47, skillId: "spell-volley") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 15, skillId: "spell-burst") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 301, skillId: "dagger-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 47, skillId: "mage-bolt") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 151, skillId: "spell-missiles") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 15, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 47, skillId: "mace-strike") [4 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 151, skillId: "spell-volley") [4 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 301, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 301, skillId: "mace-strike") [19 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 301, skillId: "mage-bolt") [417 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 451, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 151, skillId: "spell-missiles") [282 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 301, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 15, skillId: "bow-shot") [41 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 15, skillId: "dagger-strike") [52 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 47, skillId: "mace-strike") [5 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 47, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 301, skillId: "spell-volley") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 151, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 451, skillId: "mage-bolt") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 151, skillId: "dagger-strike") [310 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 47, skillId: "spell-volley") [65 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 151, skillId: "bow-shot") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 451, skillId: "spell-missiles") [927 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 47, skillId: "spell-missiles") [154 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 15, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 47, skillId: "mage-bolt") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 15, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 15, skillId: "mage-bolt") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 151, skillId: "sword-strike") [10 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 151, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 301, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 151, skillId: "mace-strike") [21 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 15, skillId: "dagger-strike") [6 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 451, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 15, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 47, skillId: "spell-burst") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 47, skillId: "sword-strike") [3 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 15, skillId: "dagger-strike") [25 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 301, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 15, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 47, skillId: "mage-bolt") [144 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 151, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 151, skillId: "mage-bolt") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 451, skillId: "spell-volley") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 301, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 451, skillId: "dagger-strike") [932 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 301, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 301, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 301, skillId: "mage-bolt") [5 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 15, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 15, skillId: "spell-missiles") [43 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 47, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 301, skillId: "spell-burst") [611 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 47, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 15, skillId: "dagger-strike") [46 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 47, skillId: "mage-bolt") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 451, skillId: "mace-strike") [52 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 451, skillId: "spell-burst") [11 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 151, skillId: "bow-shot") [511 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 47, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 151, skillId: "spell-burst") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 15, skillId: "mace-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 15, skillId: "spell-volley") [25 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 451, skillId: "bow-shot") [1 s]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 47, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 451, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 15, skillId: "mage-bolt") [8 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 451, skillId: "dagger-strike") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 151, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 301, skillId: "bow-shot") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 451, skillId: "mace-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 151, skillId: "mage-bolt") [466 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 47, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 151, skillId: "dagger-strike") [289 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 151, skillId: "mace-strike") [11 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 451, skillId: "mace-strike") [18 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 47, skillId: "mace-strike") [13 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 301, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 451, skillId: "bow-shot") [1 s]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 15, skillId: "sword-strike") [9 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 451, skillId: "bow-shot") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 15, skillId: "dagger-strike") [26 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 15, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 151, skillId: "mace-strike") [11 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 151, skillId: "mage-bolt") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 301, skillId: "spell-burst") [622 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 451, skillId: "mage-bolt") [884 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 151, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 15, skillId: "mage-bolt") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 151, skillId: "spell-missiles") [509 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 15, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 301, skillId: "spell-volley") [496 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 47, skillId: "mage-bolt") [5 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 301, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 15, skillId: "bow-shot") [44 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 47, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 15, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 151, skillId: "spell-missiles") [523 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 151, skillId: "dagger-strike") [6 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 47, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 151, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 47, skillId: "spell-missiles") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 301, skillId: "mage-bolt") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 301, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 451, skillId: "spell-burst") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 151, skillId: "mace-strike") [14 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 301, skillId: "mage-bolt") [9 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 451, skillId: "bow-shot") [1 s]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 451, skillId: "dagger-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 451, skillId: "bow-shot") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 301, skillId: "dagger-strike") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 451, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 451, skillId: "dagger-strike") [41 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 451, skillId: "bow-shot") [1 s]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 15, skillId: "dagger-strike") [30 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 451, skillId: "sword-strike") [40 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 15, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 15, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 301, skillId: "spell-missiles") [641 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 151, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 151, skillId: "dagger-strike") [277 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 451, skillId: "sword-strike") [86 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 151, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 151, skillId: "bow-shot") [505 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 301, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 451, skillId: "dagger-strike") [923 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 151, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 451, skillId: "spell-volley") [723 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 301, skillId: "dagger-strike") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 301, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 301, skillId: "mace-strike") [11 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 301, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 47, skillId: "sword-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 451, skillId: "spell-missiles") [1 s]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 151, skillId: "mage-bolt") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 151, skillId: "mage-bolt") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 301, skillId: "mace-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 451, skillId: "spell-burst") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 47, skillId: "mage-bolt") [143 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 451, skillId: "dagger-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 151, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 47, skillId: "spell-missiles") [153 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 451, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 151, skillId: "mage-bolt") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 301, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 301, skillId: "sword-strike") [19 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 451, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 301, skillId: "sword-strike") [16 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 151, skillId: "bow-shot") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 15, skillId: "mace-strike") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 451, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 301, skillId: "bow-shot") [1 s]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 47, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 301, skillId: "dagger-strike") [7 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 47, skillId: "spell-burst") [86 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 15, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 451, skillId: "sword-strike") [21 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 301, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 301, skillId: "mace-strike") [40 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 301, skillId: "bow-shot") [6 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 451, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 151, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 15, skillId: "sword-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 451, skillId: "mage-bolt") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 47, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 15, skillId: "mage-bolt") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 15, skillId: "mace-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 301, skillId: "sword-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 301, skillId: "spell-burst") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 301, skillId: "mage-bolt") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 301, skillId: "dagger-strike") [627 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 451, skillId: "mace-strike") [37 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 47, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 15, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 451, skillId: "spell-burst") [892 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 301, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 451, skillId: "bow-shot") [5 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 301, skillId: "sword-strike") [21 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 451, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 301, skillId: "spell-volley") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 151, skillId: "spell-missiles") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 301, skillId: "mage-bolt") [923 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 15, skillId: "sword-strike") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 47, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 15, skillId: "mage-bolt") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 451, skillId: "spell-volley") [710 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 151, skillId: "spell-volley") [216 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 47, skillId: "bow-shot") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 451, skillId: "dagger-strike") [941 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 301, skillId: "bow-shot") [982 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi50-wis50", strFrac: 0, agiFrac: 0.5, wisFrac: 0.5, budget: 301, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 47, skillId: "spell-missiles") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 301, skillId: "spell-burst") [606 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 451, skillId: "spell-volley") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 15, skillId: "bow-shot") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 47, skillId: "spell-burst") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 47, skillId: "mage-bolt") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 47, skillId: "sword-strike") [11 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 47, skillId: "spell-missiles") [172 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 15, skillId: "spell-volley") [4 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 301, skillId: "dagger-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi25-wis75", strFrac: 0, agiFrac: 0.25, wisFrac: 0.75, budget: 15, skillId: "bow-shot") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 47, skillId: "dagger-strike") [81 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 15, skillId: "spell-missiles") [49 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 151, skillId: "spell-volley") [239 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 47, skillId: "spell-burst") [85 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 151, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 301, skillId: "mace-strike") [38 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str100", strFrac: 1, agiFrac: 0, wisFrac: 0, budget: 47, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 47, skillId: "sword-strike") [3 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 15, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 451, skillId: "mage-bolt") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 47, skillId: "sword-strike") [7 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 151, skillId: "mace-strike") [14 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 451, skillId: "spell-burst") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 451, skillId: "spell-burst") [893 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "balanced", strFrac: 0.33333333333333331, agiFrac: 0.33333333333333331, wisFrac: 0.33333333333333331, budget: 301, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str75-agi25", strFrac: 0.75, agiFrac: 0.25, wisFrac: 0, budget: 151, skillId: "sword-strike") [< 1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 47, skillId: "dagger-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 301, skillId: "dagger-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 301, skillId: "spell-burst") [631 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str50-agi50", strFrac: 0.5, agiFrac: 0.5, wisFrac: 0, budget: 47, skillId: "spell-missiles") [143 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 15, skillId: "dagger-strike") [2 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 451, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 451, skillId: "mage-bolt") [507 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis50-str50", strFrac: 0.5, agiFrac: 0, wisFrac: 0.5, budget: 451, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 15, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 451, skillId: "mace-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis100", strFrac: 0, agiFrac: 0, wisFrac: 1, budget: 47, skillId: "bow-shot") [141 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis75-str25", strFrac: 0.25, agiFrac: 0, wisFrac: 0.75, budget: 47, skillId: "sword-strike") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "str25-agi75", strFrac: 0.25, agiFrac: 0.75, wisFrac: 0, budget: 301, skillId: "spell-volley") [455 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 15, skillId: "spell-burst") [5 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "wis25-str75", strFrac: 0.75, agiFrac: 0, wisFrac: 0.25, budget: 15, skillId: "spell-missiles") [1 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi100", strFrac: 0, agiFrac: 1, wisFrac: 0, budget: 301, skillId: "spell-missiles") [395 ms]
+  Passed GameCore.Tests.Battle.ArchetypeDamageTests.Engine_AllCombinations_PlayerWins(archetypeId: "agi75-wis25", strFrac: 0, agiFrac: 0.75, wisFrac: 0.25, budget: 15, skillId: "mage-bolt") [1 ms]
+dotnet : [xUnit.net 00:01:18.92]     
+GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(budget: 151) 
+[FAIL]
+At line:1 char:1
++ dotnet test "c:\Users\Diego\Projects\Everdawn\GameCore.Tests\GameCore ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([xUnit.net 00:0...et: 151) [FAIL] 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[xUnit.net 00:01:18.92]       Assert.Equal() Failure: Values differ
+[xUnit.net 00:01:18.92]       Expected: 25
+[xUnit.net 00:01:18.92]       Actual:   26
+[xUnit.net 00:01:18.92]       Stack Trace:
+[xUnit.net 00:01:18.92]         C:\Users\Diego\Projects\Everdawn\GameCore.Tests\Battle\ArchetypeDamageTests.cs(175,0): at GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(Int32 budget)
+[xUnit.net 00:01:18.92]            at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+[xUnit.net 00:01:18.92]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+[xUnit.net 00:01:18.92]            at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+[xUnit.net 00:01:18.92]       Output:
+[xUnit.net 00:01:18.92]         
+=== Balance Report ∩┐╜ Budget 151  (Boss HP 30200) ===
+[xUnit.net 00:01:18.92]         
+[xUnit.net 00:01:18.92]         ROUNDS-TO-KILL  (lower = faster kill)
+[xUnit.net 00:01:18.92]         Archetype            Mace    Sword      Bow   Dagger     Bolt  Missile    Burst   Volley
+[xUnit.net 00:01:18.92]         ----------------------------------------------------------------------------------------
+[xUnit.net 00:01:18.92]         str100                 26       26    90940    45344    90940    90940    45344    30233
+[xUnit.net 00:01:18.92]         agi100               1887     1511      111      115    45344    45344    45344    30233
+[xUnit.net 00:01:18.92]         wis100               3780     3780    90940    45344       26       51       21       22
+[xUnit.net 00:01:18.92]         str50-agi50            51       30      223      296    90940    90940    45344    30233
+[xUnit.net 00:01:18.92]         agi50-wis50          3780     2158      223      296       51       58       42       43
+[xUnit.net 00:01:18.92]         wis50-str50            51       51    90940    45344       51      100       42       43
+[xUnit.net 00:01:18.92]         str75-agi25            35       25      458      721    90940    90940    45344    30233
+[xUnit.net 00:01:18.92]         agi75-wis25          1887     1887      148      174       51       96       85       86
+[xUnit.net 00:01:18.92]         wis75-str25           102      102    90940    45344       35       67       28       29
+[xUnit.net 00:01:18.92]         str25-agi75            51       48      148      174    45344    45344    45344    30233
+[xUnit.net 00:01:18.92]         agi25-wis75          3780     3021      458      721       35       49       28       29
+[xUnit.net 00:01:18.92]         wis25-str75            35       35    90940    45344      102      202       85       86
+[xUnit.net 00:01:18.92]         balanced               75       51      335      488       75      100       63       64
+[xUnit.net 00:01:18.92]         
+[xUnit.net 00:01:18.92]         PER-SKILL TOP ARCHETYPES
+[xUnit.net 00:01:18.92]           Mace        : str100(26r), str75-agi25(35r), wis25-str75(35r)  ...  worst: agi25-wis75(3780r)  spread: 3754r
+[xUnit.net 00:01:18.92]           Sword       : str75-agi25(25r), str100(26r), str50-agi50(30r)  ...  worst: wis100(3780r)  spread: 3755r
+[xUnit.net 00:01:18.92]           Bow         : agi100(111r), agi75-wis25(148r), str25-agi75(148r)  ...  worst: wis25-str75(90940r)  spread: 90829r
+[xUnit.net 00:01:18.92]           Dagger      : agi100(115r), agi75-wis25(174r), str25-agi75(174r)  ...  worst: wis25-str75(45344r)  spread: 45229r
+[xUnit.net 00:01:18.92]           Bolt        : wis100(26r), wis75-str25(35r), agi25-wis75(35r)  ...  worst: str75-agi25(90940r)  spread: 90914r
+[xUnit.net 00:01:18.92]           Missile     : agi25-wis75(49r), wis100(51r), agi50-wis50(58r)  ...  worst: str75-agi25(90940r)  spread: 90891r
+[xUnit.net 00:01:18.92]           Burst       : wis100(21r), wis75-str25(28r), agi25-wis75(28r)  ...  worst: str25-agi75(45344r)  spread: 45323r
+[xUnit.net 00:01:18.92]           Volley      : wis100(22r), wis75-str25(29r), agi25-wis75(29r)  ...  worst: str25-agi75(30233r)  spread: 30211r
+[xUnit.net 00:01:18.92]         
+[xUnit.net 00:01:18.92]         PER-ARCHETYPE BEST SKILLS
+[xUnit.net 00:01:18.92]           str100          : Mace(26r)  >  Sword(26r)  >  Volley(30233r)
+[xUnit.net 00:01:18.92]           agi100          : Bow(111r)  >  Dagger(115r)  >  Sword(1511r)
+[xUnit.net 00:01:18.92]           wis100          : Burst(21r)  >  Volley(22r)  >  Bolt(26r)
+[xUnit.net 00:01:18.92]           str50-agi50     : Sword(30r)  >  Mace(51r)  >  Bow(223r)
+[xUnit.net 00:01:18.92]           agi50-wis50     : Burst(42r)  >  Volley(43r)  >  Bolt(51r)
+[xUnit.net 00:01:18.92]           wis50-str50     : Burst(42r)  >  Volley(43r)  >  Mace(51r)
+[xUnit.net 00:01:18.92]           str75-agi25     : Sword(25r)  >  Mace(35r)  >  Bow(458r)
+[xUnit.net 00:01:18.92]           agi75-wis25     : Bolt(51r)  >  Burst(85r)  >  Volley(86r)
+[xUnit.net 00:01:18.92]           wis75-str25     : Burst(28r)  >  Volley(29r)  >  Bolt(35r)
+[xUnit.net 00:01:18.92]           str25-agi75     : Sword(48r)  >  Mace(51r)  >  Bow(148r)
+[xUnit.net 00:01:18.92]           agi25-wis75     : Burst(28r)  >  Volley(29r)  >  Bolt(35r)
+[xUnit.net 00:01:18.92]           wis25-str75     : Mace(35r)  >  Sword(35r)  >  Burst(85r)
+[xUnit.net 00:01:18.92]           balanced        : Sword(51r)  >  Burst(63r)  >  Volley(64r)
+[xUnit.net 00:01:18.92]         
+[xUnit.net 00:01:18.92]         Calibration: str100+mace = 26 rounds (expect 25)
+[xUnit.net 00:01:18.92]         
+  Failed GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(budget: 151) [11 s]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 25
+Actual:   26
+  Stack Trace:
+     at GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(Int32 budget) in C:\Users\Diego\Projects\Everdawn\GameCore.Tests\Battle\ArchetypeDamageTests.cs:line 175
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+  Standard Output Messages:
+ 
+=== Balance Report ∩┐╜ Budget 151  (Boss HP 30200) ===
+ 
+ ROUNDS-TO-KILL  (lower = faster kill)
+ Archetype            Mace    Sword      Bow   Dagger     Bolt  Missile    Burst   Volley
+ ----------------------------------------------------------------------------------------
+ str100                 26       26    90940    45344    90940    90940    45344    30233
+ agi100               1887     1511      111      115    45344    45344    45344    30233
+ wis100               3780     3780    90940    45344       26       51       21       22
+ str50-agi50            51       30      223      296    90940    90940    45344    30233
+ agi50-wis50          3780     2158      223      296       51       58       42       43
+ wis50-str50            51       51    90940    45344       51      100       42       43
+ str75-agi25            35       25      458      721    90940    90940    45344    30233
+ agi75-wis25          1887     1887      148      174       51       96       85       86
+ wis75-str25           102      102    90940    45344       35       67       28       29
+ str25-agi75            51       48      148      174    45344    45344    45344    30233
+ agi25-wis75          3780     3021      458      721       35       49       28       29
+ wis25-str75            35       35    90940    45344      102      202       85       86
+ balanced               75       51      335      488       75      100       63       64
+ 
+ PER-SKILL TOP ARCHETYPES
+   Mace        : str100(26r), str75-agi25(35r), wis25-str75(35r)  ...  worst: agi25-wis75(3780r)  spread: 3754r
+   Sword       : str75-agi25(25r), str100(26r), str50-agi50(30r)  ...  worst: wis100(3780r)  spread: 3755r
+   Bow         : agi100(111r), agi75-wis25(148r), str25-agi75(148r)  ...  worst: wis25-str75(90940r)  spread: 90829r
+   Dagger      : agi100(115r), agi75-wis25(174r), str25-agi75(174r)  ...  worst: wis25-str75(45344r)  spread: 45229r
+   Bolt        : wis100(26r), wis75-str25(35r), agi25-wis75(35r)  ...  worst: str75-agi25(90940r)  spread: 90914r
+   Missile     : agi25-wis75(49r), wis100(51r), agi50-wis50(58r)  ...  worst: str75-agi25(90940r)  spread: 90891r
+   Burst       : wis100(21r), wis75-str25(28r), agi25-wis75(28r)  ...  worst: str25-agi75(45344r)  spread: 45323r
+   Volley      : wis100(22r), wis75-str25(29r), agi25-wis75(29r)  ...  worst: str25-agi75(30233r)  spread: 30211r
+ 
+ PER-ARCHETYPE BEST SKILLS
+   str100          : Mace(26r)  >  Sword(26r)  >  Volley(30233r)
+   agi100          : Bow(111r)  >  Dagger(115r)  >  Sword(1511r)
+   wis100          : Burst(21r)  >  Volley(22r)  >  Bolt(26r)
+   str50-agi50     : Sword(30r)  >  Mace(51r)  >  Bow(223r)
+   agi50-wis50     : Burst(42r)  >  Volley(43r)  >  Bolt(51r)
+   wis50-str50     : Burst(42r)  >  Volley(43r)  >  Mace(51r)
+   str75-agi25     : Sword(25r)  >  Mace(35r)  >  Bow(458r)
+   agi75-wis25     : Bolt(51r)  >  Burst(85r)  >  Volley(86r)
+   wis75-str25     : Burst(28r)  >  Volley(29r)  >  Bolt(35r)
+   str25-agi75     : Sword(48r)  >  Mace(51r)  >  Bow(148r)
+   agi25-wis75     : Burst(28r)  >  Volley(29r)  >  Bolt(35r)
+   wis25-str75     : Mace(35r)  >  Sword(35r)  >  Burst(85r)
+   balanced        : Sword(51r)  >  Burst(63r)  >  Volley(64r)
+ 
+ Calibration: str100+mace = 26 rounds (expect 25)
+ 
+
+
+[xUnit.net 00:01:22.68]     
+GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(budget: 47) 
+[FAIL]
+[xUnit.net 00:01:22.68]       Assert.Equal() Failure: Values differ
+[xUnit.net 00:01:22.68]       Expected: 25
+[xUnit.net 00:01:22.68]       Actual:   26
+[xUnit.net 00:01:22.68]       Stack Trace:
+[xUnit.net 00:01:22.68]         C:\Users\Diego\Projects\Everdawn\GameCore.Tests\Battle\ArchetypeDamageTests.cs(175,0): at GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(Int32 budget)
+[xUnit.net 00:01:22.68]            at InvokeStub_ArchetypeDamageTests.BalanceReport_ByBudget(Object, Span`1)
+[xUnit.net 00:01:22.68]            at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:01:22.68]       Output:
+[xUnit.net 00:01:22.68]         
+=== Balance Report ∩┐╜ Budget 47  (Boss HP 9400) ===
+[xUnit.net 00:01:22.68]         
+[xUnit.net 00:01:22.68]         ROUNDS-TO-KILL  (lower = faster kill)
+[xUnit.net 00:01:22.68]         Archetype            Mace    Sword      Bow   Dagger     Bolt  Missile    Burst   Volley
+[xUnit.net 00:01:22.68]         ----------------------------------------------------------------------------------------
+[xUnit.net 00:01:22.68]         str100                 26       26    28019    14021    28019    28019    14021     9374
+[xUnit.net 00:01:22.68]         agi100               1181      858      111      162    28019    28019    14021     9374
+[xUnit.net 00:01:22.68]         wis100               1181     1181    28019    14021       26       51       21       22
+[xUnit.net 00:01:22.68]         str50-agi50            52       43      229      393    28019    28019    14021     9374
+[xUnit.net 00:01:22.68]         agi50-wis50          1181     1049      229      393       52       82       43       44
+[xUnit.net 00:01:22.68]         wis50-str50            52       52    28019    14021       52      102       43       44
+[xUnit.net 00:01:22.68]         str75-agi25            35       32      496      943    28019    28019    14021     9374
+[xUnit.net 00:01:22.68]         agi75-wis25          1181      944      148      235      106      158       90       90
+[xUnit.net 00:01:22.68]         wis75-str25           106      106    28019    14021       35       67       28       29
+[xUnit.net 00:01:22.68]         str25-agi75           106       79      148      235    28019    28019    14021     9374
+[xUnit.net 00:01:22.68]         agi25-wis75          1181     1181      496      943       35       61       28       29
+[xUnit.net 00:01:22.68]         wis25-str75            35       35    28019    14021      106      213       90       90
+[xUnit.net 00:01:22.68]         balanced               77       68      348      588       77      135       65       66
+[xUnit.net 00:01:22.68]         
+[xUnit.net 00:01:22.68]         PER-SKILL TOP ARCHETYPES
+[xUnit.net 00:01:22.68]           Mace        : str100(26r), str75-agi25(35r), wis25-str75(35r)  ...  worst: agi25-wis75(1181r)  spread: 1155r
+[xUnit.net 00:01:22.68]           Sword       : str100(26r), str75-agi25(32r), wis25-str75(35r)  ...  worst: agi25-wis75(1181r)  spread: 1155r
+[xUnit.net 00:01:22.68]           Bow         : agi100(111r), agi75-wis25(148r), str25-agi75(148r)  ...  worst: wis25-str75(28019r)  spread: 27908r
+[xUnit.net 00:01:22.68]           Dagger      : agi100(162r), agi75-wis25(235r), str25-agi75(235r)  ...  worst: wis25-str75(14021r)  spread: 13859r
+[xUnit.net 00:01:22.68]           Bolt        : wis100(26r), wis75-str25(35r), agi25-wis75(35r)  ...  worst: str25-agi75(28019r)  spread: 27993r
+[xUnit.net 00:01:22.68]           Missile     : wis100(51r), agi25-wis75(61r), wis75-str25(67r)  ...  worst: str25-agi75(28019r)  spread: 27968r
+[xUnit.net 00:01:22.68]           Burst       : wis100(21r), wis75-str25(28r), agi25-wis75(28r)  ...  worst: str25-agi75(14021r)  spread: 14000r
+[xUnit.net 00:01:22.68]           Volley      : wis100(22r), wis75-str25(29r), agi25-wis75(29r)  ...  worst: str25-agi75(9374r)  spread: 9352r
+[xUnit.net 00:01:22.68]         
+[xUnit.net 00:01:22.68]         PER-ARCHETYPE BEST SKILLS
+[xUnit.net 00:01:22.68]           str100          : Mace(26r)  >  Sword(26r)  >  Volley(9374r)
+[xUnit.net 00:01:22.68]           agi100          : Bow(111r)  >  Dagger(162r)  >  Sword(858r)
+[xUnit.net 00:01:22.68]           wis100          : Burst(21r)  >  Volley(22r)  >  Bolt(26r)
+[xUnit.net 00:01:22.68]           str50-agi50     : Sword(43r)  >  Mace(52r)  >  Bow(229r)
+[xUnit.net 00:01:22.68]           agi50-wis50     : Burst(43r)  >  Volley(44r)  >  Bolt(52r)
+[xUnit.net 00:01:22.68]           wis50-str50     : Burst(43r)  >  Volley(44r)  >  Mace(52r)
+[xUnit.net 00:01:22.68]           str75-agi25     : Sword(32r)  >  Mace(35r)  >  Bow(496r)
+[xUnit.net 00:01:22.68]           agi75-wis25     : Burst(90r)  >  Volley(90r)  >  Bolt(106r)
+[xUnit.net 00:01:22.68]           wis75-str25     : Burst(28r)  >  Volley(29r)  >  Bolt(35r)
+[xUnit.net 00:01:22.68]           str25-agi75     : Sword(79r)  >  Mace(106r)  >  Bow(148r)
+[xUnit.net 00:01:22.68]           agi25-wis75     : Burst(28r)  >  Volley(29r)  >  Bolt(35r)
+[xUnit.net 00:01:22.68]           wis25-str75     : Mace(35r)  >  Sword(35r)  >  Burst(90r)
+[xUnit.net 00:01:22.68]           balanced        : Burst(65r)  >  Volley(66r)  >  Sword(68r)
+[xUnit.net 00:01:22.68]         
+[xUnit.net 00:01:22.68]         Calibration: str100+mace = 26 rounds (expect 25)
+[xUnit.net 00:01:22.68]         
+  Failed GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(budget: 47) [3 s]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 25
+Actual:   26
+  Stack Trace:
+     at GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(Int32 budget) in C:\Users\Diego\Projects\Everdawn\GameCore.Tests\Battle\ArchetypeDamageTests.cs:line 175
+   at InvokeStub_ArchetypeDamageTests.BalanceReport_ByBudget(Object, Span`1)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Standard Output Messages:
+ 
+=== Balance Report ∩┐╜ Budget 47  (Boss HP 9400) ===
+ 
+ ROUNDS-TO-KILL  (lower = faster kill)
+ Archetype            Mace    Sword      Bow   Dagger     Bolt  Missile    Burst   Volley
+ ----------------------------------------------------------------------------------------
+ str100                 26       26    28019    14021    28019    28019    14021     9374
+ agi100               1181      858      111      162    28019    28019    14021     9374
+ wis100               1181     1181    28019    14021       26       51       21       22
+ str50-agi50            52       43      229      393    28019    28019    14021     9374
+ agi50-wis50          1181     1049      229      393       52       82       43       44
+ wis50-str50            52       52    28019    14021       52      102       43       44
+ str75-agi25            35       32      496      943    28019    28019    14021     9374
+ agi75-wis25          1181      944      148      235      106      158       90       90
+ wis75-str25           106      106    28019    14021       35       67       28       29
+ str25-agi75           106       79      148      235    28019    28019    14021     9374
+ agi25-wis75          1181     1181      496      943       35       61       28       29
+ wis25-str75            35       35    28019    14021      106      213       90       90
+ balanced               77       68      348      588       77      135       65       66
+ 
+ PER-SKILL TOP ARCHETYPES
+   Mace        : str100(26r), str75-agi25(35r), wis25-str75(35r)  ...  worst: agi25-wis75(1181r)  spread: 1155r
+   Sword       : str100(26r), str75-agi25(32r), wis25-str75(35r)  ...  worst: agi25-wis75(1181r)  spread: 1155r
+   Bow         : agi100(111r), agi75-wis25(148r), str25-agi75(148r)  ...  worst: wis25-str75(28019r)  spread: 27908r
+   Dagger      : agi100(162r), agi75-wis25(235r), str25-agi75(235r)  ...  worst: wis25-str75(14021r)  spread: 13859r
+   Bolt        : wis100(26r), wis75-str25(35r), agi25-wis75(35r)  ...  worst: str25-agi75(28019r)  spread: 27993r
+   Missile     : wis100(51r), agi25-wis75(61r), wis75-str25(67r)  ...  worst: str25-agi75(28019r)  spread: 27968r
+   Burst       : wis100(21r), wis75-str25(28r), agi25-wis75(28r)  ...  worst: str25-agi75(14021r)  spread: 14000r
+   Volley      : wis100(22r), wis75-str25(29r), agi25-wis75(29r)  ...  worst: str25-agi75(9374r)  spread: 9352r
+ 
+ PER-ARCHETYPE BEST SKILLS
+   str100          : Mace(26r)  >  Sword(26r)  >  Volley(9374r)
+   agi100          : Bow(111r)  >  Dagger(162r)  >  Sword(858r)
+   wis100          : Burst(21r)  >  Volley(22r)  >  Bolt(26r)
+   str50-agi50     : Sword(43r)  >  Mace(52r)  >  Bow(229r)
+   agi50-wis50     : Burst(43r)  >  Volley(44r)  >  Bolt(52r)
+   wis50-str50     : Burst(43r)  >  Volley(44r)  >  Mace(52r)
+   str75-agi25     : Sword(32r)  >  Mace(35r)  >  Bow(496r)
+   agi75-wis25     : Burst(90r)  >  Volley(90r)  >  Bolt(106r)
+   wis75-str25     : Burst(28r)  >  Volley(29r)  >  Bolt(35r)
+   str25-agi75     : Sword(79r)  >  Mace(106r)  >  Bow(148r)
+   agi25-wis75     : Burst(28r)  >  Volley(29r)  >  Bolt(35r)
+   wis25-str75     : Mace(35r)  >  Sword(35r)  >  Burst(90r)
+   balanced        : Burst(65r)  >  Volley(66r)  >  Sword(68r)
+ 
+ Calibration: str100+mace = 26 rounds (expect 25)
+ 
+
+
+[xUnit.net 00:01:44.02]     
+GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(budget: 301) 
+[FAIL]
+[xUnit.net 00:01:44.02]       Assert.Equal() Failure: Values differ
+[xUnit.net 00:01:44.02]       Expected: 25
+[xUnit.net 00:01:44.02]       Actual:   26
+[xUnit.net 00:01:44.02]       Stack Trace:
+[xUnit.net 00:01:44.02]         C:\Users\Diego\Projects\Everdawn\GameCore.Tests\Battle\ArchetypeDamageTests.cs(175,0): at GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(Int32 budget)
+[xUnit.net 00:01:44.02]            at InvokeStub_ArchetypeDamageTests.BalanceReport_ByBudget(Object, Span`1)
+[xUnit.net 00:01:44.02]            at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:01:44.02]       Output:
+[xUnit.net 00:01:44.02]         
+=== Balance Report ∩┐╜ Budget 301  (Boss HP 60200) ===
+[xUnit.net 00:01:44.02]         
+[xUnit.net 00:01:44.02]         ROUNDS-TO-KILL  (lower = faster kill)
+[xUnit.net 00:01:44.02]         Archetype            Mace    Sword      Bow   Dagger     Bolt  Missile    Burst   Volley
+[xUnit.net 00:01:44.02]         ----------------------------------------------------------------------------------------
+[xUnit.net 00:01:44.02]         str100                 26       26   181116    90458   181116   181116    90458    60252
+[xUnit.net 00:01:44.02]         agi100               1883     1883      111       80    45185    45185    90458    60252
+[xUnit.net 00:01:44.02]         wis100               7523     7523   181116    90458       26       51       21       22
+[xUnit.net 00:01:44.02]         str50-agi50            25       20      222      231    90458    90458    90458    60252
+[xUnit.net 00:01:44.02]         agi50-wis50          3759     3008      222      231       25       40       42       43
+[xUnit.net 00:01:44.02]         wis50-str50            51       51   181116    90458       51      100       42       43
+[xUnit.net 00:01:44.02]         str75-agi25            35       19      447      591   181116   181116    90458    60252
+[xUnit.net 00:01:44.02]         agi75-wis25          2510     2510      148      126       34       63       83       84
+[xUnit.net 00:01:44.02]         wis75-str25           100      100   181116    90458       35       67       28       29
+[xUnit.net 00:01:44.02]         str25-agi75            34       32      148      126    60252    60252    90458    60252
+[xUnit.net 00:01:44.02]         agi25-wis75          7523     4305      447      591       35       39       28       29
+[xUnit.net 00:01:44.02]         wis25-str75            35       35   181116    90458      100      199       83       84
+[xUnit.net 00:01:44.02]         balanced               38       38      334      402       38       75       63       64
+[xUnit.net 00:01:44.02]         
+[xUnit.net 00:01:44.02]         PER-SKILL TOP ARCHETYPES
+[xUnit.net 00:01:44.02]           Mace        : str50-agi50(25r), str100(26r), str25-agi75(34r)  ...  worst: agi25-wis75(7523r)  spread: 7498r
+[xUnit.net 00:01:44.02]           Sword       : str75-agi25(19r), str50-agi50(20r), str100(26r)  ...  worst: wis100(7523r)  spread: 7504r
+[xUnit.net 00:01:44.02]           Bow         : agi100(111r), agi75-wis25(148r), str25-agi75(148r)  ...  worst: wis25-str75(181116r)  spread: 181005r
+[xUnit.net 00:01:44.02]           Dagger      : agi100(80r), agi75-wis25(126r), str25-agi75(126r)  ...  worst: wis25-str75(90458r)  spread: 90378r
+[xUnit.net 00:01:44.02]           Bolt        : agi50-wis50(25r), wis100(26r), agi75-wis25(34r)  ...  worst: str75-agi25(181116r)  spread: 181091r
+[xUnit.net 00:01:44.02]           Missile     : agi25-wis75(39r), agi50-wis50(40r), wis100(51r)  ...  worst: str75-agi25(181116r)  spread: 181077r
+[xUnit.net 00:01:44.02]           Burst       : wis100(21r), wis75-str25(28r), agi25-wis75(28r)  ...  worst: str25-agi75(90458r)  spread: 90437r
+[xUnit.net 00:01:44.02]           Volley      : wis100(22r), wis75-str25(29r), agi25-wis75(29r)  ...  worst: str25-agi75(60252r)  spread: 60230r
+[xUnit.net 00:01:44.02]         
+[xUnit.net 00:01:44.02]         PER-ARCHETYPE BEST SKILLS
+[xUnit.net 00:01:44.02]           str100          : Mace(26r)  >  Sword(26r)  >  Volley(60252r)
+[xUnit.net 00:01:44.02]           agi100          : Dagger(80r)  >  Bow(111r)  >  Mace(1883r)
+[xUnit.net 00:01:44.02]           wis100          : Burst(21r)  >  Volley(22r)  >  Bolt(26r)
+[xUnit.net 00:01:44.02]           str50-agi50     : Sword(20r)  >  Mace(25r)  >  Bow(222r)
+[xUnit.net 00:01:44.02]           agi50-wis50     : Bolt(25r)  >  Missile(40r)  >  Burst(42r)
+[xUnit.net 00:01:44.02]           wis50-str50     : Burst(42r)  >  Volley(43r)  >  Mace(51r)
+[xUnit.net 00:01:44.02]           str75-agi25     : Sword(19r)  >  Mace(35r)  >  Bow(447r)
+[xUnit.net 00:01:44.02]           agi75-wis25     : Bolt(34r)  >  Missile(63r)  >  Burst(83r)
+[xUnit.net 00:01:44.02]           wis75-str25     : Burst(28r)  >  Volley(29r)  >  Bolt(35r)
+[xUnit.net 00:01:44.02]           str25-agi75     : Sword(32r)  >  Mace(34r)  >  Dagger(126r)
+[xUnit.net 00:01:44.02]           agi25-wis75     : Burst(28r)  >  Volley(29r)  >  Bolt(35r)
+[xUnit.net 00:01:44.02]           wis25-str75     : Mace(35r)  >  Sword(35r)  >  Burst(83r)
+[xUnit.net 00:01:44.02]           balanced        : Mace(38r)  >  Sword(38r)  >  Bolt(38r)
+[xUnit.net 00:01:44.02]         
+[xUnit.net 00:01:44.02]         Calibration: str100+mace = 26 rounds (expect 25)
+[xUnit.net 00:01:44.02]         
+  Failed GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(budget: 301) [21 s]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 25
+Actual:   26
+  Stack Trace:
+     at GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(Int32 budget) in C:\Users\Diego\Projects\Everdawn\GameCore.Tests\Battle\ArchetypeDamageTests.cs:line 175
+   at InvokeStub_ArchetypeDamageTests.BalanceReport_ByBudget(Object, Span`1)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Standard Output Messages:
+ 
+=== Balance Report ∩┐╜ Budget 301  (Boss HP 60200) ===
+ 
+ ROUNDS-TO-KILL  (lower = faster kill)
+ Archetype            Mace    Sword      Bow   Dagger     Bolt  Missile    Burst   Volley
+ ----------------------------------------------------------------------------------------
+ str100                 26       26   181116    90458   181116   181116    90458    60252
+ agi100               1883     1883      111       80    45185    45185    90458    60252
+ wis100               7523     7523   181116    90458       26       51       21       22
+ str50-agi50            25       20      222      231    90458    90458    90458    60252
+ agi50-wis50          3759     3008      222      231       25       40       42       43
+ wis50-str50            51       51   181116    90458       51      100       42       43
+ str75-agi25            35       19      447      591   181116   181116    90458    60252
+ agi75-wis25          2510     2510      148      126       34       63       83       84
+ wis75-str25           100      100   181116    90458       35       67       28       29
+ str25-agi75            34       32      148      126    60252    60252    90458    60252
+ agi25-wis75          7523     4305      447      591       35       39       28       29
+ wis25-str75            35       35   181116    90458      100      199       83       84
+ balanced               38       38      334      402       38       75       63       64
+ 
+ PER-SKILL TOP ARCHETYPES
+   Mace        : str50-agi50(25r), str100(26r), str25-agi75(34r)  ...  worst: agi25-wis75(7523r)  spread: 7498r
+   Sword       : str75-agi25(19r), str50-agi50(20r), str100(26r)  ...  worst: wis100(7523r)  spread: 7504r
+   Bow         : agi100(111r), agi75-wis25(148r), str25-agi75(148r)  ...  worst: wis25-str75(181116r)  spread: 181005r
+   Dagger      : agi100(80r), agi75-wis25(126r), str25-agi75(126r)  ...  worst: wis25-str75(90458r)  spread: 90378r
+   Bolt        : agi50-wis50(25r), wis100(26r), agi75-wis25(34r)  ...  worst: str75-agi25(181116r)  spread: 181091r
+   Missile     : agi25-wis75(39r), agi50-wis50(40r), wis100(51r)  ...  worst: str75-agi25(181116r)  spread: 181077r
+   Burst       : wis100(21r), wis75-str25(28r), agi25-wis75(28r)  ...  worst: str25-agi75(90458r)  spread: 90437r
+   Volley      : wis100(22r), wis75-str25(29r), agi25-wis75(29r)  ...  worst: str25-agi75(60252r)  spread: 60230r
+ 
+ PER-ARCHETYPE BEST SKILLS
+   str100          : Mace(26r)  >  Sword(26r)  >  Volley(60252r)
+   agi100          : Dagger(80r)  >  Bow(111r)  >  Mace(1883r)
+   wis100          : Burst(21r)  >  Volley(22r)  >  Bolt(26r)
+   str50-agi50     : Sword(20r)  >  Mace(25r)  >  Bow(222r)
+   agi50-wis50     : Bolt(25r)  >  Missile(40r)  >  Burst(42r)
+   wis50-str50     : Burst(42r)  >  Volley(43r)  >  Mace(51r)
+   str75-agi25     : Sword(19r)  >  Mace(35r)  >  Bow(447r)
+   agi75-wis25     : Bolt(34r)  >  Missile(63r)  >  Burst(83r)
+   wis75-str25     : Burst(28r)  >  Volley(29r)  >  Bolt(35r)
+   str25-agi75     : Sword(32r)  >  Mace(34r)  >  Dagger(126r)
+   agi25-wis75     : Burst(28r)  >  Volley(29r)  >  Bolt(35r)
+   wis25-str75     : Mace(35r)  >  Sword(35r)  >  Burst(83r)
+   balanced        : Mace(38r)  >  Sword(38r)  >  Bolt(38r)
+ 
+ Calibration: str100+mace = 26 rounds (expect 25)
+ 
+
+
+[xUnit.net 00:01:45.32]     
+GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(budget: 15) 
+[FAIL]
+[xUnit.net 00:01:45.32]       Assert.Equal() Failure: Values differ
+[xUnit.net 00:01:45.32]       Expected: 25
+[xUnit.net 00:01:45.32]       Actual:   26
+[xUnit.net 00:01:45.32]       Stack Trace:
+[xUnit.net 00:01:45.32]         C:\Users\Diego\Projects\Everdawn\GameCore.Tests\Battle\ArchetypeDamageTests.cs(175,0): at GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(Int32 budget)
+[xUnit.net 00:01:45.32]            at InvokeStub_ArchetypeDamageTests.BalanceReport_ByBudget(Object, Span`1)
+[xUnit.net 00:01:45.32]            at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:01:45.32]       Output:
+[xUnit.net 00:01:45.32]         
+=== Balance Report ∩┐╜ Budget 15  (Boss HP 3000) ===
+[xUnit.net 00:01:45.32]         
+[xUnit.net 00:01:45.32]         ROUNDS-TO-KILL  (lower = faster kill)
+[xUnit.net 00:01:45.32]         Archetype            Mace    Sword      Bow   Dagger     Bolt  Missile    Burst   Volley
+[xUnit.net 00:01:45.32]         ----------------------------------------------------------------------------------------
+[xUnit.net 00:01:45.32]         str100                 26       26     8906     4434     8906     8906     4434     2980
+[xUnit.net 00:01:45.32]         agi100                376      334      110      188     8906     8906     4434     2980
+[xUnit.net 00:01:45.32]         wis100                376      376     8906     4434       26       51       21       22
+[xUnit.net 00:01:45.32]         str50-agi50            54       52      250      503     8906     8906     4434     2980
+[xUnit.net 00:01:45.32]         agi50-wis50           376      376      250      503       54      103       45       46
+[xUnit.net 00:01:45.32]         wis50-str50            54       54     8906     4434       54      107       45       46
+[xUnit.net 00:01:45.32]         str75-agi25            36       35      607     1520     8906     8906     4434     2980
+[xUnit.net 00:01:45.32]         agi75-wis25           376      376      157      300      125      230      107      111
+[xUnit.net 00:01:45.32]         wis75-str25           125      125     8906     4434       36       68       29       30
+[xUnit.net 00:01:45.32]         str25-agi75           125      115      157      300     8906     8906     4434     2980
+[xUnit.net 00:01:45.32]         agi25-wis75           376      376      607     1520       36       67       29       30
+[xUnit.net 00:01:45.32]         wis25-str75            36       36     8906     4434      125      249      107      111
+[xUnit.net 00:01:45.32]         balanced               74       71      334      759       74      141       62       63
+[xUnit.net 00:01:45.32]         
+[xUnit.net 00:01:45.32]         PER-SKILL TOP ARCHETYPES
+[xUnit.net 00:01:45.32]           Mace        : str100(26r), str75-agi25(36r), wis25-str75(36r)  ...  worst: agi25-wis75(376r)  spread: 350r
+[xUnit.net 00:01:45.32]           Sword       : str100(26r), str75-agi25(35r), wis25-str75(36r)  ...  worst: agi25-wis75(376r)  spread: 350r
+[xUnit.net 00:01:45.32]           Bow         : agi100(110r), agi75-wis25(157r), str25-agi75(157r)  ...  worst: wis25-str75(8906r)  spread: 8796r
+[xUnit.net 00:01:45.32]           Dagger      : agi100(188r), agi75-wis25(300r), str25-agi75(300r)  ...  worst: wis25-str75(4434r)  spread: 4246r
+[xUnit.net 00:01:45.32]           Bolt        : wis100(26r), wis75-str25(36r), agi25-wis75(36r)  ...  worst: str25-agi75(8906r)  spread: 8880r
+[xUnit.net 00:01:45.32]           Missile     : wis100(51r), agi25-wis75(67r), wis75-str25(68r)  ...  worst: str25-agi75(8906r)  spread: 8855r
+[xUnit.net 00:01:45.32]           Burst       : wis100(21r), wis75-str25(29r), agi25-wis75(29r)  ...  worst: str25-agi75(4434r)  spread: 4413r
+[xUnit.net 00:01:45.32]           Volley      : wis100(22r), wis75-str25(30r), agi25-wis75(30r)  ...  worst: str25-agi75(2980r)  spread: 2958r
+[xUnit.net 00:01:45.32]         
+[xUnit.net 00:01:45.32]         PER-ARCHETYPE BEST SKILLS
+[xUnit.net 00:01:45.32]           str100          : Mace(26r)  >  Sword(26r)  >  Volley(2980r)
+[xUnit.net 00:01:45.32]           agi100          : Bow(110r)  >  Dagger(188r)  >  Sword(334r)
+[xUnit.net 00:01:45.32]           wis100          : Burst(21r)  >  Volley(22r)  >  Bolt(26r)
+[xUnit.net 00:01:45.32]           str50-agi50     : Sword(52r)  >  Mace(54r)  >  Bow(250r)
+[xUnit.net 00:01:45.32]           agi50-wis50     : Burst(45r)  >  Volley(46r)  >  Bolt(54r)
+[xUnit.net 00:01:45.32]           wis50-str50     : Burst(45r)  >  Volley(46r)  >  Mace(54r)
+[xUnit.net 00:01:45.32]           str75-agi25     : Sword(35r)  >  Mace(36r)  >  Bow(607r)
+[xUnit.net 00:01:45.32]           agi75-wis25     : Burst(107r)  >  Volley(111r)  >  Bolt(125r)
+[xUnit.net 00:01:45.32]           wis75-str25     : Burst(29r)  >  Volley(30r)  >  Bolt(36r)
+[xUnit.net 00:01:45.32]           str25-agi75     : Sword(115r)  >  Mace(125r)  >  Bow(157r)
+[xUnit.net 00:01:45.32]           agi25-wis75     : Burst(29r)  >  Volley(30r)  >  Bolt(36r)
+[xUnit.net 00:01:45.32]           wis25-str75     : Mace(36r)  >  Sword(36r)  >  Burst(107r)
+[xUnit.net 00:01:45.32]           balanced        : Burst(62r)  >  Volley(63r)  >  Sword(71r)
+[xUnit.net 00:01:45.32]         
+[xUnit.net 00:01:45.32]         Calibration: str100+mace = 26 rounds (expect 25)
+[xUnit.net 00:01:45.32]         
+  Failed GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(budget: 15) [1 s]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 25
+Actual:   26
+  Stack Trace:
+     at GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(Int32 budget) in C:\Users\Diego\Projects\Everdawn\GameCore.Tests\Battle\ArchetypeDamageTests.cs:line 175
+   at InvokeStub_ArchetypeDamageTests.BalanceReport_ByBudget(Object, Span`1)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Standard Output Messages:
+ 
+=== Balance Report ∩┐╜ Budget 15  (Boss HP 3000) ===
+ 
+ ROUNDS-TO-KILL  (lower = faster kill)
+ Archetype            Mace    Sword      Bow   Dagger     Bolt  Missile    Burst   Volley
+ ----------------------------------------------------------------------------------------
+ str100                 26       26     8906     4434     8906     8906     4434     2980
+ agi100                376      334      110      188     8906     8906     4434     2980
+ wis100                376      376     8906     4434       26       51       21       22
+ str50-agi50            54       52      250      503     8906     8906     4434     2980
+ agi50-wis50           376      376      250      503       54      103       45       46
+ wis50-str50            54       54     8906     4434       54      107       45       46
+ str75-agi25            36       35      607     1520     8906     8906     4434     2980
+ agi75-wis25           376      376      157      300      125      230      107      111
+ wis75-str25           125      125     8906     4434       36       68       29       30
+ str25-agi75           125      115      157      300     8906     8906     4434     2980
+ agi25-wis75           376      376      607     1520       36       67       29       30
+ wis25-str75            36       36     8906     4434      125      249      107      111
+ balanced               74       71      334      759       74      141       62       63
+ 
+ PER-SKILL TOP ARCHETYPES
+   Mace        : str100(26r), str75-agi25(36r), wis25-str75(36r)  ...  worst: agi25-wis75(376r)  spread: 350r
+   Sword       : str100(26r), str75-agi25(35r), wis25-str75(36r)  ...  worst: agi25-wis75(376r)  spread: 350r
+   Bow         : agi100(110r), agi75-wis25(157r), str25-agi75(157r)  ...  worst: wis25-str75(8906r)  spread: 8796r
+   Dagger      : agi100(188r), agi75-wis25(300r), str25-agi75(300r)  ...  worst: wis25-str75(4434r)  spread: 4246r
+   Bolt        : wis100(26r), wis75-str25(36r), agi25-wis75(36r)  ...  worst: str25-agi75(8906r)  spread: 8880r
+   Missile     : wis100(51r), agi25-wis75(67r), wis75-str25(68r)  ...  worst: str25-agi75(8906r)  spread: 8855r
+   Burst       : wis100(21r), wis75-str25(29r), agi25-wis75(29r)  ...  worst: str25-agi75(4434r)  spread: 4413r
+   Volley      : wis100(22r), wis75-str25(30r), agi25-wis75(30r)  ...  worst: str25-agi75(2980r)  spread: 2958r
+ 
+ PER-ARCHETYPE BEST SKILLS
+   str100          : Mace(26r)  >  Sword(26r)  >  Volley(2980r)
+   agi100          : Bow(110r)  >  Dagger(188r)  >  Sword(334r)
+   wis100          : Burst(21r)  >  Volley(22r)  >  Bolt(26r)
+   str50-agi50     : Sword(52r)  >  Mace(54r)  >  Bow(250r)
+   agi50-wis50     : Burst(45r)  >  Volley(46r)  >  Bolt(54r)
+   wis50-str50     : Burst(45r)  >  Volley(46r)  >  Mace(54r)
+   str75-agi25     : Sword(35r)  >  Mace(36r)  >  Bow(607r)
+   agi75-wis25     : Burst(107r)  >  Volley(111r)  >  Bolt(125r)
+   wis75-str25     : Burst(29r)  >  Volley(30r)  >  Bolt(36r)
+   str25-agi75     : Sword(115r)  >  Mace(125r)  >  Bow(157r)
+   agi25-wis75     : Burst(29r)  >  Volley(30r)  >  Bolt(36r)
+   wis25-str75     : Mace(36r)  >  Sword(36r)  >  Burst(107r)
+   balanced        : Burst(62r)  >  Volley(63r)  >  Sword(71r)
+ 
+ Calibration: str100+mace = 26 rounds (expect 25)
+ 
+
+
+[xUnit.net 00:02:15.10]     
+GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(budget: 451) 
+[FAIL]
+[xUnit.net 00:02:15.10]       Assert.Equal() Failure: Values differ
+[xUnit.net 00:02:15.10]       Expected: 25
+[xUnit.net 00:02:15.10]       Actual:   26
+[xUnit.net 00:02:15.10]       Stack Trace:
+[xUnit.net 00:02:15.10]         C:\Users\Diego\Projects\Everdawn\GameCore.Tests\Battle\ArchetypeDamageTests.cs(175,0): at GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(Int32 budget)
+[xUnit.net 00:02:15.10]            at InvokeStub_ArchetypeDamageTests.BalanceReport_ByBudget(Object, Span`1)
+[xUnit.net 00:02:15.10]            at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:02:15.10]       Output:
+[xUnit.net 00:02:15.10]         
+=== Balance Report ∩┐╜ Budget 451  (Boss HP 90200) ===
+[xUnit.net 00:02:15.10]         
+[xUnit.net 00:02:15.10]         ROUNDS-TO-KILL  (lower = faster kill)
+[xUnit.net 00:02:15.10]         Archetype            Mace    Sword      Bow   Dagger     Bolt  Missile    Burst   Volley
+[xUnit.net 00:02:15.10]         ----------------------------------------------------------------------------------------
+[xUnit.net 00:02:15.10]         str100                 26       26   271208   135471   271208   271208   135471    90364
+[xUnit.net 00:02:15.10]         agi100               2256     2256      111       61    54157    54157   135471    90364
+[xUnit.net 00:02:15.10]         wis100              11264    11264   271208   135471       26       51       21       22
+[xUnit.net 00:02:15.10]         str50-agi50            17       16      222      189    90364    90364   135471    90364
+[xUnit.net 00:02:15.10]         agi50-wis50          3760     3760      222      189       17       32       42       43
+[xUnit.net 00:02:15.10]         wis50-str50            51       51   271208   135471       51      100       42       43
+[xUnit.net 00:02:15.10]         str75-agi25            17       16      450      519   135471   135471   135471    90364
+[xUnit.net 00:02:15.10]         agi75-wis25          2818     2818      147      100       25       46       84       84
+[xUnit.net 00:02:15.10]         wis75-str25           100      100   271208   135471       35       67       28       29
+[xUnit.net 00:02:15.10]         str25-agi75            25       23      147      100    67644    67644   135471    90364
+[xUnit.net 00:02:15.10]         agi25-wis75          5631     5631      450      519       17       32       28       29
+[xUnit.net 00:02:15.10]         wis25-str75            35       35   271208   135471      100      200       84       84
+[xUnit.net 00:02:15.10]         balanced               38       30      334      347       38       60       63       64
+[xUnit.net 00:02:15.10]         
+[xUnit.net 00:02:15.10]         PER-SKILL TOP ARCHETYPES
+[xUnit.net 00:02:15.10]           Mace        : str50-agi50(17r), str75-agi25(17r), str25-agi75(25r)  ...  worst: wis100(11264r)  spread: 11247r
+[xUnit.net 00:02:15.10]           Sword       : str50-agi50(16r), str75-agi25(16r), str25-agi75(23r)  ...  worst: wis100(11264r)  spread: 11248r
+[xUnit.net 00:02:15.10]           Bow         : agi100(111r), agi75-wis25(147r), str25-agi75(147r)  ...  worst: wis25-str75(271208r)  spread: 271097r
+[xUnit.net 00:02:15.10]           Dagger      : agi100(61r), agi75-wis25(100r), str25-agi75(100r)  ...  worst: wis25-str75(135471r)  spread: 135410r
+[xUnit.net 00:02:15.10]           Bolt        : agi50-wis50(17r), agi25-wis75(17r), agi75-wis25(25r)  ...  worst: str100(271208r)  spread: 271191r
+[xUnit.net 00:02:15.10]           Missile     : agi50-wis50(32r), agi25-wis75(32r), agi75-wis25(46r)  ...  worst: str100(271208r)  spread: 271176r
+[xUnit.net 00:02:15.10]           Burst       : wis100(21r), wis75-str25(28r), agi25-wis75(28r)  ...  worst: str25-agi75(135471r)  spread: 135450r
+[xUnit.net 00:02:15.10]           Volley      : wis100(22r), wis75-str25(29r), agi25-wis75(29r)  ...  worst: str25-agi75(90364r)  spread: 90342r
+[xUnit.net 00:02:15.10]         
+[xUnit.net 00:02:15.10]         PER-ARCHETYPE BEST SKILLS
+[xUnit.net 00:02:15.10]           str100          : Mace(26r)  >  Sword(26r)  >  Volley(90364r)
+[xUnit.net 00:02:15.10]           agi100          : Dagger(61r)  >  Bow(111r)  >  Mace(2256r)
+[xUnit.net 00:02:15.10]           wis100          : Burst(21r)  >  Volley(22r)  >  Bolt(26r)
+[xUnit.net 00:02:15.10]           str50-agi50     : Sword(16r)  >  Mace(17r)  >  Dagger(189r)
+[xUnit.net 00:02:15.10]           agi50-wis50     : Bolt(17r)  >  Missile(32r)  >  Burst(42r)
+[xUnit.net 00:02:15.10]           wis50-str50     : Burst(42r)  >  Volley(43r)  >  Mace(51r)
+[xUnit.net 00:02:15.10]           str75-agi25     : Sword(16r)  >  Mace(17r)  >  Bow(450r)
+[xUnit.net 00:02:15.10]           agi75-wis25     : Bolt(25r)  >  Missile(46r)  >  Burst(84r)
+[xUnit.net 00:02:15.10]           wis75-str25     : Burst(28r)  >  Volley(29r)  >  Bolt(35r)
+[xUnit.net 00:02:15.10]           str25-agi75     : Sword(23r)  >  Mace(25r)  >  Dagger(100r)
+[xUnit.net 00:02:15.10]           agi25-wis75     : Bolt(17r)  >  Burst(28r)  >  Volley(29r)
+[xUnit.net 00:02:15.10]           wis25-str75     : Mace(35r)  >  Sword(35r)  >  Burst(84r)
+[xUnit.net 00:02:15.10]           balanced        : Sword(30r)  >  Mace(38r)  >  Bolt(38r)
+[xUnit.net 00:02:15.10]         
+[xUnit.net 00:02:15.10]         Calibration: str100+mace = 26 rounds (expect 25)
+[xUnit.net 00:02:15.10]         
+[xUnit.net 00:02:15.10]   Finished:    GameCore.Tests
+  Failed GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(budget: 451) [29 s]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 25
+Actual:   26
+  Stack Trace:
+     at GameCore.Tests.Battle.ArchetypeDamageTests.BalanceReport_ByBudget(Int32 budget) in C:\Users\Diego\Projects\Everdawn\GameCore.Tests\Battle\ArchetypeDamageTests.cs:line 175
+   at InvokeStub_ArchetypeDamageTests.BalanceReport_ByBudget(Object, Span`1)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Standard Output Messages:
+ 
+=== Balance Report ∩┐╜ Budget 451  (Boss HP 90200) ===
+ 
+ ROUNDS-TO-KILL  (lower = faster kill)
+ Archetype            Mace    Sword      Bow   Dagger     Bolt  Missile    Burst   Volley
+ ----------------------------------------------------------------------------------------
+ str100                 26       26   271208   135471   271208   271208   135471    90364
+ agi100               2256     2256      111       61    54157    54157   135471    90364
+ wis100              11264    11264   271208   135471       26       51       21       22
+ str50-agi50            17       16      222      189    90364    90364   135471    90364
+ agi50-wis50          3760     3760      222      189       17       32       42       43
+ wis50-str50            51       51   271208   135471       51      100       42       43
+ str75-agi25            17       16      450      519   135471   135471   135471    90364
+ agi75-wis25          2818     2818      147      100       25       46       84       84
+ wis75-str25           100      100   271208   135471       35       67       28       29
+ str25-agi75            25       23      147      100    67644    67644   135471    90364
+ agi25-wis75          5631     5631      450      519       17       32       28       29
+ wis25-str75            35       35   271208   135471      100      200       84       84
+ balanced               38       30      334      347       38       60       63       64
+ 
+ PER-SKILL TOP ARCHETYPES
+   Mace        : str50-agi50(17r), str75-agi25(17r), str25-agi75(25r)  ...  worst: wis100(11264r)  spread: 11247r
+   Sword       : str50-agi50(16r), str75-agi25(16r), str25-agi75(23r)  ...  worst: wis100(11264r)  spread: 11248r
+   Bow         : agi100(111r), agi75-wis25(147r), str25-agi75(147r)  ...  worst: wis25-str75(271208r)  spread: 271097r
+   Dagger      : agi100(61r), agi75-wis25(100r), str25-agi75(100r)  ...  worst: wis25-str75(135471r)  spread: 135410r
+   Bolt        : agi50-wis50(17r), agi25-wis75(17r), agi75-wis25(25r)  ...  worst: str100(271208r)  spread: 271191r
+   Missile     : agi50-wis50(32r), agi25-wis75(32r), agi75-wis25(46r)  ...  worst: str100(271208r)  spread: 271176r
+   Burst       : wis100(21r), wis75-str25(28r), agi25-wis75(28r)  ...  worst: str25-agi75(135471r)  spread: 135450r
+   Volley      : wis100(22r), wis75-str25(29r), agi25-wis75(29r)  ...  worst: str25-agi75(90364r)  spread: 90342r
+ 
+ PER-ARCHETYPE BEST SKILLS
+   str100          : Mace(26r)  >  Sword(26r)  >  Volley(90364r)
+   agi100          : Dagger(61r)  >  Bow(111r)  >  Mace(2256r)
+   wis100          : Burst(21r)  >  Volley(22r)  >  Bolt(26r)
+   str50-agi50     : Sword(16r)  >  Mace(17r)  >  Dagger(189r)
+   agi50-wis50     : Bolt(17r)  >  Missile(32r)  >  Burst(42r)
+   wis50-str50     : Burst(42r)  >  Volley(43r)  >  Mace(51r)
+   str75-agi25     : Sword(16r)  >  Mace(17r)  >  Bow(450r)
+   agi75-wis25     : Bolt(25r)  >  Missile(46r)  >  Burst(84r)
+   wis75-str25     : Burst(28r)  >  Volley(29r)  >  Bolt(35r)
+   str25-agi75     : Sword(23r)  >  Mace(25r)  >  Dagger(100r)
+   agi25-wis75     : Bolt(17r)  >  Burst(28r)  >  Volley(29r)
+   wis25-str75     : Mace(35r)  >  Sword(35r)  >  Burst(84r)
+   balanced        : Sword(30r)  >  Mace(38r)  >  Bolt(38r)
+ 
+ Calibration: str100+mace = 26 rounds (expect 25)
+ 
+
+
+
+Test Run Failed.
+Total tests: 525
+     Passed: 520
+     Failed: 5
+ Total time: 2.2608 Minutes
+     1>Project "c:\Users\Diego\Projects\Everdawn\GameCore.Tests\GameCore.Tests.csproj" on node 1 (VSTest target(s)).
+     1>_VSTestConsole:
+         MSB4181: The "VSTestTask" task returned false but did not log an error.
+     1>Done Building Project "c:\Users\Diego\Projects\Everdawn\GameCore.Tests\GameCore.Tests.csproj" (VSTest target(s)) -- FAILED.
+
+Build FAILED.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:02:15.96
