@@ -18,15 +18,22 @@
   </ItemGroup>
 
   <!--
-    Publish GameData/Base YAML files as static web assets under wwwroot/GameData/Base/.
-    HttpContentSource fetches them via HTTP at runtime using the content-index.json manifest.
+    Copy GameData/Base YAML files into wwwroot/GameData/Base/ before each build so the
+    Blazor WASM dev server can serve them via HTTP. The static web asset system requires
+    files to be physically present in the project wwwroot; linking external paths via
+    <Content><Link> registers the correct URL but the dev server resolves the physical
+    file from (ContentRoot=wwwroot) + SubPath, which fails for out-of-project sources.
+    The copied files are generated outputs — add GameData/**/*.yml to .gitignore if you
+    don't want them committed from wwwroot.
     Update content-index.json whenever files are added to or removed from GameData/Base/.
   -->
-  <ItemGroup>
-    <Content Include="..\GameData\Base\**\*.yml">
-      <Link>wwwroot\GameData\Base\%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+  <Target Name="CopyGameDataYamlToWwwroot" BeforeTargets="BeforeBuild">
+    <ItemGroup>
+      <_YamlSource Include="..\GameData\Base\**\*.yml" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_YamlSource)"
+          DestinationFiles="@(_YamlSource->'$(MSBuildProjectDirectory)\wwwroot\GameData\Base\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>

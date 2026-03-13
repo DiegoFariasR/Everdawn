@@ -34,6 +34,11 @@ x86/
 **/bin/
 **/obj/
 
+# BattleSandbox.Web — YAML files copied from GameData/Base by the CopyGameDataYamlToWwwroot
+# build target. These are generated outputs; the canonical source is GameData/Base/.
+BattleSandbox.Web/wwwroot/GameData/Base/**/*.yml
+BattleSandbox.Web/wwwroot/GameData/Base/*.yml
+
 # NuGet
 *.nupkg
 
