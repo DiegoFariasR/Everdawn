@@ -22,6 +22,8 @@ namespace GameCore.Battle
         private string? _winningTeam;
         // Units that will lose their next turn due to the frozen status effect.
         private readonly HashSet<string> _frozenUnits = new HashSet<string>();
+        // Units that will lose their next turn due to the stunned status effect.
+        private readonly HashSet<string> _stunnedUnits = new HashSet<string>();
 
         public InteractiveBattleSession(BattleSetup setup, int seed)
         {
@@ -110,6 +112,16 @@ namespace GameCore.Battle
                 return BuildResponse(newEvents);
             }
 
+            // If the player is stunned, their chosen action is skipped and the turn is consumed.
+            if (_stunnedUnits.Contains(actor.Id))
+            {
+                _stunnedUnits.Remove(actor.Id);
+                newEvents.Add(AddEvent(actor.Id, $"{actor.Name} is stunned and cannot act!", "status"));
+                if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
+                newEvents.AddRange(AutoAdvance());
+                return BuildResponse(newEvents);
+            }
+
             var skill = actor.ResolvedSkills.FirstOrDefault(s => s.Id == r.SkillId)
                          ?? throw new ArgumentException($"Unknown skill: {r.SkillId}");
 
@@ -152,6 +164,15 @@ namespace GameCore.Battle
                 return BuildResponse(newEvents);
             }
 
+            if (_stunnedUnits.Contains(actor.Id))
+            {
+                _stunnedUnits.Remove(actor.Id);
+                newEvents.Add(AddEvent(actor.Id, $"{actor.Name} is stunned and cannot act!", "status"));
+                if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
+                newEvents.AddRange(AutoAdvance());
+                return BuildResponse(newEvents);
+            }
+
             var skill = actor.ResolvedSkills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Last();
             var targets = ResolveAutoTargets(actor, skill);
             if (targets.Count == 0) { CheckEnd(); return BuildResponse(Array.Empty<BattleEvent>()); }
@@ -178,6 +199,15 @@ namespace GameCore.Battle
                 // Consume the frozen turn: skip the action and advance.
                 _frozenUnits.Remove(actor.Id);
                 newEvents.Add(AddEvent(actor.Id, $"{actor.Name} is frozen and cannot act!", "status"));
+                if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
+                return BuildResponse(newEvents);
+            }
+
+            if (_stunnedUnits.Contains(actor.Id))
+            {
+                // Consume the stunned turn: skip the action and advance.
+                _stunnedUnits.Remove(actor.Id);
+                newEvents.Add(AddEvent(actor.Id, $"{actor.Name} is stunned and cannot act!", "status"));
                 if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
                 return BuildResponse(newEvents);
             }
@@ -226,7 +256,7 @@ namespace GameCore.Battle
 
         // ── Internals ────────────────────────────────────────────────────────
 
-        /// <summary>Auto-resolves enemy turns until it's a non-frozen player's turn or the battle ends.</summary>
+        /// <summary>Auto-resolves enemy turns until it's a non-frozen, non-stunned player's turn or the battle ends.</summary>
         private IReadOnlyList<BattleEvent> AutoAdvance()
         {
             var produced = new List<BattleEvent>();
@@ -234,11 +264,12 @@ namespace GameCore.Battle
             {
                 var actor = _turnOrder[_turnIndex];
                 bool isFrozen = _frozenUnits.Contains(actor.Id);
+                bool isStunned = _stunnedUnits.Contains(actor.Id);
 
-                // Stop when it is a living, non-frozen player's turn — they need to provide input.
-                if (!isFrozen && actor.Team == "player") break;
+                // Stop when it is a living, non-frozen, non-stunned player's turn — they need to provide input.
+                if (!isFrozen && !isStunned && actor.Team == "player") break;
 
-                // Process start-of-turn effects for this actor (burn DOT, thermal decay).
+                // Process start-of-turn effects for this actor (burn DOT, thermal decay, disruption decay).
                 produced.AddRange(StartOfTurn(actor));
                 if (_isOver) break;
 
@@ -247,6 +278,15 @@ namespace GameCore.Battle
                     // Consume the frozen turn: skip the action and advance.
                     _frozenUnits.Remove(actor.Id);
                     produced.Add(AddEvent(actor.Id, $"{actor.Name} is frozen and cannot act!", "status"));
+                    if (AdvanceTurn()) produced.AddRange(StartOfRound());
+                    continue;
+                }
+
+                if (isStunned)
+                {
+                    // Consume the stunned turn: skip the action and advance.
+                    _stunnedUnits.Remove(actor.Id);
+                    produced.Add(AddEvent(actor.Id, $"{actor.Name} is stunned and cannot act!", "status"));
                     if (AdvanceTurn()) produced.AddRange(StartOfRound());
                     continue;
                 }
@@ -378,6 +418,10 @@ namespace GameCore.Battle
 
             var effect = skill.Effects.Count > 0 ? skill.Effects[0] : null;
 
+            // Dizzy: actor's final damage output is reduced when their disruption bar is at/above the dizzy threshold.
+            // Stunned actors don't reach ExecuteAction (turn is skipped), so no need to exclude them here.
+            bool actorIsDizzy = GetBar(actor.Id, DisruptionSystem.BarDisruption) >= DisruptionSystem.DizzyThreshold;
+
             foreach (var target in targets)
             {
                 for (int i = 0; i < effectiveHits; i++)
@@ -427,6 +471,10 @@ namespace GameCore.Battle
                         var hitResults = DamageCalc.Compute(actor, target, components, skill.DamageMultiplier, empowerMult * perHitHitsMult, _rng);
                         int totalDamage = 0;
                         foreach (var r in hitResults) totalDamage += r.FinalDamage;
+
+                        // Dizzy: reduce the actor's final damage output by 20%.
+                        totalDamage = DisruptionSystem.ApplyDizzyReduction(totalDamage, actorIsDizzy);
+
                         var primaryType = skill.PrimaryEffectType;
 
                         // Barrier absorbs damage before HP.
@@ -456,6 +504,10 @@ namespace GameCore.Battle
 
                         // Thermal buildup: fire and cold hits build opposing bars on the target.
                         produced.AddRange(ApplyThermalBuildup(target, hitResults));
+
+                        // Disruption buildup: apply per-hit disruption power declared on the skill effect.
+                        if (effect != null && effect.DisruptionPower > 0)
+                            produced.AddRange(ApplyDisruptionBuildup(target, effect.DisruptionPower));
 
                         if (_hp[target.Id] <= 0)
                         {
@@ -528,6 +580,11 @@ namespace GameCore.Battle
             if (newCold != coldBar) _bars[actor.Id][ThermalSystem.BarCold] = newCold;
             if (newBurn != burnBar) _bars[actor.Id][ThermalSystem.BarBurn] = newBurn;
 
+            // Disruption bar decay.
+            int disruptionBar = GetBar(actor.Id, DisruptionSystem.BarDisruption);
+            int newDisruption = DisruptionSystem.ApplyDecay(disruptionBar);
+            if (newDisruption != disruptionBar) _bars[actor.Id][DisruptionSystem.BarDisruption] = newDisruption;
+
             return events;
         }
 
@@ -570,17 +627,54 @@ namespace GameCore.Battle
             return events;
         }
 
+        // ── Disruption helpers ───────────────────────────────────────────────
+
         /// <summary>
-        /// Returns the active thermal status effect IDs for a unit, or null when none are active.
+        /// Applies disruption power to <paramref name="target"/>'s disruption bar for one hit.
+        /// Generates stun events when the bar reaches the stun threshold.
+        /// </summary>
+        private IReadOnlyList<BattleEvent> ApplyDisruptionBuildup(BattleUnit target, int disruptionPower)
+        {
+            var events = new List<BattleEvent>();
+            int current = GetBar(target.Id, DisruptionSystem.BarDisruption);
+            int built = DisruptionSystem.ApplyDisruption(disruptionPower, target.DisruptionResistance, current, out int newBar);
+            _bars[target.Id][DisruptionSystem.BarDisruption] = newBar;
+
+            if (built > 0)
+                events.Add(AddEvent(target.Id, $"{target.Name} takes {built} disruption.", "status"));
+
+            if (DisruptionSystem.CheckStunTriggered(ref newBar))
+            {
+                _bars[target.Id][DisruptionSystem.BarDisruption] = newBar;
+                _stunnedUnits.Add(target.Id);
+                events.Add(AddEvent(target.Id, $"{target.Name} is stunned!", "status"));
+            }
+
+            return events;
+        }
+
+        /// <summary>
+        /// Returns the active status effect IDs for a unit, or null when none are active.
+        /// Combines thermal (slow/frozen/burning) and disruption (dizzy/stunned) effects.
         /// </summary>
         private IReadOnlyList<string>? BuildStatusEffects(string unitId)
         {
             if (_hp[unitId] <= 0) return null;
+
             int coldBar = GetBar(unitId, ThermalSystem.BarCold);
             int burnBar = GetBar(unitId, ThermalSystem.BarBurn);
             bool isFrozen = _frozenUnits.Contains(unitId);
-            var effects = ThermalSystem.GetThermalStatusEffects(coldBar, burnBar, isFrozen);
-            return effects.Count > 0 ? effects : null;
+            var thermalEffects = ThermalSystem.GetThermalStatusEffects(coldBar, burnBar, isFrozen);
+
+            int disruptionBar = GetBar(unitId, DisruptionSystem.BarDisruption);
+            bool isStunned = _stunnedUnits.Contains(unitId);
+            var disruptionEffects = DisruptionSystem.GetDisruptionStatusEffects(disruptionBar, isStunned);
+
+            if (thermalEffects.Count == 0 && disruptionEffects.Count == 0) return null;
+
+            var all = new List<string>(thermalEffects);
+            all.AddRange(disruptionEffects);
+            return all;
         }
 
         /// <summary>Called when the turn order wraps. Increments round, regenerates mana, decays barrier.</summary>
