@@ -42,6 +42,64 @@
     border-bottom-color: #5a8dee;
 }
 
+/* Landing page */
+.landing {
+    padding: 2rem 0;
+    color: #ccc;
+}
+
+.landing-title {
+    margin: 0 0 0.25rem;
+    font-size: 1.3rem;
+    color: #e0e0e0;
+}
+
+.landing-sub {
+    margin: 0 0 1.5rem;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.landing-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.landing-card {
+    display: block;
+    background: #12122a;
+    border: 1px solid #2a2a4a;
+    border-radius: 6px;
+    padding: 1rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.landing-card:hover {
+    border-color: #5a8dee;
+    background: #1a1a40;
+}
+
+.landing-card-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.landing-card-name {
+    font-weight: 600;
+    color: #e0e0e0;
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.landing-card-desc {
+    color: #888;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
 /* Placeholder pages shared style */
 .placeholder-page {
     padding: 2rem 0;
