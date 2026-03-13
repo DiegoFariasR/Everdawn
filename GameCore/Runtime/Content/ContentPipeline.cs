@@ -64,18 +64,11 @@ namespace GameCore.Content
             foreach (var raw in list)
                 yield return new BattleModifier(
                     raw.Id, raw.Name, raw.Description,
-                    SetCost: raw.SetCost,
-                    SetDamageMultiplier: raw.SetDamageMultiplier,
-                    SetIsAoe: raw.SetIsAoe,
-                    SetCooldown: raw.SetCooldown,
-                    SetInitialCooldown: raw.SetInitialCooldown,
-                    ModifyCost: raw.ModifyCost,
-                    ModifyDamageMultiplier: raw.ModifyDamageMultiplier,
-                    ModifyCooldown: raw.ModifyCooldown,
-                    ModifyInitialCooldown: raw.ModifyInitialCooldown,
-                    AddDamageComponents: raw.AddDamageComponents.Count == 0
+                    Set: raw.Set.Count == 0 ? null : raw.Set,
+                    Modify: raw.Modify.Count == 0 ? null : raw.Modify,
+                    AddDamagePerHit: raw.Add.DamagePerHit.Count == 0
                         ? null
-                        : raw.AddDamageComponents
+                        : raw.Add.DamagePerHit
                             .Select(c => new DamageComponent(
                                 c.DamageType != null ? Enum.Parse<EffectType>(c.DamageType, ignoreCase: true) : (EffectType?)null,
                                 c.Scaling.Select(s => new DamageScaling(s.Stat, s.Scale)).ToArray()))
@@ -138,25 +131,28 @@ namespace GameCore.Content
                                 $"Unit '{raw.Id}' skill slot '{slot.Id}' references unknown modifier '{modId}'."))
                         .ToArray();
 
-                    // Apply modifier stat overrides in list order; last modifier wins per field.
-                    // Set overrides are applied first, then Modify deltas are summed on top.
-                    var setCost = compiledMods.LastOrDefault(m => m.SetCost != null)?.SetCost ?? sk.Cost;
-                    var setDmgMult = compiledMods.LastOrDefault(m => m.SetDamageMultiplier != null)?.SetDamageMultiplier ?? sk.DamageMultiplier;
-                    var setCooldown = compiledMods.LastOrDefault(m => m.SetCooldown != null)?.SetCooldown ?? sk.Cooldown;
-                    var setInitCd = compiledMods.LastOrDefault(m => m.SetInitialCooldown != null)?.SetInitialCooldown ?? sk.InitialCooldown;
+                    // Apply modifier action groups in deterministic order: Set → Modify → Add.
+                    // Set: last modifier with a given key wins (override/replace).
+                    var setCost = GetLastSet<int>(compiledMods, "cost", sk.Cost);
+                    var setDmgMult = GetLastSet<double>(compiledMods, "damageMultiplier", sk.DamageMultiplier);
+                    var setIsAoe = GetLastSet<bool>(compiledMods, "isAoe", sk.IsAoe);
+                    var setCooldown = GetLastSet<int>(compiledMods, "cooldown", sk.Cooldown);
+                    var setInitCd = GetLastSet<int>(compiledMods, "initialCooldown", sk.InitialCooldown);
+
+                    // Modify: all deltas for a key are summed on top of the Set result.
                     var extraComponents = compiledMods
-                        .Where(m => m.AddDamageComponents != null && sk.Category != Battle.SkillCategory.Spell)
-                        .SelectMany(m => m.AddDamageComponents!)
+                        .Where(m => m.AddDamagePerHit != null && sk.Category != Battle.SkillCategory.Spell)
+                        .SelectMany(m => m.AddDamagePerHit!)
                         .ToArray();
 
                     return sk with
                     {
                         Modifiers = compiledMods.Select(m => m.Id).ToArray(),
-                        Cost = setCost + compiledMods.Sum(m => m.ModifyCost ?? 0),
-                        DamageMultiplier = setDmgMult + compiledMods.Sum(m => m.ModifyDamageMultiplier ?? 0.0),
-                        IsAoe = compiledMods.LastOrDefault(m => m.SetIsAoe != null)?.SetIsAoe ?? sk.IsAoe,
-                        Cooldown = setCooldown + compiledMods.Sum(m => m.ModifyCooldown ?? 0),
-                        InitialCooldown = setInitCd + compiledMods.Sum(m => m.ModifyInitialCooldown ?? 0),
+                        Cost = setCost + SumModifyInt(compiledMods, "cost"),
+                        DamageMultiplier = setDmgMult + SumModify(compiledMods, "damageMultiplier"),
+                        IsAoe = setIsAoe,
+                        Cooldown = setCooldown + SumModifyInt(compiledMods, "cooldown"),
+                        InitialCooldown = setInitCd + SumModifyInt(compiledMods, "initialCooldown"),
                         Effects = extraComponents.Length == 0 || sk.Effects.Count == 0
                             ? sk.Effects
                             : new SkillEffect[]
@@ -228,6 +224,47 @@ namespace GameCore.Content
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Returns the value for <paramref name="key"/> from the last modifier in
+        /// <paramref name="mods"/> that has a Set entry for that key, or <paramref name="fallback"/>
+        /// if none does. Converts via <see cref="System.Convert.ChangeType"/> to handle YAML
+        /// type variance (e.g. int stored as string).
+        /// </summary>
+        private static T GetLastSet<T>(IReadOnlyList<BattleModifier> mods, string key, T fallback)
+        {
+            for (int i = mods.Count - 1; i >= 0; i--)
+            {
+                if (mods[i].Set != null && mods[i].Set!.TryGetValue(key, out var val))
+                {
+                    try
+                    {
+                        return (T)System.Convert.ChangeType(val, typeof(T));
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException(
+                            $"Modifier '{mods[i].Id}': cannot convert Set['{key}'] value '{val}' ({val?.GetType().Name}) to {typeof(T).Name}.",
+                            ex);
+                    }
+                }
+            }
+            return fallback;
+        }
+
+        /// <summary>Sums all Modify deltas across modifiers for the given key.</summary>
+        private static double SumModify(IReadOnlyList<BattleModifier> mods, string key)
+        {
+            double total = 0;
+            foreach (var m in mods)
+                if (m.Modify != null && m.Modify.TryGetValue(key, out var delta))
+                    total += delta;
+            return total;
+        }
+
+        /// <summary>Sums Modify deltas as an integer (rounds to nearest).</summary>
+        private static int SumModifyInt(IReadOnlyList<BattleModifier> mods, string key) =>
+            (int)Math.Round(SumModify(mods, key));
 
         private static T ParseYaml<T>(string yamlText)
         {

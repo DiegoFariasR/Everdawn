@@ -4,9 +4,10 @@
     The unit's basic action. Always available, costs no MP, never on cooldown.
     Does not trigger Focus or Fury empowerment.
     Produces an "attack" event type.
-  setCost: 0
-  setCooldown: 0
-  setInitialCooldown: 0
+  set:
+    cost: 0
+    cooldown: 0
+    initialCooldown: 0
 
 - id: ultimate
   name: Ultimate
@@ -14,8 +15,9 @@
     The unit's strongest action.
     Automatically starts every battle with at least 1 round of cooldown.
     Produces a "soulburn" event type.
-  modifyCooldown: 1
-  modifyInitialCooldown: 1
+  modify:
+    cooldown: 1
+    initialCooldown: 1
 
 # ── Enchanting ────────────────────────────────────────────────────────────────
 # Pre-battle modifier family. Adds an elemental damage component to a weapon
@@ -26,28 +28,31 @@
   name: Fire Enchant
   description: >
     Infuses the weapon with fire. Adds a fire damage component scaling with WIS.
-  addDamageComponents:
-    - damageType: fire
-      scaling:
-        - stat: wis
-          scale: 0.5
+  add:
+    damagePerHit:
+      - damageType: fire
+        scaling:
+          - stat: wis
+            scale: 0.5
 
 - id: enchant-holy
   name: Holy Enchant
   description: >
     Infuses the weapon with holy power. Adds a holy damage component scaling with WIS.
-  addDamageComponents:
-    - damageType: holy
-      scaling:
-        - stat: wis
-          scale: 0.5
+  add:
+    damagePerHit:
+      - damageType: holy
+        scaling:
+          - stat: wis
+            scale: 0.5
 
 - id: enchant-lightning
   name: Lightning Enchant
   description: >
     Infuses the weapon with lightning. Adds a lightning damage component scaling with WIS.
-  addDamageComponents:
-    - damageType: lightning
-      scaling:
-        - stat: wis
-          scale: 0.5
+  add:
+    damagePerHit:
+      - damageType: lightning
+        scaling:
+          - stat: wis
+            scale: 0.5
