@@ -50,12 +50,13 @@ namespace GameCore.Tests.Battle
         }
 
         [Fact]
-        public void HundredPercentResistance_FinalDamageIsZero()
+        public void HundredPercentResistance_CapsAt90_DealsMinimumDamage()
         {
+            // Resistance is capped at 90%: even immune units always take ≥10% damage.
             var target = MakeTarget(new Dictionary<EffectType, int> { [EffectType.Physical] = 100 });
             var result = Compute(MakeActor(str: 100), target, EffectType.Physical);
-            Assert.Equal(0, result.FinalDamage);
-            Assert.True(result.RawDamage > 0);
+            Assert.Equal((int)(result.RawDamage * 0.10), result.FinalDamage);
+            Assert.True(result.FinalDamage > 0);
         }
 
         [Fact]

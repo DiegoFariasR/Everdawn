@@ -18,7 +18,8 @@ namespace GameCore.Content.Raw
     /// Typed override values for a modifier's Set action group.
     /// Scalar skill variables are explicit nullable fields; elemental resistance and penetration
     /// are expressed as string-keyed dictionaries (keys match <see cref="GameCore.Battle.EffectType"/>
-    /// names, case-insensitive) so they can be authored as a single typed block in YAML.
+    /// names, case-insensitive). Crowd-control resistance/penetration types (e.g. "disruption")
+    /// also go in those same dicts and are routed to their runtime variables by the pipeline.
     /// </summary>
     public class RawModifierSet
     {
@@ -27,17 +28,19 @@ namespace GameCore.Content.Raw
         public bool? IsAoe { get; set; }
         public int? Cooldown { get; set; }
         public int? InitialCooldown { get; set; }
-        public int? DisruptionResistance { get; set; }
-        public int? DisruptionPenetration { get; set; }
 
         /// <summary>
-        /// Elemental resistance overrides keyed by effect type name (e.g. "physical", "fire").
+        /// Resistance overrides keyed by type name (e.g. "physical", "fire", "disruption").
+        /// Elemental keys map to <see cref="GameCore.Battle.EffectType"/>; CC keys like
+        /// "disruption" are routed to their dedicated runtime variable by the pipeline.
         /// Last modifier wins per type. 0 = none, 50 = half damage, 100 = immune, negative = weakness.
         /// </summary>
         public Dictionary<string, int> Resistance { get; set; } = new Dictionary<string, int>();
 
         /// <summary>
-        /// Elemental penetration overrides keyed by effect type name (e.g. "physical", "fire").
+        /// Penetration overrides keyed by type name (e.g. "physical", "fire", "disruption").
+        /// Elemental keys map to <see cref="GameCore.Battle.EffectType"/>; CC keys like
+        /// "disruption" are routed to their dedicated runtime variable by the pipeline.
         /// Last modifier wins per type. Subtracted from the target's effective resistance.
         /// </summary>
         public Dictionary<string, int> Penetration { get; set; } = new Dictionary<string, int>();
@@ -47,6 +50,7 @@ namespace GameCore.Content.Raw
     /// Typed additive deltas for a modifier's Modify action group.
     /// Scalar skill variables are explicit nullable fields; elemental resistance and penetration
     /// are expressed as string-keyed dictionaries so they can be authored as a single typed block.
+    /// CC types like "disruption" also go in those dicts — routed by the pipeline.
     /// All deltas for the same key are summed across all modifiers.
     /// </summary>
     public class RawModifierModify
@@ -55,13 +59,11 @@ namespace GameCore.Content.Raw
         public double? DamageMultiplier { get; set; }
         public double? Cooldown { get; set; }
         public double? InitialCooldown { get; set; }
-        public double? DisruptionResistance { get; set; }
-        public double? DisruptionPenetration { get; set; }
 
-        /// <summary>Elemental resistance deltas keyed by effect type name.</summary>
+        /// <summary>Resistance deltas keyed by type name (elemental or CC, e.g. "disruption").</summary>
         public Dictionary<string, double> Resistance { get; set; } = new Dictionary<string, double>();
 
-        /// <summary>Elemental penetration deltas keyed by effect type name.</summary>
+        /// <summary>Penetration deltas keyed by type name (elemental or CC, e.g. "disruption").</summary>
         public Dictionary<string, double> Penetration { get; set; } = new Dictionary<string, double>();
     }
 

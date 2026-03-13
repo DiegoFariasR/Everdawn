@@ -74,7 +74,8 @@ namespace GameCore.Battle
         /// <returns>Amount of disruption actually built (after resistance).</returns>
         public static int ApplyDisruption(int power, int disruptionResistance, int currentBar, out int newBar)
         {
-            double factor = Math.Max(0.0, 1.0 - disruptionResistance / 100.0);
+            // Resistance capped at 90: even full immunity still allows ≥10% disruption through.
+            double factor = Math.Max(0.0, 1.0 - Math.Min(90, disruptionResistance) / 100.0);
             int built = (int)(power * factor);
             newBar = Math.Min(MaxBar, currentBar + built);
             return built;

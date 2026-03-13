@@ -43,10 +43,10 @@ namespace GameCore.Battle
             int value = rolled;
 
             // ── Layer 2: Resistance ──────────────────────────────────────────
-            // Reduce damage by the defender's resistance percentage for this damage type,
-            // minus the attacker's penetration for the same type.
-            // 0 = no change. 50 = half damage. 100 = immune. Negative = weakness (extra damage).
-            int resistance = target.GetResistance(effectType) - actor.GetPenetration(effectType);
+            // Reduce damage by the defender's effective resistance (raw minus penetration).
+            // Capped at 90: even full immunity still takes ≥10% damage.
+            // Negative = weakness (extra damage). No floor below the cap.
+            int resistance = Math.Min(90, target.GetResistance(effectType) - actor.GetPenetration(effectType));
             int afterResistance = Math.Max(0, (int)(value * (1.0 - resistance / 100.0)));
             steps.Add(new DamageStep("Resistance", value, afterResistance));
             value = afterResistance;
@@ -106,12 +106,13 @@ namespace GameCore.Battle
                 // Use getEffectiveResistance if supplied (includes runtime stat modifiers);
                 // fall back to the unit's compiled base resistance otherwise.
                 // Subtract the actor's penetration (compiled or runtime) from the resistance.
-                int resistance = (getEffectiveResistance != null
+                // Capped at 90: even full immunity still takes ≥10% damage.
+                int resistance = Math.Min(90, (getEffectiveResistance != null
                     ? getEffectiveResistance(component.DamageType.Value)
                     : target.GetResistance(component.DamageType.Value))
                     - (getEffectivePenetration != null
                         ? getEffectivePenetration(component.DamageType.Value)
-                        : actor.GetPenetration(component.DamageType.Value));
+                        : actor.GetPenetration(component.DamageType.Value)));
                 int afterResistance = Math.Max(0, (int)(value * (1.0 - resistance / 100.0)));
                 steps.Add(new DamageStep("Resistance", value, afterResistance));
 

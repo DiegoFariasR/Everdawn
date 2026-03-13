@@ -364,13 +364,13 @@ namespace GameCore.Tests.Battle
         // ────────────────────────────────────────────────────────────────────
 
         [Fact]
-        public void ColdResistBuff_ImmunityBlocksColdBuildup()
+        public void ColdResistBuff_ReducesColdBuildup()
         {
-            // ColdResistUp adds 100 cold resistance → full immunity from cold buildup.
+            // ColdResistUp adds 100 cold resistance → capped at 90%, so 10% of cold still builds.
             // Player has high AGI so they act first; enemy counter-attacks with the buff active.
             var player = MakePlayer(str: 50, agi: 100,
                 skills: new BattleSkill[] { MakeDamageSkill("p-basic") });
-            var enemy = new BattleUnit("enemy", "enemy", "enemy", Level: 1, Str: 50, Wis: 50, Agi: 1,
+            var enemy = new BattleUnit("enemy", "enemy", "enemy", Level: 1, Str: 50, Wis: 5, Agi: 1,
                 Skills: new BattleSkill[]
                 {
                     new BattleSkill("cold-atk", "Blizzard", Cost: 0, DamageMultiplier: 1.0,
@@ -386,11 +386,11 @@ namespace GameCore.Tests.Battle
 
             // Without resistance: cold builds up.
             int coldBarNoResist = GetPlayerColdBarAfterEnemyAttack(player, enemy, withResist: false, seed: 1);
-            // With full cold immunity: cold bar stays at 0.
+            // With 100 cold resistance (capped at 90%): cold buildup reduced by 90%, not fully blocked.
             int coldBarWithResist = GetPlayerColdBarAfterEnemyAttack(player, enemy, withResist: true, seed: 1);
 
             Assert.True(coldBarNoResist > 0, "Cold should build up without resistance");
-            Assert.Equal(0, coldBarWithResist);
+            Assert.True(coldBarWithResist < coldBarNoResist, "Cold resistance should reduce buildup");
         }
 
         private static int GetPlayerColdBarAfterEnemyAttack(BattleUnit player, BattleUnit enemy, bool withResist, int seed)
@@ -417,7 +417,7 @@ namespace GameCore.Tests.Battle
         // ────────────────────────────────────────────────────────────────────
 
         [Fact]
-        public void DisruptionResistBuff_ImmunityBlocksDisruptionBuildup()
+        public void DisruptionResistBuff_ReducesDisruptionBuildup()
         {
             // Player has high AGI so they act first; enemy counter-attacks with the buff active.
             var player = MakePlayer(str: 50, agi: 100,
@@ -441,7 +441,7 @@ namespace GameCore.Tests.Battle
             int disruptWithResist = GetPlayerDisruptionAfterEnemyAttack(player, enemy, withResist: true, seed: 1);
 
             Assert.True(disruptNoResist > 0, "Disruption should build without resistance");
-            Assert.Equal(0, disruptWithResist);
+            Assert.True(disruptWithResist < disruptNoResist, "Disruption resistance should reduce buildup");
         }
 
         private static int GetPlayerDisruptionAfterEnemyAttack(BattleUnit player, BattleUnit enemy, bool withResist, int seed)

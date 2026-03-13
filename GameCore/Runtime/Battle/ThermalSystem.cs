@@ -98,7 +98,8 @@ namespace GameCore.Battle
             int coldBuilt = 0;
             if (leftover > 0)
             {
-                double factor = Math.Max(0.0, 1.0 - coldResistance / 100.0);
+                // Resistance capped at 90: even full immunity still allows ≥10% cold through.
+                double factor = Math.Max(0.0, 1.0 - Math.Min(90, coldResistance) / 100.0);
                 coldBuilt = (int)(leftover * factor);
                 newColdBar = Math.Min(MaxBar, currentColdBar + coldBuilt);
             }
@@ -138,7 +139,8 @@ namespace GameCore.Battle
             int burnBuilt = 0;
             if (leftover > 0)
             {
-                double factor = Math.Max(0.0, 1.0 - fireResistance / 100.0);
+                // Resistance capped at 90: even full immunity still allows ≥10% fire through.
+                double factor = Math.Max(0.0, 1.0 - Math.Min(90, fireResistance) / 100.0);
                 burnBuilt = (int)(leftover * factor);
                 newBurnBar = Math.Min(MaxBar, currentBurnBar + burnBuilt);
             }

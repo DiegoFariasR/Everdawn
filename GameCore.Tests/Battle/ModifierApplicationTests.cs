@@ -452,7 +452,8 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   set:
-    disruptionResistance: 50
+    resistance:
+      disruption: 50
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
             var unit = db.GetUnit("test-unit");
@@ -465,7 +466,8 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   modify:
-    disruptionResistance: 30
+    resistance:
+      disruption: 30
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
             var unit = db.GetUnit("test-unit");
@@ -638,7 +640,8 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   set:
-    disruptionPenetration: 40
+    penetration:
+      disruption: 40
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
             var unit = db.GetUnit("test-unit");
@@ -651,7 +654,8 @@ skills:
             var db = BuildDb(@"
 - id: test-mod
   modify:
-    disruptionPenetration: 20
+    penetration:
+      disruption: 20
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
             var unit = db.GetUnit("test-unit");
@@ -671,7 +675,7 @@ skills:
       lightning: 40
       holy: 50
       void: 60
-    disruptionPenetration: 70
+      disruption: 70
 ", string.Format(UnitYamlWithUnitMod, "test-mod"));
 
             var unit = db.GetUnit("test-unit");

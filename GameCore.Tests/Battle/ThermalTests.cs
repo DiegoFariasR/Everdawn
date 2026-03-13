@@ -139,15 +139,16 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void ThermalSystem_ApplyCold_ColdResistanceDoesNotAffectBurnRemoval()
         {
-            // Burn = 15, coldPower = 30, coldResistance = 100%.
-            // Burn removal: 15 removed (ignores resistance). Leftover = 15 * resistance(100%) = 0.
+            // Burn = 15, coldPower = 30, coldResistance = 100% (capped at 90%).
+            // Burn removal: 15 removed (ignores resistance). Leftover = 15.
+            // Cold buildup: (int)(15 * 0.0999...) = 1 — cap means 10% always gets through.
             ThermalSystem.ApplyCold(
                 coldPower: 30, coldResistance: 100,
                 currentBurnBar: 15, currentColdBar: 0,
                 out int newBurn, out int newCold);
 
             Assert.Equal(0, newBurn);  // burn removed regardless of resistance
-            Assert.Equal(0, newCold);  // no cold buildup because resistance = 100%
+            Assert.Equal(1, newCold);  // 10% of leftover still builds due to 90% cap
         }
 
         // ── Test 5: Fire resistance reduces Burn buildup only ─────────────────
@@ -168,15 +169,16 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void ThermalSystem_ApplyFire_FireResistanceDoesNotAffectColdRemoval()
         {
-            // Cold = 15, firePower = 30, fireResistance = 100%.
-            // Cold removal: 15 removed (ignores resistance). No burn buildup.
+            // Cold = 15, firePower = 30, fireResistance = 100% (capped at 90%).
+            // Cold removal: 15 removed (ignores resistance). Leftover = 15.
+            // Burn buildup: (int)(15 * 0.0999...) = 1 — cap means 10% always gets through.
             ThermalSystem.ApplyFire(
                 firePower: 30, fireResistance: 100,
                 currentColdBar: 15, currentBurnBar: 0,
                 out int newCold, out int newBurn);
 
             Assert.Equal(0, newCold);  // cold removed regardless of fire resistance
-            Assert.Equal(0, newBurn);  // no burn buildup because resistance = 100%
+            Assert.Equal(1, newBurn);  // 10% of leftover still builds due to 90% cap
         }
 
         // ── Test 6: Cold >= 50 adds "slow" ───────────────────────────────────

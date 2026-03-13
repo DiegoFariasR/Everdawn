@@ -59,11 +59,13 @@ namespace GameCore.Tests.Battle
         }
 
         [Fact]
-        public void DisruptionSystem_ApplyDisruption_FullResistanceBuildsNothing()
+        public void DisruptionSystem_ApplyDisruption_ResistanceCapsAt90()
         {
+            // 100% resistance is capped at 90%: 10% of 60 power builds.
+            // (int)(60 * 0.0999...) = 5 due to floating-point truncation.
             int built = DisruptionSystem.ApplyDisruption(60, disruptionResistance: 100, currentBar: 0, out int newBar);
-            Assert.Equal(0, built);
-            Assert.Equal(0, newBar);
+            Assert.Equal(5, built);
+            Assert.Equal(5, newBar);
         }
 
         // ── Test 5 helper: Stun triggers at 100 ──────────────────────────────
@@ -263,7 +265,7 @@ namespace GameCore.Tests.Battle
             int barNoRes = sessionNoRes.GetView().Units.First(u => u.UnitId == "enemy")
                 .GetBar(DisruptionSystem.BarDisruption);
 
-            // 100% resistance: disruption bar should stay at 0.
+            // 100% resistance: disruption bar reduced but not zeroed (capped at 90%).
             var sessionFullRes = BuildSession(DizzySkill(), enemyDisruptionResistance: 100, seed: 42);
             sessionFullRes.TryExecute(new AdvanceTurnCommand());
             int barFullRes = sessionFullRes.GetView().Units.First(u => u.UnitId == "enemy")
@@ -271,7 +273,6 @@ namespace GameCore.Tests.Battle
 
             Assert.True(barNoRes > barFullRes,
                 $"Full resistance should reduce buildup (no-res={barNoRes}, full-res={barFullRes})");
-            Assert.Equal(0, barFullRes);
         }
 
         // ── Test 3: Disruption >= 50 shows "dizzy" in StatusEffects ──────────

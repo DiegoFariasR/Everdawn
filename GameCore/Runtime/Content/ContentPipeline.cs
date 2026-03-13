@@ -63,41 +63,49 @@ namespace GameCore.Content
             var list = ParseYaml<List<RawModifier>>(source.ReadAllText(path));
             foreach (var raw in list)
             {
-                // ── Scalar Set (skill variables + disruption) ─────────────────
+                // ── Scalar Set (skill variables) ──────────────────────────────
                 var scalarSet = new Dictionary<ModifierVariable, object>();
                 if (raw.Set.Cost != null) scalarSet[ModifierVariable.Cost] = raw.Set.Cost.Value;
                 if (raw.Set.DamageMultiplier != null) scalarSet[ModifierVariable.DamageMultiplier] = raw.Set.DamageMultiplier.Value;
                 if (raw.Set.IsAoe != null) scalarSet[ModifierVariable.IsAoe] = raw.Set.IsAoe.Value;
                 if (raw.Set.Cooldown != null) scalarSet[ModifierVariable.Cooldown] = raw.Set.Cooldown.Value;
                 if (raw.Set.InitialCooldown != null) scalarSet[ModifierVariable.InitialCooldown] = raw.Set.InitialCooldown.Value;
-                if (raw.Set.DisruptionResistance != null) scalarSet[ModifierVariable.DisruptionResistance] = raw.Set.DisruptionResistance.Value;
-                if (raw.Set.DisruptionPenetration != null) scalarSet[ModifierVariable.DisruptionPenetration] = raw.Set.DisruptionPenetration.Value;
 
-                // ── Scalar Modify ────────────────────────────────────────────
+                // ── Scalar Modify ─────────────────────────────────────────────
                 var scalarModify = new Dictionary<ModifierVariable, double>();
                 if (raw.Modify.Cost.HasValue) scalarModify[ModifierVariable.Cost] = raw.Modify.Cost.Value;
                 if (raw.Modify.DamageMultiplier.HasValue) scalarModify[ModifierVariable.DamageMultiplier] = raw.Modify.DamageMultiplier.Value;
                 if (raw.Modify.Cooldown.HasValue) scalarModify[ModifierVariable.Cooldown] = raw.Modify.Cooldown.Value;
                 if (raw.Modify.InitialCooldown.HasValue) scalarModify[ModifierVariable.InitialCooldown] = raw.Modify.InitialCooldown.Value;
-                if (raw.Modify.DisruptionResistance.HasValue) scalarModify[ModifierVariable.DisruptionResistance] = raw.Modify.DisruptionResistance.Value;
-                if (raw.Modify.DisruptionPenetration.HasValue) scalarModify[ModifierVariable.DisruptionPenetration] = raw.Modify.DisruptionPenetration.Value;
 
-                // ── Typed resistance/penetration dictionaries ─────────────────
-                Dictionary<EffectType, int>? setResistances = raw.Set.Resistance.Count > 0
-                    ? raw.Set.Resistance.ToDictionary(
-                        kvp => Enum.Parse<EffectType>(kvp.Key, ignoreCase: true), kvp => kvp.Value)
+                // ── CC resistance/penetration from Resistance/Penetration dicts ─
+                // CC keys (e.g. "disruption") are extracted before the remaining
+                // entries are parsed as elemental EffectType values.
+                var setResKvp = raw.Set.Resistance.FirstOrDefault(kvp => kvp.Key.Equals("disruption", StringComparison.OrdinalIgnoreCase));
+                if (setResKvp.Key != null) scalarSet[ModifierVariable.DisruptionResistance] = setResKvp.Value;
+                var setPenKvp = raw.Set.Penetration.FirstOrDefault(kvp => kvp.Key.Equals("disruption", StringComparison.OrdinalIgnoreCase));
+                if (setPenKvp.Key != null) scalarSet[ModifierVariable.DisruptionPenetration] = setPenKvp.Value;
+                var modResKvp = raw.Modify.Resistance.FirstOrDefault(kvp => kvp.Key.Equals("disruption", StringComparison.OrdinalIgnoreCase));
+                if (modResKvp.Key != null) scalarModify[ModifierVariable.DisruptionResistance] = modResKvp.Value;
+                var modPenKvp = raw.Modify.Penetration.FirstOrDefault(kvp => kvp.Key.Equals("disruption", StringComparison.OrdinalIgnoreCase));
+                if (modPenKvp.Key != null) scalarModify[ModifierVariable.DisruptionPenetration] = modPenKvp.Value;
+
+                // ── Typed resistance/penetration dictionaries (elemental only) ──
+                var setResElemental = raw.Set.Resistance.Where(kvp => Enum.TryParse<EffectType>(kvp.Key, ignoreCase: true, out _)).ToList();
+                Dictionary<EffectType, int>? setResistances = setResElemental.Count > 0
+                    ? setResElemental.ToDictionary(kvp => Enum.Parse<EffectType>(kvp.Key, ignoreCase: true), kvp => kvp.Value)
                     : null;
-                Dictionary<EffectType, double>? modifyResistances = raw.Modify.Resistance.Count > 0
-                    ? raw.Modify.Resistance.ToDictionary(
-                        kvp => Enum.Parse<EffectType>(kvp.Key, ignoreCase: true), kvp => kvp.Value)
+                var modResElemental = raw.Modify.Resistance.Where(kvp => Enum.TryParse<EffectType>(kvp.Key, ignoreCase: true, out _)).ToList();
+                Dictionary<EffectType, double>? modifyResistances = modResElemental.Count > 0
+                    ? modResElemental.ToDictionary(kvp => Enum.Parse<EffectType>(kvp.Key, ignoreCase: true), kvp => kvp.Value)
                     : null;
-                Dictionary<EffectType, int>? setPenetrations = raw.Set.Penetration.Count > 0
-                    ? raw.Set.Penetration.ToDictionary(
-                        kvp => Enum.Parse<EffectType>(kvp.Key, ignoreCase: true), kvp => kvp.Value)
+                var setPenElemental = raw.Set.Penetration.Where(kvp => Enum.TryParse<EffectType>(kvp.Key, ignoreCase: true, out _)).ToList();
+                Dictionary<EffectType, int>? setPenetrations = setPenElemental.Count > 0
+                    ? setPenElemental.ToDictionary(kvp => Enum.Parse<EffectType>(kvp.Key, ignoreCase: true), kvp => kvp.Value)
                     : null;
-                Dictionary<EffectType, double>? modifyPenetrations = raw.Modify.Penetration.Count > 0
-                    ? raw.Modify.Penetration.ToDictionary(
-                        kvp => Enum.Parse<EffectType>(kvp.Key, ignoreCase: true), kvp => kvp.Value)
+                var modPenElemental = raw.Modify.Penetration.Where(kvp => Enum.TryParse<EffectType>(kvp.Key, ignoreCase: true, out _)).ToList();
+                Dictionary<EffectType, double>? modifyPenetrations = modPenElemental.Count > 0
+                    ? modPenElemental.ToDictionary(kvp => Enum.Parse<EffectType>(kvp.Key, ignoreCase: true), kvp => kvp.Value)
                     : null;
 
                 yield return new BattleModifier(

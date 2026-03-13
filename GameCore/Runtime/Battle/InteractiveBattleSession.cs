@@ -448,8 +448,8 @@ namespace GameCore.Battle
                         int healVariance = Math.Max(1, (int)healRaw / 5);
                         int amount = Math.Max(0, (int)healRaw + _rng.Next(-healVariance, healVariance + 1));
                         var maxHp = _allUnits.First(u => u.Id == target.Id).MaxHp;
-                        int healed = Math.Min(amount, maxHp - _hp[target.Id]);
-                        _hp[target.Id] = Math.Min(maxHp, _hp[target.Id] + amount);
+                        int healed = Math.Min(amount, Math.Max(0, maxHp - _hp[target.Id]));
+                        _hp[target.Id] += healed;
                         produced.Add(AddEvent(actor.Id,
                             $"{actor.Name} heals {target.Name} for {healed} HP.",
                             evType, target.Id, healed,
