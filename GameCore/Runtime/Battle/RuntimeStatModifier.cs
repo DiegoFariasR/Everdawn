@@ -34,6 +34,29 @@ namespace GameCore.Battle
         /// 0 = none, 50 = half buildup, 100 = immune, negative = weakness.
         /// </summary>
         DisruptionResistance,
+
+        // ── Penetration keys ─────────────────────────────────────────────────
+
+        /// <summary>Physical resistance penetration. Reduces the target's effective physical resistance.</summary>
+        PhysicalPenetration,
+
+        /// <summary>Fire resistance penetration. Reduces the target's effective fire resistance.</summary>
+        FirePenetration,
+
+        /// <summary>Cold resistance penetration. Reduces the target's effective cold resistance.</summary>
+        ColdPenetration,
+
+        /// <summary>Lightning resistance penetration. Reduces the target's effective lightning resistance.</summary>
+        LightningPenetration,
+
+        /// <summary>Holy resistance penetration. Reduces the target's effective holy resistance.</summary>
+        HolyPenetration,
+
+        /// <summary>Void resistance penetration. Reduces the target's effective void resistance.</summary>
+        VoidPenetration,
+
+        /// <summary>Disruption resistance penetration. Reduces the target's effective disruption resistance.</summary>
+        DisruptionPenetration,
     }
 
     /// <summary>

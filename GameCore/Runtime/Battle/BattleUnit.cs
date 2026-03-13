@@ -23,7 +23,18 @@ namespace GameCore.Battle
         /// Reduces disruption bar gain (0 = none, 50 = half, 100 = immune, negative = weakness).
         /// Kept separate from element resistances because disruption is a bar mechanic, not a damage type.
         /// </summary>
-        int DisruptionResistance = 0
+        int DisruptionResistance = 0,
+        /// <summary>
+        /// Effect type → penetration percentage. Subtracted from the target's effective resistance
+        /// when this unit deals damage of that type. Positive values pierce resistance; negative values
+        /// reduce effective penetration (anti-penetration).
+        /// </summary>
+        IReadOnlyDictionary<EffectType, int>? Penetrations = null,
+        /// <summary>
+        /// Reduces the target's effective disruption resistance when this unit applies disruption.
+        /// Kept separate from element penetrations because disruption is a bar mechanic, not a damage type.
+        /// </summary>
+        int DisruptionPenetration = 0
     )
     {
         // ── Traits ───────────────────────────────────────────────────────
@@ -37,6 +48,14 @@ namespace GameCore.Battle
         /// </summary>
         public int GetResistance(EffectType type) =>
             Resistances != null && Resistances.TryGetValue(type, out int r) ? r : 0;
+
+        /// <summary>
+        /// Returns this unit's penetration percentage for <paramref name="type"/>.
+        /// Subtracted from the target's resistance before the damage formula is applied.
+        /// 0 = no penetration. Positive = pierces resistance. Negative = anti-penetration.
+        /// </summary>
+        public int GetPenetration(EffectType type) =>
+            Penetrations != null && Penetrations.TryGetValue(type, out int p) ? p : 0;
 
         // ── Derived stats ────────────────────────────────────────────────
         /// <summary>Max HP derived from STR.</summary>

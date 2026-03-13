@@ -12,6 +12,12 @@ namespace GameCore.Battle
     /// are applied when a modifier appears in a unit's modifier list and adjust the unit's resistance
     /// percentages. 0 = no mitigation, 50 = half damage, 100 = immune, negative = weakness.
     /// </para>
+    /// <para>
+    /// Penetration variables (<see cref="PhysicalPenetration"/> through <see cref="DisruptionPenetration"/>)
+    /// are applied when a modifier appears in a unit's modifier list and reduce the effective resistance
+    /// of the target when this unit deals damage of that type. Penetration is subtracted from the
+    /// target's resistance before the damage formula is applied.
+    /// </para>
     /// </summary>
     public enum ModifierVariable
     {
@@ -44,5 +50,22 @@ namespace GameCore.Battle
         VoidResistance,
         /// <summary>Disruption bar gain resistance percentage for the unit.</summary>
         DisruptionResistance,
+
+        // ── Unit penetration variables ───────────────────────────────────────
+
+        /// <summary>Physical resistance penetration percentage. Reduces the target's effective physical resistance when this unit deals physical damage.</summary>
+        PhysicalPenetration,
+        /// <summary>Fire resistance penetration percentage. Reduces the target's effective fire resistance when this unit deals fire damage.</summary>
+        FirePenetration,
+        /// <summary>Cold resistance penetration percentage. Reduces the target's effective cold resistance when this unit deals cold damage.</summary>
+        ColdPenetration,
+        /// <summary>Lightning resistance penetration percentage. Reduces the target's effective lightning resistance when this unit deals lightning damage.</summary>
+        LightningPenetration,
+        /// <summary>Holy resistance penetration percentage. Reduces the target's effective holy resistance when this unit deals holy damage.</summary>
+        HolyPenetration,
+        /// <summary>Void resistance penetration percentage. Reduces the target's effective void resistance when this unit deals void damage.</summary>
+        VoidPenetration,
+        /// <summary>Disruption resistance penetration percentage. Reduces the target's effective disruption resistance when this unit applies disruption.</summary>
+        DisruptionPenetration,
     }
 }
