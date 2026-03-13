@@ -170,7 +170,7 @@
                             @_renderSkillBtn((sk.Id, sk.Name, sk.PrimaryEffectType, sk.DamageMultiplier, baseDmg,
                                 sk.IsAoe, sk.Target == BattleSkillTarget.Ally, sk.IsBasic, sk.IsUltimate,
                                 sk.Cost, sk.Cooldown, 0, sk.EffectiveInitialCooldown,
-                                SkillSlotClass(si), false, false, true,
+                                SkillSlotClass(si), false, sk.Id == lastEv?.SkillId, true,
                                 "", sk.NumberOfHits,
                                 () => { }))
                         }
@@ -687,6 +687,7 @@
             int hpPct     = u.MaxHp > 0 ? st.CurrentHp * 100 / u.MaxHp : 0;
             string hpColor = hpPct > 50 ? "#44cc44" : hpPct > 25 ? "#ffaa00" : "#cc4444";
             return @<div class="unit-card
+        @(isPlayer      ? "card-player"                     : "")
         @(isActive      ? "card-active"                      : "")
         @(!st.IsAlive   ? "card-dead"                        : "")
         @(canTarget     ? "card-targetable"                  : "")
