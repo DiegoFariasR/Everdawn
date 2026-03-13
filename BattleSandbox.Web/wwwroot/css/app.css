@@ -361,11 +361,15 @@ html, body {
 .btn-selected {
     outline: 3px solid #ffd700;
     outline-offset: 2px;
-    filter: brightness(1.3) saturate(1.2);
+    filter: brightness(1.35) saturate(1.2);
+    position: relative;
+    z-index: 1;
 }
 .btn-selected.btn-aoe {
     outline: 3px solid #ffd700;
     outline-offset: 2px;
+    position: relative;
+    z-index: 1;
 }
 
 .aoe-badge {
