@@ -174,6 +174,47 @@ namespace GameCore.Content
                     kvp => kvp.Value);
             }
 
+            // Compile and apply unit-level modifiers to resistances.
+            var unitMods = raw.Modifiers
+                .Select(modId => modifierDict.TryGetValue(modId, out var mod)
+                    ? mod
+                    : throw new KeyNotFoundException(
+                        $"Unit '{raw.Id}' references unknown modifier '{modId}'."))
+                .ToArray();
+
+            int disruptionResistance = 0;
+            if (unitMods.Length > 0)
+            {
+                var mergedResistances = resistances != null
+                    ? new Dictionary<EffectType, int>(resistances)
+                    : new Dictionary<EffectType, int>();
+
+                var resistanceKeys = new (EffectType Type, ModifierVariable Key)[]
+                {
+                    (EffectType.Physical, ModifierVariable.PhysicalResistance),
+                    (EffectType.Fire, ModifierVariable.FireResistance),
+                    (EffectType.Cold, ModifierVariable.ColdResistance),
+                    (EffectType.Lightning, ModifierVariable.LightningResistance),
+                    (EffectType.Holy, ModifierVariable.HolyResistance),
+                    (EffectType.Void, ModifierVariable.VoidResistance),
+                };
+
+                foreach (var (type, key) in resistanceKeys)
+                {
+                    int baseVal = mergedResistances.TryGetValue(type, out int r) ? r : 0;
+                    int finalVal = GetLastSet<int>(unitMods, key, baseVal) + SumModifyInt(unitMods, key);
+                    if (finalVal != 0)
+                        mergedResistances[type] = finalVal;
+                    else
+                        mergedResistances.Remove(type);
+                }
+
+                resistances = mergedResistances.Count > 0 ? mergedResistances : null;
+
+                disruptionResistance = GetLastSet<int>(unitMods, ModifierVariable.DisruptionResistance, 0)
+                    + SumModifyInt(unitMods, ModifierVariable.DisruptionResistance);
+            }
+
             return new BattleUnit(
                 raw.Id, raw.Name,
                 Team: "",           // team is assigned by the scenario, not the data file
@@ -183,7 +224,8 @@ namespace GameCore.Content
                 Agi: raw.Agi,
                 Skills: skills,
                 Traits: traits,
-                Resistances: resistances);
+                Resistances: resistances,
+                DisruptionResistance: disruptionResistance);
         }
 
         private static BattleSkill CompileSkill(RawSkill raw)
