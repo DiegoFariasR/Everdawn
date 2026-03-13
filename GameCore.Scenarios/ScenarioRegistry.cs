@@ -18,6 +18,10 @@ namespace GameCore.Scenarios
         {
             new SampleScenario(),
             new WatchScenario(new SampleScenario()),
+            new WeaponArchetypeScenario(),
+            new WatchScenario(new WeaponArchetypeScenario()),
+            new SpellArchetypeScenario(),
+            new WatchScenario(new SpellArchetypeScenario()),
         };
 
         /// <summary>All registered scenarios, in display order.</summary>

@@ -145,7 +145,7 @@ namespace GameCore.Content
                     var setCooldown = compiledMods.LastOrDefault(m => m.SetCooldown != null)?.SetCooldown ?? sk.Cooldown;
                     var setInitCd = compiledMods.LastOrDefault(m => m.SetInitialCooldown != null)?.SetInitialCooldown ?? sk.InitialCooldown;
                     var extraComponents = compiledMods
-                        .Where(m => m.AddDamageComponents != null)
+                        .Where(m => m.AddDamageComponents != null && sk.Category != Battle.SkillCategory.Spell)
                         .SelectMany(m => m.AddDamageComponents!)
                         .ToArray();
 
