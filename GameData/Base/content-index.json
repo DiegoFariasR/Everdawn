@@ -1,0 +1,11 @@
+[
+  "modifiers.yml",
+  "skills/physical.yml",
+  "skills/void.yml",
+  "units/goblin-archer.yml",
+  "units/goblin-warrior.yml",
+  "units/mage.yml",
+  "units/necromancer.yml",
+  "units/paladin.yml",
+  "units/rogue.yml"
+]

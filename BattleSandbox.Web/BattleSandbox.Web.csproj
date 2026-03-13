@@ -27,12 +27,12 @@
     don't want them committed from wwwroot.
     Update content-index.json whenever files are added to or removed from GameData/Base/.
   -->
-  <Target Name="CopyGameDataYamlToWwwroot" BeforeTargets="BeforeBuild">
+  <Target Name="CopyGameDataToWwwroot" BeforeTargets="BeforeBuild">
     <ItemGroup>
-      <_YamlSource Include="..\GameData\Base\**\*.yml" />
+      <_GameDataSource Include="..\GameData\Base\**" />
     </ItemGroup>
-    <Copy SourceFiles="@(_YamlSource)"
-          DestinationFiles="@(_YamlSource->'$(MSBuildProjectDirectory)\wwwroot\GameData\Base\%(RecursiveDir)%(Filename)%(Extension)')"
+    <Copy SourceFiles="@(_GameDataSource)"
+          DestinationFiles="@(_GameDataSource->'$(MSBuildProjectDirectory)\wwwroot\GameData\Base\%(RecursiveDir)%(Filename)%(Extension)')"
           SkipUnchangedFiles="true" />
   </Target>
 
