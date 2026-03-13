@@ -66,3 +66,51 @@
           scaling:
             - stat: wis
               scale: 3.0
+
+# ── Spell archetypes (benchmark reference) ────────────────────────────────────
+# Canonical spell behavior patterns, separated from character-specific skills.
+# Used in archetype damage benchmarks to isolate hit-pattern effects cleanly.
+
+# Bolt: 1 WIS hit, no AGI interaction. Identical to mage-bolt / necro-bolt.
+# (use mage-bolt for benchmarks — no separate id needed)
+
+# Missiles: lower WIS per hit, hit count scales with AGI.
+- id: spell-missiles
+  name: Magic Missiles
+  scalingHits:
+    - stat: agi
+      scale: 0.01
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: void
+          scaling:
+            - stat: wis
+              scale: 0.5
+
+# Burst: medium WIS, 2 fixed hits, no AGI hit scaling.
+- id: spell-burst
+  name: Arcane Burst
+  baseHits: 2.0
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: void
+          scaling:
+            - stat: wis
+              scale: 0.6
+
+# Volley: lower WIS per hit, 3 fixed hits, no AGI hit scaling.
+- id: spell-volley
+  name: Magic Volley
+  baseHits: 3.0
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: void
+          scaling:
+            - stat: wis
+              scale: 0.4
