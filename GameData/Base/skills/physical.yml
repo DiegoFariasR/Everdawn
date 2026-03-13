@@ -1,5 +1,8 @@
-- id: strength-strike
-  name: Strike
+# ── Mace ──────────────────────────────────────────────────────────────────────
+# Full STR base damage, single hit. Pure reliable power, no AGI interaction.
+
+- id: mace-strike
+  name: Mace Strike
   effects:
     - kind: damage
       target: enemy
@@ -8,7 +11,137 @@
           scaling:
             - stat: str
 
-- id: strength-bash
+- id: mace-crush
+  name: Crushing Blow
+  cooldown: 3
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: physical
+          scaling:
+            - stat: str
+              scale: 1.6
+
+- id: mace-shatter
+  name: Shattering Blow
+  cooldown: 3
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: physical
+          scaling:
+            - stat: str
+              scale: 2.4
+
+# ── Sword ─────────────────────────────────────────────────────────────────────
+# STR base damage. Hit count scales softly with AGI.
+
+- id: sword-strike
+  name: Sword Strike
+  scalingHits:
+    - stat: agi
+      scale: 0.01
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: physical
+          scaling:
+            - stat: str
+
+- id: sword-cleave
+  name: Cleave
+  cooldown: 3
+  scalingHits:
+    - stat: agi
+      scale: 0.01
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: physical
+          scaling:
+            - stat: str
+              scale: 1.4
+
+# ── Bow ───────────────────────────────────────────────────────────────────────
+# AGI base damage. Fixed multi-hit, no AGI hit scaling.
+
+- id: bow-shot
+  name: Arrow Shot
+  baseHits: 1.8
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: physical
+          scaling:
+            - stat: agi
+
+- id: bow-precise
+  name: Precise Shot
+  cooldown: 3
+  baseHits: 2.2
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: physical
+          scaling:
+            - stat: agi
+
+- id: bow-volley
+  name: Volley
+  cooldown: 3
+  baseHits: 3.0
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: physical
+          scaling:
+            - stat: agi
+              scale: 0.6
+
+# ── Dagger ────────────────────────────────────────────────────────────────────
+# Half AGI per hit, multiple hits. Hit count scales with AGI.
+
+- id: dagger-strike
+  name: Dagger Strike
+  baseHits: 2.0
+  scalingHits:
+    - stat: agi
+      scale: 0.01
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: physical
+          scaling:
+            - stat: agi
+              scale: 0.5
+
+- id: dagger-flurry
+  name: Flurry
+  cooldown: 3
+  baseHits: 3.0
+  scalingHits:
+    - stat: agi
+      scale: 0.01
+  effects:
+    - kind: damage
+      target: enemy
+      damagePerHit:
+        - damageType: physical
+          scaling:
+            - stat: agi
+              scale: 0.4
+
+# ── Special ───────────────────────────────────────────────────────────────────
+
+- id: shield-bash
   name: Shield Bash
   cooldown: 3
   effects:
@@ -31,91 +164,13 @@
             - stat: str
               scale: 1.2
 
-- id: agility-strike
-  name: Quick Strike
-  effects:
-    - kind: damage
-      target: enemy
-      damagePerHit:
-        - damageType: physical
-          scaling:
-            - stat: agi
-
-- id: multi-strike
-  name: Poison Blade
-  cooldown: 3
-  numberOfHits: 3
-  effects:
-    - kind: damage
-      target: enemy
-      damagePerHit:
-        - damageType: physical
-          scaling:
-            - stat: agi
-              scale: 0.5
-
 - id: rogue-mark
   name: Death Mark
   cooldown: 3
-  numberOfHits: 2.5
-  effects:
-    - kind: damage
-      target: enemy
-      damagePerHit:
-        - damageType: physical
-          scaling:
-            - stat: agi
-
-- id: gw-warcry
-  name: War Cry
-  cooldown: 3
-  effects:
-    - kind: damage
-      target: enemy
-      damagePerHit:
-        - damageType: physical
-          scaling:
-            - stat: str
-              scale: 1.6
-
-- id: gw-frenzy
-  name: Frenzy
-  cooldown: 3
-  effects:
-    - kind: damage
-      target: enemy
-      damagePerHit:
-        - damageType: physical
-          scaling:
-            - stat: str
-              scale: 2.4
-
-- id: ga-shot
-  name: Arrow Shot
-  effects:
-    - kind: damage
-      target: enemy
-      damagePerHit:
-        - damageType: physical
-          scaling:
-            - stat: agi
-
-- id: ga-precise
-  name: Precise Shot
-  cooldown: 3
-  numberOfHits: 1.8
-  effects:
-    - kind: damage
-      target: enemy
-      damagePerHit:
-        - damageType: physical
-          scaling:
-            - stat: agi
-
-- id: ga-volley
-  name: Volley
-  cooldown: 3
-  numberOfHits: 2.2
+  baseHits: 2.5
+  scalingHits:
+    - stat: agi
+      scale: 0.01
   effects:
     - kind: damage
       target: enemy

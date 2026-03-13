@@ -36,15 +36,15 @@ namespace GameCore.Content.Raw
         /// <summary>Modifier hook: multiplies overall skill output. Default 1.0 = identity.</summary>
         public double DamageMultiplier { get; set; } = 1.0;
         /// <summary>
-        /// Number of hits this skill fires. Floor(n) hits, each dealing DamageMultiplier × (n / floor(n)) of base damage.
-        /// Total damage = DamageMultiplier × numberOfHits × base. Defaults to 1.0 (single hit, no split).
+        /// Base hit count for this skill. Floor(n) hits, each dealing DamageMultiplier × (n / floor(n)) of base damage.
+        /// Total damage = DamageMultiplier × baseHits × base. Defaults to 1.0 (single hit, no split).
         /// </summary>
-        public double NumberOfHits { get; set; } = 1.0;
+        public double BaseHits { get; set; } = 1.0;
         /// <summary>
-        /// Optional stat-based bonus added to NumberOfHits at runtime.
-        /// Effective hits = floor(NumberOfHits + Σ(actor.GetStat(stat) × scale)), min 1.
+        /// Optional stat-based bonus added to BaseHits at runtime.
+        /// Effective hits = floor(BaseHits + Σ(actor.GetStat(stat) × scale)), min 1.
         /// </summary>
-        public List<RawDamageScaling> HitsScaling { get; set; } = new List<RawDamageScaling>();
+        public List<RawDamageScaling> ScalingHits { get; set; } = new List<RawDamageScaling>();
         /// <summary>How the skill is delivered: Melee, Ranged, or Self. Defaults to Melee.</summary>
         public string Range { get; set; } = "Melee";
         /// <summary>Ability category: Attack, Spell (can be silenced), or Passive. Defaults to Attack.</summary>

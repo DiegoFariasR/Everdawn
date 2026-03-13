@@ -6,7 +6,7 @@ wis: 55
 agi: 55
 traits: [MagicUser, Fury]
 skills:
-  - id: strength-strike
+  - id: mace-strike
     modifiers: [Basic]
-  - id: strength-bash
+  - id: shield-bash
   - id: melee-heal

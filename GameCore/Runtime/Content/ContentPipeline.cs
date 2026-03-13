@@ -69,10 +69,17 @@ namespace GameCore.Content
                     SetIsAoe: raw.SetIsAoe,
                     SetCooldown: raw.SetCooldown,
                     SetInitialCooldown: raw.SetInitialCooldown,
-                    AddCost: raw.AddCost,
-                    AddDamageMultiplier: raw.AddDamageMultiplier,
-                    AddCooldown: raw.AddCooldown,
-                    AddInitialCooldown: raw.AddInitialCooldown);
+                    ModifyCost: raw.ModifyCost,
+                    ModifyDamageMultiplier: raw.ModifyDamageMultiplier,
+                    ModifyCooldown: raw.ModifyCooldown,
+                    ModifyInitialCooldown: raw.ModifyInitialCooldown,
+                    AddDamageComponents: raw.AddDamageComponents.Count == 0
+                        ? null
+                        : raw.AddDamageComponents
+                            .Select(c => new DamageComponent(
+                                c.DamageType != null ? Enum.Parse<EffectType>(c.DamageType, ignoreCase: true) : (EffectType?)null,
+                                c.Scaling.Select(s => new DamageScaling(s.Stat, s.Scale)).ToArray()))
+                            .ToArray());
         }
 
         // ── Skills ────────────────────────────────────────────────────────────
@@ -132,20 +139,33 @@ namespace GameCore.Content
                         .ToArray();
 
                     // Apply modifier stat overrides in list order; last modifier wins per field.
-                    // Set overrides are applied first, then Add deltas are summed on top.
+                    // Set overrides are applied first, then Modify deltas are summed on top.
                     var setCost = compiledMods.LastOrDefault(m => m.SetCost != null)?.SetCost ?? sk.Cost;
                     var setDmgMult = compiledMods.LastOrDefault(m => m.SetDamageMultiplier != null)?.SetDamageMultiplier ?? sk.DamageMultiplier;
                     var setCooldown = compiledMods.LastOrDefault(m => m.SetCooldown != null)?.SetCooldown ?? sk.Cooldown;
                     var setInitCd = compiledMods.LastOrDefault(m => m.SetInitialCooldown != null)?.SetInitialCooldown ?? sk.InitialCooldown;
+                    var extraComponents = compiledMods
+                        .Where(m => m.AddDamageComponents != null)
+                        .SelectMany(m => m.AddDamageComponents!)
+                        .ToArray();
 
                     return sk with
                     {
                         Modifiers = compiledMods.Select(m => m.Id).ToArray(),
-                        Cost = setCost + compiledMods.Sum(m => m.AddCost ?? 0),
-                        DamageMultiplier = setDmgMult + compiledMods.Sum(m => m.AddDamageMultiplier ?? 0.0),
+                        Cost = setCost + compiledMods.Sum(m => m.ModifyCost ?? 0),
+                        DamageMultiplier = setDmgMult + compiledMods.Sum(m => m.ModifyDamageMultiplier ?? 0.0),
                         IsAoe = compiledMods.LastOrDefault(m => m.SetIsAoe != null)?.SetIsAoe ?? sk.IsAoe,
-                        Cooldown = setCooldown + compiledMods.Sum(m => m.AddCooldown ?? 0),
-                        InitialCooldown = setInitCd + compiledMods.Sum(m => m.AddInitialCooldown ?? 0),
+                        Cooldown = setCooldown + compiledMods.Sum(m => m.ModifyCooldown ?? 0),
+                        InitialCooldown = setInitCd + compiledMods.Sum(m => m.ModifyInitialCooldown ?? 0),
+                        Effects = extraComponents.Length == 0 || sk.Effects.Count == 0
+                            ? sk.Effects
+                            : new SkillEffect[]
+                                {
+                                    new SkillEffect(
+                                        sk.Effects[0].Kind,
+                                        sk.Effects[0].Target,
+                                        sk.Effects[0].DamagePerHit.Concat(extraComponents).ToArray())
+                                }.Concat(sk.Effects.Skip(1)).ToArray(),
                     };
                 })
                 .ToArray();
@@ -199,10 +219,10 @@ namespace GameCore.Content
                 IsAoe: raw.IsAoe,
                 Cooldown: raw.Cooldown,
                 InitialCooldown: raw.InitialCooldown,
-                NumberOfHits: raw.NumberOfHits,
-                HitsScaling: raw.HitsScaling.Count == 0
+                BaseHits: raw.BaseHits,
+                ScalingHits: raw.ScalingHits.Count == 0
                     ? null
-                    : raw.HitsScaling.Select(s => new DamageScaling(s.Stat, s.Scale)).ToArray<DamageScaling>(),
+                    : raw.ScalingHits.Select(s => new DamageScaling(s.Stat, s.Scale)).ToArray<DamageScaling>(),
                 Range: Enum.Parse<SkillRange>(raw.Range, ignoreCase: true),
                 Category: Enum.Parse<SkillCategory>(raw.Category, ignoreCase: true));
         }

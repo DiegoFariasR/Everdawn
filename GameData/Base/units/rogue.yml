@@ -6,8 +6,8 @@ wis: 0
 agi: 120
 traits: [Focus]
 skills:
-  - id: agility-strike
+  - id: dagger-strike
     modifiers: [Basic]
-  - id: multi-strike
+  - id: dagger-flurry
   - id: rogue-mark
     modifiers: [Ultimate]

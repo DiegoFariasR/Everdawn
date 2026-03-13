@@ -6,8 +6,8 @@ wis: 0
 agi: 100
 traits: [Focus]
 skills:
-  - id: ga-shot
+  - id: bow-shot
     modifiers: [Basic]
-  - id: ga-precise
-  - id: ga-volley
+  - id: bow-precise
+  - id: bow-volley
     modifiers: [Ultimate]

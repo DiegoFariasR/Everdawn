@@ -278,19 +278,19 @@ namespace GameCore.Battle
                 produced.Add(AddEvent(actor.Id, $"{actor.Name} unleashes {skill.Name} on all enemies!", evType));
 
             // Determine effective hit count and per-hit damage multiplier.
-            // When skill.NumberOfHits != 1.0 or HitsScaling is set, the skill controls hit count:
-            //   raw = clamp(NumberOfHits + Σ hitsScaling, min 0.5)
+            // When skill.BaseHits != 1.0 or ScalingHits is set, the skill controls hit count:
+            //   raw = clamp(BaseHits + Σ scalingHits, min 0.5)
             //   floor(raw) hits, each dealing DamageMultiplier × (raw / floor(raw)) × base.
             //   At raw = 0.5: 1 hit at 50% power. Total damage = DamageMultiplier × raw × base.
-            // When NumberOfHits is 1.0 and HitsScaling is empty, actor.HitCount (AGI-derived) applies.
+            // When BaseHits is 1.0 and ScalingHits is empty, actor.HitCount (AGI-derived) applies.
             int effectiveHits;
             double perHitHitsMult;
-            bool hasHitsOverride = skill.NumberOfHits != 1.0 || (skill.HitsScaling != null && skill.HitsScaling.Count > 0);
+            bool hasHitsOverride = skill.BaseHits != 1.0 || (skill.ScalingHits != null && skill.ScalingHits.Count > 0);
             if (!skill.IsHeal && hasHitsOverride)
             {
-                double rawHits = skill.NumberOfHits;
-                if (skill.HitsScaling != null)
-                    foreach (var s in skill.HitsScaling)
+                double rawHits = skill.BaseHits;
+                if (skill.ScalingHits != null)
+                    foreach (var s in skill.ScalingHits)
                         rawHits += actor.GetStat(s.Stat) * s.Scale;
                 rawHits = Math.Max(0.5, rawHits);
                 effectiveHits = Math.Max(1, (int)Math.Floor(rawHits));

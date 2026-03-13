@@ -149,7 +149,7 @@
                             isAoe, isAllySkill, skill.IsBasic, skill.IsUltimate,
                             skill.Cost, skill.Cooldown, cdLeft, skill.EffectiveInitialCooldown,
                             SkillSlotClass(si), canUse, isSelected, _autoMode,
-                            keyHint, skill.NumberOfHits,
+                            keyHint, skill.BaseHits,
                             () => { if (!_autoMode) { if (isAoe) FireAoe(skillId); else _pendingAction = skillId; } }))
                     }
                 </div>
@@ -171,7 +171,7 @@
                                 sk.IsAoe, sk.Target == BattleSkillTarget.Ally, sk.IsBasic, sk.IsUltimate,
                                 sk.Cost, sk.Cooldown, 0, sk.EffectiveInitialCooldown,
                                 SkillSlotClass(si), false, sk.Id == lastEv?.SkillId, true,
-                                "", sk.NumberOfHits,
+                                "", sk.BaseHits,
                                 () => { }))
                         }
                     </div>
@@ -790,7 +790,7 @@
                     @if (sk.IsUltimate) { <span class="info-badge badge-ult">Ult</span>   }
                     @if (sk.PrimaryEffectType.HasValue) { <span class="info-badge @DmgTypeCss(sk.PrimaryEffectType.Value)">@sk.PrimaryEffectType</span> }
                     <span class="info-skill-stat">x@(sk.DamageMultiplier.ToString("0.##"))</span>
-                    @if (sk.NumberOfHits != 1.0) { <span class="info-skill-stat">@(sk.NumberOfHits.ToString("0.##"))hits</span> }
+                    @if (sk.BaseHits != 1.0) { <span class="info-skill-stat">@(sk.BaseHits.ToString("0.##"))hits</span> }
                     <span class="info-skill-stat">~@baseDmg</span>
                     @if (sk.Cost > 0)                   { <span class="info-skill-stat">@sk.Cost MP</span> }
                     @if (sk.IsAoe)                        { <span class="info-badge badge-aoe">AoE</span> }
@@ -815,14 +815,14 @@
         bool isAoe, bool isAllySkill, bool isBasic, bool isUltimate,
         int cost, int cooldown, int cdLeft, int effectiveInitCd,
         string btnClass, bool canUse, bool isSelected, bool isInfoOnly,
-        string keyHint, double numberOfHits, Action onClick)> _renderSkillBtn =>
+        string keyHint, double baseHits, Action onClick)> _renderSkillBtn =>
         ctx =>
         {
             var (id, name, dmgType, damageMultiplier, baseDmg,
                 isAoe, isAllySkill, isBasic, isUltimate,
                 cost, cooldown, cdLeft, effectiveInitCd,
                 btnClass, canUse, isSelected, isInfoOnly,
-                keyHint, numberOfHits, onClick) = ctx;
+                keyHint, baseHits, onClick) = ctx;
             return @<button class="btn-action @btnClass
               @(isAoe       ? "btn-aoe"       : "")
               @(isAllySkill ? "btn-heal"       : "")
@@ -844,7 +844,7 @@
             @if (isBasic)    { <span class="info-badge badge-basic">Basic</span> }
             @if (isUltimate) { <span class="info-badge badge-ult">Ult</span>   }
             <span class="info-skill-stat">x@(damageMultiplier.ToString("0.##"))</span>
-            @if (numberOfHits != 1.0) { <span class="info-skill-stat">@(numberOfHits.ToString("0.##"))hits</span> }
+            @if (baseHits != 1.0) { <span class="info-skill-stat">@(baseHits.ToString("0.##"))hits</span> }
             <span class="info-skill-stat">~@baseDmg</span>
             @if (effectiveInitCd > 0) { <span class="info-skill-stat">Init@("")@effectiveInitCd</span> }
         </div>

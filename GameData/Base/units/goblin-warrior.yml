@@ -6,8 +6,8 @@ wis: 0
 agi: 50
 traits: [Fury]
 skills:
-  - id: strength-strike
+  - id: mace-strike
     modifiers: [Basic]
-  - id: gw-warcry
-  - id: gw-frenzy
+  - id: mace-crush
+  - id: mace-shatter
     modifiers: [Ultimate]

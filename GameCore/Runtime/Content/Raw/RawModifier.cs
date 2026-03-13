@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 namespace GameCore.Content.Raw
 {
     /// <summary>Raw modifier data as parsed directly from YAML.</summary>
@@ -15,9 +16,15 @@ namespace GameCore.Content.Raw
         public int? SetInitialCooldown { get; set; }
 
         // Additive adjustments — applied after all Set overrides. Can be negative.
-        public int? AddCost { get; set; }
-        public double? AddDamageMultiplier { get; set; }
-        public int? AddCooldown { get; set; }
-        public int? AddInitialCooldown { get; set; }
+        public int? ModifyCost { get; set; }
+        public double? ModifyDamageMultiplier { get; set; }
+        public int? ModifyCooldown { get; set; }
+        public int? ModifyInitialCooldown { get; set; }
+
+        /// <summary>
+        /// Extra damage components injected into the first effect's DamagePerHit list.
+        /// Used by Enchanting modifiers to add elemental damage to weapon attacks.
+        /// </summary>
+        public List<RawDamageComponent> AddDamageComponents { get; set; } = new List<RawDamageComponent>();
     }
 }

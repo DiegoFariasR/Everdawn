@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 namespace GameCore.Battle
 {
     /// <summary>
@@ -16,9 +17,14 @@ namespace GameCore.Battle
         int? SetCooldown = null,
         int? SetInitialCooldown = null,
         // Additive adjustments — applied after all Set overrides. Can be negative.
-        int? AddCost = null,
-        double? AddDamageMultiplier = null,
-        int? AddCooldown = null,
-        int? AddInitialCooldown = null
+        int? ModifyCost = null,
+        double? ModifyDamageMultiplier = null,
+        int? ModifyCooldown = null,
+        int? ModifyInitialCooldown = null,
+        /// <summary>
+        /// Extra damage components appended to the first effect's DamagePerHit after all other overrides.
+        /// Null when none. Used by Enchanting modifiers to add elemental (e.g. WIS-based) damage.
+        /// </summary>
+        IReadOnlyList<DamageComponent>? AddDamageComponents = null
     );
 }

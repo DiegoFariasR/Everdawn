@@ -253,8 +253,8 @@ namespace GameCore.Battle
             new SkillView(s.Id, s.Name, s.Cost, s.DamageMultiplier, s.IsAoe, s.IsHeal, s.Cooldown, s.Target,
                 s.PrimaryEffectType, s.IsBasic, s.IsUltimate, s.EffectiveInitialCooldown,
                 s.EstimateBaseDmg(actor),
-                s.NumberOfHits,
-                s.HitsScaling ?? System.Array.Empty<DamageScaling>(),
+                s.BaseHits,
+                s.ScalingHits ?? System.Array.Empty<DamageScaling>(),
                 s.Range,
                 s.Category);
     }

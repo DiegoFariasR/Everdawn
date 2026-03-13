@@ -37,15 +37,15 @@ namespace GameCore.Battle
         /// <summary>Optional modifiers that change how this skill behaves.</summary>
         IReadOnlyList<string>? Modifiers = null,
         /// <summary>
-        /// Number of hits this skill fires. Floor(n) hits, each dealing DamageMultiplier × (n / floor(n)) of base.
-        /// Total damage = DamageMultiplier × NumberOfHits × base. When 1.0 (default), the unit's HitCount applies instead.
+        /// Base hit count for this skill. Floor(n) hits, each dealing DamageMultiplier × (n / floor(n)) of base.
+        /// Total damage = DamageMultiplier × BaseHits × base. When 1.0 (default), the unit's HitCount applies instead.
         /// </summary>
-        double NumberOfHits = 1.0,
+        double BaseHits = 1.0,
         /// <summary>
-        /// Optional stat-based bonus to hit count. Effective hits = floor(NumberOfHits + Σ(stat × scale)), min 1.
-        /// When empty and NumberOfHits == 1.0, the unit's HitCount (AGI-derived) is used instead.
+        /// Optional stat-based bonus to hit count. Effective hits = floor(BaseHits + Σ(stat × scale)), min 1.
+        /// When empty and BaseHits == 1.0, the unit's HitCount (AGI-derived) is used instead.
         /// </summary>
-        IReadOnlyList<DamageScaling>? HitsScaling = null,
+        IReadOnlyList<DamageScaling>? ScalingHits = null,
         /// <summary>How the skill is delivered to its target.</summary>
         SkillRange Range = SkillRange.Melee,
         /// <summary>Ability category used for silencing and UI tagging.</summary>
@@ -91,9 +91,9 @@ namespace GameCore.Battle
             foreach (var comp in Effects[0].DamagePerHit)
                 foreach (var s in comp.Scaling)
                     total += actor.GetStat(s.Stat) * s.Scale;
-            double hits = NumberOfHits;
-            if (HitsScaling != null)
-                foreach (var s in HitsScaling)
+            double hits = BaseHits;
+            if (ScalingHits != null)
+                foreach (var s in ScalingHits)
                     hits += actor.GetStat(s.Stat) * s.Scale;
             hits = Math.Max(0.5, hits);
             return (int)(total * DamageMultiplier * hits);
