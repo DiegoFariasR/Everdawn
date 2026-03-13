@@ -27,9 +27,9 @@
         <div class="picker-row">
             <label for="auto-speed">Speed</label>
             <select id="auto-speed" @bind="_autoDelay">
-                <option value="500">Fast</option>
-                <option value="1000">Normal</option>
-                <option value="1750">Slow</option>
+                <option value="1000">1× (1 s/turn)</option>
+                <option value="333">3× (0.33 s)</option>
+                <option value="200">5× (0.2 s)</option>
             </select>
             <button class="btn-auto @(_autoMode ? "btn-auto-on" : "")" @onclick="ToggleAuto">
                 Auto @(_autoMode ? "ON" : "OFF")
@@ -80,6 +80,7 @@
                         AutoSkillId="_autoSkillId"
                         OnSkillSelect="@(id => { _pendingAction = id; })"
                         OnAoeFire="FireAoe"
+                        OnAutoFire="AutoFireSkill"
                         OnRetry="StartSession" />
 
         <BattleLogPanel Events="_view.FullLog" IsPlayMode="true" AutoMode="_autoMode"
@@ -137,7 +138,7 @@
     private BattleView?    _view;
     private string?        _pendingAction;
     private bool           _autoMode;
-    private int            _autoDelay = 1750;
+    private int            _autoDelay = 1000;
     private int            _lastActionEventStart;
 
     private SkillView? _pendingSkill =>
@@ -269,6 +270,22 @@
         SpawnFloats(result.Events);
         SelectDefaultSkill();
         if (!_autoMode) _ = AdvanceNonPlayerTurnsAsync();
+    }
+
+    private void AutoFireSkill(string skillId)
+    {
+        if (_engine is null || _setup is null || _view is null || _pendingAction is null) return;
+        var pending = _view.PendingInput;
+        if (pending is null) return;
+        var skill = _pendingSkill;
+        if (skill is null) return;
+
+        var targets = skill.Target == BattleSkillTarget.Ally
+            ? (System.Collections.Generic.IReadOnlyList<BattleUnit>)_setup.PlayerUnits
+            : _setup.EnemyUnits;
+        var autoTarget = System.Linq.Enumerable.FirstOrDefault(targets,
+            u => _view.Units.FirstOrDefault(s => s.UnitId == u.Id)?.IsAlive ?? false);
+        if (autoTarget != null) ConfirmTarget(autoTarget.Id);
     }
 
     private void ConfirmTarget(string targetId)

@@ -10,7 +10,7 @@
 <section class="card turn-strip">
     @if (Round > 0)
     {
-        <span class="round-badge">R@Round</span>
+        <span class="round-badge">R@(Round)</span>
     }
     @foreach (var entry in BuildTurnOrder())
     {

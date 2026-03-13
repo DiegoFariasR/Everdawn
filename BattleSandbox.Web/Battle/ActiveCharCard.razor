@@ -30,9 +30,10 @@ else if (Pending != null)
             @for (int si = 0; si < Pending.Skills.Count; si++)
             {
                 var skill      = Pending.Skills[si];
-                bool canUse    = !AutoMode && Pending.AvailableSkillIds.Contains(skill.Id);
-                bool isSelected   = skill.Id == SelectedSkillId;
-                bool isAutoNext   = !isSelected && skill.Id == AutoSkillId;
+                bool available    = Pending.AvailableSkillIds.Contains(skill.Id);
+                bool canUse    = !AutoMode && available;
+                bool isSelected   = skill.Id == SelectedSkillId && available;
+                bool isAutoNext   = !isSelected && skill.Id == AutoSkillId && available;
                 bool isAoe        = skill.IsAoe;
                 bool isAllySkill  = skill.Target == BattleSkillTarget.Ally;
                 int  cdLeft       = Pending.SkillCooldowns.TryGetValue(skill.Id, out var cd) ? cd : 0;
@@ -44,7 +45,7 @@ else if (Pending != null)
                         @(isSelected   ? "btn-selected" : "")
                         @(isAutoNext   ? "btn-auto-next": "")"
                         disabled="@(!canUse)"
-                        @onclick="() => HandleSkillClick(skillId, isAoe, canUse)">
+                        @onclick="() => HandleSkillClick(skillId, isAoe, canUse, isSelected)">
                     <div class="skill-btn-top">
                         @skill.Name
                         @if (isAoe)      { <span class="aoe-badge">ALL</span>  }
@@ -122,14 +123,16 @@ else if (ActiveEnemyUnit != null)
     /// <summary>Skill the auto AI would fire next; shown with a dashed highlight when different from SelectedSkillId.</summary>
     [Parameter] public string? AutoSkillId { get; set; }
 
-    [Parameter] public EventCallback<string> OnSkillSelect { get; set; }
-    [Parameter] public EventCallback<string> OnAoeFire     { get; set; }
+    [Parameter] public EventCallback<string> OnSkillSelect  { get; set; }
+    [Parameter] public EventCallback<string> OnAoeFire      { get; set; }
+    [Parameter] public EventCallback<string> OnAutoFire     { get; set; }
     [Parameter] public EventCallback         OnRetry        { get; set; }
 
-    private void HandleSkillClick(string skillId, bool isAoe, bool canUse)
+    private void HandleSkillClick(string skillId, bool isAoe, bool canUse, bool isSelected)
     {
         if (!canUse) return;
-        if (isAoe) OnAoeFire.InvokeAsync(skillId);
-        else       OnSkillSelect.InvokeAsync(skillId);
+        if (isAoe)       OnAoeFire.InvokeAsync(skillId);
+        else if (isSelected) OnAutoFire.InvokeAsync(skillId);
+        else             OnSkillSelect.InvokeAsync(skillId);
     }
 }

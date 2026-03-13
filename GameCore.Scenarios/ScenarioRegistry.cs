@@ -17,11 +17,9 @@ namespace GameCore.Scenarios
         private static readonly IBattleScenario[] _all = new IBattleScenario[]
         {
             new SampleScenario(),
-            new WatchScenario(new SampleScenario()),
             new WeaponArchetypeScenario(),
-            new WatchScenario(new WeaponArchetypeScenario()),
             new SpellArchetypeScenario(),
-            new WatchScenario(new SpellArchetypeScenario()),
+            new AllArchetypesScenario(),
         };
 
         /// <summary>All registered scenarios, in display order.</summary>

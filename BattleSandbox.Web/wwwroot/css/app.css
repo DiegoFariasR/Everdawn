@@ -436,8 +436,20 @@ html, body {
 .btn-cancel:active { background: #30363d; }
 
 /* ── Target selection ─────────────────────────────────────── */
-.card-targetable { cursor: pointer; }
-.card-targetable:hover { border-color: #888; }
+.card-targetable {
+    cursor: pointer;
+    border-color: #cc4444 !important;
+    box-shadow: 0 0 8px rgba(204, 68, 68, 0.45);
+    animation: targetable-pulse 1.4s ease-in-out infinite;
+}
+.card-targetable:hover {
+    border-color: #ff7777 !important;
+    box-shadow: 0 0 14px rgba(255, 100, 100, 0.7);
+}
+@keyframes targetable-pulse {
+    0%, 100% { box-shadow: 0 0 6px rgba(204, 68, 68, 0.35); }
+    50% { box-shadow: 0 0 14px rgba(220, 80, 80, 0.7); }
+}
 
 /* Heal/ally-target modifier */
 .btn-heal { outline: 2px solid #44cc88; outline-offset: 1px; }

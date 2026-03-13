@@ -1,40 +1,54 @@
 @using GameCore.Battle
 @using System.Collections.Generic
+@using System.Linq
 
 @*
   BattleLogPanel — scrollable event log.
 
   Play mode (IsPlayMode=true):
-    Most-recent event highlighted gold. Events from the last player action highlighted green.
-    Clicking any entry undoes back to just before that action (OnEntryClick(index)).
+    Most-recent entry highlighted gold. Entries from the last player action highlighted green.
+    Clicking any entry undoes back to just before that action (OnEntryClick(originalIndex)).
 
   Watch mode (IsPlayMode=false):
     Current snapshot entry highlighted. Clicking sets the active step (OnEntryClick(index)).
+
+  Multi-hit grouping: consecutive hits of the same skill+actor+target are collapsed into one line
+  showing the total damage across all hits.
 *@
 
 <section class="card event-log @(IsPlayMode ? "play-log" : "")" id="@(IsPlayMode ? "play-log" : "watch-log")">
-    @for (int i = 0; i < Events.Count; i++)
+    @{ var groups = BuildGroups(); }
+    @for (int gi = 0; gi < groups.Count; gi++)
     {
-        var  ev       = Events[i];
-        bool isLast   = IsPlayMode  && i == Events.Count - 1;
-        bool isNew    = IsPlayMode  && i >= NewEventsStart;
-        bool isCurrent = !IsPlayMode && i == CurrentStep;
-        int  idx      = i;
+        var  group    = groups[gi];
+        var  ev       = group.First;
+        bool isLast   = IsPlayMode  && gi == groups.Count - 1;
+        bool isNew    = IsPlayMode  && group.OriginalIndex >= NewEventsStart;
+        bool isCurrent = !IsPlayMode && group.OriginalIndex == CurrentStep;
+        int  clickIdx = group.OriginalIndex;
+        bool isGrouped = group.HitsGrouped > 1;
+        string desc    = isGrouped ? GroupedDescription(group) : ev.Description;
 
         <div class="event-entry @ev.Type
             @(isNew               ? "event-new"     : "")
             @(isLast || isCurrent ? "event-current" : "")"
              title="@(IsPlayMode && !AutoMode ? "Click to undo to this point" : "")"
-             @onclick="() => OnEntryClick.InvokeAsync(idx)">
+             @onclick="() => OnEntryClick.InvokeAsync(clickIdx)">
 
-            @if (!IsPlayMode) { <span class="event-num">@(i + 1).</span> }
-            @ev.Description
+            @if (!IsPlayMode) { <span class="event-num">@(gi + 1).</span> }
+            @desc
 
-            @if (ev.EffectType.HasValue || ev.TotalHits > 1)
+            @if (isGrouped)
             {
                 <span class="ev-meta">
                     @if (ev.EffectType.HasValue) { <span class="info-badge @BattleHelpers.DmgTypeCss(ev.EffectType.Value) ev-meta-badge">@ev.EffectType</span> }
-                    @if (ev.TotalHits > 1) { <span class="ev-hit">@(ev.HitIndex + 1)/@ev.TotalHits</span> }
+                    <span class="ev-hit">@(group.HitsGrouped) hits &middot; @(group.TotalValue) total</span>
+                </span>
+            }
+            else if (ev.EffectType.HasValue)
+            {
+                <span class="ev-meta">
+                    <span class="info-badge @BattleHelpers.DmgTypeCss(ev.EffectType.Value) ev-meta-badge">@ev.EffectType</span>
                 </span>
             }
         </div>
@@ -54,6 +68,56 @@
     /// <summary>Watch mode: index of the currently displayed snapshot.</summary>
     [Parameter] public int CurrentStep     { get; set; }
 
-    /// <summary>Called with the clicked entry index. Play mode = undo; watch mode = jump to step.</summary>
+    /// <summary>Called with the clicked entry's original event index. Play mode = undo; watch mode = jump to step.</summary>
     [Parameter] public EventCallback<int> OnEntryClick { get; set; }
+
+    private record LogGroup(BattleEvent First, int TotalValue, int HitsGrouped, int OriginalIndex);
+
+    private List<LogGroup> BuildGroups()
+    {
+        var result = new List<LogGroup>();
+        int i = 0;
+        while (i < Events.Count)
+        {
+            var ev = Events[i];
+            // Start of a groupable multi-hit: HitIndex==0, TotalHits>1, has a skill
+            if (ev.TotalHits > 1 && ev.HitIndex == 0 && ev.SkillId != null)
+            {
+                int total = ev.Value;
+                int j     = i + 1;
+                while (j < Events.Count
+                    && Events[j].SkillId  == ev.SkillId
+                    && Events[j].ActorId  == ev.ActorId
+                    && Events[j].TargetId == ev.TargetId
+                    && Events[j].HitIndex > 0)
+                {
+                    total += Events[j].Value;
+                    j++;
+                }
+                result.Add(new LogGroup(ev, total, j - i, i));
+                i = j;
+            }
+            else
+            {
+                result.Add(new LogGroup(ev, ev.Value, 1, i));
+                i++;
+            }
+        }
+        return result;
+    }
+
+    private static string GroupedDescription(LogGroup g)
+    {
+        var desc = g.First.Description;
+        // Strip " (hit 1/N)" trailing label so we can replace with grouped summary
+        int hitTag = desc.IndexOf(" (hit ", System.StringComparison.Ordinal);
+        if (hitTag >= 0)
+        {
+            // Find the closing ")" then the final "."
+            int close = desc.IndexOf(')', hitTag);
+            if (close >= 0 && close + 1 < desc.Length && desc[close + 1] == '.')
+                return desc.Substring(0, hitTag) + $" ({g.HitsGrouped} hits).";
+        }
+        return desc;
+    }
 }
