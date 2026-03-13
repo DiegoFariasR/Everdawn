@@ -1,9 +1,10 @@
 ﻿@page "/"
+@using BattleSandbox.Web.Services
 @using GameCore.Battle
 @using GameCore.Content
 @using GameCore.Scenarios
 @inject IJSRuntime JS
-@inject IContentSource ContentSource
+@inject WebGameClient GameClient
 @implements IAsyncDisposable
 
 <PageTitle>Battle Sandbox</PageTitle>
@@ -422,7 +423,7 @@
     private void StartSessionInner()
     {
         _currentScenario = _scenarios.First(s => s.Id == _selectedScenarioId);
-        _setup         = _currentScenario.CreateSetup(ContentSource);
+        _setup         = _currentScenario.CreateSetup(GameClient.ContentSource);
         _playMode      = _currentScenario.IsPlayable;
         _engine        = null;
         _view          = null;

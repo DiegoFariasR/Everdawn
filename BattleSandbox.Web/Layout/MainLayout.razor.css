@@ -12,7 +12,7 @@
 }
 
 .container {
-    max-width: 600px;
+    max-width: 640px;
     margin: 0 auto;
     padding: 1rem;
 }
@@ -40,4 +40,29 @@
 .top-nav-link.active {
     color: #e0e0e0;
     border-bottom-color: #5a8dee;
+}
+
+/* Placeholder pages shared style */
+.placeholder-page {
+    padding: 2rem 0;
+    color: #ccc;
+}
+
+.placeholder-page h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.1rem;
+}
+
+.placeholder-note {
+    color: #666;
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+.placeholder-note code {
+    color: #999;
+    background: #1a1a30;
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+    font-size: 0.9em;
 }
