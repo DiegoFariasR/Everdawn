@@ -174,16 +174,46 @@ namespace GameCore.Content
                     kvp => kvp.Value);
             }
 
-            // ── Unit-level modifiers ──────────────────────────────────────────
-            // Look up unit-level modifiers (e.g. to adjust penetration values).
-            var unitMods = raw.Modifiers.Count == 0
-                ? System.Array.Empty<BattleModifier>()
-                : raw.Modifiers
-                    .Select(modId => modifierDict.TryGetValue(modId, out var mod)
-                        ? mod
-                        : throw new KeyNotFoundException(
-                            $"Unit '{raw.Id}' references unknown unit modifier '{modId}'."))
-                    .ToArray();
+            // Compile and apply unit-level modifiers to resistances, penetrations, and disruption resistance.
+            var unitMods = raw.Modifiers
+                .Select(modId => modifierDict.TryGetValue(modId, out var mod)
+                    ? mod
+                    : throw new KeyNotFoundException(
+                        $"Unit '{raw.Id}' references unknown modifier '{modId}'."))
+                .ToArray();
+
+            int disruptionResistance = 0;
+            if (unitMods.Length > 0)
+            {
+                var mergedResistances = resistances != null
+                    ? new Dictionary<EffectType, int>(resistances)
+                    : new Dictionary<EffectType, int>();
+
+                var resistanceKeys = new (EffectType Type, ModifierVariable Key)[]
+                {
+                    (EffectType.Physical, ModifierVariable.PhysicalResistance),
+                    (EffectType.Fire, ModifierVariable.FireResistance),
+                    (EffectType.Cold, ModifierVariable.ColdResistance),
+                    (EffectType.Lightning, ModifierVariable.LightningResistance),
+                    (EffectType.Holy, ModifierVariable.HolyResistance),
+                    (EffectType.Void, ModifierVariable.VoidResistance),
+                };
+
+                foreach (var (type, key) in resistanceKeys)
+                {
+                    int baseVal = mergedResistances.TryGetValue(type, out int r) ? r : 0;
+                    int finalVal = GetLastSet<int>(unitMods, key, baseVal) + SumModifyInt(unitMods, key);
+                    if (finalVal != 0)
+                        mergedResistances[type] = finalVal;
+                    else
+                        mergedResistances.Remove(type);
+                }
+
+                resistances = mergedResistances.Count > 0 ? mergedResistances : null;
+
+                disruptionResistance = GetLastSet<int>(unitMods, ModifierVariable.DisruptionResistance, 0)
+                    + SumModifyInt(unitMods, ModifierVariable.DisruptionResistance);
+            }
 
             // ── Penetrations ──────────────────────────────────────────────────
             // Compile raw YAML penetrations, then apply unit-level modifier Set/Modify.
@@ -223,7 +253,8 @@ namespace GameCore.Content
                 Skills: skills,
                 Traits: traits,
                 Resistances: resistances,
-                Penetrations: penetrations);
+                Penetrations: penetrations,
+                DisruptionResistance: disruptionResistance);
         }
 
         private static BattleSkill CompileSkill(RawSkill raw)

@@ -13,14 +13,17 @@ namespace GameCore.Content.Raw
         public List<string> Traits { get; set; } = new List<string>();
         public List<RawUnitSkill> Skills { get; set; } = new List<RawUnitSkill>();  // resolved by ContentPipeline
         public Dictionary<string, int> Resistances { get; set; } = new Dictionary<string, int>();
+
         /// <summary>
         /// Base penetration values keyed by effect type name (case-insensitive).
         /// Penetration reduces the target's effective resistance when this unit attacks.
         /// </summary>
         public Dictionary<string, int> Penetrations { get; set; } = new Dictionary<string, int>();
+
         /// <summary>
-        /// Unit-level modifier IDs. These modifiers can adjust unit stats such as penetration.
-        /// Applied after base values; Set → Modify order, same as skill-slot modifiers.
+        /// Unit-level modifier IDs applied to this unit's stats (resistances, penetration, etc.).
+        /// Only unit-level <see cref="GameCore.Battle.ModifierVariable"/> keys are used;
+        /// skill variables (Cost, DamageMultiplier, etc.) in these modifiers are ignored.
         /// </summary>
         public List<string> Modifiers { get; set; } = new List<string>();
     }
