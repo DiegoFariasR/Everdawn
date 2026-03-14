@@ -34,14 +34,23 @@ namespace GameCore.Battle
                     false,
                     new ValidationError(ValidationErrorCode.SessionAlreadyStarted, "Session already started."),
                     BuildView(_lastResponse!),
-                    Array.Empty<BattleEvent>()
+                    Array.Empty<BattleEvent>(),
+                    Array.Empty<UnitDisplayInfo>(),
+                    Array.Empty<UnitDisplayInfo>()
                 );
             }
 
             _setup = setup;
             _inner = new InteractiveBattleSession(setup, _seed);
             _lastResponse = _inner.HandleRequest(new InitiateBattleRequest());
-            return new BattleStartResult(true, null, BuildView(_lastResponse), _lastResponse.NewEvents);
+            return new BattleStartResult(
+                true,
+                null,
+                BuildView(_lastResponse),
+                _lastResponse.NewEvents,
+                setup.PlayerUnits.Select(u => ToDisplayInfo(u, "player")).ToArray(),
+                setup.EnemyUnits.Select(u => ToDisplayInfo(u, "enemy")).ToArray()
+            );
         }
 
         public BattleStepResult TryExecute(BattleCommand command)
@@ -116,7 +125,14 @@ namespace GameCore.Battle
                 logOffset = fullLog.Count;
 
                 if (maxRounds > 0 && roundsElapsed >= maxRounds)
-                    return new BattleResult { Snapshots = snapshots, WinningTeam = "enemy", Seed = seed };
+                    return new BattleResult
+                    {
+                        Snapshots = snapshots,
+                        WinningTeam = "enemy",
+                        Seed = seed,
+                        PlayerUnits = setup.PlayerUnits.Select(u => ToDisplayInfo(u, "player")).ToArray(),
+                        EnemyUnits = setup.EnemyUnits.Select(u => ToDisplayInfo(u, "enemy")).ToArray(),
+                    };
             }
 
             var view = session.GetView();
@@ -125,6 +141,8 @@ namespace GameCore.Battle
                 Snapshots = snapshots,
                 WinningTeam = view.WinningTeam ?? "enemy",
                 Seed = seed,
+                PlayerUnits = setup.PlayerUnits.Select(u => ToDisplayInfo(u, "player")).ToArray(),
+                EnemyUnits = setup.EnemyUnits.Select(u => ToDisplayInfo(u, "enemy")).ToArray(),
             };
         }
 
@@ -284,5 +302,43 @@ namespace GameCore.Battle
                 s.ScalingHits ?? System.Array.Empty<DamageScaling>(),
                 s.Range,
                 s.Category);
+
+        private static UnitDisplayInfo ToDisplayInfo(BattleUnit u, string team) =>
+            new UnitDisplayInfo(
+                Id: u.Id,
+                Name: u.Name,
+                Team: team,
+                Level: u.Level,
+                MaxHp: u.MaxHp,
+                Str: u.Str,
+                Wis: u.Wis,
+                Agi: u.Agi,
+                PhysAttack: u.PhysAttack,
+                MagicAttack: u.MagicAttack,
+                Initiative: u.Initiative,
+                HitCount: u.HitCount,
+                MaxBars: u.MaxBars,
+                Traits: (IReadOnlyList<BattleTrait>)(u.Traits ?? Array.Empty<BattleTrait>()),
+                Resistances: (IReadOnlyDictionary<EffectType, int>)(u.Resistances ?? new Dictionary<EffectType, int>()),
+                Skills: u.ResolvedSkills.Select(sk => ToSkillDisplay(sk, u)).ToArray()
+            );
+
+        private static SkillDisplayInfo ToSkillDisplay(BattleSkill sk, BattleUnit u) =>
+            new SkillDisplayInfo(
+                Id: sk.Id,
+                Name: sk.Name,
+                IsBasic: sk.IsBasic,
+                IsUltimate: sk.IsUltimate,
+                PrimaryEffectType: sk.PrimaryEffectType,
+                DamageMultiplier: sk.DamageMultiplier,
+                BaseHits: sk.BaseHits,
+                Cost: sk.Cost,
+                IsAoe: sk.IsAoe,
+                Target: sk.Target,
+                Cooldown: sk.Cooldown,
+                EffectiveInitialCooldown: sk.EffectiveInitialCooldown,
+                BaseDmg: sk.EstimateBaseDmg(u),
+                Range: sk.Range
+            );
     }
 }

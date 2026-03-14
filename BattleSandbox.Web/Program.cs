@@ -1,8 +1,7 @@
 using System;
 using System.Net.Http;
 using BattleSandbox.Web;
-using BattleSandbox.Web.Services;
-using GameCore.Content;
+using GameCore.Scenarios;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,10 +17,9 @@ builder.Services.AddScoped(_ => http);
 // HttpContentSource reads content-index.json to discover available files, then pre-fetches
 // each one via HTTP. No repository-relative path math is performed at runtime.
 var contentSource = await HttpContentSource.LoadAsync(http, "GameData/Base");
-builder.Services.AddSingleton<IContentSource>(contentSource);
 
-// The web client facade — the presentation layer's single entry point into GameCore.
-// Mirrors the relationship UnityClient has with the GameCore package.
-builder.Services.AddSingleton(new WebGameClient(contentSource));
+// BattleSandboxEngine is the presentation layer's single entry point into GameCore.
+// It owns content loading, scenario resolution, and session lifecycle.
+builder.Services.AddSingleton<IBattleSandboxEngine>(new BattleSandboxEngine(contentSource));
 
 await builder.Build().RunAsync();

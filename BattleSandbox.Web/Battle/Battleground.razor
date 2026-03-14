@@ -67,8 +67,8 @@
 </div>
 
 @code {
-    [Parameter, EditorRequired] public IReadOnlyList<BattleUnit> PlayerUnits { get; set; } = null!;
-    [Parameter, EditorRequired] public IReadOnlyList<BattleUnit> EnemyUnits  { get; set; } = null!;
+    [Parameter, EditorRequired] public IReadOnlyList<UnitDisplayInfo> PlayerUnits { get; set; } = null!;
+    [Parameter, EditorRequired] public IReadOnlyList<UnitDisplayInfo> EnemyUnits  { get; set; } = null!;
     [Parameter, EditorRequired] public IReadOnlyList<UnitState>  UnitStates  { get; set; } = null!;
 
     [Parameter] public string?  ActiveUnitId      { get; set; }
@@ -83,9 +83,9 @@
 
     [Parameter] public EventCallback<string> OnUnitTargeted { get; set; }
 
-    private (BattleUnit Unit, bool IsPlayer)? _detail;
+    private (UnitDisplayInfo Unit, bool IsPlayer)? _detail;
 
-    private void ToggleDetail(BattleUnit unit, bool isPlayer)
+    private void ToggleDetail(UnitDisplayInfo unit, bool isPlayer)
     {
         if (_detail.HasValue && _detail.Value.Unit.Id == unit.Id)
             _detail = null;

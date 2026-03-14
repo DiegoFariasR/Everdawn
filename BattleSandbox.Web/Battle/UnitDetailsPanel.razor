@@ -59,9 +59,8 @@
         }
 
         <div class="info-skills">
-            @foreach (var sk in Unit.ResolvedSkills)
+            @foreach (var sk in Unit.Skills)
             {
-                int baseDmg = sk.EstimateBaseDmg(Unit);
                 <div class="info-skill-row">
                     <span class="info-skill-name">@sk.Name</span>
                     @if (sk.IsBasic)    { <span class="info-badge badge-basic">Basic</span> }
@@ -69,7 +68,7 @@
                     @if (sk.PrimaryEffectType.HasValue) { <span class="info-badge @BattleHelpers.DmgTypeCss(sk.PrimaryEffectType.Value)">@sk.PrimaryEffectType</span> }
                     <span class="info-skill-stat">x@(sk.DamageMultiplier.ToString("0.##"))</span>
                     @if (sk.BaseHits != 1.0) { <span class="info-skill-stat">@(sk.BaseHits.ToString("0.##"))hits</span> }
-                    <span class="info-skill-stat">~@baseDmg</span>
+                    <span class="info-skill-stat">~@sk.BaseDmg</span>
                     @if (sk.Cost > 0)                    { <span class="info-skill-stat">@sk.Cost MP</span> }
                     @if (sk.IsAoe)                       { <span class="info-badge badge-aoe">AoE</span>  }
                     @if (sk.Cooldown > 0)                { <span class="info-skill-stat">CD @sk.Cooldown</span> }
@@ -81,7 +80,7 @@
 }
 
 @code {
-    [Parameter] public BattleUnit?    Unit     { get; set; }
+    [Parameter] public UnitDisplayInfo? Unit     { get; set; }
     [Parameter] public bool           IsPlayer { get; set; }
     [Parameter] public EventCallback  OnClose  { get; set; }
 }

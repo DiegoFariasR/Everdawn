@@ -1,12 +1,10 @@
 ﻿@page "/battle"
 @using BattleSandbox.Web.Battle
-@using BattleSandbox.Web.Services
 @using GameCore.Battle
-@using GameCore.Content
 @using GameCore.Scenarios
 @using System.Collections.Generic
 @using System.Linq
-@inject WebGameClient GameClient
+@inject IBattleSandboxEngine Engine
 
 <PageTitle>Battle Sandbox</PageTitle>
 
@@ -43,7 +41,7 @@
     }
 
     <!-- == Play mode ======================================================= -->
-    @if (_playMode && _view != null && _setup != null)
+    @if (_playMode && _view != null && _playerUnits != null)
     {
         var  state       = _view.Units;
         var  lastEv      = _view.FullLog.LastOrDefault();
@@ -53,13 +51,13 @@
         bool targetIsAlly = pending != null && (_pendingSkill?.Target == BattleSkillTarget.Ally);
         bool pendingIsAoe = _pendingSkill?.IsAoe ?? false;
 
-        <TurnStrip PlayerUnits="_setup.PlayerUnits" EnemyUnits="_setup.EnemyUnits"
+        <TurnStrip PlayerUnits="_playerUnits" EnemyUnits="_enemyUnits!"
                    UnitStates="state" ActiveUnitId="activeId" Round="_view.Round" />
 
         <CurrentEventCard EventType="evType"
                           Description="@(lastEv?.Description ?? "Battle begins!")" />
 
-        <Battleground PlayerUnits="_setup.PlayerUnits" EnemyUnits="_setup.EnemyUnits"
+        <Battleground PlayerUnits="_playerUnits" EnemyUnits="_enemyUnits!"
                       UnitStates="state" ActiveUnitId="activeId"
                       Floats="_floats" MeleeAnimators="_meleeAnimators"
                       SelectedSkillId="_pendingAction"
@@ -71,7 +69,7 @@
 
         <ActiveCharCard Pending="pending"
                         ActiveEnemyUnit="@(pending == null && !_view.IsOver
-                            ? _setup.EnemyUnits.FirstOrDefault(u => u.Id == activeId)
+                            ? _enemyUnits!.FirstOrDefault(u => u.Id == activeId)
                             : null)"
                         LastEventSkillId="lastEv?.SkillId"
                         IsOver="_view.IsOver" WinningTeam="_view.WinningTeam"
@@ -89,20 +87,20 @@
     }
 
     <!-- == Watch mode ======================================================= -->
-    @if (!_playMode && _result != null && _setup != null)
+    @if (!_playMode && _result != null && _playerUnits != null)
     {
         var snap      = CurrentSnapshot!;
         string? snapActor = snap.Event.ActorId;
         var emptyFloats   = Enumerable.Empty<FloatNumber>();
         var emptySet      = new HashSet<string>();
 
-        <TurnStrip PlayerUnits="_setup.PlayerUnits" EnemyUnits="_setup.EnemyUnits"
+        <TurnStrip PlayerUnits="_playerUnits" EnemyUnits="_enemyUnits!"
                    UnitStates="snap.UnitStates" ActiveUnitId="snapActor"
                    Round="WatchRound" />
 
         <CurrentEventCard EventType="snap.Event.Type" Description="snap.Event.Description" />
 
-        <Battleground PlayerUnits="_setup.PlayerUnits" EnemyUnits="_setup.EnemyUnits"
+        <Battleground PlayerUnits="_playerUnits" EnemyUnits="_enemyUnits!"
                       UnitStates="snap.UnitStates" ActiveUnitId="snapActor"
                       Floats="emptyFloats" MeleeAnimators="emptySet"
                       AutoMode="true" HasPendingInput="false" />
@@ -123,7 +121,8 @@
     private List<IBattleScenario> _scenarios = new List<IBattleScenario>();
     private string _selectedScenarioId = "";
     private IBattleScenario? _currentScenario;
-    private BattleSetup? _setup;
+    private IReadOnlyList<UnitDisplayInfo>? _playerUnits;
+    private IReadOnlyList<UnitDisplayInfo>? _enemyUnits;
     private bool _playMode;
     private string? _startError;
 
@@ -134,8 +133,7 @@
     }
 
     // Play mode
-    private IBattleEngine? _engine;
-    private BattleView?    _view;
+    private BattleView? _view;
     private string?        _pendingAction;
     private bool           _autoMode;
     private int            _autoDelay = 1000;
@@ -189,43 +187,44 @@
     private void StartSessionInner()
     {
         _currentScenario = _scenarios.First(s => s.Id == _selectedScenarioId);
-        _setup           = _currentScenario.CreateSetup(GameClient.ContentSource);
         _playMode        = _currentScenario.IsPlayable;
-        _engine          = null;
         _view            = null;
         _result          = null;
         _pendingAction   = null;
-
-        BuildSkillRanges();
-        _playerUnitIds.Clear();
-        foreach (var u in _setup.PlayerUnits) _playerUnitIds.Add(u.Id);
         _meleeAnimators.Clear();
 
         if (_playMode)
         {
             _resumeCommand  = null;
             _commandHistory = new List<CommandRecord>();
-            _engine = new BattleSession(_currentScenario.Seed);
-            _view   = _engine.Start(_setup).View;
+            var startResult = Engine.StartBattle(_selectedScenarioId);
+            _playerUnits    = startResult.PlayerUnits;
+            _enemyUnits     = startResult.EnemyUnits;
+            _view           = startResult.View;
+            BuildSkillRanges();
             SelectDefaultSkill();
             if (_autoMode) _ = RunAutoAsync();
         }
         else
         {
-            _result = BattleSession.RunFull(_setup, _currentScenario.Seed);
-            _step   = 0;
+            _result      = Engine.RunFull(_selectedScenarioId);
+            _playerUnits = _result.PlayerUnits;
+            _enemyUnits  = _result.EnemyUnits;
+            BuildSkillRanges();
+            _step = 0;
         }
     }
 
     private void TakeControlFromHere()
     {
-        if (_result == null || _setup == null || _currentScenario == null) return;
+        if (_result == null || _currentScenario == null) return;
         var snap        = _result.Snapshots[_step];
         _resumeCommand  = new ResumeFromSnapshotCommand(snap.UnitStates, snap.Event.ActorId, _step + 1);
         _commandHistory = new List<CommandRecord>();
-        _engine = new BattleSession(_currentScenario.Seed);
-        _engine.Start(_setup);
-        _view     = _engine.TryExecute(_resumeCommand).View;
+        var startResult = Engine.StartBattle(_selectedScenarioId);
+        _playerUnits    = startResult.PlayerUnits;
+        _enemyUnits     = startResult.EnemyUnits;
+        _view     = Engine.ExecuteCommand(_resumeCommand).View;
         _playMode = true;
         _result   = null;
         SelectDefaultSkill();
@@ -236,19 +235,19 @@
     private void ToggleAuto()
     {
         _autoMode = !_autoMode;
-        if (_autoMode && _engine != null && _view?.PendingInput != null && !_view.IsOver)
+        if (_autoMode && _view?.PendingInput != null && !_view.IsOver)
             _ = RunAutoAsync();
     }
 
     private async System.Threading.Tasks.Task RunAutoAsync()
     {
-        while (_autoMode && _engine != null && !(_view?.IsOver ?? true))
+        while (_autoMode && !(_view?.IsOver ?? true))
         {
             await System.Threading.Tasks.Task.Delay(_autoDelay);
-            if (!_autoMode || _engine == null) break;
+            if (!_autoMode) break;
             var cmd = new AdvanceTurnCommand();
             _commandHistory.Add(new CommandRecord(cmd, _view!.FullLog.Count));
-            var result = _engine.TryExecute(cmd);
+            var result = Engine.ExecuteCommand(cmd);
             _view = result.View;
             TriggerMeleeAnims(result.Events);
             SpawnFloats(result.Events);
@@ -260,11 +259,10 @@
     // Player actions
     private void FireAoe(string skillId)
     {
-        if (_engine is null) return;
         _lastActionEventStart = _view!.FullLog.Count;
         var cmd = new PlayerActionCommand(skillId, null);
         _commandHistory.Add(new CommandRecord(cmd, _view.FullLog.Count));
-        var result = _engine.TryExecute(cmd);
+        var result = Engine.ExecuteCommand(cmd);
         _view = result.View;
         TriggerMeleeAnims(result.Events);
         SpawnFloats(result.Events);
@@ -274,27 +272,27 @@
 
     private void AutoFireSkill(string skillId)
     {
-        if (_engine is null || _setup is null || _view is null || _pendingAction is null) return;
+        if (_view is null || _pendingAction is null || _playerUnits is null) return;
         var pending = _view.PendingInput;
         if (pending is null) return;
         var skill = _pendingSkill;
         if (skill is null) return;
 
         var targets = skill.Target == BattleSkillTarget.Ally
-            ? (System.Collections.Generic.IReadOnlyList<BattleUnit>)_setup.PlayerUnits
-            : _setup.EnemyUnits;
-        var autoTarget = System.Linq.Enumerable.FirstOrDefault(targets,
+            ? (IReadOnlyList<UnitDisplayInfo>)_playerUnits
+            : _enemyUnits!;
+        var autoTarget = targets.FirstOrDefault(
             u => _view.Units.FirstOrDefault(s => s.UnitId == u.Id)?.IsAlive ?? false);
         if (autoTarget != null) ConfirmTarget(autoTarget.Id);
     }
 
     private void ConfirmTarget(string targetId)
     {
-        if (_engine is null || _pendingAction is null) return;
+        if (_pendingAction is null) return;
         _lastActionEventStart = _view!.FullLog.Count;
         var cmd = new PlayerActionCommand(_pendingAction, targetId);
         _commandHistory.Add(new CommandRecord(cmd, _view.FullLog.Count));
-        var result = _engine.TryExecute(cmd);
+        var result = Engine.ExecuteCommand(cmd);
         _view = result.View;
         TriggerMeleeAnims(result.Events);
         SpawnFloats(result.Events);
@@ -304,14 +302,14 @@
 
     private async System.Threading.Tasks.Task AdvanceNonPlayerTurnsAsync()
     {
-        while (_engine != null && !(_view?.IsOver ?? true) && _view?.PendingInput == null)
+        while (!(_view?.IsOver ?? true) && _view?.PendingInput == null)
         {
             StateHasChanged();
             await System.Threading.Tasks.Task.Delay(_autoDelay);
-            if (_engine == null || _autoMode) break;
+            if (_autoMode) break;
             var cmd = new AdvanceTurnCommand();
             _commandHistory.Add(new CommandRecord(cmd, _view!.FullLog.Count));
-            var result = _engine.TryExecute(cmd);
+            var result = Engine.ExecuteCommand(cmd);
             _view = result.View;
             TriggerMeleeAnims(result.Events);
             SpawnFloats(result.Events);
@@ -323,7 +321,7 @@
     // Undo
     private void UndoToEvent(int logIndex)
     {
-        if (_engine == null || _setup == null || _currentScenario == null || _autoMode) return;
+        if (_currentScenario == null || _autoMode) return;
 
         int actionsToReplay = 0;
         for (int j = 0; j < _commandHistory.Count; j++)
@@ -335,13 +333,14 @@
             else break;
         }
 
-        var newEng = new BattleSession(_currentScenario.Seed);
-        BattleView v = newEng.Start(_setup).View;
-        if (_resumeCommand != null) v = newEng.TryExecute(_resumeCommand).View;
+        var startResult = Engine.StartBattle(_selectedScenarioId);
+        _playerUnits    = startResult.PlayerUnits;
+        _enemyUnits     = startResult.EnemyUnits;
+        BattleView v    = startResult.View;
+        if (_resumeCommand != null) v = Engine.ExecuteCommand(_resumeCommand).View;
         for (int j = 0; j < actionsToReplay; j++)
-            v = newEng.TryExecute(_commandHistory[j].Cmd).View;
+            v = Engine.ExecuteCommand(_commandHistory[j].Cmd).View;
 
-        _engine         = newEng;
         _view           = v;
         _commandHistory = _commandHistory.Take(actionsToReplay).ToList();
         _lastActionEventStart = 0;
@@ -366,14 +365,13 @@
     // Melee animations
     private readonly HashSet<string> _meleeAnimators = new HashSet<string>();
     private Dictionary<string, SkillRange> _skillRanges = new Dictionary<string, SkillRange>();
-    private readonly HashSet<string> _playerUnitIds = new HashSet<string>();
 
     private void BuildSkillRanges()
     {
-        if (_setup == null) return;
-        _skillRanges = _setup.PlayerUnits
-            .Concat(_setup.EnemyUnits)
-            .SelectMany(u => u.ResolvedSkills)
+        if (_playerUnits == null) return;
+        _skillRanges = _playerUnits
+            .Concat(_enemyUnits!)
+            .SelectMany(u => u.Skills)
             .GroupBy(s => s.Id)
             .ToDictionary(g => g.Key, g => g.First().Range);
     }

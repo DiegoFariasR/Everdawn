@@ -9,6 +9,8 @@ namespace GameCore.Battle
         bool Success,
         ValidationError? Error,
         BattleView View,
-        IReadOnlyList<BattleEvent> Events
+        IReadOnlyList<BattleEvent> Events,
+        IReadOnlyList<UnitDisplayInfo> PlayerUnits,
+        IReadOnlyList<UnitDisplayInfo> EnemyUnits
     );
 }

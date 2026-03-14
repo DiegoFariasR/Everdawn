@@ -73,10 +73,9 @@ else if (ActiveEnemyUnit != null)
     <section class="card action-bar">
         <div class="acting-label enemy-acting">@(ActiveEnemyUnit.Name)'s turn</div>
         <div class="action-buttons">
-            @for (int si = 0; si < ActiveEnemyUnit.ResolvedSkills.Count; si++)
+            @for (int si = 0; si < ActiveEnemyUnit.Skills.Count; si++)
             {
-                var sk      = ActiveEnemyUnit.ResolvedSkills[si];
-                int baseDmg = sk.EstimateBaseDmg(ActiveEnemyUnit);
+                var sk      = ActiveEnemyUnit.Skills[si];
 
                 <button class="btn-action @BattleHelpers.SkillSlotClass(si) btn-enemy-info
                         @(sk.IsAoe ? "btn-aoe" : "")
@@ -95,7 +94,7 @@ else if (ActiveEnemyUnit != null)
                         @if (sk.IsUltimate) { <span class="info-badge badge-ult">Ult</span>   }
                         <span class="info-skill-stat">x@(sk.DamageMultiplier.ToString("0.##"))</span>
                         @if (sk.BaseHits != 1.0) { <span class="info-skill-stat">@(sk.BaseHits.ToString("0.##"))hits</span> }
-                        <span class="info-skill-stat">~@baseDmg</span>
+                        <span class="info-skill-stat">~@sk.BaseDmg</span>
                     </div>
                 </button>
             }
@@ -108,7 +107,7 @@ else if (ActiveEnemyUnit != null)
     [Parameter] public PendingInputView? Pending { get; set; }
 
     /// <summary>Non-null when it is an enemy's turn (for info display).</summary>
-    [Parameter] public BattleUnit? ActiveEnemyUnit { get; set; }
+    [Parameter] public UnitDisplayInfo? ActiveEnemyUnit { get; set; }
 
     /// <summary>Skill ID from the last event — used to highlight the enemy skill being executed.</summary>
     [Parameter] public string? LastEventSkillId { get; set; }

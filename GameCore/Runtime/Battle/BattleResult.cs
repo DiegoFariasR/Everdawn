@@ -10,5 +10,7 @@ namespace GameCore.Battle
         public IReadOnlyList<BattleSnapshot> Snapshots { get; init; } = Array.Empty<BattleSnapshot>();
         public string WinningTeam { get; init; } = string.Empty;
         public int Seed { get; init; }
+        public IReadOnlyList<UnitDisplayInfo> PlayerUnits { get; init; } = Array.Empty<UnitDisplayInfo>();
+        public IReadOnlyList<UnitDisplayInfo> EnemyUnits { get; init; } = Array.Empty<UnitDisplayInfo>();
     }
 }

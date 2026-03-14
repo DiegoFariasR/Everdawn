@@ -71,7 +71,7 @@
 </div>
 
 @code {
-    [Parameter, EditorRequired] public BattleUnit Unit  { get; set; } = null!;
+    [Parameter, EditorRequired] public UnitDisplayInfo Unit  { get; set; } = null!;
     [Parameter, EditorRequired] public UnitState  State { get; set; } = null!;
 
     [Parameter] public bool IsPlayer        { get; set; }
