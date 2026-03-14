@@ -51,10 +51,47 @@ namespace GameCore.Content.Raw
         /// <summary>How duration counts down: ForTargetTurns, ForSourceTurns, or UntilNextAction.</summary>
         public string DurationKind { get; set; } = "ForTargetTurns";
         /// <summary>
-        /// Stat multipliers to apply while the effect is active.
-        /// Keys are RuntimeStatKey names (e.g. "physicalDamageDealtMultiplier"); values are multipliers.
+        /// Stat changes to apply while the effect is active.
         /// </summary>
-        public Dictionary<string, double> Stats { get; set; } = new Dictionary<string, double>();
+        public RawEffectStats Stats { get; set; } = new RawEffectStats();
+    }
+
+    /// <summary>
+    /// Structured stat changes for an ApplyEffect active buff/debuff.
+    /// Per-type entries use lists of single-key dicts, e.g. [{physical: 1.2}].
+    /// Flat scalars are applied to all types (e.g. damageTakenMultiplier: 0.8).
+    /// </summary>
+    public class RawEffectStats
+    {
+        // ── Flat (all-type) multipliers ───────────────────────────────────────
+        /// <summary>Multiplier on all outgoing damage dealt. Stacks with per-type entries.</summary>
+        public double? DamageDealtMultiplier { get; set; }
+        /// <summary>Multiplier on all incoming damage taken.</summary>
+        public double? DamageTakenMultiplier { get; set; }
+        /// <summary>Multiplier on all healing received.</summary>
+        public double? ReceivingHealingMultiplier { get; set; }
+        /// <summary>Multiplier on all barrier received.</summary>
+        public double? ReceivingBarrierMultiplier { get; set; }
+        // ── Per-type dealt multiplier ─────────────────────────────────────────
+        /// <summary>
+        /// Per damage-type outgoing damage multipliers.
+        /// Each entry is a single-key dict: [{physical: 1.2}, {fire: 1.5}].
+        /// Value is a multiplier (1.2 = +20%).
+        /// </summary>
+        public List<Dictionary<string, double>>? DamageDealtMultiplierByType { get; set; }
+        // ── Per-type resistance / penetration ─────────────────────────────────
+        /// <summary>
+        /// Per damage-type resistance adjustments.
+        /// Each entry is a single-key dict: [{fire: 20}, {cold: 10}].
+        /// Value is a flat percentage added to the unit's resistance (20 = +20%).
+        /// </summary>
+        public List<Dictionary<string, int>>? Resistance { get; set; }
+        /// <summary>
+        /// Per damage-type penetration adjustments.
+        /// Each entry is a single-key dict: [{physical: 15}].
+        /// Value is a flat percentage added to the unit's penetration.
+        /// </summary>
+        public List<Dictionary<string, int>>? Penetration { get; set; }
     }
 
     /// <summary>Raw skill data as parsed directly from YAML. No validation or compilation yet.</summary>

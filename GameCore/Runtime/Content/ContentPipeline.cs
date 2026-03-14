@@ -533,11 +533,38 @@ namespace GameCore.Content
 
             var durationKind = Enum.Parse<EffectDurationKind>(rawEffect.DurationKind, ignoreCase: true);
             var statModifiers = new List<RuntimeStatModifier>();
-            foreach (var kvp in rawEffect.Stats)
-            {
-                if (Enum.TryParse<RuntimeStatKey>(kvp.Key, ignoreCase: true, out var statKey))
-                    statModifiers.Add(new RuntimeStatModifier(statKey, ModifierOperation.Multiply, kvp.Value));
-            }
+            var s = rawEffect.Stats;
+
+            // ── Flat (all-type) multipliers ───────────────────────────────────
+            if (s.DamageDealtMultiplier.HasValue)
+                statModifiers.Add(new RuntimeStatModifier(RuntimeStatKey.DamageDealtMultiplier, ModifierOperation.Multiply, s.DamageDealtMultiplier.Value));
+            if (s.DamageTakenMultiplier.HasValue)
+                statModifiers.Add(new RuntimeStatModifier(RuntimeStatKey.DamageTakenMultiplier, ModifierOperation.Multiply, s.DamageTakenMultiplier.Value));
+            if (s.ReceivingHealingMultiplier.HasValue)
+                statModifiers.Add(new RuntimeStatModifier(RuntimeStatKey.ReceivingHealingMultiplier, ModifierOperation.Multiply, s.ReceivingHealingMultiplier.Value));
+            if (s.ReceivingBarrierMultiplier.HasValue)
+                statModifiers.Add(new RuntimeStatModifier(RuntimeStatKey.ReceivingBarrierMultiplier, ModifierOperation.Multiply, s.ReceivingBarrierMultiplier.Value));
+
+            // ── Per-type damage dealt multipliers ─────────────────────────────
+            if (s.DamageDealtMultiplierByType != null)
+                foreach (var entry in s.DamageDealtMultiplierByType)
+                    foreach (var kvp in entry)
+                        if (Enum.TryParse<EffectType>(kvp.Key, ignoreCase: true, out var et))
+                            statModifiers.Add(new RuntimeStatModifier(DamageDealtKeyFor(et), ModifierOperation.Multiply, kvp.Value));
+
+            // ── Per-type resistance (additive flat %) ─────────────────────────
+            if (s.Resistance != null)
+                foreach (var entry in s.Resistance)
+                    foreach (var kvp in entry)
+                        if (Enum.TryParse<EffectType>(kvp.Key, ignoreCase: true, out var et))
+                            statModifiers.Add(new RuntimeStatModifier(ResistanceKeyFor(et), ModifierOperation.Add, kvp.Value));
+
+            // ── Per-type penetration (additive flat %) ────────────────────────
+            if (s.Penetration != null)
+                foreach (var entry in s.Penetration)
+                    foreach (var kvp in entry)
+                        if (Enum.TryParse<EffectType>(kvp.Key, ignoreCase: true, out var et))
+                            statModifiers.Add(new RuntimeStatModifier(PenetrationKeyFor(et), ModifierOperation.Add, kvp.Value));
 
             return new ActiveEffectDefinition(
                 Id: rawEffect.EffectId,
@@ -547,6 +574,39 @@ namespace GameCore.Content
                 StackingPolicy: EffectStackingPolicy.RefreshDuration,
                 StatModifiers: statModifiers.Count > 0 ? statModifiers.ToArray() : null);
         }
+
+        private static RuntimeStatKey DamageDealtKeyFor(EffectType et) => et switch
+        {
+            EffectType.Physical => RuntimeStatKey.PhysicalDamageDealtMultiplier,
+            EffectType.Fire => RuntimeStatKey.FireDamageDealtMultiplier,
+            EffectType.Cold => RuntimeStatKey.ColdDamageDealtMultiplier,
+            EffectType.Lightning => RuntimeStatKey.LightningDamageDealtMultiplier,
+            EffectType.Holy => RuntimeStatKey.HolyDamageDealtMultiplier,
+            EffectType.Void => RuntimeStatKey.VoidDamageDealtMultiplier,
+            _ => RuntimeStatKey.PhysicalDamageDealtMultiplier,
+        };
+
+        private static RuntimeStatKey ResistanceKeyFor(EffectType et) => et switch
+        {
+            EffectType.Physical => RuntimeStatKey.PhysicalResistance,
+            EffectType.Fire => RuntimeStatKey.FireResistance,
+            EffectType.Cold => RuntimeStatKey.ColdResistance,
+            EffectType.Lightning => RuntimeStatKey.LightningResistance,
+            EffectType.Holy => RuntimeStatKey.HolyResistance,
+            EffectType.Void => RuntimeStatKey.VoidResistance,
+            _ => RuntimeStatKey.PhysicalResistance,
+        };
+
+        private static RuntimeStatKey PenetrationKeyFor(EffectType et) => et switch
+        {
+            EffectType.Physical => RuntimeStatKey.PhysicalPenetration,
+            EffectType.Fire => RuntimeStatKey.FirePenetration,
+            EffectType.Cold => RuntimeStatKey.ColdPenetration,
+            EffectType.Lightning => RuntimeStatKey.LightningPenetration,
+            EffectType.Holy => RuntimeStatKey.HolyPenetration,
+            EffectType.Void => RuntimeStatKey.VoidPenetration,
+            _ => RuntimeStatKey.PhysicalPenetration,
+        };
 
         /// <summary>
         /// Returns the value for <paramref name="key"/> from the last modifier in

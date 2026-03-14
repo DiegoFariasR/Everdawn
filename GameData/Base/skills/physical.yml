@@ -214,4 +214,5 @@
       duration: 2
       durationKind: ForSourceTurns
       stats:
-        physicalDamageDealtMultiplier: 1.2
+        damageDealtMultiplierByType:
+          - physical: 1.2
