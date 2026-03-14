@@ -1,0 +1,14 @@
+# Modifier tag rules
+# Defines how many skills tagged with each modifier tag every unit must have.
+# The content pipeline validates each unit against these rules.
+# Validation only runs when this file is present (absence = no tag constraints).
+
+- tag: basic
+  requiredPerUnit: 1
+
+- tag: ultimate
+  requiredPerUnit: 1
+
+# reaction tag is planned but not yet implemented — uncomment when all units have a reaction skill:
+# - tag: reaction
+#   requiredPerUnit: 1

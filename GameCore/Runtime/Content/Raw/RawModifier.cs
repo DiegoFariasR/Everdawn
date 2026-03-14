@@ -86,9 +86,16 @@ namespace GameCore.Content.Raw
         public RawModifierAdd Add { get; set; } = new RawModifierAdd();
 
         /// <summary>
-        /// IDs of modifiers that cannot be combined with this one in the same skill slot.
-        /// If a skill slot includes both this modifier and any listed here, the content pipeline throws.
+        /// Tags of modifier categories that cannot share the same skill slot with this modifier.
+        /// If a skill slot includes this modifier and any other modifier carrying one of the listed
+        /// tags, the content pipeline throws. References tag names, not modifier IDs.
         /// </summary>
         public List<string> ExclusiveWith { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Category tags for this modifier (e.g. "basic", "ultimate", "reaction").
+        /// Used by exclusiveWith checks and unit-level tag count validation.
+        /// </summary>
+        public List<string> Tags { get; set; } = new List<string>();
     }
 }

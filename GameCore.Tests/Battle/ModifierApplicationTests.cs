@@ -423,6 +423,8 @@ skills:
             var ex = Assert.Throws<InvalidOperationException>(() => BuildDb(@"
 - id: basic
   name: Basic
+  tags:
+    - basic
   exclusiveWith:
     - ultimate
   set:
@@ -430,6 +432,8 @@ skills:
     cooldown: 0
 - id: ultimate
   name: Ultimate
+  tags:
+    - ultimate
   exclusiveWith:
     - basic
   modify:
@@ -459,6 +463,8 @@ skills:
             var db = BuildDb(@"
 - id: basic
   name: Basic
+  tags:
+    - basic
   exclusiveWith:
     - ultimate
   set:
@@ -466,6 +472,8 @@ skills:
     cooldown: 0
 - id: ultimate
   name: Ultimate
+  tags:
+    - ultimate
   exclusiveWith:
     - basic
   modify:
@@ -483,6 +491,8 @@ skills:
             var db = BuildDb(@"
 - id: basic
   name: Basic
+  tags:
+    - basic
   exclusiveWith:
     - ultimate
   set:
@@ -490,6 +500,8 @@ skills:
     cooldown: 0
 - id: ultimate
   name: Ultimate
+  tags:
+    - ultimate
   exclusiveWith:
     - basic
   modify:
@@ -533,6 +545,172 @@ skills:
             Assert.Equal(1, skill.Cooldown); // base 2 + (-1)
         }
 
+        // ── Modifier tags ──────────────────────────────────────────────────────
+
+        [Fact]
+        public void Tags_AreCollectedOnSkillModifierTags_AfterCompilation()
+        {
+            var db = BuildDb(@"
+- id: my-basic
+  name: My Basic
+  tags:
+    - basic
+  set:
+    cost: 0
+    cooldown: 0
+", string.Format(UnitYaml, "my-basic"));
+
+            var skill = GetSkill(db, "test-unit", "sword-strike");
+            Assert.NotNull(skill.ModifierTags);
+            Assert.Contains(skill.ModifierTags, t => string.Equals(t, "basic", StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public void IsBasic_TrueWhenModifierHasBasicTag_RegardlessOfId()
+        {
+            // Modifier ID is "my-basic" but tag is "basic" — IsBasic must use the tag.
+            var db = BuildDb(@"
+- id: my-basic
+  name: My Basic
+  tags:
+    - basic
+  set:
+    cost: 0
+    cooldown: 0
+", string.Format(UnitYaml, "my-basic"));
+
+            var skill = GetSkill(db, "test-unit", "sword-strike");
+            Assert.True(skill.IsBasic);
+        }
+
+        [Fact]
+        public void IsBasic_FalseWhenModifierLacksTag()
+        {
+            // Modifier ID is "basic" but declares no tags — IsBasic must return false.
+            var db = BuildDb(@"
+- id: basic
+  name: Basic
+  set:
+    cost: 0
+    cooldown: 0
+", string.Format(UnitYaml, "basic"));
+
+            var skill = GetSkill(db, "test-unit", "sword-strike");
+            Assert.False(skill.IsBasic);
+        }
+
+        [Fact]
+        public void ExclusiveWith_TagBased_ThrowsForDifferentIdsSameTag()
+        {
+            // Two modifiers with different IDs but the same tag are mutually exclusive.
+            var ex = Assert.Throws<InvalidOperationException>(() => BuildDb(@"
+- id: warrior-basic
+  name: Warrior Basic
+  tags:
+    - basic
+  exclusiveWith:
+    - basic
+  set:
+    cost: 0
+    cooldown: 0
+- id: mage-basic
+  name: Mage Basic
+  tags:
+    - basic
+  exclusiveWith:
+    - basic
+  set:
+    cost: 0
+    cooldown: 0
+", @"
+id: test-unit
+name: Test Unit
+level: 1
+str: 100
+wis: 80
+agi: 50
+skills:
+  - id: sword-strike
+    modifiers:
+      - warrior-basic
+      - mage-basic
+"));
+            Assert.Contains("test-unit", ex.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("sword-strike", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        // ── Unit-level tag count validation ───────────────────────────────────
+
+        [Fact]
+        public void TagRule_RequiredPerUnit_PassesWhenCountExactlyMatches()
+        {
+            var db = BuildDbWithTagRules(@"
+- id: my-basic
+  name: My Basic
+  tags:
+    - basic
+  set:
+    cost: 0
+    cooldown: 0
+", @"
+- tag: basic
+  requiredPerUnit: 1
+", string.Format(UnitYaml, "my-basic"));
+
+            var skill = GetSkill(db, "test-unit", "sword-strike");
+            Assert.True(skill.IsBasic);
+        }
+
+        [Fact]
+        public void TagRule_RequiredPerUnit_ThrowsWhenUnitHasNoneOfRequiredTag()
+        {
+            var ex = Assert.Throws<InvalidOperationException>(() => BuildDbWithTagRules(@"
+- id: test-mod
+  name: Test Mod
+  set:
+    cost: 0
+", @"
+- tag: basic
+  requiredPerUnit: 1
+", string.Format(UnitYaml, "test-mod")));
+            Assert.Contains("test-unit", ex.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("basic", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void TagRule_RequiredPerUnit_ThrowsWhenUnitHasTooManyTaggedSkills()
+        {
+            // Two skills both carrying the "basic" tag violates requiredPerUnit: 1.
+            var ex = Assert.Throws<InvalidOperationException>(() => BuildDbWithTagRules(@"
+- id: my-basic
+  name: My Basic
+  tags:
+    - basic
+  set:
+    cost: 0
+    cooldown: 0
+", @"
+- tag: basic
+  requiredPerUnit: 1
+", @"
+id: test-unit
+name: Test Unit
+level: 1
+str: 100
+wis: 80
+agi: 50
+skills:
+  - id: sword-strike
+    modifiers:
+      - my-basic
+  - id: sword-strike
+    modifiers:
+      - my-basic
+"));
+            Assert.Contains("test-unit", ex.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("basic", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
         // ── Helpers ───────────────────────────────────────────────────────────
 
         private static ContentDatabase BuildDb(string modifiersYaml, string unitYaml)
@@ -540,6 +718,18 @@ skills:
             var files = new Dictionary<string, string>
             {
                 ["modifiers.yml"] = modifiersYaml,
+                ["skills/sword-strike.yml"] = SkillYaml,
+                ["units/test-unit.yml"] = unitYaml,
+            };
+            return ContentPipeline.Load(new InMemoryContentSource(files));
+        }
+
+        private static ContentDatabase BuildDbWithTagRules(string modifiersYaml, string tagRulesYaml, string unitYaml)
+        {
+            var files = new Dictionary<string, string>
+            {
+                ["modifiers.yml"] = modifiersYaml,
+                ["modifier-tag-rules.yml"] = tagRulesYaml,
                 ["skills/sword-strike.yml"] = SkillYaml,
                 ["units/test-unit.yml"] = unitYaml,
             };

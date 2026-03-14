@@ -22,7 +22,8 @@ namespace GameCore.Scenarios
         // scenario changes in a way that is expected and reviewed.
         public string ExpectedWinner => "player";
         // Updated to 125 after adding mage-meditate and rogue-concentrate skills.
-        public int ExpectedSnapshotCount => 125;
+        // Updated to 111 after adding mace-shatter (ultimate) to the paladin.
+        public int ExpectedSnapshotCount => 111;
 
         public override string ToString() => $"{DisplayName} [{Id}]";
 

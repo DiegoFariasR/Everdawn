@@ -40,10 +40,16 @@ namespace GameCore.Battle
         /// </summary>
         IReadOnlyList<DamageComponent>? AddDamagePerHit = null,
         /// <summary>
-        /// IDs of modifiers that cannot be combined with this one in the same skill slot.
-        /// The content pipeline throws <see cref="System.InvalidOperationException"/> if a skill
-        /// slot contains both this modifier and any modifier listed here.
+        /// Tag names of modifier categories that cannot share the same skill slot with this modifier.
+        /// The content pipeline throws <see cref="System.InvalidOperationException"/> if a skill slot
+        /// contains this modifier and any other modifier carrying one of these tags.
+        /// References tag names (see <see cref="Tags"/>), not modifier IDs.
         /// </summary>
-        IReadOnlyList<string>? ExclusiveWith = null
+        IReadOnlyList<string>? ExclusiveWith = null,
+        /// <summary>
+        /// Category tags for this modifier (e.g. "basic", "ultimate", "reaction").
+        /// Used by exclusiveWith checks and unit-level tag count validation.
+        /// </summary>
+        IReadOnlyList<string>? Tags = null
     );
 }

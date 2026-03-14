@@ -154,7 +154,7 @@ namespace GameCore.Tests.Battle
                     new("focus-unit", "Fighter", "player", Level: 1, Str: 200, Wis: 0, Agi: playerAgi,
                         Skills: new BattleSkill[]
                         {
-                            new("basic",   "Strike",     Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(), Modifiers: new[] { "basic" }),
+                            new("basic",   "Strike",     Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(), Modifiers: new[] { "basic" }, ModifierTags: new[] { "basic" }),
                             new("special", "Power Blow", Cost: 0, DamageMultiplier: 1.5, Effects: PhysEffect(1.5), Cooldown: 2),
                         },
                         Traits: new[] { BattleTrait.Focus }),
@@ -185,7 +185,7 @@ namespace GameCore.Tests.Battle
                     new("focus-unit", "Fighter", "player", Level: 1, Str: playerStr, Wis: 0, Agi: 50,
                         Skills: new BattleSkill[]
                         {
-                            new("basic",   "Strike",     Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(), Modifiers: new[] { "basic" }),
+                            new("basic",   "Strike",     Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(), Modifiers: new[] { "basic" }, ModifierTags: new[] { "basic" }),
                             new("special", "Power Blow", Cost: 0, DamageMultiplier: 1.5, Effects: PhysEffect(1.5), Cooldown: 2),
                         },
                         Traits: new[] { BattleTrait.Focus }),

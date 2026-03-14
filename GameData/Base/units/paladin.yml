@@ -11,3 +11,5 @@ skills:
     modifiers: [Basic]
   - id: shield-bash
   - id: melee-heal
+  - id: mace-shatter
+    modifiers: [ultimate]

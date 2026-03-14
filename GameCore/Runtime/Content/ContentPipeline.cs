@@ -41,9 +41,10 @@ namespace GameCore.Content
         /// </summary>
         public static ContentDatabase Load(IContentSource source)
         {
+            var tagRules = LoadModifierTagRules(source);
             var modifiers = LoadModifiers(source).ToDictionary(m => m.Id, StringComparer.OrdinalIgnoreCase);
             var skills = LoadSkills(source).ToDictionary(s => s.Id);
-            var units = LoadUnits(source, skills, modifiers);
+            var units = LoadUnits(source, skills, modifiers, tagRules);
             return new ContentDatabase(units, skills.Values, modifiers.Values);
         }
 
@@ -128,7 +129,8 @@ namespace GameCore.Content
                                 c.DamageType != null ? Enum.Parse<EffectType>(c.DamageType, ignoreCase: true) : (EffectType?)null,
                                 c.Scaling.Select(s => new DamageScaling(s.Stat, s.Scale)).ToArray()))
                             .ToArray(),
-                    ExclusiveWith: raw.ExclusiveWith.Count > 0 ? raw.ExclusiveWith.ToArray() : null);
+                    ExclusiveWith: raw.ExclusiveWith.Count > 0 ? raw.ExclusiveWith.ToArray() : null,
+                    Tags: raw.Tags.Count > 0 ? raw.Tags.ToArray() : null);
             }
         }
 
@@ -151,7 +153,9 @@ namespace GameCore.Content
         // ── Units ─────────────────────────────────────────────────────────────
 
         private static IEnumerable<BattleUnit> LoadUnits(
-            IContentSource source, IReadOnlyDictionary<string, BattleSkill> skillDict, IReadOnlyDictionary<string, BattleModifier> modifierDict)
+            IContentSource source, IReadOnlyDictionary<string, BattleSkill> skillDict,
+            IReadOnlyDictionary<string, BattleModifier> modifierDict,
+            IReadOnlyList<RawModifierTagRule> tagRules)
         {
             const string dir = "units";
             if (!source.DirectoryExists(dir))
@@ -160,12 +164,21 @@ namespace GameCore.Content
             foreach (var file in source.ListFiles(dir, "*.yml"))
             {
                 var raw = ParseYaml<RawUnit>(source.ReadAllText(file));
-                yield return CompileUnit(raw, skillDict, modifierDict);
+                yield return CompileUnit(raw, skillDict, modifierDict, tagRules);
             }
+        }
+
+        private static IReadOnlyList<RawModifierTagRule> LoadModifierTagRules(IContentSource source)
+        {
+            const string path = "modifier-tag-rules.yml";
+            if (!source.FileExists(path))
+                return Array.Empty<RawModifierTagRule>();
+            return ParseYaml<List<RawModifierTagRule>>(source.ReadAllText(path));
         }
 #endif
 
-        private static BattleUnit CompileUnit(RawUnit raw, IReadOnlyDictionary<string, BattleSkill> skillDict, IReadOnlyDictionary<string, BattleModifier> modifierDict)
+        private static BattleUnit CompileUnit(RawUnit raw, IReadOnlyDictionary<string, BattleSkill> skillDict,
+            IReadOnlyDictionary<string, BattleModifier> modifierDict, IReadOnlyList<RawModifierTagRule> tagRules)
         {
             var traits = raw.Traits
                 .Select(t => Enum.Parse<BattleTrait>(t, ignoreCase: true))
@@ -189,19 +202,27 @@ namespace GameCore.Content
                                 $"Unit '{raw.Id}' skill slot '{slot.Id}' references unknown modifier '{modId}'."))
                         .ToArray();
 
-                    // Validate exclusive modifiers: if a modifier declares ExclusiveWith entries,
-                    // none of those IDs may appear in the same skill slot's modifier list.
-                    var modIds = new HashSet<string>(compiledMods.Select(m => m.Id), StringComparer.OrdinalIgnoreCase);
+                    // Validate exclusive tags:
                     foreach (var mod in compiledMods)
                     {
                         if (mod.ExclusiveWith == null) continue;
-                        foreach (var exclusiveId in mod.ExclusiveWith)
+                        foreach (var exclusiveTag in mod.ExclusiveWith)
                         {
-                            if (modIds.Contains(exclusiveId))
+                            var conflicting = compiledMods.FirstOrDefault(
+                                m2 => !ReferenceEquals(m2, mod) && m2.Tags != null &&
+                                m2.Tags.Any(t => string.Equals(t, exclusiveTag, StringComparison.OrdinalIgnoreCase)));
+                            if (conflicting != null)
                                 throw new InvalidOperationException(
-                                    $"Unit '{raw.Id}' skill slot '{slot.Id}': modifiers '{mod.Id}' and '{exclusiveId}' are mutually exclusive and cannot be combined.");
+                                    $"Unit '{raw.Id}' skill slot '{slot.Id}': modifier '{mod.Id}' is exclusive with tag '{exclusiveTag}' (carried by '{conflicting.Id}').");
                         }
                     }
+
+                    // Collect all tags from applied modifiers for tag-based skill properties.
+                    var allTags = compiledMods
+                        .Where(m => m.Tags != null)
+                        .SelectMany(m => m.Tags!)
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .ToArray();
 
                     // Apply modifier action groups in deterministic order: Set → Modify → Add.
                     // Set: last modifier with a given key wins (override/replace).
@@ -221,6 +242,7 @@ namespace GameCore.Content
                     return sk with
                     {
                         Modifiers = compiledMods.Select(m => m.Id).ToArray(),
+                        ModifierTags = allTags.Length > 0 ? (IReadOnlyList<string>)allTags : null,
                         Cost = setCost + SumModifyInt(compiledMods, ModifierVariable.Cost),
                         DamageMultiplier = setDmgMult + SumModify(compiledMods, ModifierVariable.DamageMultiplier),
                         IsAoe = setIsAoe,
@@ -327,6 +349,28 @@ namespace GameCore.Content
                     resistances = merged;
                 }
                 disruptionResistance += skill.PassiveDisruptionResistance;
+            }
+
+            // ── Validate modifier tag counts per unit ─────────────────────────
+            // Each tag rule requires exactly requiredPerUnit skills to carry that tag.
+            foreach (var rule in tagRules)
+            {
+                int count = 0;
+                foreach (var skill in skills)
+                {
+                    if (skill.ModifierTags == null) continue;
+                    foreach (var tag in skill.ModifierTags)
+                    {
+                        if (string.Equals(tag, rule.Tag, StringComparison.OrdinalIgnoreCase))
+                        {
+                            count++;
+                            break;
+                        }
+                    }
+                }
+                if (count != rule.RequiredPerUnit)
+                    throw new InvalidOperationException(
+                        $"Unit '{raw.Id}' must have exactly {rule.RequiredPerUnit} skill(s) tagged '{rule.Tag}', but found {count}.");
             }
 
             return new BattleUnit(

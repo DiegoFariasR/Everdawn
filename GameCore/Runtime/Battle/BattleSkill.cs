@@ -58,6 +58,13 @@ namespace GameCore.Battle
         /// <summary>Optional modifiers that change how this skill behaves.</summary>
         IReadOnlyList<string>? Modifiers = null,
         /// <summary>
+        /// All category tags collected from this skill's applied modifiers (e.g. "basic", "ultimate", "reaction").
+        /// Populated during unit compilation when modifiers are applied. Null when no modifiers are applied.
+        /// Used for tag-based skill properties (<see cref="IsBasic"/>, <see cref="IsUltimate"/>) and
+        /// unit-level tag count validation.
+        /// </summary>
+        IReadOnlyList<string>? ModifierTags = null,
+        /// <summary>
         /// Base hit count for this skill. Floor(n) hits, each dealing DamageMultiplier × (n / floor(n)) of base.
         /// Total damage = DamageMultiplier × BaseHits × base. When 1.0 (default), the unit's HitCount applies instead.
         /// </summary>
@@ -140,11 +147,11 @@ namespace GameCore.Battle
                 ? Effects[0].DamagePerHit[0].DamageType
                 : null;
 
-        /// <summary>The skill is the unit's basic action (never triggers Focus empowerment).</summary>
-        public bool IsBasic => HasModifier("basic");
+        /// <summary>True if any of this skill's modifier tags is "basic".</summary>
+        public bool IsBasic => ModifierTags?.Any(t => string.Equals(t, "basic", StringComparison.OrdinalIgnoreCase)) ?? false;
 
-        /// <summary>The skill is the unit's ultimate action.</summary>
-        public bool IsUltimate => HasModifier("ultimate");
+        /// <summary>True if any of this skill's modifier tags is "ultimate".</summary>
+        public bool IsUltimate => ModifierTags?.Any(t => string.Equals(t, "ultimate", StringComparison.OrdinalIgnoreCase)) ?? false;
 
         /// <summary>
         /// The cooldown this skill enters battle with.
