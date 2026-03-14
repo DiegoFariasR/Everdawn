@@ -37,6 +37,13 @@ namespace GameCore.Battle
         /// </summary>
         int DisruptionPenetration = 0,
         /// <summary>
+        /// Bonus percentage applied to fire and cold resistances when absorbing thermal buildup.
+        /// 0 = no bonus. 10 = resistances act 10% stronger for buildup. Stacks additively.
+        /// Example: 50% cold resistance + 10% ThermalProtection → acts like 55% for buildup.
+        /// Does not affect fire/cold damage reduction — only buildup bar accumulation.
+        /// </summary>
+        int ThermalProtection = 0,
+        /// <summary>
         /// The type of weapon this unit is equipped with.
         /// Determines which weapon-gated skills the unit can use.
         /// </summary>

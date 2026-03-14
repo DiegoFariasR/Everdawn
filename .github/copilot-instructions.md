@@ -177,6 +177,15 @@ Skills with `category: Passive` grant permanent battle stats for the duration of
 - `CompileUnit` merges passive stats additively into the compiled `BattleUnit` after unit-level modifiers.
 - Passive skills are never treated as battle actions: filtered from AI skill selection and `BattlePendingInput`.
 
+### Thermal Protection
+`BattleUnit.ThermalProtection` (int, default 0) is a bonus percentage that amplifies fire and cold resistances exclusively for thermal buildup accumulation — it does **not** reduce fire/cold damage taken.
+
+Formula: `effectiveResistanceForBuildup = (int)(elementResistance * (1.0 + thermalProtection / 100.0))`. The 90% resistance cap inside `ThermalSystem` still applies.
+
+Example: 50% cold resistance + 10 ThermalProtection → acts like 55% resistance for freeze buildup.
+
+Authored per unit in YAML via modifiers (`modify: { thermalProtection: 20 }`). Accessible at runtime via `RuntimeStatKey.ThermalProtection` for active effects. Compiled in `ContentPipeline.CompileUnit` via `ModifierVariable.ThermalProtection`.
+
 ---
 
 ## Content Pipeline

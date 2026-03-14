@@ -83,6 +83,13 @@ namespace GameCore.Battle
 
         /// <summary>Disruption resistance penetration. Reduces the target's effective disruption resistance.</summary>
         DisruptionPenetration,
+
+        /// <summary>
+        /// Bonus percentage applied to fire and cold resistances for thermal buildup absorption.
+        /// 0 = no bonus. 10 = resistances act 10% stronger for buildup purposes.
+        /// Does not affect fire/cold damage reduction — only buildup bar accumulation.
+        /// </summary>
+        ThermalProtection,
     }
 
     /// <summary>

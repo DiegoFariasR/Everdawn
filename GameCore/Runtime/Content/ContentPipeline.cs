@@ -302,6 +302,13 @@ namespace GameCore.Content
                     + SumModifyInt(unitMods, ModifierVariable.DisruptionResistance);
             }
 
+            int thermalProtection = 0;
+            if (unitMods.Length > 0)
+            {
+                thermalProtection = GetLastSet<int>(unitMods, ModifierVariable.ThermalProtection, 0)
+                    + SumModifyInt(unitMods, ModifierVariable.ThermalProtection);
+            }
+
             IReadOnlyDictionary<EffectType, int>? penetrations = null;
             int disruptionPenetration = 0;
             if (unitMods.Length > 0)
@@ -387,6 +394,7 @@ namespace GameCore.Content
                 DisruptionResistance: disruptionResistance,
                 Penetrations: penetrations,
                 DisruptionPenetration: disruptionPenetration,
+                ThermalProtection: thermalProtection,
                 WeaponType: Enum.Parse<WeaponType>(raw.WeaponType, ignoreCase: true));
         }
 

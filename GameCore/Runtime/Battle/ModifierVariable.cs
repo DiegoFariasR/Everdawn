@@ -51,6 +51,16 @@ namespace GameCore.Battle
         /// </summary>
         DisruptionPenetration,
 
+        // ── Thermal protection ───────────────────────────────────────────────
+
+        /// <summary>
+        /// Multiplier bonus (in %) applied to fire and cold resistances when absorbing thermal buildup.
+        /// 0 = no bonus. 10 = resistances act 10% stronger for buildup purposes.
+        /// Example: 50% cold resistance + 10% thermal protection → acts like 55% for freezing buildup.
+        /// Does not affect fire/cold damage reduction — only buildup bar accumulation.
+        /// </summary>
+        ThermalProtection,
+
         // ── Receiving multipliers ────────────────────────────────────────────
 
         /// <summary>

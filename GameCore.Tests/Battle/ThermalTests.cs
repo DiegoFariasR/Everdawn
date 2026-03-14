@@ -28,6 +28,7 @@ namespace GameCore.Tests.Battle
     /// 15. StatusEffects list contains the correct IDs.
     /// 16. Session path and full-run path stay aligned after the refactor.
     /// 17. Determinism still holds with the same seed.
+    /// 18. ThermalProtection amplifies fire and cold resistance for buildup purposes.
     /// </summary>
     public class ThermalTests
     {
@@ -344,7 +345,8 @@ namespace GameCore.Tests.Battle
             int enemyStr = 10000,  // 10000 * 100 = 1 000 000 HP — survives massive hits
             int playerWis = 50,
             int playerAgi = 200,   // ensures player goes first always
-            int seed = 42)
+            int seed = 42,
+            int enemyThermalProtection = 0)
         {
             var player = new BattleUnit("player", "Player", "player",
                 Level: 1, Str: 10, Wis: playerWis, Agi: playerAgi,
@@ -354,7 +356,8 @@ namespace GameCore.Tests.Battle
             var enemy = new BattleUnit("enemy", "Enemy", "enemy",
                 Level: 1, Str: enemyStr, Wis: 0, Agi: 1,
                 Skills: new BattleSkill[] { enemySkill },
-                Resistances: enemyResistances);
+                Resistances: enemyResistances,
+                ThermalProtection: enemyThermalProtection);
 
             var session = new BattleSession(seed);
             session.Start(new BattleSetup
@@ -754,6 +757,100 @@ namespace GameCore.Tests.Battle
                         $"Snapshot step {snap.Step} unit {state.UnitId} missing '{ThermalSystem.BarBurn}' bar");
                 }
             }
+        }
+
+        // ── Test 18: ThermalProtection amplifies resistance for buildup ────────
+
+        [Fact]
+        public void ThermalProtection_AmplifiesColdResistanceForBuildup()
+        {
+            // base cold resistance = 50 (half buildup). With +20% thermal protection → 60% effective.
+            var coldResistances = new Dictionary<EffectType, int> { [EffectType.Cold] = 50 };
+
+            var sessionNoProtection = BuildSession(
+                MassiveColdSkill(), TinyPhysicalSkill(),
+                enemyResistances: coldResistances,
+                enemyStr: 10000, playerWis: 5, playerAgi: 200, seed: 10);
+            var r0 = sessionNoProtection.TryExecute(new AdvanceTurnCommand());
+            int coldBarNoProtection = r0.View.Units.First(u => u.UnitId == "enemy").GetBar(ThermalSystem.BarCold);
+
+            var sessionWithProtection = BuildSession(
+                MassiveColdSkill(), TinyPhysicalSkill(),
+                enemyResistances: coldResistances,
+                enemyStr: 10000, playerWis: 5, playerAgi: 200, seed: 10,
+                enemyThermalProtection: 20);
+            var r1 = sessionWithProtection.TryExecute(new AdvanceTurnCommand());
+            int coldBarWithProtection = r1.View.Units.First(u => u.UnitId == "enemy").GetBar(ThermalSystem.BarCold);
+
+            Assert.True(coldBarWithProtection < coldBarNoProtection,
+                $"ThermalProtection should reduce cold buildup (no-protection={coldBarNoProtection}, with-protection={coldBarWithProtection})");
+        }
+
+        [Fact]
+        public void ThermalProtection_AmplifiesFireResistanceForBuildup()
+        {
+            // base fire resistance = 50 (half buildup). With +20% thermal protection → 60% effective.
+            var fireResistances = new Dictionary<EffectType, int> { [EffectType.Fire] = 50 };
+
+            var sessionNoProtection = BuildSession(
+                MassiveFireSkill(), TinyPhysicalSkill(),
+                enemyResistances: fireResistances,
+                enemyStr: 10000, playerWis: 5, playerAgi: 99, seed: 10);
+            var r0 = sessionNoProtection.TryExecute(new AdvanceTurnCommand());
+            int burnBarNoProtection = r0.View.Units.First(u => u.UnitId == "enemy").GetBar(ThermalSystem.BarBurn);
+
+            var sessionWithProtection = BuildSession(
+                MassiveFireSkill(), TinyPhysicalSkill(),
+                enemyResistances: fireResistances,
+                enemyStr: 10000, playerWis: 5, playerAgi: 99, seed: 10,
+                enemyThermalProtection: 20);
+            var r1 = sessionWithProtection.TryExecute(new AdvanceTurnCommand());
+            int burnBarWithProtection = r1.View.Units.First(u => u.UnitId == "enemy").GetBar(ThermalSystem.BarBurn);
+
+            Assert.True(burnBarWithProtection < burnBarNoProtection,
+                $"ThermalProtection should reduce burn buildup (no-protection={burnBarNoProtection}, with-protection={burnBarWithProtection})");
+        }
+
+        [Fact]
+        public void ThermalProtection_DoesNotAffectOpposingBarRemoval()
+        {
+            // Cold removes burn bar first, ignoring all resistance — thermal protection must not change this.
+            // coldPower=50, boostedColdResistance=100 (→ capped at 90 inside ThermalSystem), currentBurnBar=30.
+            // Burn removal = min(30, 50) = 30 (ignores resistance).
+            // Leftover = 20, factor = 1.0 - 0.90 = 0.10 → coldBuilt = int(20 * 0.10) = 2.
+            int boostedColdResistance = (int)(50 * (1.0 + 100 / 100.0)); // 100, capped to 90 inside
+            ThermalSystem.ApplyCold(
+                coldPower: 50, coldResistance: boostedColdResistance,
+                currentBurnBar: 30, currentColdBar: 0,
+                out int newBurn, out int newCold);
+
+            Assert.Equal(0, newBurn);  // all burn removed (resistance ignored for bar removal)
+            Assert.Equal(1, newCold);  // 20 leftover * ~0.10 (90% cap, float truncation) = 1
+        }
+
+        [Fact]
+        public void ThermalProtection_OnlyAffectsBuildup_NotDamageTaken()
+        {
+            // ThermalProtection must NOT reduce fire/cold damage taken — only buildup accumulation.
+            // Use a cold skill that deals damage and also builds the cold bar.
+            // HP loss should be identical with or without thermal protection.
+            var coldSkill = new BattleSkill("cold-small", "Cold", Cost: 0, DamageMultiplier: 1.0,
+                Effects: ColdDamageEffect(wisScale: 0.1, buildupPower: 60));
+
+            var sessionNoProtection = BuildSession(
+                coldSkill, TinyPhysicalSkill(),
+                enemyStr: 10000, playerWis: 50, playerAgi: 200, seed: 10);
+            var r0 = sessionNoProtection.TryExecute(new AdvanceTurnCommand());
+            int hpNoProtection = r0.View.Units.First(u => u.UnitId == "enemy").CurrentHp;
+
+            var sessionWithProtection = BuildSession(
+                coldSkill, TinyPhysicalSkill(),
+                enemyStr: 10000, playerWis: 50, playerAgi: 200, seed: 10,
+                enemyThermalProtection: 50);
+            var r1 = sessionWithProtection.TryExecute(new AdvanceTurnCommand());
+            int hpWithProtection = r1.View.Units.First(u => u.UnitId == "enemy").CurrentHp;
+
+            Assert.Equal(hpNoProtection, hpWithProtection);
         }
     }
 }

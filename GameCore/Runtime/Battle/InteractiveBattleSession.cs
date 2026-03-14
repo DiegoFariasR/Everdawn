@@ -669,7 +669,9 @@ namespace GameCore.Battle
                     int currentCold = GetBar(target.Id, ThermalSystem.BarCold);
                     int currentBurn = GetBar(target.Id, ThermalSystem.BarBurn);
                     int effectiveColdResistance = GetEffectiveResistance(target.Id, EffectType.Cold);
-                    ThermalSystem.ApplyCold(r.BuildupPower, effectiveColdResistance,
+                    int thermalProtection = GetEffectiveThermalProtection(target.Id);
+                    int boostedColdResistance = (int)(effectiveColdResistance * (1.0 + thermalProtection / 100.0));
+                    ThermalSystem.ApplyCold(r.BuildupPower, boostedColdResistance,
                         currentBurn, currentCold, out int newBurn, out int newCold);
                     _bars[target.Id][ThermalSystem.BarBurn] = newBurn;
                     _bars[target.Id][ThermalSystem.BarCold] = newCold;
@@ -686,7 +688,9 @@ namespace GameCore.Battle
                     int currentCold = GetBar(target.Id, ThermalSystem.BarCold);
                     int currentBurn = GetBar(target.Id, ThermalSystem.BarBurn);
                     int effectiveFireResistance = GetEffectiveResistance(target.Id, EffectType.Fire);
-                    ThermalSystem.ApplyFire(r.BuildupPower, effectiveFireResistance,
+                    int thermalProtection = GetEffectiveThermalProtection(target.Id);
+                    int boostedFireResistance = (int)(effectiveFireResistance * (1.0 + thermalProtection / 100.0));
+                    ThermalSystem.ApplyFire(r.BuildupPower, boostedFireResistance,
                         currentCold, currentBurn, out int newCold, out int newBurn);
                     _bars[target.Id][ThermalSystem.BarCold] = newCold;
                     _bars[target.Id][ThermalSystem.BarBurn] = newBurn;
@@ -1036,6 +1040,17 @@ namespace GameCore.Battle
             var unit = _allUnits.First(u => u.Id == unitId);
             return (int)ResolveStatModifier(unitId, RuntimeStatKey.DisruptionResistance,
                 baseValue: unit.DisruptionResistance);
+        }
+
+        /// <summary>
+        /// Returns the effective thermal protection for a unit, combining the compiled base value
+        /// with any runtime stat modifiers from active effects.
+        /// </summary>
+        private int GetEffectiveThermalProtection(string unitId)
+        {
+            var unit = _allUnits.First(u => u.Id == unitId);
+            return (int)ResolveStatModifier(unitId, RuntimeStatKey.ThermalProtection,
+                baseValue: unit.ThermalProtection);
         }
 
         /// <summary>
