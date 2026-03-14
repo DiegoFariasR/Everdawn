@@ -733,5 +733,162 @@ skills:
             Assert.Equal(0, unit.GetPenetration(EffectType.Void));
             Assert.Equal(0, unit.DisruptionPenetration);
         }
+
+        // ── Passive skill stat bonuses ────────────────────────────────────────
+
+        private static ContentDatabase BuildDbWithPassive(string skillsYaml, string passiveSkillId)
+        {
+            var unitYaml = $@"
+id: test-unit
+name: Test Unit
+level: 1
+str: 100
+wis: 80
+agi: 50
+skills:
+  - id: sword-strike
+  - id: {passiveSkillId}
+";
+            var files = new Dictionary<string, string>
+            {
+                ["modifiers.yml"] = "[]",
+                ["skills/sword-strike.yml"] = SkillYaml,
+                [$"skills/passive-test.yml"] = skillsYaml,
+                ["units/test-unit.yml"] = unitYaml,
+            };
+            return ContentPipeline.Load(new InMemoryContentSource(files));
+        }
+
+        [Fact]
+        public void PassiveSkill_PhysicalPenetration_AppliedToUnit()
+        {
+            var db = BuildDbWithPassive(@"
+- id: test-passive
+  name: Test Passive
+  category: Passive
+  penetration:
+    physical: 20
+", "test-passive");
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(20, unit.GetPenetration(EffectType.Physical));
+        }
+
+        [Fact]
+        public void PassiveSkill_FirePenetration_AppliedToUnit()
+        {
+            var db = BuildDbWithPassive(@"
+- id: test-passive
+  name: Test Passive
+  category: Passive
+  penetration:
+    fire: 20
+", "test-passive");
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(20, unit.GetPenetration(EffectType.Fire));
+        }
+
+        [Fact]
+        public void PassiveSkill_DisruptionResistance_AppliedToUnit()
+        {
+            var db = BuildDbWithPassive(@"
+- id: test-passive
+  name: Test Passive
+  category: Passive
+  resistance:
+    disruption: 40
+", "test-passive");
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(40, unit.DisruptionResistance);
+        }
+
+        [Fact]
+        public void PassiveSkill_ElementalResistance_AppliedToUnit()
+        {
+            var db = BuildDbWithPassive(@"
+- id: test-passive
+  name: Test Passive
+  category: Passive
+  resistance:
+    cold: 30
+", "test-passive");
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(30, unit.GetResistance(EffectType.Cold));
+        }
+
+        [Fact]
+        public void PassiveSkill_DisruptionPenetration_AppliedToUnit()
+        {
+            var db = BuildDbWithPassive(@"
+- id: test-passive
+  name: Test Passive
+  category: Passive
+  penetration:
+    disruption: 25
+", "test-passive");
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(25, unit.DisruptionPenetration);
+        }
+
+        [Fact]
+        public void PassiveSkill_DoesNotAffectNonPassiveStats_WhenCategoryIsAttack()
+        {
+            // A skill with penetration fields but category Attack should NOT apply passive bonuses.
+            var db = BuildDbWithPassive(@"
+- id: test-passive
+  name: Test Active
+  category: Attack
+  penetration:
+    physical: 50
+", "test-passive");
+
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(0, unit.GetPenetration(EffectType.Physical));
+        }
+
+        [Fact]
+        public void PassiveSkill_StacksWithUnitModifierPenetration()
+        {
+            // Unit has a modifier with 10% physical penetration, and a passive skill with 20%.
+            // Total should be 30%.
+            var unitYaml = @"
+id: test-unit
+name: Test Unit
+level: 1
+str: 100
+wis: 80
+agi: 50
+modifiers:
+  - pen-mod
+skills:
+  - id: sword-strike
+  - id: test-passive
+";
+            var files = new Dictionary<string, string>
+            {
+                ["modifiers.yml"] = @"
+- id: pen-mod
+  modify:
+    penetration:
+      physical: 10
+",
+                ["skills/sword-strike.yml"] = SkillYaml,
+                ["skills/passive-test.yml"] = @"
+- id: test-passive
+  name: Test Passive
+  category: Passive
+  penetration:
+    physical: 20
+",
+                ["units/test-unit.yml"] = unitYaml,
+            };
+            var db = ContentPipeline.Load(new InMemoryContentSource(files));
+            var unit = db.GetUnit("test-unit");
+            Assert.Equal(30, unit.GetPenetration(EffectType.Physical));
+        }
     }
 }

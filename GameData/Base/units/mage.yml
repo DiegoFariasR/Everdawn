@@ -12,3 +12,4 @@ skills:
   - id: mage-barrier
   - id: mage-meteor
     modifiers: [Ultimate]
+  - id: mage-passive

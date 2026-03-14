@@ -1,0 +1,21 @@
+# ── Passive skills ────────────────────────────────────────────────────────────
+# Passive skills grant permanent stat bonuses to the unit for the duration of
+# the battle. They are not used as actions and do not appear on the skill bar.
+
+- id: warrior-passive
+  name: Battle Hardening
+  category: Passive
+  penetration:
+    physical: 20
+
+- id: mage-passive
+  name: Arcane Insight
+  category: Passive
+  penetration:
+    fire: 20
+
+- id: rogue-passive
+  name: Concussion Ward
+  category: Passive
+  resistance:
+    disruption: 40

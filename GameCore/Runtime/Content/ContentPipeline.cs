@@ -279,6 +279,37 @@ namespace GameCore.Content
                     + SumModifyInt(unitMods, ModifierVariable.DisruptionPenetration);
             }
 
+            // ── Apply passive skill bonuses ───────────────────────────────────
+            // Passive skills in the unit's skill list contribute penetrations and
+            // resistances directly to the compiled unit stats.
+            foreach (var skill in skills)
+            {
+                if (skill.Category != Battle.SkillCategory.Passive)
+                    continue;
+
+                if (skill.PassivePenetrations != null && skill.PassivePenetrations.Count > 0)
+                {
+                    var merged = penetrations != null
+                        ? new Dictionary<EffectType, int>(penetrations)
+                        : new Dictionary<EffectType, int>();
+                    foreach (var kvp in skill.PassivePenetrations)
+                        merged[kvp.Key] = (merged.TryGetValue(kvp.Key, out int existing) ? existing : 0) + kvp.Value;
+                    penetrations = merged;
+                }
+                disruptionPenetration += skill.PassiveDisruptionPenetration;
+
+                if (skill.PassiveResistances != null && skill.PassiveResistances.Count > 0)
+                {
+                    var merged = resistances != null
+                        ? new Dictionary<EffectType, int>(resistances)
+                        : new Dictionary<EffectType, int>();
+                    foreach (var kvp in skill.PassiveResistances)
+                        merged[kvp.Key] = (merged.TryGetValue(kvp.Key, out int existing) ? existing : 0) + kvp.Value;
+                    resistances = merged;
+                }
+                disruptionResistance += skill.PassiveDisruptionResistance;
+            }
+
             return new BattleUnit(
                 raw.Id, raw.Name,
                 Team: "",           // team is assigned by the scenario, not the data file
@@ -315,6 +346,40 @@ namespace GameCore.Content
                 effects.Add(new SkillEffect(kind, target, components));
             }
 
+            // ── Passive stat bonuses ──────────────────────────────────────────
+            IReadOnlyDictionary<EffectType, int>? passivePenetrations = null;
+            int passiveDisruptionPenetration = 0;
+            IReadOnlyDictionary<EffectType, int>? passiveResistances = null;
+            int passiveDisruptionResistance = 0;
+
+            if (raw.Penetration.Count > 0)
+            {
+                var pen = new Dictionary<EffectType, int>();
+                foreach (var kvp in raw.Penetration)
+                {
+                    if (kvp.Key.Equals("disruption", StringComparison.OrdinalIgnoreCase))
+                        passiveDisruptionPenetration = kvp.Value;
+                    else if (Enum.TryParse<EffectType>(kvp.Key, ignoreCase: true, out var t))
+                        pen[t] = kvp.Value;
+                }
+                if (pen.Count > 0)
+                    passivePenetrations = pen;
+            }
+
+            if (raw.Resistance.Count > 0)
+            {
+                var res = new Dictionary<EffectType, int>();
+                foreach (var kvp in raw.Resistance)
+                {
+                    if (kvp.Key.Equals("disruption", StringComparison.OrdinalIgnoreCase))
+                        passiveDisruptionResistance = kvp.Value;
+                    else if (Enum.TryParse<EffectType>(kvp.Key, ignoreCase: true, out var t))
+                        res[t] = kvp.Value;
+                }
+                if (res.Count > 0)
+                    passiveResistances = res;
+            }
+
             return new BattleSkill(
                 raw.Id, raw.Name,
                 Cost: raw.Cost,
@@ -328,7 +393,11 @@ namespace GameCore.Content
                     ? null
                     : raw.ScalingHits.Select(s => new DamageScaling(s.Stat, s.Scale)).ToArray<DamageScaling>(),
                 Range: Enum.Parse<SkillRange>(raw.Range, ignoreCase: true),
-                Category: Enum.Parse<SkillCategory>(raw.Category, ignoreCase: true));
+                Category: Enum.Parse<SkillCategory>(raw.Category, ignoreCase: true),
+                PassivePenetrations: passivePenetrations,
+                PassiveDisruptionPenetration: passiveDisruptionPenetration,
+                PassiveResistances: passiveResistances,
+                PassiveDisruptionResistance: passiveDisruptionResistance);
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────

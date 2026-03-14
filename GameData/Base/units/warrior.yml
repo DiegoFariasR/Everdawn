@@ -1,0 +1,14 @@
+id: warrior
+name: Warrior
+level: 12
+str: 95
+wis: 0
+agi: 60
+traits: [Fury]
+skills:
+  - id: mace-strike
+    modifiers: [Basic]
+  - id: mace-crush
+  - id: mace-shatter
+    modifiers: [Ultimate]
+  - id: warrior-passive

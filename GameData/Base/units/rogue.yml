@@ -11,3 +11,4 @@ skills:
   - id: dagger-flurry
   - id: rogue-mark
     modifiers: [Ultimate]
+  - id: rogue-passive

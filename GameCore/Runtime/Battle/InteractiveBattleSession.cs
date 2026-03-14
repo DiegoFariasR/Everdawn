@@ -179,7 +179,7 @@ namespace GameCore.Battle
                 return BuildResponse(newEvents);
             }
 
-            var skill = actor.ResolvedSkills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Last();
+            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Last();
             var targets = ResolveAutoTargets(actor, skill);
             if (targets.Count == 0) { CheckEnd(); return BuildResponse(Array.Empty<BattleEvent>()); }
 
@@ -218,7 +218,7 @@ namespace GameCore.Battle
                 return BuildResponse(newEvents);
             }
 
-            var skill = actor.ResolvedSkills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Last();
+            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Last();
             var targets = ResolveAutoTargets(actor, skill);
             if (targets.Count == 0) { CheckEnd(); return BuildResponse(newEvents); }
 
@@ -235,7 +235,7 @@ namespace GameCore.Battle
             if (!_isOver && _turnOrder[_turnIndex].Team == "player")
             {
                 var actor = _turnOrder[_turnIndex];
-                var skills = actor.ResolvedSkills;
+                var skills = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive).ToArray();
                 pending = new BattlePendingInput(
                     Actor: actor,
                     Skills: skills,
@@ -299,7 +299,7 @@ namespace GameCore.Battle
                 }
 
                 // Auto-resolve enemy action.
-                var skill = actor.ResolvedSkills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Last();
+                var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Last();
                 var targets = ResolveAutoTargets(actor, skill);
                 if (targets.Count == 0) { CheckEnd(); break; }
 
