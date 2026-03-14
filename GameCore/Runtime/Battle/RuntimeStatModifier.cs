@@ -11,6 +11,26 @@ namespace GameCore.Battle
         /// <summary>Multiplier applied to all incoming damage taken by this unit. Default base value: 1.0.</summary>
         DamageTakenMultiplier,
 
+        // ── Per-type damage dealt multipliers ─────────────────────────────────
+
+        /// <summary>Multiplier applied to outgoing physical damage dealt by this unit. Default base value: 1.0.</summary>
+        PhysicalDamageDealtMultiplier,
+
+        /// <summary>Multiplier applied to outgoing fire damage dealt by this unit. Default base value: 1.0.</summary>
+        FireDamageDealtMultiplier,
+
+        /// <summary>Multiplier applied to outgoing cold damage dealt by this unit. Default base value: 1.0.</summary>
+        ColdDamageDealtMultiplier,
+
+        /// <summary>Multiplier applied to outgoing lightning damage dealt by this unit. Default base value: 1.0.</summary>
+        LightningDamageDealtMultiplier,
+
+        /// <summary>Multiplier applied to outgoing holy damage dealt by this unit. Default base value: 1.0.</summary>
+        HolyDamageDealtMultiplier,
+
+        /// <summary>Multiplier applied to outgoing void damage dealt by this unit. Default base value: 1.0.</summary>
+        VoidDamageDealtMultiplier,
+
         /// <summary>Physical damage resistance percentage. 0 = none, 50 = half damage, 100 = immune, negative = weakness.</summary>
         PhysicalResistance,
 

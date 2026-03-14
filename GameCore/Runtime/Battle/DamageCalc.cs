@@ -72,6 +72,12 @@ namespace GameCore.Battle
         /// <c>actor.GetPenetration(type)</c> so that runtime active-effect penetration modifiers
         /// are applied. When null, falls back to the actor's compiled base penetrations.
         /// </param>
+        /// <param name="getEffectiveDamageDealtMultiplier">
+        /// Optional override for the per-type damage dealt multiplier lookup. When provided, called
+        /// with the component's damage type and the returned value multiplies the rolled damage for
+        /// that type. Stacks multiplicatively with <paramref name="extraMultiplier"/>.
+        /// When null, no per-type multiplier is applied (equivalent to 1.0 for all types).
+        /// </param>
         public static IReadOnlyList<DamageResult> Compute(
             BattleUnit actor,
             BattleUnit target,
@@ -80,7 +86,8 @@ namespace GameCore.Battle
             double extraMultiplier,
             Random rng,
             Func<EffectType, int>? getEffectiveResistance = null,
-            Func<EffectType, int>? getEffectivePenetration = null)
+            Func<EffectType, int>? getEffectivePenetration = null,
+            Func<EffectType, double>? getEffectiveDamageDealtMultiplier = null)
         {
             var results = new List<DamageResult>();
             foreach (var component in components)
@@ -116,6 +123,21 @@ namespace GameCore.Battle
                         : actor.GetPenetration(component.DamageType.Value)));
                 int afterResistance = Math.Max(0, (int)(value * (1.0 - resistance / 100.0)));
                 steps.Add(new DamageStep("Resistance", value, afterResistance));
+                value = afterResistance;
+
+                // ── Layer 3: TypeMultiplier ──────────────────────────────────────
+                // Multiply the current damage by the actor's per-type damage dealt multiplier.
+                // Base value is 1.0 (no change). Values > 1.0 increase damage; < 1.0 decrease it.
+                if (getEffectiveDamageDealtMultiplier != null)
+                {
+                    double typeMult = getEffectiveDamageDealtMultiplier(component.DamageType.Value);
+                    if (typeMult != 1.0)
+                    {
+                        int afterTypeMult = Math.Max(0, (int)(value * typeMult));
+                        steps.Add(new DamageStep("TypeMultiplier", value, afterTypeMult));
+                        value = afterTypeMult;
+                    }
+                }
 
                 // ── Add future layers here ───────────────────────────────────────
 

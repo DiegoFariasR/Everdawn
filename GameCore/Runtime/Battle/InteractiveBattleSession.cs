@@ -480,11 +480,13 @@ namespace GameCore.Battle
                     else
                     {
                         var components = effect?.DamagePerHit ?? System.Array.Empty<DamageComponent>();
-                        // Pass effective resistance and penetration resolvers so runtime modifiers are applied.
+                        // Pass effective resistance, penetration, and per-type damage dealt multiplier
+                        // resolvers so runtime modifiers are applied.
                         var hitResults = DamageCalc.Compute(actor, target, components, effectiveSkill.DamageMultiplier,
                             empowerMult * perHitHitsMult, _rng,
                             et => GetEffectiveResistance(target.Id, et),
-                            et => GetEffectivePenetration(actor.Id, et));
+                            et => GetEffectivePenetration(actor.Id, et),
+                            et => GetDamageDealtMultiplierForType(actor.Id, et));
                         int totalDamage = 0;
                         foreach (var r in hitResults) totalDamage += r.FinalDamage;
 
@@ -935,6 +937,16 @@ namespace GameCore.Battle
         private double GetDamageDealtMultiplier(string unitId) =>
             ResolveStatModifier(unitId, RuntimeStatKey.DamageDealtMultiplier, baseValue: 1.0);
 
+        /// <summary>
+        /// Returns the effective per-type damage dealt multiplier for a unit and damage type from active effects.
+        /// Base value is 1.0 (no change). Stacks multiplicatively with <see cref="GetDamageDealtMultiplier"/>.
+        /// </summary>
+        private double GetDamageDealtMultiplierForType(string unitId, EffectType effectType)
+        {
+            RuntimeStatKey key = EffectTypeToDamageDealtKey(effectType);
+            return ResolveStatModifier(unitId, key, baseValue: 1.0);
+        }
+
         /// <summary>Returns the effective damage-taken multiplier for a unit from active effects.</summary>
         private double GetDamageTakenMultiplier(string unitId) =>
             ResolveStatModifier(unitId, RuntimeStatKey.DamageTakenMultiplier, baseValue: 1.0);
@@ -1107,6 +1119,17 @@ namespace GameCore.Battle
             EffectType.Holy => RuntimeStatKey.HolyPenetration,
             EffectType.Void => RuntimeStatKey.VoidPenetration,
             _ => RuntimeStatKey.PhysicalPenetration,
+        };
+
+        private static RuntimeStatKey EffectTypeToDamageDealtKey(EffectType effectType) => effectType switch
+        {
+            EffectType.Physical => RuntimeStatKey.PhysicalDamageDealtMultiplier,
+            EffectType.Fire => RuntimeStatKey.FireDamageDealtMultiplier,
+            EffectType.Cold => RuntimeStatKey.ColdDamageDealtMultiplier,
+            EffectType.Lightning => RuntimeStatKey.LightningDamageDealtMultiplier,
+            EffectType.Holy => RuntimeStatKey.HolyDamageDealtMultiplier,
+            EffectType.Void => RuntimeStatKey.VoidDamageDealtMultiplier,
+            _ => RuntimeStatKey.PhysicalDamageDealtMultiplier,
         };
     }
 }
