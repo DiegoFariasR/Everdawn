@@ -35,7 +35,12 @@ namespace GameCore.Battle
         /// Reduces the target's effective disruption resistance when this unit applies disruption.
         /// Kept separate from element penetrations because disruption is a bar mechanic, not a damage type.
         /// </summary>
-        int DisruptionPenetration = 0
+        int DisruptionPenetration = 0,
+        /// <summary>
+        /// The type of weapon this unit is equipped with.
+        /// Determines which weapon-gated skills the unit can use.
+        /// </summary>
+        WeaponType WeaponType = WeaponType.None
     )
     {
         // ── Traits ───────────────────────────────────────────────────────

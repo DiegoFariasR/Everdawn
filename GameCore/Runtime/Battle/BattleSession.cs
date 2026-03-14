@@ -145,19 +145,24 @@ namespace GameCore.Battle
             if (skill == null)
                 return Rejected(ValidationErrorCode.UnknownSkill, $"Unknown skill: '{cmd.SkillId}'.");
 
-            // Validate the skill is usable (MP and cooldown).
+            // Validate the skill is usable (MP, cooldown, and requirements).
             if (!pending.AvailableSkillIds.Contains(cmd.SkillId))
             {
                 int cd = pending.SkillCooldowns.TryGetValue(cmd.SkillId, out var c) ? c : 0;
-                return cd > 0
-                    ? Rejected(
+                if (cd > 0)
+                    return Rejected(
                         ValidationErrorCode.SkillOnCooldown,
                         $"Skill '{cmd.SkillId}' is on cooldown ({cd} turn(s) remaining)."
-                    )
-                    : Rejected(
-                        ValidationErrorCode.InsufficientMp,
-                        $"Not enough MP to use '{cmd.SkillId}'."
                     );
+                if (!skill.MeetsRequirements(pending.Actor))
+                    return Rejected(
+                        ValidationErrorCode.RequirementNotMet,
+                        $"Skill '{cmd.SkillId}' requires a trait or weapon type this unit does not have."
+                    );
+                return Rejected(
+                    ValidationErrorCode.InsufficientMp,
+                    $"Not enough MP to use '{cmd.SkillId}'."
+                );
             }
 
             // Validate target for single-target skills.

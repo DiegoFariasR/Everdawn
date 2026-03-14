@@ -179,7 +179,7 @@ namespace GameCore.Battle
                 return BuildResponse(newEvents);
             }
 
-            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Last();
+            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor)).Last();
             var targets = ResolveAutoTargets(actor, skill);
             if (targets.Count == 0) { CheckEnd(); return BuildResponse(Array.Empty<BattleEvent>()); }
 
@@ -218,7 +218,7 @@ namespace GameCore.Battle
                 return BuildResponse(newEvents);
             }
 
-            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Last();
+            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor)).Last();
             var targets = ResolveAutoTargets(actor, skill);
             if (targets.Count == 0) { CheckEnd(); return BuildResponse(newEvents); }
 
@@ -239,7 +239,7 @@ namespace GameCore.Battle
                 pending = new BattlePendingInput(
                     Actor: actor,
                     Skills: skills,
-                    AvailableSkillIds: skills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Select(s => s.Id).ToArray(),
+                    AvailableSkillIds: skills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor)).Select(s => s.Id).ToArray(),
                     EnemyTargets: _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToArray(),
                     AllyTargets: _allUnits.Where(u => u.Team == actor.Team && _hp[u.Id] > 0).ToArray(),
                     SkillCooldowns: skills.Where(s => GetCooldown(s.Id) > 0)
@@ -299,7 +299,7 @@ namespace GameCore.Battle
                 }
 
                 // Auto-resolve enemy action.
-                var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0).Last();
+                var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor)).Last();
                 var targets = ResolveAutoTargets(actor, skill);
                 if (targets.Count == 0) { CheckEnd(); break; }
 

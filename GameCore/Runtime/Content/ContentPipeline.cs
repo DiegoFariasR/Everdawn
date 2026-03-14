@@ -322,7 +322,8 @@ namespace GameCore.Content
                 Resistances: resistances,
                 DisruptionResistance: disruptionResistance,
                 Penetrations: penetrations,
-                DisruptionPenetration: disruptionPenetration);
+                DisruptionPenetration: disruptionPenetration,
+                WeaponType: Enum.Parse<WeaponType>(raw.WeaponType, ignoreCase: true));
         }
 
         private static BattleSkill CompileSkill(RawSkill raw)
@@ -397,7 +398,13 @@ namespace GameCore.Content
                 PassivePenetrations: passivePenetrations,
                 PassiveDisruptionPenetration: passiveDisruptionPenetration,
                 PassiveResistances: passiveResistances,
-                PassiveDisruptionResistance: passiveDisruptionResistance);
+                PassiveDisruptionResistance: passiveDisruptionResistance,
+                RequiredTrait: raw.RequiredTrait != null
+                    ? Enum.Parse<BattleTrait>(raw.RequiredTrait, ignoreCase: true)
+                    : (BattleTrait?)null,
+                RequiredWeaponType: raw.RequiredWeaponType != null
+                    ? Enum.Parse<WeaponType>(raw.RequiredWeaponType, ignoreCase: true)
+                    : (WeaponType?)null);
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────

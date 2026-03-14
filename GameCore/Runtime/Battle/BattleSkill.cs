@@ -81,12 +81,35 @@ namespace GameCore.Battle
         /// Disruption resistance percentage granted to the unit while this passive skill is equipped.
         /// Only meaningful when Category is Passive.
         /// </summary>
-        int PassiveDisruptionResistance = 0
+        int PassiveDisruptionResistance = 0,
+        /// <summary>
+        /// If set, the unit must have this trait to use this skill.
+        /// For example, Spell skills may require <see cref="BattleTrait.MagicUser"/>.
+        /// </summary>
+        BattleTrait? RequiredTrait = null,
+        /// <summary>
+        /// If set, the unit must be equipped with this weapon type to use this skill.
+        /// For example, a mace skill requires <see cref="WeaponType.Blunt"/>.
+        /// </summary>
+        WeaponType? RequiredWeaponType = null
     )
     {
         /// <summary>Returns true if this skill carries the given modifier (case-insensitive).</summary>
         public bool HasModifier(string id) =>
             Modifiers?.Any(m => string.Equals(m, id, StringComparison.OrdinalIgnoreCase)) ?? false;
+
+        /// <summary>
+        /// Returns true if the given unit meets all requirements to use this skill.
+        /// A unit must have the required trait (if any) and the required weapon type (if any).
+        /// </summary>
+        public bool MeetsRequirements(BattleUnit actor)
+        {
+            if (RequiredTrait.HasValue && !actor.HasTrait(RequiredTrait.Value))
+                return false;
+            if (RequiredWeaponType.HasValue && actor.WeaponType != RequiredWeaponType.Value)
+                return false;
+            return true;
+        }
 
         /// <summary>True if this skill heals rather than damages.</summary>
         public bool IsHeal => Effects.Count > 0 && Effects[0].Kind == EffectKind.Heal;

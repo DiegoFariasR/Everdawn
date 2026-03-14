@@ -5,6 +5,7 @@ str: 80
 wis: 105
 agi: 65
 traits: [MagicUser]
+weaponType: Staff
 skills:
   - id: necro-bolt
     modifiers: [Basic]

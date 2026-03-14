@@ -3,6 +3,7 @@
 
 - id: mace-strike
   name: Mace Strike
+  requiredWeaponType: Blunt
   effects:
     - kind: damage
       target: enemy
@@ -14,6 +15,7 @@
 - id: mace-crush
   name: Crushing Blow
   cooldown: 3
+  requiredWeaponType: Blunt
   effects:
     - kind: damage
       target: enemy
@@ -26,6 +28,7 @@
 - id: mace-shatter
   name: Shattering Blow
   cooldown: 3
+  requiredWeaponType: Blunt
   effects:
     - kind: damage
       target: enemy
@@ -40,6 +43,7 @@
 
 - id: sword-strike
   name: Sword Strike
+  requiredWeaponType: Slash
   scalingHits:
     - stat: agi
       scale: 0.01
@@ -54,6 +58,7 @@
 - id: sword-cleave
   name: Cleave
   cooldown: 3
+  requiredWeaponType: Slash
   scalingHits:
     - stat: agi
       scale: 0.01
@@ -71,6 +76,7 @@
 
 - id: bow-shot
   name: Arrow Shot
+  requiredWeaponType: Bow
   baseHits: 1.8
   effects:
     - kind: damage
@@ -83,6 +89,7 @@
 - id: bow-precise
   name: Precise Shot
   cooldown: 3
+  requiredWeaponType: Bow
   baseHits: 2.2
   effects:
     - kind: damage
@@ -95,6 +102,7 @@
 - id: bow-volley
   name: Volley
   cooldown: 3
+  requiredWeaponType: Bow
   baseHits: 3.0
   effects:
     - kind: damage
@@ -110,6 +118,7 @@
 
 - id: dagger-strike
   name: Dagger Strike
+  requiredWeaponType: Pierce
   baseHits: 2.0
   scalingHits:
     - stat: agi
@@ -126,6 +135,7 @@
 - id: dagger-flurry
   name: Flurry
   cooldown: 3
+  requiredWeaponType: Pierce
   baseHits: 3.0
   scalingHits:
     - stat: agi
@@ -144,6 +154,7 @@
 - id: shield-bash
   name: Shield Bash
   cooldown: 3
+  requiredWeaponType: Blunt
   effects:
     - kind: damage
       target: enemy
@@ -167,6 +178,7 @@
 - id: rogue-mark
   name: Death Mark
   cooldown: 3
+  requiredWeaponType: Pierce
   baseHits: 2.5
   scalingHits:
     - stat: agi

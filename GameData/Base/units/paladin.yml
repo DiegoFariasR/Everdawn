@@ -5,6 +5,7 @@ str: 85
 wis: 55
 agi: 55
 traits: [MagicUser, Fury]
+weaponType: Blunt
 skills:
   - id: mace-strike
     modifiers: [Basic]
