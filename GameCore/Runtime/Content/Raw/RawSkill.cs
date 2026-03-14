@@ -54,5 +54,17 @@ namespace GameCore.Content.Raw
         public int Cooldown { get; set; }
         public int InitialCooldown { get; set; }
         public List<RawEffect> Effects { get; set; } = new List<RawEffect>();
+        /// <summary>
+        /// Passive penetration bonuses granted to the unit while this passive skill is equipped.
+        /// Keys are damage type names (e.g. "physical", "fire") or "disruption".
+        /// Only applied when Category is Passive.
+        /// </summary>
+        public Dictionary<string, int> Penetration { get; set; } = new Dictionary<string, int>();
+        /// <summary>
+        /// Passive resistance bonuses granted to the unit while this passive skill is equipped.
+        /// Keys are damage type names (e.g. "cold") or "disruption".
+        /// Only applied when Category is Passive.
+        /// </summary>
+        public Dictionary<string, int> Resistance { get; set; } = new Dictionary<string, int>();
     }
 }

@@ -59,7 +59,29 @@ namespace GameCore.Battle
         /// <summary>How the skill is delivered to its target.</summary>
         SkillRange Range = SkillRange.Melee,
         /// <summary>Ability category used for silencing and UI tagging.</summary>
-        SkillCategory Category = SkillCategory.Attack
+        SkillCategory Category = SkillCategory.Attack,
+        /// <summary>
+        /// Elemental penetration percentages granted to the unit while this passive skill is equipped.
+        /// Null when the skill grants no passive penetration bonuses.
+        /// Only meaningful when Category is Passive.
+        /// </summary>
+        IReadOnlyDictionary<EffectType, int>? PassivePenetrations = null,
+        /// <summary>
+        /// Disruption penetration percentage granted to the unit while this passive skill is equipped.
+        /// Only meaningful when Category is Passive.
+        /// </summary>
+        int PassiveDisruptionPenetration = 0,
+        /// <summary>
+        /// Elemental resistance percentages granted to the unit while this passive skill is equipped.
+        /// Null when the skill grants no passive elemental resistance bonuses.
+        /// Only meaningful when Category is Passive.
+        /// </summary>
+        IReadOnlyDictionary<EffectType, int>? PassiveResistances = null,
+        /// <summary>
+        /// Disruption resistance percentage granted to the unit while this passive skill is equipped.
+        /// Only meaningful when Category is Passive.
+        /// </summary>
+        int PassiveDisruptionResistance = 0
     )
     {
         /// <summary>Returns true if this skill carries the given modifier (case-insensitive).</summary>
