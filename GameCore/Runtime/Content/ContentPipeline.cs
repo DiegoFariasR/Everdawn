@@ -4,8 +4,10 @@ using System.IO;
 using System.Linq;
 using GameCore.Battle;
 using GameCore.Content.Raw;
+#if !UNITY_5_3_OR_NEWER
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+#endif
 
 namespace GameCore.Content
 {
@@ -28,6 +30,7 @@ namespace GameCore.Content
     /// </summary>
     public static class ContentPipeline
     {
+#if !UNITY_5_3_OR_NEWER
         private static readonly IDeserializer _deserializer = new DeserializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .IgnoreUnmatchedProperties()
@@ -157,6 +160,7 @@ namespace GameCore.Content
                 yield return CompileUnit(raw, skillDict, modifierDict);
             }
         }
+#endif
 
         private static BattleUnit CompileUnit(RawUnit raw, IReadOnlyDictionary<string, BattleSkill> skillDict, IReadOnlyDictionary<string, BattleModifier> modifierDict)
         {
@@ -408,10 +412,12 @@ namespace GameCore.Content
             return (int)Math.Round(total);
         }
 
+#if !UNITY_5_3_OR_NEWER
         private static T ParseYaml<T>(string yamlText)
         {
             using var reader = new StringReader(yamlText);
             return _deserializer.Deserialize<T>(reader);
         }
+#endif
     }
 }

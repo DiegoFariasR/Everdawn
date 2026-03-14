@@ -1,3 +1,4 @@
+#nullable enable
 namespace GameCore.Battle
 {
     /// <summary>
