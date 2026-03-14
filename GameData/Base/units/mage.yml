@@ -11,6 +11,7 @@ skills:
     modifiers: [Basic]
   - id: mage-burst
   - id: mage-barrier
+  - id: mage-meditate
   - id: mage-meteor
     modifiers: [Ultimate]
   - id: mage-passive

@@ -50,6 +50,18 @@
             - stat: wis
               scale: 2.0
 
+- id: mage-meditate
+  name: Meditate
+  cooldown: 4
+  range: Self
+  category: Spell
+  requiredTrait: MagicUser
+  effects:
+    - kind: restoreBar
+      target: ally
+      barKey: mp
+      barAmount: 100
+
 - id: necro-bolt
   name: Dark Bolt
   requiredTrait: MagicUser

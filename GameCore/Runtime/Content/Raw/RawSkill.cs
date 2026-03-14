@@ -26,6 +26,16 @@ namespace GameCore.Content.Raw
         public string Kind { get; set; } = "Damage";
         public string Target { get; set; } = "Enemy";
         public List<RawDamageComponent> DamagePerHit { get; set; } = new List<RawDamageComponent>();
+        /// <summary>
+        /// Bar key to modify when Kind is "restoreBar" (e.g. "mp", "focus", "fury").
+        /// Ignored for other effect kinds.
+        /// </summary>
+        public string? BarKey { get; set; }
+        /// <summary>
+        /// Fixed amount to add to the bar when Kind is "restoreBar".
+        /// Positive restores; negative drains.
+        /// </summary>
+        public int BarAmount { get; set; }
     }
 
     /// <summary>Raw skill data as parsed directly from YAML. No validation or compilation yet.</summary>

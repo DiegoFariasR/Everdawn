@@ -26,7 +26,18 @@ namespace GameCore.Battle
         /// Disruption power applied per hit to the target's disruption bar.
         /// 0 = no disruption (default). Set explicitly on blunt/impact and lightning skills that should stagger.
         /// </summary>
-        int DisruptionPower = 0
+        int DisruptionPower = 0,
+        /// <summary>
+        /// The bar key to modify when <see cref="Kind"/> is <see cref="EffectKind.RestoreBar"/>.
+        /// Matches keys used in <see cref="BattleUnit.MaxBars"/> (e.g. "mp", "focus", "fury").
+        /// Ignored for other effect kinds.
+        /// </summary>
+        string? BarKey = null,
+        /// <summary>
+        /// Fixed amount to add to <see cref="BarKey"/> when <see cref="Kind"/> is <see cref="EffectKind.RestoreBar"/>.
+        /// Positive values restore; negative values drain.
+        /// </summary>
+        int BarAmount = 0
     );
 
     /// <summary>
@@ -116,6 +127,9 @@ namespace GameCore.Battle
 
         /// <summary>True if this skill grants a barrier (shield) rather than dealing damage.</summary>
         public bool IsShield => Effects.Count > 0 && Effects[0].Kind == EffectKind.Shield;
+
+        /// <summary>True if this skill restores or drains a secondary bar (MP, Focus, Fury, …).</summary>
+        public bool IsRestoreBar => Effects.Count > 0 && Effects[0].Kind == EffectKind.RestoreBar;
 
         /// <summary>Target side of the first effect. Defaults to Enemy if Effects is empty.</summary>
         public BattleSkillTarget Target => Effects.Count > 0 ? Effects[0].Target : BattleSkillTarget.Enemy;

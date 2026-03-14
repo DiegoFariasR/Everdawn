@@ -8,6 +8,11 @@ namespace GameCore.Battle
         Damage,
         Heal,
         Shield,
+        /// <summary>
+        /// Adds or subtracts a fixed amount from a named bar on the target (e.g. MP, Focus, Fury).
+        /// Positive <see cref="SkillEffect.BarAmount"/> restores; negative drains.
+        /// </summary>
+        RestoreBar,
     }
 
     /// <summary>

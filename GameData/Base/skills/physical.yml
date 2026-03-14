@@ -190,3 +190,13 @@
         - damageType: physical
           scaling:
             - stat: agi
+
+- id: rogue-concentrate
+  name: Concentrate
+  cooldown: 4
+  range: Self
+  effects:
+    - kind: restoreBar
+      target: ally
+      barKey: focus
+      barAmount: 30

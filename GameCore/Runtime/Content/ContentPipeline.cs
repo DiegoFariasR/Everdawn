@@ -348,7 +348,7 @@ namespace GameCore.Content
                         .ToArray();
                     components.Add(new DamageComponent(damageType, scaling));
                 }
-                effects.Add(new SkillEffect(kind, target, components));
+                effects.Add(new SkillEffect(kind, target, components, BarKey: rawEffect.BarKey, BarAmount: rawEffect.BarAmount));
             }
 
             // ── Passive stat bonuses ──────────────────────────────────────────
