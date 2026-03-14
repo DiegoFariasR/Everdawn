@@ -494,7 +494,11 @@ namespace GameCore.Content
                 RequiredWeaponTypes: raw.RequiredWeaponTypes?.Select(t => Enum.Parse<WeaponType>(t, ignoreCase: true)).ToArray(),
                 Trigger: raw.Trigger != null
                     ? Enum.Parse<ReactionTrigger>(raw.Trigger, ignoreCase: true)
-                    : (ReactionTrigger?)null);
+                    : (ReactionTrigger?)null,
+                TriggerConditions: raw.TriggerConditions?.Select(c => new TriggerCondition(
+                    Range: c.Range != null ? Enum.Parse<SkillRange>(c.Range, ignoreCase: true) : (SkillRange?)null,
+                    DamageType: c.DamageType != null ? Enum.Parse<EffectType>(c.DamageType, ignoreCase: true) : (EffectType?)null
+                )).ToArray());
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────

@@ -93,8 +93,26 @@ namespace GameCore.Content.Raw
         public List<string>? RequiredWeaponTypes { get; set; }
         /// <summary>
         /// The trigger condition for a reaction skill. Only meaningful when Category is "Reaction".
-        /// Value is a <see cref="GameCore.Battle.ReactionTrigger"/> name (e.g. "OnHitByMelee").
+        /// Value is a <see cref="GameCore.Battle.ReactionTrigger"/> name (e.g. "OnHitBy").
         /// </summary>
         public string? Trigger { get; set; }
+        /// <summary>
+        /// Filter conditions for the trigger. Each entry is AND-ed with the others.
+        /// Supports keys: <c>range</c> (e.g. "Melee") and <c>damageType</c> (e.g. "Physical").
+        /// When empty or absent, any damaging hit fires the reaction.
+        /// </summary>
+        public List<RawTriggerCondition>? TriggerConditions { get; set; }
+    }
+
+    /// <summary>
+    /// One filter condition entry under a reaction skill's <c>triggerConditions</c> list.
+    /// All non-null fields must match simultaneously (AND logic).
+    /// </summary>
+    public class RawTriggerCondition
+    {
+        /// <summary>If set, the incoming skill must have this range (e.g. "Melee", "Ranged").</summary>
+        public string? Range { get; set; }
+        /// <summary>If set, the incoming skill must include a damage component of this type (e.g. "Physical", "Fire").</summary>
+        public string? DamageType { get; set; }
     }
 }

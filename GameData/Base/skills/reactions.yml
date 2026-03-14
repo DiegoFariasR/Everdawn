@@ -6,7 +6,9 @@
 - id: counter-strike
   name: Counter Strike
   category: Reaction
-  trigger: OnHitByMelee
+  trigger: OnHitBy
+  triggerConditions:
+    - range: Melee
   cooldown: 2
   effects:
     - kind: Damage

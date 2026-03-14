@@ -122,7 +122,14 @@ namespace GameCore.Battle
         /// Null for non-reaction skills.
         /// Only meaningful when <see cref="Category"/> is <see cref="SkillCategory.Reaction"/>.
         /// </summary>
-        ReactionTrigger? Trigger = null
+        ReactionTrigger? Trigger = null,
+        /// <summary>
+        /// Filter conditions that all must match for the trigger to fire.
+        /// Only meaningful when <see cref="Trigger"/> is <see cref="ReactionTrigger.OnHitBy"/>.
+        /// When null or empty, any damaging hit will fire the reaction.
+        /// Multiple conditions are AND-ed: all must match simultaneously.
+        /// </summary>
+        IReadOnlyList<TriggerCondition>? TriggerConditions = null
     )
     {
         /// <summary>Returns true if this skill carries the given modifier (case-insensitive).</summary>

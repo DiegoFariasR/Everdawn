@@ -63,9 +63,33 @@ namespace GameCore.Battle
     public enum ReactionTrigger
     {
         /// <summary>
-        /// Fires after the unit is hit by a melee-range, non-heal, non-shield attack.
-        /// The reactor counter-attacks the original attacker.
+        /// Fires after the unit takes a hit from a damaging action (not heals or shields).
+        /// Filter what counts as a trigger by adding <see cref="TriggerCondition"/> entries to the skill.
+        /// When no conditions are specified, any damaging hit will fire the reaction.
         /// </summary>
-        OnHitByMelee,
+        OnHitBy,
+    }
+
+    /// <summary>
+    /// A filter condition for a <see cref="ReactionTrigger.OnHitBy"/> trigger.
+    /// All non-null fields in a single instance must match simultaneously (AND logic).
+    /// Multiple conditions in the list also AND together.
+    /// </summary>
+    public class TriggerCondition
+    {
+        /// <summary>If set, the incoming skill must use this range (e.g. <see cref="SkillRange.Melee"/>).</summary>
+        public SkillRange? Range { get; }
+
+        /// <summary>
+        /// If set, the incoming skill must contain at least one damage component of this type
+        /// (e.g. <see cref="EffectType.Physical"/> to only react to physical hits).
+        /// </summary>
+        public EffectType? DamageType { get; }
+
+        public TriggerCondition(SkillRange? Range = null, EffectType? DamageType = null)
+        {
+            this.Range = Range;
+            this.DamageType = DamageType;
+        }
     }
 }

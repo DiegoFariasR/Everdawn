@@ -18,14 +18,38 @@ Implemented triggers:
 
 | Trigger | Condition | Context |
 |---|---|---|
-| `OnHitByMelee` | Unit took ≥ 1 hit from a melee weapon attack | `sourceUnitId` = the attacker |
+| `OnHitBy` | Unit took ≥ 1 hit from a damaging action. Filter what qualifies via `triggerConditions`. | `sourceUnitId` = the attacker |
+
+### `OnHitBy` Conditions
+
+`triggerConditions` is an optional list of filter objects under a `OnHitBy` trigger.
+All conditions in the list are AND-ed (every entry must match). When the list is absent or empty, any damaging hit fires the reaction.
+
+Supported condition keys:
+
+| Key | Values | Description |
+|---|---|---|
+| `range` | `Melee`, `Ranged`, `Self` | Incoming skill must use this range |
+| `damageType` | `Physical`, `Fire`, `Cold`, `Lightning`, `Holy`, `Void` | Incoming skill must include at least one component of this type |
+
+Example — only melee physical hits:
+```yaml
+trigger: OnHitBy
+triggerConditions:
+  - range: Melee
+    damageType: Physical
+```
+Example — any fire hit (ranged or melee):
+```yaml
+trigger: OnHitBy
+triggerConditions:
+  - damageType: Fire
+```
 
 Planned triggers (not yet implemented):
 
 | Trigger | Condition | Context |
 |---|---|---|
-| `OnHitBySpell` | Unit took ≥ 1 hit from a spell | `sourceUnitId` |
-| `OnHitByAny` | Unit took ≥ 1 hit of any kind | `sourceUnitId` |
 | `OnAllyKilled` | Any ally is killed | `allyId` = who died |
 | `OnHpDropBelow(X%)` | HP crosses a threshold downward for the first time in the battle | — |
 | `OnTurnStart` | Start of the reacting unit's own turn | — |
@@ -56,15 +80,18 @@ The trigger provides context about how the condition was met (e.g. `sourceUnitId
 - id: counter-strike
   name: Counter Strike
   category: Reaction
-  trigger: OnHitByMelee
+  trigger: OnHitBy
+  triggerConditions:
+    - range: Melee
   cooldown: 2
   effects:
     - kind: Damage
-      components:
-        - type: Physical
+      target: Enemy
+      damagePerHit:
+        - damageType: Physical
           scaling:
             - stat: str
-              factor: 0.5
+              scale: 0.5
 ```
 
 On the unit:
@@ -75,21 +102,22 @@ reaction: counter-strike
 
 Fields:
 - `category: Reaction` — marks this as a reaction skill (never an action choice)
-- `trigger` — the condition that fires this reaction (see trigger table above)
+- `trigger` — the trigger type (currently only `OnHitBy`)
+- `triggerConditions` — optional list of `{range, damageType}` filter objects (AND-ed); absent = any damaging hit
 - `cooldown` — rounds the reaction is unavailable after firing
 - `effects` — same effect system as regular skills; `sourceUnitId` from context is the default target
 
-Reactions can also declare `requiredWeaponType` to restrict them to specific weapon users (e.g. a parry reaction only for shield users).
+Reactions can also declare `requiredWeaponTypes` to restrict them to specific weapon users (e.g. a parry reaction only for shield users).
 
 ## Implemented Reactions
 
 ### Counter Strike
 
-- [ ] Trigger: `OnHitByMelee`
-- [ ] Effect: deal physical damage back at the attacker, scaling with STR × 0.5
-- [ ] Cooldown: 2 rounds
-- [ ] Flavor: pure melee deterrent — the attacker risks eating a free hit every 2 rounds
-- [ ] Natural fit: warriors, bruisers, any STR-heavy character
+- [x] Trigger: `OnHitBy` with `triggerConditions: [{range: Melee}]`
+- [x] Effect: deal physical damage back at the attacker, scaling with STR × 0.5
+- [x] Cooldown: 2 rounds
+- [x] Flavor: pure melee deterrent — the attacker risks eating a free hit every 2 rounds
+- [x] Natural fit: warriors, bruisers, any STR-heavy character
 
 ## Planned Reactions
 

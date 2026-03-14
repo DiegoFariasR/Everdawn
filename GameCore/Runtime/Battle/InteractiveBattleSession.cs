@@ -616,9 +616,6 @@ namespace GameCore.Battle
         private IReadOnlyList<BattleEvent> ExecuteReactions(
             BattleUnit actor, List<BattleUnit> hitTargets, BattleSkill usedSkill)
         {
-            bool isMeleeAttack = usedSkill.Range == SkillRange.Melee
-                && !usedSkill.IsHeal && !usedSkill.IsShield && !usedSkill.IsRestoreBar;
-
             var produced = new List<BattleEvent>();
 
             // Collect eligible reactors in AGI descending order (fastest reacts first).
@@ -636,7 +633,7 @@ namespace GameCore.Battle
                 var reaction = reactor.ReactionSkill!;
                 bool triggers = reaction.Trigger switch
                 {
-                    ReactionTrigger.OnHitByMelee => isMeleeAttack,
+                    ReactionTrigger.OnHitBy => MatchesOnHitBy(reaction, usedSkill),
                     _ => false,
                 };
                 if (!triggers) continue;
@@ -652,6 +649,46 @@ namespace GameCore.Battle
             }
 
             return produced;
+        }
+
+        /// <summary>
+        /// Returns true when <paramref name="usedSkill"/> satisfies all <see cref="TriggerCondition"/>
+        /// entries on <paramref name="reaction"/> for the <see cref="ReactionTrigger.OnHitBy"/> trigger.
+        /// The action must deal damage (not a heal, shield, or bar restore).
+        /// When the skill's <see cref="BattleSkill.TriggerConditions"/> list is empty, any damaging
+        /// action qualifies.
+        /// </summary>
+        private static bool MatchesOnHitBy(BattleSkill reaction, BattleSkill usedSkill)
+        {
+            // Only fire for damaging actions — heals and shields do not "hit" the target.
+            if (usedSkill.IsHeal || usedSkill.IsShield || usedSkill.IsRestoreBar) return false;
+
+            var conditions = reaction.TriggerConditions;
+            if (conditions == null || conditions.Count == 0) return true;
+
+            foreach (var condition in conditions)
+            {
+                if (condition.Range != null && usedSkill.Range != condition.Range) return false;
+
+                if (condition.DamageType != null)
+                {
+                    bool hasType = false;
+                    foreach (var effect in usedSkill.Effects)
+                    {
+                        foreach (var dc in effect.DamagePerHit)
+                        {
+                            if (dc.DamageType == condition.DamageType.Value)
+                            {
+                                hasType = true;
+                                break;
+                            }
+                        }
+                        if (hasType) break;
+                    }
+                    if (!hasType) return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>

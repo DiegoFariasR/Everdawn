@@ -16,6 +16,8 @@ namespace GameCore.Tests.Battle
     /// 6.  Counter-strike goes on cooldown after firing and skips the next trigger.
     /// 7.  Frozen units do not react.
     /// 8.  Stunned units do not react.
+    /// 9.  OnHitBy with no conditions triggers on any damaging hit.
+    /// 10. OnHitBy with damageType condition triggers only on matching damage type.
     /// </summary>
     public class ReactionTests
     {
@@ -51,7 +53,8 @@ namespace GameCore.Tests.Battle
             new BattleSkill("counter-strike", "Counter Strike", Cost: 0, DamageMultiplier: 1.0,
                 Range: SkillRange.Melee,
                 Category: SkillCategory.Reaction,
-                Trigger: ReactionTrigger.OnHitByMelee,
+                Trigger: ReactionTrigger.OnHitBy,
+                TriggerConditions: new TriggerCondition[] { new TriggerCondition(Range: SkillRange.Melee) },
                 Cooldown: cooldown,
                 Effects: new SkillEffect[]
                 {
@@ -226,6 +229,103 @@ namespace GameCore.Tests.Battle
                 .Skip(r1.View.FullLog.Count(e => e.Type == "reaction"))
                 .ToList();
             Assert.Empty(newReactionEvents);
+        }
+
+        // ── Test 9: OnHitBy with no conditions fires on any damaging hit ──────
+
+        [Fact]
+        public void OnHitBy_NoConditions_TriggersOnAnyDamagingHit()
+        {
+            // Reaction with OnHitBy and no TriggerConditions — fires on both melee and ranged.
+            var unconditionalReaction = new BattleSkill("any-counter", "Any Counter",
+                Cost: 0, DamageMultiplier: 1.0,
+                Range: SkillRange.Melee,
+                Category: SkillCategory.Reaction,
+                Trigger: ReactionTrigger.OnHitBy,
+                TriggerConditions: null,
+                Cooldown: 0,
+                Effects: new SkillEffect[]
+                {
+                    new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
+                        new DamageComponent[]
+                        {
+                            new DamageComponent(EffectType.Physical,
+                                new DamageScaling[] { new DamageScaling("str", 0.5) })
+                        }),
+                });
+
+            var session = BuildSession(RangedSkill(), enemyReactionSkill: unconditionalReaction,
+                attackerStr: 5, enemyStr: 500, seed: 42);
+            var result = session.TryExecute(new AdvanceTurnCommand());
+
+            // Should fire even on a ranged hit because there are no range conditions.
+            Assert.Contains(result.View.FullLog, e => e.Type == "reaction");
+        }
+
+        // ── Test 10: OnHitBy with damageType condition ────────────────────────
+
+        [Fact]
+        public void OnHitBy_DamageTypeCondition_DoesNotFireOnNonMatchingType()
+        {
+            // Reaction that only fires on Fire damage.
+            var fireCounter = new BattleSkill("fire-counter", "Fire Counter",
+                Cost: 0, DamageMultiplier: 1.0,
+                Range: SkillRange.Melee,
+                Category: SkillCategory.Reaction,
+                Trigger: ReactionTrigger.OnHitBy,
+                TriggerConditions: new TriggerCondition[]
+                {
+                    new TriggerCondition(DamageType: EffectType.Fire),
+                },
+                Cooldown: 0,
+                Effects: new SkillEffect[]
+                {
+                    new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
+                        new DamageComponent[]
+                        {
+                            new DamageComponent(EffectType.Physical,
+                                new DamageScaling[] { new DamageScaling("str", 0.5) })
+                        }),
+                });
+
+            // Attacker uses a Physical melee skill — should NOT trigger the Fire condition.
+            var session = BuildSession(MeleeSkill(), enemyReactionSkill: fireCounter,
+                attackerStr: 5, enemyStr: 500, seed: 42);
+            var result = session.TryExecute(new AdvanceTurnCommand());
+
+            Assert.Empty(result.View.FullLog.Where(e => e.Type == "reaction").ToList());
+        }
+
+        [Fact]
+        public void OnHitBy_DamageTypeCondition_FiresOnMatchingType()
+        {
+            // Reaction that only fires on Physical damage.
+            var physCounter = new BattleSkill("phys-counter", "Phys Counter",
+                Cost: 0, DamageMultiplier: 1.0,
+                Range: SkillRange.Melee,
+                Category: SkillCategory.Reaction,
+                Trigger: ReactionTrigger.OnHitBy,
+                TriggerConditions: new TriggerCondition[]
+                {
+                    new TriggerCondition(DamageType: EffectType.Physical),
+                },
+                Cooldown: 0,
+                Effects: new SkillEffect[]
+                {
+                    new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
+                        new DamageComponent[]
+                        {
+                            new DamageComponent(EffectType.Physical,
+                                new DamageScaling[] { new DamageScaling("str", 0.5) })
+                        }),
+                });
+
+            // Attacker uses a Physical melee skill — should trigger.
+            var session = BuildSession(MeleeSkill(), enemyReactionSkill: physCounter,
+                attackerStr: 5, enemyStr: 500, seed: 42);
+            var result = session.TryExecute(new AdvanceTurnCommand());
+
+            Assert.Contains(result.View.FullLog, e => e.Type == "reaction");
         }
     }
 }
