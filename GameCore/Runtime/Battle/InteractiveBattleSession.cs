@@ -312,6 +312,10 @@ namespace GameCore.Battle
         /// <summary>Resolves the target list for auto actions (AI and auto mode).</summary>
         private List<BattleUnit> ResolveAutoTargets(BattleUnit actor, BattleSkill skill)
         {
+            // Self-range skills always target the actor.
+            if (skill.Range == SkillRange.Self)
+                return new List<BattleUnit> { actor };
+
             if (skill.Target == BattleSkillTarget.Ally)
             {
                 var allies = _allUnits.Where(u => u.Team == actor.Team && _hp[u.Id] > 0).ToList();
@@ -361,7 +365,7 @@ namespace GameCore.Battle
                 _bars[actor.Id]["mp"] = Math.Max(0, _bars[actor.Id]["mp"] - effectiveSkill.Cost);
 
             // Determine event type from skill modifier
-            string evType = (effectiveSkill.IsHeal || effectiveSkill.IsShield) ? "skill"
+            string evType = (effectiveSkill.IsHeal || effectiveSkill.IsShield || effectiveSkill.IsRestoreBar) ? "skill"
                            : effectiveSkill.IsBasic ? "attack" : effectiveSkill.IsUltimate ? "soulburn" : "skill";
 
             // Focus empowerment: fires when focus is full and the actor uses a non-basic offensive skill
@@ -369,7 +373,8 @@ namespace GameCore.Battle
                 && GetBar(actor.Id, "focus") == 100
                 && !effectiveSkill.IsBasic
                 && !effectiveSkill.IsHeal
-                && !effectiveSkill.IsShield;
+                && !effectiveSkill.IsShield
+                && !effectiveSkill.IsRestoreBar;
             if (isFocusEmpowered)
             {
                 _bars[actor.Id]["focus"] = 50;
@@ -380,7 +385,8 @@ namespace GameCore.Battle
                 && GetBar(actor.Id, "fury") == 100
                 && !effectiveSkill.IsBasic
                 && !effectiveSkill.IsHeal
-                && !effectiveSkill.IsShield;
+                && !effectiveSkill.IsShield
+                && !effectiveSkill.IsRestoreBar;
             if (isFuryEmpowered)
             {
                 _bars[actor.Id]["fury"] = 0;
@@ -409,7 +415,7 @@ namespace GameCore.Battle
             int effectiveHits;
             double perHitHitsMult;
             bool hasHitsOverride = effectiveSkill.BaseHits != 1.0 || (effectiveSkill.ScalingHits != null && effectiveSkill.ScalingHits.Count > 0);
-            if (!effectiveSkill.IsHeal && !effectiveSkill.IsShield && hasHitsOverride)
+            if (!effectiveSkill.IsHeal && !effectiveSkill.IsShield && !effectiveSkill.IsRestoreBar && hasHitsOverride)
             {
                 double rawHits = effectiveSkill.BaseHits;
                 if (effectiveSkill.ScalingHits != null)
@@ -424,7 +430,7 @@ namespace GameCore.Battle
                 // AGI-derived hit count, reduced by slow if active.
                 bool actorIsSlow = GetBar(actor.Id, ThermalSystem.BarCold) >= ThermalSystem.SlowThreshold
                                    && !_frozenUnits.Contains(actor.Id);
-                effectiveHits = (effectiveSkill.IsHeal || effectiveSkill.IsShield) ? 1 : ThermalSystem.ResolveAgiHits(actor.Agi, actorIsSlow);
+                effectiveHits = (effectiveSkill.IsHeal || effectiveSkill.IsShield || effectiveSkill.IsRestoreBar) ? 1 : ThermalSystem.ResolveAgiHits(actor.Agi, actorIsSlow);
                 perHitHitsMult = 1.0;
             }
 
@@ -478,6 +484,36 @@ namespace GameCore.Battle
                                 : $"{actor.Name} grants {amount} barrier to {target.Name}.",
                             evType, target.Id, amount,
                             skillId: skill.Id));
+                    }
+                    else if (effect?.Kind == EffectKind.RestoreBar && effect.BarKey != null)
+                    {
+                        // RestoreBar: add a fixed amount to a named secondary bar on the target.
+                        // Positive BarAmount restores; negative drains.
+                        string barKey = effect.BarKey;
+                        if (_bars[target.Id].ContainsKey(barKey))
+                        {
+                            var targetUnit = _allUnits.First(u => u.Id == target.Id);
+                            int current = GetBar(target.Id, barKey);
+                            int max = targetUnit.MaxBars.TryGetValue(barKey, out int m) ? m : int.MaxValue;
+                            int clamped = Math.Min(Math.Max(current + effect.BarAmount, 0), max);
+                            _bars[target.Id][barKey] = clamped;
+                            int actual = clamped - current;
+                            string barName = barKey.ToUpperInvariant() switch
+                            {
+                                "MP" => "MP",
+                                "FOCUS" => "Focus",
+                                "FURY" => "Fury",
+                                _ => char.ToUpperInvariant(barKey[0]) + barKey.Substring(1),
+                            };
+                            string desc = actual >= 0
+                                ? (target.Id == actor.Id
+                                    ? $"{actor.Name} restores {actual} {barName}."
+                                    : $"{actor.Name} restores {actual} {barName} for {target.Name}.")
+                                : (target.Id == actor.Id
+                                    ? $"{actor.Name} loses {-actual} {barName}."
+                                    : $"{actor.Name} drains {-actual} {barName} from {target.Name}.");
+                            produced.Add(AddEvent(actor.Id, desc, evType, target.Id, actual, skillId: skill.Id));
+                        }
                     }
                     else
                     {
@@ -547,8 +583,8 @@ namespace GameCore.Battle
             // so that runtime cooldown modifiers do not permanently alter the session's cooldown state).
             if (skill.Cooldown > 0)
                 _skillCooldowns[skill.Id] = skill.Cooldown;
-            // Fury: actor gains 10–50 per action (excludes heals and shields)
-            if (actor.HasTrait(BattleTrait.Fury) && !effectiveSkill.IsHeal && !effectiveSkill.IsShield)
+            // Fury: actor gains 10–50 per action (excludes heals, shields, and bar restores)
+            if (actor.HasTrait(BattleTrait.Fury) && !effectiveSkill.IsHeal && !effectiveSkill.IsShield && !effectiveSkill.IsRestoreBar)
                 _bars[actor.Id]["fury"] = Math.Min(100, GetBar(actor.Id, "fury") + _rng.Next(10, 51));
 
             // Tick active effects: decrement durations and remove expired instances.

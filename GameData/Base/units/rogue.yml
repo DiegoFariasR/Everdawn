@@ -10,6 +10,7 @@ skills:
   - id: dagger-strike
     modifiers: [Basic]
   - id: dagger-flurry
+  - id: rogue-concentrate
   - id: rogue-mark
     modifiers: [Ultimate]
   - id: rogue-passive

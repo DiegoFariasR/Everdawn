@@ -21,8 +21,8 @@ namespace GameCore.Scenarios
         // single authoritative execution path. Update intentionally if the engine or
         // scenario changes in a way that is expected and reviewed.
         public string ExpectedWinner => "player";
-        // 1 start + round banners + skill/attack/death/heal events + 1 end = 60
-        public int ExpectedSnapshotCount => 109;
+        // Updated to 125 after adding mage-meditate and rogue-concentrate skills.
+        public int ExpectedSnapshotCount => 125;
 
         public override string ToString() => $"{DisplayName} [{Id}]";
 
