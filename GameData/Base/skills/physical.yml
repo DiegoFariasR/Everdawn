@@ -195,6 +195,7 @@
   name: Concentrate
   cooldown: 4
   range: Self
+  requiredTrait: Focus
   effects:
     - kind: restoreBar
       target: ally

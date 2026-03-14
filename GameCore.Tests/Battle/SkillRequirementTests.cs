@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GameCore.Battle;
+using GameCore.Content;
 using Xunit;
 
 namespace GameCore.Tests.Battle
@@ -217,6 +218,60 @@ namespace GameCore.Tests.Battle
             var result = session.TryExecute(new PlayerActionCommand("mace-strike", "e"));
             Assert.False(result.Accepted);
             Assert.Equal(ValidationErrorCode.RequirementNotMet, result.Error!.Code);
+        }
+
+        // ── Content-level requirement tests ───────────────────────────────────
+
+        [Fact]
+        public void Content_RogueConcentrate_RequiresFocusTrait()
+        {
+            var db = ContentPipeline.Load(TestContentSource.Default);
+            var skill = db.GetSkill("rogue-concentrate");
+            Assert.Equal(BattleTrait.Focus, skill.RequiredTrait);
+        }
+
+        [Fact]
+        public void Content_RogueConcentrate_UnavailableWithoutFocusTrait()
+        {
+            var db = ContentPipeline.Load(TestContentSource.Default);
+            var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, DamageMultiplier: 1.0,
+                Effects: PhysEffect(), Modifiers: new[] { "basic" });
+            var concentrateSkill = db.GetSkill("rogue-concentrate");
+
+            // Unit without Focus trait — cannot use rogue-concentrate.
+            var player = new BattleUnit("p", "Player", "player", Level: 1, Str: 100, Wis: 0, Agi: 50,
+                Skills: new[] { basicSkill, concentrateSkill });
+            var enemy = new BattleUnit("e", "Enemy", "enemy", Level: 1, Str: 50, Wis: 0, Agi: 10,
+                Skills: new[] { basicSkill });
+
+            var setup = new BattleSetup { PlayerUnits = new[] { player }, EnemyUnits = new[] { enemy } };
+            var session = new BattleSession(seed: 42);
+            session.Start(setup);
+
+            var available = session.GetView().PendingInput!.AvailableSkillIds;
+            Assert.DoesNotContain("rogue-concentrate", available);
+        }
+
+        [Fact]
+        public void Content_RogueConcentrate_AvailableWithFocusTrait()
+        {
+            var db = ContentPipeline.Load(TestContentSource.Default);
+            var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, DamageMultiplier: 1.0,
+                Effects: PhysEffect(), Modifiers: new[] { "basic" });
+            var concentrateSkill = db.GetSkill("rogue-concentrate");
+
+            // Unit with Focus trait — can use rogue-concentrate.
+            var player = new BattleUnit("p", "Player", "player", Level: 1, Str: 100, Wis: 0, Agi: 50,
+                Traits: new[] { BattleTrait.Focus }, Skills: new[] { basicSkill, concentrateSkill });
+            var enemy = new BattleUnit("e", "Enemy", "enemy", Level: 1, Str: 50, Wis: 0, Agi: 10,
+                Skills: new[] { basicSkill });
+
+            var setup = new BattleSetup { PlayerUnits = new[] { player }, EnemyUnits = new[] { enemy } };
+            var session = new BattleSession(seed: 42);
+            session.Start(setup);
+
+            var available = session.GetView().PendingInput!.AvailableSkillIds;
+            Assert.Contains("rogue-concentrate", available);
         }
     }
 }
