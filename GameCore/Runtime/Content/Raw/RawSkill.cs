@@ -87,9 +87,9 @@ namespace GameCore.Content.Raw
         /// </summary>
         public string? RequiredTrait { get; set; }
         /// <summary>
-        /// If set, the unit must be equipped with this weapon type to use this skill.
-        /// Value is a <see cref="GameCore.Battle.WeaponType"/> name (e.g. "Blunt", "Slash").
+        /// If set, the unit must be equipped with one of these weapon types to use this skill.
+        /// Values are <see cref="GameCore.Battle.WeaponType"/> names (e.g. "Blunt", "Slash").
         /// </summary>
-        public string? RequiredWeaponType { get; set; }
+        public List<string>? RequiredWeaponTypes { get; set; }
     }
 }

@@ -466,9 +466,7 @@ namespace GameCore.Content
                 RequiredTrait: raw.RequiredTrait != null
                     ? Enum.Parse<BattleTrait>(raw.RequiredTrait, ignoreCase: true)
                     : (BattleTrait?)null,
-                RequiredWeaponType: raw.RequiredWeaponType != null
-                    ? Enum.Parse<WeaponType>(raw.RequiredWeaponType, ignoreCase: true)
-                    : (WeaponType?)null);
+                RequiredWeaponTypes: raw.RequiredWeaponTypes?.Select(t => Enum.Parse<WeaponType>(t, ignoreCase: true)).ToArray());
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────

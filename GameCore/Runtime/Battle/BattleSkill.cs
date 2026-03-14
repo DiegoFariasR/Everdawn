@@ -113,10 +113,10 @@ namespace GameCore.Battle
         /// </summary>
         BattleTrait? RequiredTrait = null,
         /// <summary>
-        /// If set, the unit must be equipped with this weapon type to use this skill.
+        /// If set, the unit must be equipped with one of these weapon types to use this skill.
         /// For example, a mace skill requires <see cref="WeaponType.Blunt"/>.
         /// </summary>
-        WeaponType? RequiredWeaponType = null
+        IReadOnlyList<WeaponType>? RequiredWeaponTypes = null
     )
     {
         /// <summary>Returns true if this skill carries the given modifier (case-insensitive).</summary>
@@ -125,13 +125,13 @@ namespace GameCore.Battle
 
         /// <summary>
         /// Returns true if the given unit meets all requirements to use this skill.
-        /// A unit must have the required trait (if any) and the required weapon type (if any).
+        /// A unit must have the required trait (if any) and one of the required weapon types (if any).
         /// </summary>
         public bool MeetsRequirements(BattleUnit actor)
         {
             if (RequiredTrait.HasValue && !actor.HasTrait(RequiredTrait.Value))
                 return false;
-            if (RequiredWeaponType.HasValue && actor.WeaponType != RequiredWeaponType.Value)
+            if (RequiredWeaponTypes != null && !RequiredWeaponTypes.Contains(actor.WeaponType))
                 return false;
             return true;
         }
