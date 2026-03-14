@@ -723,15 +723,18 @@ html, body {
     margin-bottom: 2px;
     overflow: hidden;
 }
-.hp-bar, .mp-bar, .focus-bar {
+.hp-bar, .mp-bar, .focus-bar, .fury-bar, .cold-bar, .burn-bar, .disruption-bar {
     height: 100%;
     border-radius: 2px;
     transition: width 0.25s ease;
 }
-.mp-bar    { background: #2266cc; }
-.focus-bar { background: #cc8800; }
-.fury-bar  { background: #cc2200; }
-.barrier-bar { background: rgba(210, 235, 255, 0.88); }
+.mp-bar          { background: #2266cc; }
+.focus-bar       { background: #cc8800; }
+.fury-bar        { background: #cc2200; }
+.barrier-bar     { background: rgba(210, 235, 255, 0.88); }
+.cold-bar        { background: #55ccff; }
+.burn-bar        { background: #ff6622; }
+.disruption-bar  { background: #bb44ff; }
 
 .stat-text {
     font-size: 0.58rem;

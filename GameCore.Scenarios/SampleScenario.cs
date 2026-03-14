@@ -28,7 +28,8 @@ namespace GameCore.Scenarios
         //   resulting in fewer/different thermal status events.
         // Updated to 94 after lowering mage-bolt buildupPower 50 → 30 (bolt no longer
         //   triggers burning in one hit, fewer DOT events in the sample battle).
-        public int ExpectedSnapshotCount => 94;
+        // Updated to 91 after further lowering burst/meteor/necro buildupPower 50 → 20.
+        public int ExpectedSnapshotCount => 91;
 
         public override string ToString() => $"{DisplayName} [{Id}]";
 

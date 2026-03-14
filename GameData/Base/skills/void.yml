@@ -19,7 +19,7 @@
       target: enemy
       damagePerHit:
         - damageType: fire
-          buildupPower: 50
+          buildupPower: 20
           scaling:
             - stat: wis
               scale: 1.6
@@ -34,7 +34,7 @@
       target: enemy
       damagePerHit:
         - damageType: fire
-          buildupPower: 50
+          buildupPower: 20
           scaling:
             - stat: wis
               scale: 2.0
@@ -73,7 +73,7 @@
       target: enemy
       damagePerHit:
         - damageType: void
-          buildupPower: 50
+          buildupPower: 20
           scaling:
             - stat: wis
 
@@ -86,7 +86,7 @@
       target: enemy
       damagePerHit:
         - damageType: void
-          buildupPower: 50
+          buildupPower: 20
           scaling:
             - stat: wis
               scale: 1.8
@@ -100,7 +100,7 @@
       target: enemy
       damagePerHit:
         - damageType: void
-          buildupPower: 50
+          buildupPower: 20
           scaling:
             - stat: wis
               scale: 3.0
@@ -124,7 +124,7 @@
       target: enemy
       damagePerHit:
         - damageType: fire
-          buildupPower: 50
+          buildupPower: 20
           scaling:
             - stat: wis
               scale: 0.5
@@ -139,7 +139,7 @@
       target: enemy
       damagePerHit:
         - damageType: fire
-          buildupPower: 50
+          buildupPower: 20
           scaling:
             - stat: wis
               scale: 0.6
@@ -154,7 +154,7 @@
       target: enemy
       damagePerHit:
         - damageType: fire
-          buildupPower: 50
+          buildupPower: 20
           scaling:
             - stat: wis
               scale: 0.4
