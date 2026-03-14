@@ -50,6 +50,21 @@ namespace GameCore.Battle
         /// Category tags for this modifier (e.g. "basic", "ultimate", "reaction").
         /// Used by exclusiveWith checks and unit-level tag count validation.
         /// </summary>
-        IReadOnlyList<string>? Tags = null
+        IReadOnlyList<string>? Tags = null,
+        /// <summary>
+        /// If set, overrides the compiled skill's <see cref="SkillCategory"/> to this value.
+        /// Use <see cref="SkillCategory.Reaction"/> to mark the base skill as a reaction slot.
+        /// </summary>
+        SkillCategory? SetCategory = null,
+        /// <summary>
+        /// Trigger that causes the base skill to fire as a reaction when this modifier is applied.
+        /// Only meaningful when <see cref="Tags"/> contains "reaction".
+        /// </summary>
+        ReactionTrigger? Trigger = null,
+        /// <summary>
+        /// Filter conditions for the reaction trigger. All conditions are AND-ed.
+        /// Null or empty = any damaging hit fires the reaction.
+        /// </summary>
+        IReadOnlyList<TriggerCondition>? TriggerConditions = null
     );
 }

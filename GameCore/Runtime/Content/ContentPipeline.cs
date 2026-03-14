@@ -131,7 +131,17 @@ namespace GameCore.Content
                                 c.BuildupPower))
                             .ToArray(),
                     ExclusiveWith: raw.ExclusiveWith.Count > 0 ? raw.ExclusiveWith.ToArray() : null,
-                    Tags: raw.Tags.Count > 0 ? raw.Tags.ToArray() : null);
+                    Tags: raw.Tags.Count > 0 ? raw.Tags.ToArray() : null,
+                    SetCategory: raw.Set.Category != null
+                        ? Enum.Parse<SkillCategory>(raw.Set.Category, ignoreCase: true)
+                        : (SkillCategory?)null,
+                    Trigger: raw.Trigger != null
+                        ? Enum.Parse<ReactionTrigger>(raw.Trigger, ignoreCase: true)
+                        : (ReactionTrigger?)null,
+                    TriggerConditions: raw.TriggerConditions?.Select(c => new TriggerCondition(
+                        Range: c.Range != null ? Enum.Parse<SkillRange>(c.Range, ignoreCase: true) : (SkillRange?)null,
+                        DamageType: c.DamageType != null ? Enum.Parse<EffectType>(c.DamageType, ignoreCase: true) : (EffectType?)null
+                    )).ToArray());
             }
         }
 
@@ -233,6 +243,7 @@ namespace GameCore.Content
                     var setCooldown = GetLastSet<int>(compiledMods, ModifierVariable.Cooldown, sk.Cooldown);
                     var setInitCd = GetLastSet<int>(compiledMods, ModifierVariable.InitialCooldown, sk.InitialCooldown);
                     var setExtraHits = GetLastSet<double>(compiledMods, ModifierVariable.ExtraHits, sk.BaseHits);
+                    var setCategory = compiledMods.Select(m => m.SetCategory).FirstOrDefault(c => c != null);
 
                     // Modify: all deltas for a key are summed on top of the Set result.
                     var extraComponents = compiledMods
@@ -244,6 +255,9 @@ namespace GameCore.Content
                     {
                         Modifiers = compiledMods.Select(m => m.Id).ToArray(),
                         ModifierTags = allTags.Length > 0 ? (IReadOnlyList<string>)allTags : null,
+                        Category = setCategory.HasValue ? setCategory.Value : sk.Category,
+                        Trigger = compiledMods.Select(m => m.Trigger).FirstOrDefault(t => t != null) ?? sk.Trigger,
+                        TriggerConditions = compiledMods.Select(m => m.TriggerConditions).FirstOrDefault(tc => tc != null) ?? sk.TriggerConditions,
                         Cost = setCost + SumModifyInt(compiledMods, ModifierVariable.Cost),
                         DamageMultiplier = setDmgMult + SumModify(compiledMods, ModifierVariable.DamageMultiplier),
                         IsAoe = setIsAoe,
@@ -381,6 +395,27 @@ namespace GameCore.Content
                         $"Unit '{raw.Id}' must have exactly {rule.RequiredPerUnit} skill(s) tagged '{rule.Tag}', but found {count}.");
             }
 
+            // ── Detect reaction skill ─────────────────────────────────────────
+            BattleSkill? reactionSkill = null;
+            int reactionCount = 0;
+            foreach (var sk in skills)
+            {
+                if (sk.IsReaction)
+                {
+                    reactionCount++;
+                    reactionSkill = sk;
+                }
+            }
+            if (reactionCount > 1)
+                throw new InvalidOperationException(
+                    $"Unit '{raw.Id}' has {reactionCount} reaction skills; at most 1 is allowed.");
+            if (reactionSkill != null && reactionSkill.Trigger == null)
+                throw new InvalidOperationException(
+                    $"Unit '{raw.Id}' reaction skill '{reactionSkill.Id}' must declare a trigger (via the modifier's 'trigger' field).");
+            var resolvedSkills = reactionSkill != null
+                ? skills.Where(s => !s.IsReaction).ToArray()
+                : skills;
+
             return new BattleUnit(
                 raw.Id, raw.Name,
                 Team: "",           // team is assigned by the scenario, not the data file
@@ -388,7 +423,7 @@ namespace GameCore.Content
                 Str: raw.Str,
                 Wis: raw.Wis,
                 Agi: raw.Agi,
-                Skills: skills,
+                Skills: resolvedSkills,
                 Traits: traits,
                 Resistances: resistances,
                 DisruptionResistance: disruptionResistance,
@@ -396,23 +431,7 @@ namespace GameCore.Content
                 DisruptionPenetration: disruptionPenetration,
                 ThermalProtection: thermalProtection,
                 WeaponType: Enum.Parse<WeaponType>(raw.WeaponType, ignoreCase: true),
-                ReactionSkill: CompileReactionSkill(raw, skillDict));
-        }
-
-        private static BattleSkill? CompileReactionSkill(
-            RawUnit raw, IReadOnlyDictionary<string, BattleSkill> skillDict)
-        {
-            if (raw.Reaction == null) return null;
-            if (!skillDict.TryGetValue(raw.Reaction, out var skill))
-                throw new KeyNotFoundException(
-                    $"Unit '{raw.Id}' reaction references unknown skill '{raw.Reaction}'.");
-            if (skill.Category != Battle.SkillCategory.Reaction)
-                throw new InvalidOperationException(
-                    $"Unit '{raw.Id}' reaction skill '{raw.Reaction}' must have category Reaction, but has {skill.Category}.");
-            if (skill.Trigger == null)
-                throw new InvalidOperationException(
-                    $"Unit '{raw.Id}' reaction skill '{raw.Reaction}' must declare a trigger.");
-            return skill;
+                ReactionSkill: reactionSkill);
         }
 
         private static BattleSkill CompileSkill(RawSkill raw)

@@ -27,7 +27,34 @@
     cooldown: 1
     initialCooldown: 1
 
-# ── Enchanting ────────────────────────────────────────────────────────────────
+
+# ── Reactions ───────────────────────────────────────────────────────────────────────────────────
+# Reaction modifiers turn any skill into a reaction slot:
+#   - tags: [reaction]         marks it as occupying the reaction slot
+#   - set: { category: Reaction }  forces SkillCategory.Reaction at runtime
+#   - trigger / triggerConditions  define when the reaction fires
+#   - exclusiveWith: [basic, ultimate]  prevents dual-slotting
+# The base skill's effects are used unchanged as the reaction damage.
+
+- id: counter-strike
+  name: Counter Strike
+  tags:
+    - reaction
+  trigger: OnHitBy
+  triggerConditions:
+    - range: Melee
+  description: >
+    Counter-attacks the original attacker after taking a melee hit.
+    Uses the base skill's effects and damage formula unchanged.
+  exclusiveWith:
+    - basic
+    - ultimate
+  set:
+    category: Reaction
+  modify:
+    cooldown: 2
+
+# ── Enchanting ───────────────────────────────────────────────────────────────────────────────────
 # Pre-battle modifier family. Adds an elemental damage component to a weapon
 # attack without replacing its base identity. The extra component scales with
 # the user's WIS and uses the specified magic damage type.

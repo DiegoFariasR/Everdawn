@@ -29,6 +29,11 @@ namespace GameCore.Content.Raw
         public int? Cooldown { get; set; }
         public int? InitialCooldown { get; set; }
         public double? ExtraHits { get; set; }
+        /// <summary>
+        /// If set, overrides the skill's <c>category</c> to this value (e.g. "Reaction").
+        /// Value is a <see cref="GameCore.Battle.SkillCategory"/> name, case-insensitive.
+        /// </summary>
+        public string? Category { get; set; }
 
         /// <summary>
         /// Resistance overrides keyed by type name (e.g. "physical", "fire", "disruption").
@@ -97,5 +102,19 @@ namespace GameCore.Content.Raw
         /// Used by exclusiveWith checks and unit-level tag count validation.
         /// </summary>
         public List<string> Tags { get; set; } = new List<string>();
+
+        /// <summary>
+        /// The trigger that causes the base skill to fire as a reaction when this modifier is applied.
+        /// Value is a <see cref="GameCore.Battle.ReactionTrigger"/> name (e.g. "OnHitBy").
+        /// Only meaningful when <see cref="Tags"/> contains "reaction".
+        /// </summary>
+        public string? Trigger { get; set; }
+
+        /// <summary>
+        /// Filter conditions for the reaction trigger. Each entry is AND-ed.
+        /// Supports keys: <c>range</c> (e.g. "Melee") and <c>damageType</c> (e.g. "Physical").
+        /// When absent or empty, any damaging hit fires the reaction.
+        /// </summary>
+        public List<RawTriggerCondition>? TriggerConditions { get; set; }
     }
 }
