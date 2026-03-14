@@ -13,6 +13,12 @@ namespace GameCore.Battle
         /// Positive <see cref="SkillEffect.BarAmount"/> restores; negative drains.
         /// </summary>
         RestoreBar,
+        /// <summary>
+        /// Applies an active buff or debuff to the target for a fixed duration.
+        /// The effect definition is compiled inline from the skill's YAML data.
+        /// Applied once per target (not per hit). No damage is dealt.
+        /// </summary>
+        ApplyEffect,
     }
 
     /// <summary>

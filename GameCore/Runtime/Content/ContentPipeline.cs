@@ -452,7 +452,7 @@ namespace GameCore.Content
                         .ToArray();
                     components.Add(new DamageComponent(damageType, scaling, rawComp.BuildupPower));
                 }
-                effects.Add(new SkillEffect(kind, target, components, BarKey: rawEffect.BarKey, BarAmount: rawEffect.BarAmount));
+                effects.Add(new SkillEffect(kind, target, components, BarKey: rawEffect.BarKey, BarAmount: rawEffect.BarAmount, EffectDefinition: CompileEffectDefinition(kind, rawEffect)));
             }
 
             // ── Passive stat bonuses ──────────────────────────────────────────
@@ -521,6 +521,32 @@ namespace GameCore.Content
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Builds an <see cref="ActiveEffectDefinition"/> from a raw skill effect when kind is ApplyEffect.
+        /// Returns null for all other effect kinds.
+        /// </summary>
+        private static ActiveEffectDefinition? CompileEffectDefinition(EffectKind kind, Raw.RawEffect rawEffect)
+        {
+            if (kind != EffectKind.ApplyEffect || rawEffect.EffectId == null)
+                return null;
+
+            var durationKind = Enum.Parse<EffectDurationKind>(rawEffect.DurationKind, ignoreCase: true);
+            var statModifiers = new List<RuntimeStatModifier>();
+            foreach (var kvp in rawEffect.Stats)
+            {
+                if (Enum.TryParse<RuntimeStatKey>(kvp.Key, ignoreCase: true, out var statKey))
+                    statModifiers.Add(new RuntimeStatModifier(statKey, ModifierOperation.Multiply, kvp.Value));
+            }
+
+            return new ActiveEffectDefinition(
+                Id: rawEffect.EffectId,
+                Name: rawEffect.EffectName ?? rawEffect.EffectId,
+                DurationKind: durationKind,
+                Duration: rawEffect.Duration,
+                StackingPolicy: EffectStackingPolicy.RefreshDuration,
+                StatModifiers: statModifiers.Count > 0 ? statModifiers.ToArray() : null);
+        }
 
         /// <summary>
         /// Returns the value for <paramref name="key"/> from the last modifier in

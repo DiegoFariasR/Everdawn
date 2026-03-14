@@ -44,7 +44,12 @@ namespace GameCore.Battle
         /// Fixed amount to add to <see cref="BarKey"/> when <see cref="Kind"/> is <see cref="EffectKind.RestoreBar"/>.
         /// Positive values restore; negative values drain.
         /// </summary>
-        int BarAmount = 0
+        int BarAmount = 0,
+        /// <summary>
+        /// The active effect to apply when <see cref="Kind"/> is <see cref="EffectKind.ApplyEffect"/>.
+        /// Applied once per target, not per hit. Null for all other effect kinds.
+        /// </summary>
+        ActiveEffectDefinition? EffectDefinition = null
     );
 
     /// <summary>
@@ -157,6 +162,9 @@ namespace GameCore.Battle
 
         /// <summary>True if this skill restores or drains a secondary bar (MP, Focus, Fury, …).</summary>
         public bool IsRestoreBar => Effects.Count > 0 && Effects[0].Kind == EffectKind.RestoreBar;
+
+        /// <summary>True if this skill applies an active buff or debuff to its target.</summary>
+        public bool IsApplyEffect => Effects.Count > 0 && Effects[0].Kind == EffectKind.ApplyEffect;
 
         /// <summary>Target side of the first effect. Defaults to Enemy if Effects is empty.</summary>
         public BattleSkillTarget Target => Effects.Count > 0 ? Effects[0].Target : BattleSkillTarget.Enemy;

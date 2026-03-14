@@ -201,3 +201,17 @@
       target: ally
       barKey: focus
       barAmount: 30
+
+- id: battle-cry
+  name: Battle Cry
+  cooldown: 4
+  range: Self
+  effects:
+    - kind: applyEffect
+      target: ally
+      effectId: battle-cry-buff
+      effectName: Battle Cry
+      duration: 2
+      durationKind: ForSourceTurns
+      stats:
+        physicalDamageDealtMultiplier: 1.2

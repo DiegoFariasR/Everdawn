@@ -2,7 +2,8 @@
 
 - [ ] On a tavern, start with a budget, hire your heroes, go on an adventure
 - [ ] World map to navigate to the POI and start a battle or sequence of battles
-- [ ] Battle can be set to auto, or a route on map
+- [x] Battle can be set to auto
+- [ ] Set to auto a route on map
 - [ ] Besides battles, PoI can have challenges which can be overcome by specific talents
 - [x] Cooldowns apply at the start of each round, not turn
 - [x] CC bar, hard and low thresholds
@@ -24,7 +25,6 @@
     - [x] 2 round cd
 
 - [ ] Abilities can have second cast version, can be a weaker version, a stop main effect or confirm to transformation
-- [ ] Passives can do many things, separated by context
 
 ## Main Attributes
 
@@ -34,11 +34,10 @@
 - **Wisdom - WIS**
   - [x] Magic base damage
   - [x] More Mana
-  - [ ] Affect on big or small the other bars are
 - **Agility - AGI**
   - [x] Number of hits increase
   - [x] Each 100% increase adds an extra hit instead
-  - [ ] Each weapon and spell have a base attack speed
+  - [x] Each weapon skill and spell have a base attack speed
   - [x] Initiative
 
 ## Ability Tags (one tag of each group)

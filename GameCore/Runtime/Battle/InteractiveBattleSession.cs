@@ -382,7 +382,8 @@ namespace GameCore.Battle
                 && !effectiveSkill.IsBasic
                 && !effectiveSkill.IsHeal
                 && !effectiveSkill.IsShield
-                && !effectiveSkill.IsRestoreBar;
+                && !effectiveSkill.IsRestoreBar
+                && !effectiveSkill.IsApplyEffect;
             if (isFocusEmpowered)
             {
                 _bars[actor.Id]["focus"] = 50;
@@ -394,7 +395,8 @@ namespace GameCore.Battle
                 && !effectiveSkill.IsBasic
                 && !effectiveSkill.IsHeal
                 && !effectiveSkill.IsShield
-                && !effectiveSkill.IsRestoreBar;
+                && !effectiveSkill.IsRestoreBar
+                && !effectiveSkill.IsApplyEffect;
             if (isFuryEmpowered)
             {
                 _bars[actor.Id]["fury"] = 0;
@@ -450,6 +452,17 @@ namespace GameCore.Battle
 
             foreach (var target in targets)
             {
+                // ApplyEffect: applies an active buff/debuff once per target, not per hit.
+                if (effect?.Kind == EffectKind.ApplyEffect && effect.EffectDefinition != null)
+                {
+                    ApplyActiveEffect(target.Id, effect.EffectDefinition, actor.Id);
+                    string gainMsg = target.Id == actor.Id
+                        ? $"{actor.Name} gains {effect.EffectDefinition.Name}!"
+                        : $"{actor.Name} grants {effect.EffectDefinition.Name} to {target.Name}!";
+                    produced.Add(AddEvent(actor.Id, gainMsg, evType, target.Id, skillId: skill.Id));
+                    continue;
+                }
+
                 for (int i = 0; i < effectiveHits; i++)
                 {
                     if (effect?.Kind == EffectKind.Heal)
@@ -592,7 +605,7 @@ namespace GameCore.Battle
             if (skill.Cooldown > 0)
                 _skillCooldowns[skill.Id] = skill.Cooldown;
             // Fury: actor gains 10–50 per action (excludes heals, shields, and bar restores)
-            if (actor.HasTrait(BattleTrait.Fury) && !effectiveSkill.IsHeal && !effectiveSkill.IsShield && !effectiveSkill.IsRestoreBar)
+            if (actor.HasTrait(BattleTrait.Fury) && !effectiveSkill.IsHeal && !effectiveSkill.IsShield && !effectiveSkill.IsRestoreBar && !effectiveSkill.IsApplyEffect)
                 _bars[actor.Id]["fury"] = Math.Min(100, GetBar(actor.Id, "fury") + _rng.Next(10, 51));
 
             // Tick active effects: decrement durations and remove expired instances.

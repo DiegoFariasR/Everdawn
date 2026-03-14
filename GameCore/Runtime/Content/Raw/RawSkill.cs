@@ -41,6 +41,20 @@ namespace GameCore.Content.Raw
         /// Positive restores; negative drains.
         /// </summary>
         public int BarAmount { get; set; }
+        // ── ApplyEffect fields ────────────────────────────────────────────────
+        /// <summary>Stable ID for the active effect definition. Required when Kind is "applyEffect".</summary>
+        public string? EffectId { get; set; }
+        /// <summary>Display name shown in the UI and battle log. Defaults to EffectId when omitted.</summary>
+        public string? EffectName { get; set; }
+        /// <summary>Duration in qualifying turns. Used when Kind is "applyEffect".</summary>
+        public int Duration { get; set; }
+        /// <summary>How duration counts down: ForTargetTurns, ForSourceTurns, or UntilNextAction.</summary>
+        public string DurationKind { get; set; } = "ForTargetTurns";
+        /// <summary>
+        /// Stat multipliers to apply while the effect is active.
+        /// Keys are RuntimeStatKey names (e.g. "physicalDamageDealtMultiplier"); values are multipliers.
+        /// </summary>
+        public Dictionary<string, double> Stats { get; set; } = new Dictionary<string, double>();
     }
 
     /// <summary>Raw skill data as parsed directly from YAML. No validation or compilation yet.</summary>
