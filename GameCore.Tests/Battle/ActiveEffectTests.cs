@@ -27,6 +27,7 @@ namespace GameCore.Tests.Battle
     /// 16.  UntilNextAction expires after the target's next action.
     /// 17.  StackIntensity increments the stack count on re-application.
     /// 18.  IndependentInstances creates separate instances on each application.
+    /// 19.  Per-type damage dealt multiplier increases only the matching damage type and stacks with global multiplier.
     /// </summary>
     public class ActiveEffectTests
     {
@@ -856,6 +857,117 @@ namespace GameCore.Tests.Battle
 
             var playerState = session.GetView().Units.First(u => u.UnitId == "player");
             Assert.Equal(3, playerState.ActiveEffects!.Count);
+        }
+
+        // ────────────────────────────────────────────────────────────────────
+        // Test 19: Per-type damage dealt multiplier increases damage only for the specified type
+        // ────────────────────────────────────────────────────────────────────
+
+        [Fact]
+        public void PerTypeDamageDealtMultiplier_IncreasesOnlyMatchingType()
+        {
+            // Fire skill vs. no-resistance enemy.
+            var fireSkill = MakeDamageSkill("fire-skill", wisScale: 1.0, effectType: EffectType.Fire, statKey: "wis");
+            var physSkill = MakeDamageSkill("phys-skill", wisScale: 1.0, effectType: EffectType.Physical, statKey: "str");
+
+            var player = new BattleUnit("player", "player", "player", Level: 1, Str: 50, Wis: 50, Agi: 1,
+                Skills: new BattleSkill[] { fireSkill, physSkill });
+            var enemy = new BattleUnit("enemy", "enemy", "enemy", Level: 1, Str: 100, Wis: 0, Agi: 1,
+                Skills: new BattleSkill[] { MakeDamageSkill("e-basic") });
+
+            int enemyMaxHp = enemy.MaxHp;
+
+            var fireBoost = new ActiveEffectDefinition("fireboost", "Fire Boost",
+                EffectDurationKind.ForTargetTurns, Duration: 5,
+                StatModifiers: new RuntimeStatModifier[]
+                {
+                    new RuntimeStatModifier(RuntimeStatKey.FireDamageDealtMultiplier, ModifierOperation.Multiply, 2.0)
+                });
+
+            // Measure fire damage without buff.
+            int fireDamageNoBuff = MeasureTypeDamage(player, enemy, "fire-skill", applyBuff: null, seed: 42);
+
+            // Measure fire damage WITH fire buff.
+            int fireDamageWithBuff = MeasureTypeDamage(player, enemy, "fire-skill", applyBuff: fireBoost, seed: 42);
+
+            // Measure physical damage WITH fire buff — should be unchanged.
+            int physDamageWithBuff = MeasureTypeDamage(player, enemy, "phys-skill", applyBuff: fireBoost, seed: 42);
+            int physDamageNoBuff = MeasureTypeDamage(player, enemy, "phys-skill", applyBuff: null, seed: 42);
+
+            Assert.True(fireDamageWithBuff > fireDamageNoBuff,
+                "Fire damage dealt multiplier should increase fire damage");
+            Assert.Equal(physDamageNoBuff, physDamageWithBuff);
+        }
+
+        [Fact]
+        public void PerTypeDamageDealtMultiplier_StacksWithGlobalDamageMultiplier()
+        {
+            var fireSkill = MakeDamageSkill("fire-skill", wisScale: 1.0, effectType: EffectType.Fire, statKey: "wis");
+            var player = new BattleUnit("player", "player", "player", Level: 1, Str: 10, Wis: 50, Agi: 1,
+                Skills: new BattleSkill[] { fireSkill });
+            var enemy = new BattleUnit("enemy", "enemy", "enemy", Level: 1, Str: 100, Wis: 0, Agi: 1,
+                Skills: new BattleSkill[] { MakeDamageSkill("e-basic") });
+
+            var globalBoost = new ActiveEffectDefinition("global", "Global Boost",
+                EffectDurationKind.ForTargetTurns, Duration: 5,
+                StatModifiers: new RuntimeStatModifier[]
+                {
+                    new RuntimeStatModifier(RuntimeStatKey.DamageDealtMultiplier, ModifierOperation.Multiply, 2.0)
+                });
+
+            var fireBoost = new ActiveEffectDefinition("fireboost", "Fire Boost",
+                EffectDurationKind.ForTargetTurns, Duration: 5,
+                StatModifiers: new RuntimeStatModifier[]
+                {
+                    new RuntimeStatModifier(RuntimeStatKey.FireDamageDealtMultiplier, ModifierOperation.Multiply, 2.0)
+                });
+
+            int damageNoBuff = MeasureTypeDamage(player, enemy, "fire-skill", applyBuff: null, seed: 7);
+            int damageGlobalOnly = MeasureTypeDamage(player, enemy, "fire-skill", applyBuff: globalBoost, seed: 7);
+            int damageFireOnly = MeasureTypeDamage(player, enemy, "fire-skill", applyBuff: fireBoost, seed: 7);
+            int damageBoth = MeasureTypeDamageTwoBuffs(player, enemy, "fire-skill", globalBoost, fireBoost, seed: 7);
+
+            Assert.True(damageGlobalOnly > damageNoBuff, "Global multiplier should increase fire damage");
+            Assert.True(damageFireOnly > damageNoBuff, "Per-type multiplier should increase fire damage");
+            Assert.True(damageBoth > damageGlobalOnly, "Both buffs should be stronger than global alone");
+            Assert.True(damageBoth > damageFireOnly, "Both buffs should be stronger than per-type alone");
+        }
+
+        private static int MeasureTypeDamage(BattleUnit player, BattleUnit enemy,
+            string skillId, ActiveEffectDefinition? applyBuff, int seed)
+        {
+            int enemyMaxHp = enemy.MaxHp;
+            var session = new BattleSession(seed);
+            session.Start(new BattleSetup
+            {
+                PlayerUnits = new List<BattleUnit> { player },
+                EnemyUnits = new List<BattleUnit> { enemy },
+            });
+
+            if (applyBuff != null)
+                session.ApplyActiveEffect("player", applyBuff, sourceUnitId: "player");
+
+            session.TryExecute(new PlayerActionCommand(skillId, "enemy"));
+            var enemyState = session.GetView().Units.First(u => u.UnitId == "enemy");
+            return enemyMaxHp - enemyState.CurrentHp;
+        }
+
+        private static int MeasureTypeDamageTwoBuffs(BattleUnit player, BattleUnit enemy,
+            string skillId, ActiveEffectDefinition buffA, ActiveEffectDefinition buffB, int seed)
+        {
+            int enemyMaxHp = enemy.MaxHp;
+            var session = new BattleSession(seed);
+            session.Start(new BattleSetup
+            {
+                PlayerUnits = new List<BattleUnit> { player },
+                EnemyUnits = new List<BattleUnit> { enemy },
+            });
+
+            session.ApplyActiveEffect("player", buffA, sourceUnitId: "player");
+            session.ApplyActiveEffect("player", buffB, sourceUnitId: "player");
+            session.TryExecute(new PlayerActionCommand(skillId, "enemy"));
+            var enemyState = session.GetView().Units.First(u => u.UnitId == "enemy");
+            return enemyMaxHp - enemyState.CurrentHp;
         }
     }
 }
