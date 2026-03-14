@@ -84,5 +84,11 @@ namespace GameCore.Content.Raw
         public RawModifierSet Set { get; set; } = new RawModifierSet();
         public RawModifierModify Modify { get; set; } = new RawModifierModify();
         public RawModifierAdd Add { get; set; } = new RawModifierAdd();
+
+        /// <summary>
+        /// IDs of modifiers that cannot be combined with this one in the same skill slot.
+        /// If a skill slot includes both this modifier and any listed here, the content pipeline throws.
+        /// </summary>
+        public List<string> ExclusiveWith { get; set; } = new List<string>();
     }
 }
