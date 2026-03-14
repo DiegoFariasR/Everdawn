@@ -27,6 +27,16 @@
     The copied files are generated outputs — add GameData/**/*.yml to .gitignore if you
     don't want them committed from wwwroot.
     Update content-index.json whenever files are added to or removed from GameData/Base/.
+
+    IMPORTANT: After copying, delete the static asset manifest cache files so the
+    manifest is always rebuilt from the current wwwroot contents. This is required
+    because MSBuild evaluates the wwwroot/** item glob at project-load time (before
+    any targets run). New YAML files that did not exist in wwwroot at load time are
+    not in the item list for the current build; they appear in the next build's item
+    list. Without cache deletion the incremental manifest is never invalidated to
+    pick them up. Deleting the cache costs only a few extra seconds per build but
+    guarantees correctness: every build produces a manifest that reflects the current
+    wwwroot contents, so the second build after adding a new YAML always works.
   -->
   <Target Name="CopyGameDataToWwwroot" BeforeTargets="BeforeBuild">
     <ItemGroup>
@@ -35,6 +45,13 @@
     <Copy SourceFiles="@(_GameDataSource)"
           DestinationFiles="@(_GameDataSource->'$(MSBuildProjectDirectory)\wwwroot\GameData\Base\%(RecursiveDir)%(Filename)%(Extension)')"
           SkipUnchangedFiles="true" />
+    <!-- Delete the incremental static asset manifest caches. Without this, newly
+         copied YAML files are never added to the manifest (they were not in wwwroot
+         at item-evaluation time, so the old cache entry will persist indefinitely). -->
+    <Delete Files="$(IntermediateOutputPath)staticwebassets.build.json.cache"
+            Condition="Exists('$(IntermediateOutputPath)staticwebassets.build.json.cache')" />
+    <Delete Files="$(IntermediateOutputPath)$(AssemblyName).assets.cache"
+            Condition="Exists('$(IntermediateOutputPath)$(AssemblyName).assets.cache')" />
   </Target>
 
 </Project>
