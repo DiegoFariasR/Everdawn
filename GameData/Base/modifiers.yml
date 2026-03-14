@@ -61,8 +61,12 @@
 
 - id: enchant-fire
   name: Fire Enchant
+  tags:
+    - enchant
   description: >
     Infuses the weapon with fire. Adds a fire damage component scaling with WIS.
+  exclusiveWith:
+    - enchant
   add:
     damagePerHit:
       - damageType: fire
@@ -72,6 +76,8 @@
 
 - id: enchant-holy
   name: Holy Enchant
+  tags:
+    - enchant
   description: >
     Infuses the weapon with holy power. Adds a holy damage component scaling with WIS.
   add:
@@ -83,8 +89,12 @@
 
 - id: enchant-lightning
   name: Lightning Enchant
+  tags:
+    - enchant
   description: >
     Infuses the weapon with lightning. Adds a lightning damage component scaling with WIS.
+  exclusiveWith:
+    - enchant
   add:
     damagePerHit:
       - damageType: lightning
