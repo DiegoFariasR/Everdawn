@@ -127,7 +127,8 @@ namespace GameCore.Content
                         : raw.Add.DamagePerHit
                             .Select(c => new DamageComponent(
                                 c.DamageType != null ? Enum.Parse<EffectType>(c.DamageType, ignoreCase: true) : (EffectType?)null,
-                                c.Scaling.Select(s => new DamageScaling(s.Stat, s.Scale)).ToArray()))
+                                c.Scaling.Select(s => new DamageScaling(s.Stat, s.Scale)).ToArray(),
+                                c.BuildupPower))
                             .ToArray(),
                     ExclusiveWith: raw.ExclusiveWith.Count > 0 ? raw.ExclusiveWith.ToArray() : null,
                     Tags: raw.Tags.Count > 0 ? raw.Tags.ToArray() : null);
@@ -405,7 +406,7 @@ namespace GameCore.Content
                     var scaling = rawComp.Scaling
                         .Select(s => new DamageScaling(s.Stat, s.Scale))
                         .ToArray();
-                    components.Add(new DamageComponent(damageType, scaling));
+                    components.Add(new DamageComponent(damageType, scaling, rawComp.BuildupPower));
                 }
                 effects.Add(new SkillEffect(kind, target, components, BarKey: rawEffect.BarKey, BarAmount: rawEffect.BarAmount));
             }

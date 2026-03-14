@@ -141,7 +141,7 @@ namespace GameCore.Battle
 
                 // ── Add future layers here ───────────────────────────────────────
 
-                results.Add(new DamageResult(component.DamageType.Value, steps));
+                results.Add(new DamageResult(component.DamageType.Value, steps, component.BuildupPower));
             }
             return results;
         }

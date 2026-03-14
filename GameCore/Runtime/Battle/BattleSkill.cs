@@ -13,7 +13,14 @@ namespace GameCore.Battle
     /// One damage type component within a hit.
     /// <see cref="DamageType"/> is null for heal components (no resistance applied).
     /// </summary>
-    public record DamageComponent(EffectType? DamageType, IReadOnlyList<DamageScaling> Scaling);
+    public record DamageComponent(
+        EffectType? DamageType,
+        IReadOnlyList<DamageScaling> Scaling,
+        /// <summary>
+        /// Flat power applied to CC buildup bars (burn/cold) per hit, independent of damage output.
+        /// 0 = no CC buildup (default). Set explicitly on skills that should build status bars.
+        /// </summary>
+        int BuildupPower = 0);
 
     /// <summary>
     /// One effect produced by a skill: its kind (damage/heal), intended target side, and per-hit formula.

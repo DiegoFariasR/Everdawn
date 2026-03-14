@@ -20,7 +20,7 @@ namespace GameCore.Battle
     /// actually takes.
     /// </para>
     /// </summary>
-    public record DamageResult(EffectType EffectType, IReadOnlyList<DamageStep> Steps)
+    public record DamageResult(EffectType EffectType, IReadOnlyList<DamageStep> Steps, int BuildupPower = 0)
     {
         /// <summary>Output of the "Base" step — damage before any mitigation.</summary>
         public int RawDamage => Steps.Count > 0 ? Steps[0].ValueAfter : 0;

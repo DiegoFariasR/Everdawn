@@ -17,6 +17,11 @@ namespace GameCore.Content.Raw
     public class RawDamageComponent
     {
         public string? DamageType { get; set; }
+        /// <summary>
+        /// Flat power applied to CC buildup bars (burn/cold) per hit, independent of damage output.
+        /// 0 = no CC buildup (default). Set explicitly on skills that should build status bars.
+        /// </summary>
+        public int BuildupPower { get; set; } = 0;
         public List<RawDamageScaling> Scaling { get; set; } = new List<RawDamageScaling>();
     }
 

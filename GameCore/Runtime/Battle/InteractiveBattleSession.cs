@@ -663,13 +663,13 @@ namespace GameCore.Battle
             var events = new List<BattleEvent>();
             foreach (var r in hitResults)
             {
-                if (r.RawDamage <= 0) continue;
+                if (r.BuildupPower <= 0) continue;
                 if (r.EffectType == EffectType.Cold)
                 {
                     int currentCold = GetBar(target.Id, ThermalSystem.BarCold);
                     int currentBurn = GetBar(target.Id, ThermalSystem.BarBurn);
                     int effectiveColdResistance = GetEffectiveResistance(target.Id, EffectType.Cold);
-                    ThermalSystem.ApplyCold(r.RawDamage, effectiveColdResistance,
+                    ThermalSystem.ApplyCold(r.BuildupPower, effectiveColdResistance,
                         currentBurn, currentCold, out int newBurn, out int newCold);
                     _bars[target.Id][ThermalSystem.BarBurn] = newBurn;
                     _bars[target.Id][ThermalSystem.BarCold] = newCold;
@@ -686,7 +686,7 @@ namespace GameCore.Battle
                     int currentCold = GetBar(target.Id, ThermalSystem.BarCold);
                     int currentBurn = GetBar(target.Id, ThermalSystem.BarBurn);
                     int effectiveFireResistance = GetEffectiveResistance(target.Id, EffectType.Fire);
-                    ThermalSystem.ApplyFire(r.RawDamage, effectiveFireResistance,
+                    ThermalSystem.ApplyFire(r.BuildupPower, effectiveFireResistance,
                         currentCold, currentBurn, out int newCold, out int newBurn);
                     _bars[target.Id][ThermalSystem.BarCold] = newCold;
                     _bars[target.Id][ThermalSystem.BarBurn] = newBurn;

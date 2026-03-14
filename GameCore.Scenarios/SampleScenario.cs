@@ -23,7 +23,10 @@ namespace GameCore.Scenarios
         public string ExpectedWinner => "player";
         // Updated to 125 after adding mage-meditate and rogue-concentrate skills.
         // Updated to 111 after adding mace-shatter (ultimate) to the paladin.
-        public int ExpectedSnapshotCount => 111;
+        // Updated to 103 after adding BuildupPower: thermal buildup decoupled from raw damage,
+        //   fire spells now use explicit buildupPower: 50 (vs. old WIS-scaled raw damage),
+        //   resulting in fewer/different thermal status events.
+        public int ExpectedSnapshotCount => 103;
 
         public override string ToString() => $"{DisplayName} [{Id}]";
 

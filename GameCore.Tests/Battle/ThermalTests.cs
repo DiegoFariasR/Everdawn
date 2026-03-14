@@ -284,23 +284,23 @@ namespace GameCore.Tests.Battle
 
         // Helpers ─────────────────────────────────────────────────────────────
 
-        private static SkillEffect[] ColdDamageEffect(double wisScale = 1.0) =>
+        private static SkillEffect[] ColdDamageEffect(double wisScale = 1.0, int buildupPower = 0) =>
             new SkillEffect[]
             {
                 new(EffectKind.Damage, BattleSkillTarget.Enemy,
                     new DamageComponent[]
                     {
-                        new(EffectType.Cold, new DamageScaling[] { new("wis", wisScale) })
+                        new(EffectType.Cold, new DamageScaling[] { new("wis", wisScale) }, buildupPower)
                     })
             };
 
-        private static SkillEffect[] FireDamageEffect(double wisScale = 1.0) =>
+        private static SkillEffect[] FireDamageEffect(double wisScale = 1.0, int buildupPower = 0) =>
             new SkillEffect[]
             {
                 new(EffectKind.Damage, BattleSkillTarget.Enemy,
                     new DamageComponent[]
                     {
-                        new(EffectType.Fire, new DamageScaling[] { new("wis", wisScale) })
+                        new(EffectType.Fire, new DamageScaling[] { new("wis", wisScale) }, buildupPower)
                     })
             };
 
@@ -316,16 +316,16 @@ namespace GameCore.Tests.Battle
 
         /// <summary>
         /// A cold skill that guarantees the cold bar reaches 100 in a single hit
-        /// (raw damage ≈ 400 >> MaxBar=100), while dealing negligible total HP damage.
+        /// (buildupPower=100 fills the bar exactly, triggering freeze).
         /// </summary>
         private static BattleSkill MassiveColdSkill(string id = "massive-cold") =>
             new(id, "Massive Cold", Cost: 0, DamageMultiplier: 1.0,
-                Effects: ColdDamageEffect(wisScale: 1.0));
+                Effects: ColdDamageEffect(wisScale: 1.0, buildupPower: 100));
 
-        /// <summary>A fire skill that reliably fills the burn bar in one hit.</summary>
+        /// <summary>A fire skill that reliably fills the burn bar in one hit (buildupPower=100).</summary>
         private static BattleSkill MassiveFireSkill(string id = "massive-fire") =>
             new(id, "Massive Fire", Cost: 0, DamageMultiplier: 1.0,
-                Effects: FireDamageEffect(wisScale: 1.0));
+                Effects: FireDamageEffect(wisScale: 1.0, buildupPower: 100));
 
         /// <summary>Harmless physical attack that deals negligible damage.</summary>
         private static BattleSkill TinyPhysicalSkill(string id = "tiny") =>
@@ -400,33 +400,24 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void Integration_ColdBar50_AppliesSlowStatus()
         {
-            // Use a moderate cold skill (wis=10, scale=1.0) to produce raw damage ≈ 80±16,
-            // which lands the cold bar in the 50–99 range (slow, no freeze) for seed=10.
-            // The test validates conditionally: only asserts when the bar is actually ≥ 50.
+            // buildupPower: 60 → cold bar = 60 after hit (no resistance, no variance).
+            // AdvanceTurnCommand processes only the player's turn so no enemy decay applies yet.
             var coldSkill = new BattleSkill("cold-med", "Cold", Cost: 0, DamageMultiplier: 1.0,
-                Effects: ColdDamageEffect(wisScale: 1.0));  // wis=10 → ~80 raw damage
+                Effects: ColdDamageEffect(wisScale: 1.0, buildupPower: 60));
 
-            var session = BuildSession(coldSkill, TinyPhysicalSkill(), playerWis: 10, seed: 10);
-
-            // Player attacks with cold. AutoAdvance also runs enemy turn (decay applies).
-            var result = session.TryExecute(new PlayerActionCommand("cold-med", "enemy"));
+            // playerAgi: 50 → HitCount = 1 (single hit), still goes before enemy (agi=1).
+            var session = BuildSession(coldSkill, TinyPhysicalSkill(), playerWis: 10, playerAgi: 50, seed: 10);
+            var result = session.TryExecute(new AdvanceTurnCommand());
             Assert.True(result.Accepted);
 
             var enemyState = result.View.Units.First(u => u.UnitId == "enemy");
             int coldBar = enemyState.GetBar(ThermalSystem.BarCold);
 
-            if (coldBar >= ThermalSystem.SlowThreshold && coldBar < ThermalSystem.FrozenThreshold)
-            {
-                Assert.NotNull(enemyState.StatusEffects);
-                Assert.Contains(ThermalSystem.StatusSlow, enemyState.StatusEffects!);
-                Assert.DoesNotContain(ThermalSystem.StatusFrozen, enemyState.StatusEffects!);
-            }
-            else if (coldBar >= ThermalSystem.FrozenThreshold)
-            {
-                // Should not happen with wis=10 (raw≈80 < 100) but guard anyway.
-                Assert.Contains(ThermalSystem.StatusFrozen, enemyState.StatusEffects ?? Array.Empty<string>());
-            }
-            // else bar < 50: the variance pulled it low — test is inconclusive for this seed.
+            Assert.True(coldBar >= ThermalSystem.SlowThreshold && coldBar < ThermalSystem.FrozenThreshold,
+                $"Cold bar should be in the slow range [50,100), but was {coldBar}");
+            Assert.NotNull(enemyState.StatusEffects);
+            Assert.Contains(ThermalSystem.StatusSlow, enemyState.StatusEffects!);
+            Assert.DoesNotContain(ThermalSystem.StatusFrozen, enemyState.StatusEffects!);
         }
 
         // ── Test 7 (integration): Burn >= 50 → "burning" in StatusEffects ────

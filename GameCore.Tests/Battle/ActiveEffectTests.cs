@@ -380,7 +380,7 @@ namespace GameCore.Tests.Battle
                             new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
                                 new DamageComponent[]
                                 {
-                                    new DamageComponent(EffectType.Cold, new DamageScaling[] { new DamageScaling("wis", 1.0) })
+                                    new DamageComponent(EffectType.Cold, new DamageScaling[] { new DamageScaling("wis", 1.0) }, BuildupPower: 30)
                                 })
                         })
                 });
