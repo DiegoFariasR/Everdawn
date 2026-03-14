@@ -5,6 +5,7 @@ str: 54
 wis: 0
 agi: 120
 traits: [Focus]
+weaponType: Pierce
 skills:
   - id: dagger-strike
     modifiers: [Basic]

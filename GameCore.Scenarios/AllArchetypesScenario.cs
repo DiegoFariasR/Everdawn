@@ -60,7 +60,12 @@ namespace GameCore.Scenarios
                     Str: Math.Max(1, (int)(Budget * strFrac)),
                     Wis: Math.Max(1, (int)(Budget * wisFrac)),
                     Agi: Math.Max(1, (int)(Budget * agiFrac)),
-                    Skills: allSkills));
+                    Skills: allSkills,
+                    // Grant MagicUser and a Blunt weapon so all benchmark skills are usable.
+                    // This scenario is a sandbox for stat-vs-skill damage analysis, not a
+                    // lore-accurate setup — requirements are intentionally satisfied broadly.
+                    Traits: new[] { BattleTrait.MagicUser },
+                    WeaponType: WeaponType.Blunt));
             }
 
             return new BattleSetup

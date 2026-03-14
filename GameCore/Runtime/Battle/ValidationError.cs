@@ -21,6 +21,8 @@ namespace GameCore.Battle
         InsufficientMp,
         /// <summary>The target ID is not a valid living target for the selected skill.</summary>
         InvalidTarget,
+        /// <summary>The actor does not meet the trait or weapon-type requirement for the skill.</summary>
+        RequirementNotMet,
     }
 
     /// <summary>

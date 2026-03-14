@@ -5,6 +5,7 @@ str: 55
 wis: 0
 agi: 100
 traits: [Focus]
+weaponType: Bow
 skills:
   - id: bow-shot
     modifiers: [Basic]
