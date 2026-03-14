@@ -135,6 +135,19 @@ skills:
         }
 
         [Fact]
+        public void Set_OverridesBaseHits()
+        {
+            var db = BuildDb(@"
+- id: test-mod
+  set:
+    extraHits: 3.0
+", string.Format(UnitYaml, "test-mod"));
+
+            var skill = GetSkill(db, "test-unit", "sword-strike");
+            Assert.Equal(3.0, skill.BaseHits);
+        }
+
+        [Fact]
         public void Set_LastModifierWins_WhenMultipleModsSetSameKey()
         {
             // Two mods both set cost — last one (cost: 1) should win.
@@ -190,6 +203,66 @@ skills:
 
             var skill = GetSkill(db, "test-unit", "sword-strike");
             Assert.Equal(3, skill.Cooldown); // base 2 + delta 1
+        }
+
+        [Fact]
+        public void Modify_AddsExtraHits()
+        {
+            var db = BuildDb(@"
+- id: test-mod
+  modify:
+    extraHits: 1
+", string.Format(UnitYaml, "test-mod"));
+
+            var skill = GetSkill(db, "test-unit", "sword-strike");
+            Assert.Equal(2.0, skill.BaseHits); // base 1.0 + delta 1
+        }
+
+        [Fact]
+        public void Modify_AddsExtraHits_StacksAcrossMultipleMods()
+        {
+            const string unitYaml = @"
+id: test-unit
+name: Test Unit
+level: 1
+str: 100
+wis: 80
+agi: 50
+skills:
+  - id: sword-strike
+    modifiers:
+      - add-hit-a
+      - add-hit-b
+";
+            var db = BuildDb(@"
+- id: add-hit-a
+  modify:
+    extraHits: 1
+- id: add-hit-b
+  modify:
+    extraHits: 1
+", unitYaml);
+
+            var skill = GetSkill(db, "test-unit", "sword-strike");
+            Assert.Equal(3.0, skill.BaseHits); // base 1.0 + 1 + 1
+        }
+
+        [Fact]
+        public void Modify_ExtraHits_WithCooldownAndCost()
+        {
+            // A modifier that adds one extra hit but also increases cooldown and cost.
+            var db = BuildDb(@"
+- id: heavy-multishot
+  modify:
+    extraHits: 1
+    cooldown: 1
+    cost: 2
+", string.Format(UnitYaml, "heavy-multishot"));
+
+            var skill = GetSkill(db, "test-unit", "sword-strike");
+            Assert.Equal(2.0, skill.BaseHits); // base 1.0 + 1
+            Assert.Equal(3, skill.Cooldown);   // base 2 + 1
+            Assert.Equal(5, skill.Cost);       // base 3 + 2
         }
 
         [Fact]

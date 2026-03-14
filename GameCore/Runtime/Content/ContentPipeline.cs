@@ -73,6 +73,7 @@ namespace GameCore.Content
                 if (raw.Set.IsAoe != null) scalarSet[ModifierVariable.IsAoe] = raw.Set.IsAoe.Value;
                 if (raw.Set.Cooldown != null) scalarSet[ModifierVariable.Cooldown] = raw.Set.Cooldown.Value;
                 if (raw.Set.InitialCooldown != null) scalarSet[ModifierVariable.InitialCooldown] = raw.Set.InitialCooldown.Value;
+                if (raw.Set.ExtraHits != null) scalarSet[ModifierVariable.ExtraHits] = raw.Set.ExtraHits.Value;
 
                 // ── Scalar Modify ─────────────────────────────────────────────
                 var scalarModify = new Dictionary<ModifierVariable, double>();
@@ -80,6 +81,7 @@ namespace GameCore.Content
                 if (raw.Modify.DamageMultiplier.HasValue) scalarModify[ModifierVariable.DamageMultiplier] = raw.Modify.DamageMultiplier.Value;
                 if (raw.Modify.Cooldown.HasValue) scalarModify[ModifierVariable.Cooldown] = raw.Modify.Cooldown.Value;
                 if (raw.Modify.InitialCooldown.HasValue) scalarModify[ModifierVariable.InitialCooldown] = raw.Modify.InitialCooldown.Value;
+                if (raw.Modify.ExtraHits.HasValue) scalarModify[ModifierVariable.ExtraHits] = raw.Modify.ExtraHits.Value;
 
                 // ── CC resistance/penetration from Resistance/Penetration dicts ─
                 // CC keys (e.g. "disruption") are extracted before the remaining
@@ -193,6 +195,7 @@ namespace GameCore.Content
                     var setIsAoe = GetLastSet<bool>(compiledMods, ModifierVariable.IsAoe, sk.IsAoe);
                     var setCooldown = GetLastSet<int>(compiledMods, ModifierVariable.Cooldown, sk.Cooldown);
                     var setInitCd = GetLastSet<int>(compiledMods, ModifierVariable.InitialCooldown, sk.InitialCooldown);
+                    var setExtraHits = GetLastSet<double>(compiledMods, ModifierVariable.ExtraHits, sk.BaseHits);
 
                     // Modify: all deltas for a key are summed on top of the Set result.
                     var extraComponents = compiledMods
@@ -208,6 +211,7 @@ namespace GameCore.Content
                         IsAoe = setIsAoe,
                         Cooldown = setCooldown + SumModifyInt(compiledMods, ModifierVariable.Cooldown),
                         InitialCooldown = setInitCd + SumModifyInt(compiledMods, ModifierVariable.InitialCooldown),
+                        BaseHits = Math.Max(0.5, setExtraHits + SumModify(compiledMods, ModifierVariable.ExtraHits)),
                         Effects = extraComponents.Length == 0 || sk.Effects.Count == 0
                             ? sk.Effects
                             : new SkillEffect[]
