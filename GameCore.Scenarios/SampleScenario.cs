@@ -26,7 +26,9 @@ namespace GameCore.Scenarios
         // Updated to 103 after adding BuildupPower: thermal buildup decoupled from raw damage,
         //   fire spells now use explicit buildupPower: 50 (vs. old WIS-scaled raw damage),
         //   resulting in fewer/different thermal status events.
-        public int ExpectedSnapshotCount => 103;
+        // Updated to 94 after lowering mage-bolt buildupPower 50 → 30 (bolt no longer
+        //   triggers burning in one hit, fewer DOT events in the sample battle).
+        public int ExpectedSnapshotCount => 94;
 
         public override string ToString() => $"{DisplayName} [{Id}]";
 

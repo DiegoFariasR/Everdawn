@@ -6,7 +6,7 @@
       target: enemy
       damagePerHit:
         - damageType: fire
-          buildupPower: 50
+          buildupPower: 30
           scaling:
             - stat: wis
 
@@ -72,7 +72,7 @@
     - kind: damage
       target: enemy
       damagePerHit:
-        - damageType: fire
+        - damageType: void
           buildupPower: 50
           scaling:
             - stat: wis
@@ -85,7 +85,7 @@
     - kind: damage
       target: enemy
       damagePerHit:
-        - damageType: fire
+        - damageType: void
           buildupPower: 50
           scaling:
             - stat: wis
@@ -99,7 +99,7 @@
     - kind: damage
       target: enemy
       damagePerHit:
-        - damageType: fire
+        - damageType: void
           buildupPower: 50
           scaling:
             - stat: wis
