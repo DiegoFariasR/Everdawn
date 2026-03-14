@@ -220,21 +220,36 @@ GameData/
 
 ## Rules for AI Assistants
 
-1. **Never collapse gameplay truth into UnityClient.** GameCore decides, UnityClient renders.
-2. **Check `Docs/Design/` for design decisions** before implementing a mechanic.
-3. **Open questions in design docs are undecided** — ask before assuming an answer.
-4. **New game mechanics go in GameCore/ first**, with tests in GameCore.Tests/.
-5. **Data definitions go in GameData/Base/** as YAML files.
-6. **Unity-specific code stays in UnityClient/** and only calls into GameCore.
-7. **Keep PRs focused**: one feature or system per PR.
-8. **Update this file and relevant design docs** when a decision is made or a system changes.
+### Before Starting a Task
+1. **Check `Docs/Design/` for design decisions** before implementing a mechanic.
+2. **Open questions in design docs are undecided** — ask before assuming an answer.
+3. **Check the Battle Architecture section** in this file for summaries of implemented systems before reading source code — it is faster than exploring the codebase.
+
+### During Implementation
+4. **Never collapse gameplay truth into UnityClient.** GameCore decides, UnityClient renders.
+5. **New game mechanics go in GameCore/ first**, with tests in GameCore.Tests/.
+6. **Data definitions go in GameData/Base/** as YAML files.
+7. **Unity-specific code stays in UnityClient/** and only calls into GameCore.
+8. **Keep PRs focused**: one feature or system per PR.
 9. **Do not overengineer.** Build what is needed now, not what might be needed later.
 10. **Battle scenarios must be deterministic.** Same seed + same inputs = same result, always.
+
+### Before Closing a PR
 11. **Run `dotnet format Everdawn.slnx` before every commit.** Do not wait for CI to catch formatting errors — format locally first. A pre-commit hook is installed at `.git/hooks/pre-commit` that does this automatically.
+12. **Update `Docs/Design/` design docs** when a feature is implemented:
+    - Tick `- [x]` checkboxes for items that are now fully implemented.
+    - Add implementation details (types, enums, rules) under the relevant section.
+    - Do **not** add new undecided features or resolve open questions without explicit instruction from the user.
+13. **Update this file** when a new major system is implemented:
+    - Add a brief subsection under the relevant Architecture section (e.g., "Battle Architecture").
+    - Focus on what an AI needs to know to work with the system — public types, key rules, entry points — not internal implementation details.
+    - Do **not** duplicate content already covered in `Docs/Design/`.
 
 ---
 
 ## Gameplay Quality Warnings
+
+> **Scope:** These are design and playtesting warnings — not a per-PR checklist. Apply them when reviewing a new mechanic's design, during playtesting sessions, or when evaluating content. They are **not** AI assistant task rules; skip this section unless explicitly asked to review design quality.
 
 Treat the following as development warnings. Apply them during design, implementation, playtesting, and content production — not just at launch. These are relevant once the game is large enough to evaluate end-to-end.
 
