@@ -448,6 +448,7 @@ namespace GameCore.Battle
                         healRaw *= effectiveSkill.DamageMultiplier * empowerMult;
                         int healVariance = Math.Max(1, (int)healRaw / 5);
                         int amount = Math.Max(0, (int)healRaw + _rng.Next(-healVariance, healVariance + 1));
+                        amount = (int)(amount * GetReceivingHealingMultiplier(target.Id));
                         var maxHp = _allUnits.First(u => u.Id == target.Id).MaxHp;
                         int healed = Math.Min(amount, Math.Max(0, maxHp - _hp[target.Id]));
                         _hp[target.Id] += healed;
@@ -467,6 +468,7 @@ namespace GameCore.Battle
                         shieldRaw *= effectiveSkill.DamageMultiplier * empowerMult;
                         int shieldVariance = Math.Max(1, (int)shieldRaw / 5);
                         int amount = Math.Max(0, (int)shieldRaw + _rng.Next(-shieldVariance, shieldVariance + 1));
+                        amount = (int)(amount * GetReceivingBarrierMultiplier(target.Id));
                         if (!_bars[target.Id].ContainsKey("barrier"))
                             _bars[target.Id]["barrier"] = 0;
                         _bars[target.Id]["barrier"] += amount;
@@ -956,6 +958,14 @@ namespace GameCore.Battle
         /// <summary>Returns the effective damage-taken multiplier for a unit from active effects.</summary>
         private double GetDamageTakenMultiplier(string unitId) =>
             ResolveStatModifier(unitId, RuntimeStatKey.DamageTakenMultiplier, baseValue: 1.0);
+
+        /// <summary>Returns the effective receiving-healing multiplier for a unit from active effects.</summary>
+        private double GetReceivingHealingMultiplier(string unitId) =>
+            ResolveStatModifier(unitId, RuntimeStatKey.ReceivingHealingMultiplier, baseValue: 1.0);
+
+        /// <summary>Returns the effective receiving-barrier multiplier for a unit from active effects.</summary>
+        private double GetReceivingBarrierMultiplier(string unitId) =>
+            ResolveStatModifier(unitId, RuntimeStatKey.ReceivingBarrierMultiplier, baseValue: 1.0);
 
         /// <summary>
         /// Returns the effective resistance percentage for a unit and damage type, combining the

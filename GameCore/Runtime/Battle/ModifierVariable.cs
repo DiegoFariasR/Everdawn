@@ -50,5 +50,19 @@ namespace GameCore.Battle
         /// Kept separate from elemental penetration because disruption is a bar mechanic, not a damage type.
         /// </summary>
         DisruptionPenetration,
+
+        // ── Receiving multipliers ────────────────────────────────────────────
+
+        /// <summary>
+        /// Multiplier applied to all healing received by this unit. Default base value: 1.0.
+        /// Values above 1.0 increase healing received; values below 1.0 reduce it.
+        /// </summary>
+        ReceivingHealingMultiplier,
+
+        /// <summary>
+        /// Multiplier applied to all barrier received by this unit. Default base value: 1.0.
+        /// Values above 1.0 increase barrier received; values below 1.0 reduce it.
+        /// </summary>
+        ReceivingBarrierMultiplier,
     }
 }

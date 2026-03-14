@@ -11,6 +11,12 @@ namespace GameCore.Battle
         /// <summary>Multiplier applied to all incoming damage taken by this unit. Default base value: 1.0.</summary>
         DamageTakenMultiplier,
 
+        /// <summary>Multiplier applied to all healing received by this unit. Default base value: 1.0.</summary>
+        ReceivingHealingMultiplier,
+
+        /// <summary>Multiplier applied to all barrier received by this unit. Default base value: 1.0.</summary>
+        ReceivingBarrierMultiplier,
+
         // ── Per-type damage dealt multipliers ─────────────────────────────────
 
         /// <summary>Multiplier applied to outgoing physical damage dealt by this unit. Default base value: 1.0.</summary>
