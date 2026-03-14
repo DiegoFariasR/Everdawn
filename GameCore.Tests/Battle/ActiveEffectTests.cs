@@ -969,5 +969,125 @@ namespace GameCore.Tests.Battle
             var enemyState = session.GetView().Units.First(u => u.UnitId == "enemy");
             return enemyMaxHp - enemyState.CurrentHp;
         }
+
+        // ────────────────────────────────────────────────────────────────────
+        // Test 20: ReceivingHealingMultiplier scales healing received by target
+        // ────────────────────────────────────────────────────────────────────
+
+        [Fact]
+        public void ReceivingHealingMultiplier_ScalesHealingReceived()
+        {
+            var basicAtk = MakeDamageSkill("basic-atk");
+            var healSkill = new BattleSkill("heal", "heal", Cost: 0, DamageMultiplier: 1.0,
+                Effects: new SkillEffect[]
+                {
+                    new SkillEffect(EffectKind.Heal, BattleSkillTarget.Ally,
+                        new DamageComponent[] { new DamageComponent(null, new DamageScaling[] { new DamageScaling("wis", 1.0) }) })
+                });
+
+            // Player Wis=10 → MagicAttack=80 → raw heal ≈ 80 per cast.
+            // Enemy Str=25 → PhysAttack=200 → ~200 damage per hit.
+            // Both 80 and 2×80=160 are less than the ≈200 deficit, so the HP cap never interferes.
+            // Player Str=20 → MaxHp=2000, survives two enemy hits (≈200 each).
+            var player = new BattleUnit("player", "player", "player", Level: 1, Str: 20, Wis: 10, Agi: 100,
+                Skills: new BattleSkill[] { basicAtk, healSkill });
+            var enemy = new BattleUnit("enemy", "enemy", "enemy", Level: 1, Str: 25, Wis: 0, Agi: 1,
+                Skills: new BattleSkill[] { MakeDamageSkill("e-basic", statKey: "str") });
+
+            var healBoost = new ActiveEffectDefinition("healBoost", "Heal Boost",
+                EffectDurationKind.ForTargetTurns, Duration: 5,
+                StatModifiers: new RuntimeStatModifier[]
+                {
+                    new RuntimeStatModifier(RuntimeStatKey.ReceivingHealingMultiplier, ModifierOperation.Multiply, 2.0)
+                });
+
+            // Compare final player HP after (basic-atk → enemy hits → heal → enemy hits).
+            // Both sessions share the same seed so all RNG rolls are identical except the heal
+            // amount (which is multiplied in the buff session). Same-seed enemy hits cancel out.
+            int hpNoBuff = MeasureHpAfterHeal(player, enemy, "heal", applyBuff: null, seed: 42);
+            int hpWithBuff = MeasureHpAfterHeal(player, enemy, "heal", applyBuff: healBoost, seed: 42);
+
+            Assert.True(hpWithBuff > hpNoBuff,
+                "ReceivingHealingMultiplier should increase healing received, resulting in higher HP");
+        }
+
+        // ────────────────────────────────────────────────────────────────────
+        // Test 21: ReceivingBarrierMultiplier scales barrier received by target
+        // ────────────────────────────────────────────────────────────────────
+
+        [Fact]
+        public void ReceivingBarrierMultiplier_ScalesBarrierReceived()
+        {
+            var shieldSkill = new BattleSkill("shield", "shield", Cost: 0, DamageMultiplier: 1.0,
+                Effects: new SkillEffect[]
+                {
+                    new SkillEffect(EffectKind.Shield, BattleSkillTarget.Ally,
+                        new DamageComponent[] { new DamageComponent(null, new DamageScaling[] { new DamageScaling("wis", 1.0) }) })
+                });
+
+            var player = new BattleUnit("player", "player", "player", Level: 1, Str: 10, Wis: 50, Agi: 100,
+                Skills: new BattleSkill[] { shieldSkill });
+            var enemy = new BattleUnit("enemy", "enemy", "enemy", Level: 1, Str: 1, Wis: 0, Agi: 1,
+                Skills: new BattleSkill[] { MakeDamageSkill("e-basic", statKey: "str") });
+
+            var barrierBoost = new ActiveEffectDefinition("barrierBoost", "Barrier Boost",
+                EffectDurationKind.ForTargetTurns, Duration: 5,
+                StatModifiers: new RuntimeStatModifier[]
+                {
+                    new RuntimeStatModifier(RuntimeStatKey.ReceivingBarrierMultiplier, ModifierOperation.Multiply, 2.0)
+                });
+
+            int barrierNoBuff = MeasureBarrierAfterShield(player, enemy, "shield", applyBuff: null, seed: 42);
+            int barrierWithBuff = MeasureBarrierAfterShield(player, enemy, "shield", applyBuff: barrierBoost, seed: 42);
+
+            Assert.True(barrierWithBuff > barrierNoBuff,
+                "ReceivingBarrierMultiplier should increase barrier received");
+        }
+
+        /// <summary>
+        /// Executes a basic attack (to let the enemy damage the player), applies an optional buff,
+        /// then executes the heal skill. Returns the player's HP after both actions (including the
+        /// two enemy counter-attacks in AutoAdvance). Both sessions use the same seed so enemy
+        /// damage values are identical, isolating the healing difference.
+        /// </summary>
+        private static int MeasureHpAfterHeal(BattleUnit player, BattleUnit enemy,
+            string healSkillId, ActiveEffectDefinition? applyBuff, int seed)
+        {
+            var session = new BattleSession(seed);
+            session.Start(new BattleSetup
+            {
+                PlayerUnits = new List<BattleUnit> { player },
+                EnemyUnits = new List<BattleUnit> { enemy },
+            });
+
+            // First action: player basic-attacks. AutoAdvance plays enemy counter-attack.
+            // Player is now below max HP, creating a deficit that makes healing measurable.
+            session.TryExecute(new PlayerActionCommand("basic-atk", "enemy"));
+
+            if (applyBuff != null)
+                session.ApplyActiveEffect("player", applyBuff, sourceUnitId: "player");
+
+            // Second action: player heals self. AutoAdvance plays another enemy counter-attack.
+            session.TryExecute(new PlayerActionCommand(healSkillId, "player"));
+
+            return session.GetView().Units.First(u => u.UnitId == "player").CurrentHp;
+        }
+
+        private static int MeasureBarrierAfterShield(BattleUnit player, BattleUnit enemy,
+            string shieldSkillId, ActiveEffectDefinition? applyBuff, int seed)
+        {
+            var session = new BattleSession(seed);
+            session.Start(new BattleSetup
+            {
+                PlayerUnits = new List<BattleUnit> { player },
+                EnemyUnits = new List<BattleUnit> { enemy },
+            });
+
+            if (applyBuff != null)
+                session.ApplyActiveEffect("player", applyBuff, sourceUnitId: "player");
+
+            session.TryExecute(new PlayerActionCommand(shieldSkillId, "player"));
+            return session.GetView().Units.First(u => u.UnitId == "player").GetBar("barrier");
+        }
     }
 }
