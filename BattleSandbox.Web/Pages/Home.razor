@@ -138,6 +138,7 @@
     private bool           _autoMode;
     private int            _autoDelay = 1000;
     private int            _lastActionEventStart;
+    private int            _autoGeneration;
 
     private SkillView? _pendingSkill =>
         _view?.PendingInput?.Skills.FirstOrDefault(s => s.Id == _pendingAction);
@@ -203,7 +204,8 @@
             _view           = startResult.View;
             BuildSkillRanges();
             SelectDefaultSkill();
-            if (_autoMode) _ = RunAutoAsync();
+            _autoGeneration++;
+            if (_autoMode) _ = RunAutoAsync(_autoGeneration);
         }
         else
         {
@@ -228,7 +230,8 @@
         _playMode = true;
         _result   = null;
         SelectDefaultSkill();
-        if (_autoMode) _ = RunAutoAsync();
+        _autoGeneration++;
+        if (_autoMode) _ = RunAutoAsync(_autoGeneration);
     }
 
     // Auto-play
@@ -236,15 +239,18 @@
     {
         _autoMode = !_autoMode;
         if (_autoMode && _view?.PendingInput != null && !_view.IsOver)
-            _ = RunAutoAsync();
+        {
+            _autoGeneration++;
+            _ = RunAutoAsync(_autoGeneration);
+        }
     }
 
-    private async System.Threading.Tasks.Task RunAutoAsync()
+    private async System.Threading.Tasks.Task RunAutoAsync(int gen)
     {
-        while (_autoMode && !(_view?.IsOver ?? true))
+        while (_autoMode && !(_view?.IsOver ?? true) && _autoGeneration == gen)
         {
             await System.Threading.Tasks.Task.Delay(_autoDelay);
-            if (!_autoMode) break;
+            if (!_autoMode || _autoGeneration != gen) break;
             var cmd = new AdvanceTurnCommand();
             _commandHistory.Add(new CommandRecord(cmd, _view!.FullLog.Count));
             var result = Engine.ExecuteCommand(cmd);
@@ -267,7 +273,7 @@
         TriggerMeleeAnims(result.Events);
         SpawnFloats(result.Events);
         SelectDefaultSkill();
-        if (!_autoMode) _ = AdvanceNonPlayerTurnsAsync();
+        if (!_autoMode) _ = AdvanceNonPlayerTurnsAsync(_autoGeneration);
     }
 
     private void AutoFireSkill(string skillId)
@@ -297,16 +303,16 @@
         TriggerMeleeAnims(result.Events);
         SpawnFloats(result.Events);
         SelectDefaultSkill();
-        if (!_autoMode) _ = AdvanceNonPlayerTurnsAsync();
+        if (!_autoMode) _ = AdvanceNonPlayerTurnsAsync(_autoGeneration);
     }
 
-    private async System.Threading.Tasks.Task AdvanceNonPlayerTurnsAsync()
+    private async System.Threading.Tasks.Task AdvanceNonPlayerTurnsAsync(int gen)
     {
-        while (!(_view?.IsOver ?? true) && _view?.PendingInput == null)
+        while (!(_view?.IsOver ?? true) && _view?.PendingInput == null && _autoGeneration == gen)
         {
             StateHasChanged();
             await System.Threading.Tasks.Task.Delay(_autoDelay);
-            if (_autoMode) break;
+            if (_autoMode || _autoGeneration != gen) break;
             var cmd = new AdvanceTurnCommand();
             _commandHistory.Add(new CommandRecord(cmd, _view!.FullLog.Count));
             var result = Engine.ExecuteCommand(cmd);
