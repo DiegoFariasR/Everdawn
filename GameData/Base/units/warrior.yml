@@ -6,6 +6,7 @@ wis: 0
 agi: 60
 traits: [Fury]
 weaponType: Blunt
+reaction: counter-strike
 skills:
   - id: mace-strike
     modifiers: [Basic]

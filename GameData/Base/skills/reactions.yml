@@ -1,0 +1,18 @@
+# ── Reaction skills ─────────────────────────────────────────────────────────
+# Reaction skills fire automatically when their trigger condition is met.
+# Each unit may equip at most one reaction skill (declared as `reaction:` in the unit file).
+# They are never chosen as battle actions and do not appear on the skill bar.
+
+- id: counter-strike
+  name: Counter Strike
+  category: Reaction
+  trigger: OnHitByMelee
+  cooldown: 2
+  effects:
+    - kind: Damage
+      target: Enemy
+      damagePerHit:
+        - damageType: Physical
+          scaling:
+            - stat: str
+              scale: 0.5

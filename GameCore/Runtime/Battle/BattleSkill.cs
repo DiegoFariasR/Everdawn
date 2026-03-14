@@ -116,7 +116,13 @@ namespace GameCore.Battle
         /// If set, the unit must be equipped with one of these weapon types to use this skill.
         /// For example, a mace skill requires <see cref="WeaponType.Blunt"/>.
         /// </summary>
-        IReadOnlyList<WeaponType>? RequiredWeaponTypes = null
+        IReadOnlyList<WeaponType>? RequiredWeaponTypes = null,
+        /// <summary>
+        /// The trigger condition that causes this reaction skill to fire automatically.
+        /// Null for non-reaction skills.
+        /// Only meaningful when <see cref="Category"/> is <see cref="SkillCategory.Reaction"/>.
+        /// </summary>
+        ReactionTrigger? Trigger = null
     )
     {
         /// <summary>Returns true if this skill carries the given modifier (case-insensitive).</summary>
@@ -159,6 +165,9 @@ namespace GameCore.Battle
 
         /// <summary>True if any of this skill's modifier tags is "ultimate".</summary>
         public bool IsUltimate => ModifierTags?.Any(t => string.Equals(t, "ultimate", StringComparison.OrdinalIgnoreCase)) ?? false;
+
+        /// <summary>True if this skill is a reaction (fires automatically on a trigger, never chosen as an action).</summary>
+        public bool IsReaction => Category == SkillCategory.Reaction;
 
         /// <summary>
         /// The cooldown this skill enters battle with.

@@ -395,7 +395,24 @@ namespace GameCore.Content
                 Penetrations: penetrations,
                 DisruptionPenetration: disruptionPenetration,
                 ThermalProtection: thermalProtection,
-                WeaponType: Enum.Parse<WeaponType>(raw.WeaponType, ignoreCase: true));
+                WeaponType: Enum.Parse<WeaponType>(raw.WeaponType, ignoreCase: true),
+                ReactionSkill: CompileReactionSkill(raw, skillDict));
+        }
+
+        private static BattleSkill? CompileReactionSkill(
+            RawUnit raw, IReadOnlyDictionary<string, BattleSkill> skillDict)
+        {
+            if (raw.Reaction == null) return null;
+            if (!skillDict.TryGetValue(raw.Reaction, out var skill))
+                throw new KeyNotFoundException(
+                    $"Unit '{raw.Id}' reaction references unknown skill '{raw.Reaction}'.");
+            if (skill.Category != Battle.SkillCategory.Reaction)
+                throw new InvalidOperationException(
+                    $"Unit '{raw.Id}' reaction skill '{raw.Reaction}' must have category Reaction, but has {skill.Category}.");
+            if (skill.Trigger == null)
+                throw new InvalidOperationException(
+                    $"Unit '{raw.Id}' reaction skill '{raw.Reaction}' must declare a trigger.");
+            return skill;
         }
 
         private static BattleSkill CompileSkill(RawSkill raw)
@@ -474,7 +491,10 @@ namespace GameCore.Content
                 RequiredTrait: raw.RequiredTrait != null
                     ? Enum.Parse<BattleTrait>(raw.RequiredTrait, ignoreCase: true)
                     : (BattleTrait?)null,
-                RequiredWeaponTypes: raw.RequiredWeaponTypes?.Select(t => Enum.Parse<WeaponType>(t, ignoreCase: true)).ToArray());
+                RequiredWeaponTypes: raw.RequiredWeaponTypes?.Select(t => Enum.Parse<WeaponType>(t, ignoreCase: true)).ToArray(),
+                Trigger: raw.Trigger != null
+                    ? Enum.Parse<ReactionTrigger>(raw.Trigger, ignoreCase: true)
+                    : (ReactionTrigger?)null);
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────

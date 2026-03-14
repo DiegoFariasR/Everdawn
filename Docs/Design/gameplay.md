@@ -126,6 +126,14 @@ Two independent buildup-bar families drive crowd-control. Each bar runs from 0 t
 - [x] Passive skills are never selectable as battle actions (filtered from AI selection and player input)
 - [x] Each character currently has 1 passive skill (e.g. Warrior: Battle Hardening +20% physical pen; Mage: Arcane Insight +20% fire pen; Rogue: Concussion Ward +40% disruption resistance)
 
+## Reactions
+
+- [ ] 1 reaction skill slot per character — fires automatically on a trigger, never chosen as an action
+- [ ] Reactions fire after the full triggering action resolves (not mid-hit)
+- [ ] Reaction goes on cooldown after firing; CD suppresses further triggers
+- [ ] Frozen/stunned units do not react; dead units do not react
+- [ ] See `Docs/Design/reactions.md` for full design, trigger catalog, and planned reactions
+
 ## Open Questions
 
 ### Damage of multiple types/elements on the same attack

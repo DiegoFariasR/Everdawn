@@ -50,5 +50,22 @@ namespace GameCore.Battle
         Attack,
         Spell,
         Passive,
+        /// <summary>
+        /// Reaction skills fire automatically in response to a trigger, never as a chosen action.
+        /// Each unit may equip at most one reaction skill (stored in <see cref="BattleUnit.ReactionSkill"/>).
+        /// </summary>
+        Reaction,
+    }
+
+    /// <summary>
+    /// The condition that causes a <see cref="SkillCategory.Reaction"/> skill to fire.
+    /// </summary>
+    public enum ReactionTrigger
+    {
+        /// <summary>
+        /// Fires after the unit is hit by a melee-range, non-heal, non-shield attack.
+        /// The reactor counter-attacks the original attacker.
+        /// </summary>
+        OnHitByMelee,
     }
 }

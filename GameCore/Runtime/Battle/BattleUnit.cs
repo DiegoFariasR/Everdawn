@@ -47,7 +47,13 @@ namespace GameCore.Battle
         /// The type of weapon this unit is equipped with.
         /// Determines which weapon-gated skills the unit can use.
         /// </summary>
-        WeaponType WeaponType = WeaponType.None
+        WeaponType WeaponType = WeaponType.None,
+        /// <summary>
+        /// The unit's reaction skill, if any. Fires automatically when the trigger condition is met.
+        /// Not included in <see cref="ResolvedSkills"/> — it is never chosen as a battle action.
+        /// At most one reaction is allowed per unit.
+        /// </summary>
+        BattleSkill? ReactionSkill = null
     )
     {
         // ── Traits ───────────────────────────────────────────────────────

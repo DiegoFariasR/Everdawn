@@ -186,6 +186,22 @@ Example: 50% cold resistance + 10 ThermalProtection → acts like 55% resistance
 
 Authored per unit in YAML via modifiers (`modify: { thermalProtection: 20 }`). Accessible at runtime via `RuntimeStatKey.ThermalProtection` for active effects. Compiled in `ContentPipeline.CompileUnit` via `ModifierVariable.ThermalProtection`.
 
+### Reaction Skills
+A **Reaction** is a 4th skill slot (alongside basic, secondary, ultimate) limited to **one per character**. Reaction skills fire automatically when their trigger condition is met during any action, never as a chosen action.
+
+Key rules:
+- Tagged `Category: Reaction` in YAML; declared as `reaction: <skill-id>` in the unit YAML.
+- Stored on `BattleUnit.ReactionSkill` (separate from `ResolvedSkills`). Never appears in action choices or AI selection.
+- Has a `Trigger` field (`ReactionTrigger` enum). Current values: `OnHitByMelee`.
+- Reactions fire **after the full triggering action resolves**, before `CheckEnd`.
+- Dead, frozen, or stunned units do not react. Reactions cannot trigger further reactions (no chaining).
+- Reaction goes on cooldown after firing (same CD system as normal skills, ticked on the reactor's own turn).
+- Execution path: `ExecuteReactions(actor, hitTargets, usedSkill)` → `ExecuteReactionAction(reactor, target, reaction)`.
+- No MP cost, no Focus/Fury empowerment, no CD ticking of the reactor's other skills.
+- First implemented reaction: `counter-strike` (ID) — fires on `OnHitByMelee`, physical hit at STR × 0.5, CD 2.
+
+Design doc: `Docs/Design/reactions.md`.
+
 ---
 
 ## Content Pipeline

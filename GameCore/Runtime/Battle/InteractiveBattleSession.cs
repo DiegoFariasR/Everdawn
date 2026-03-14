@@ -40,9 +40,14 @@ namespace GameCore.Battle
             _rng = new Random(seed);
             // Apply initial cooldowns (Ultimate modifier auto-supplies 1 round if not set higher)
             foreach (var u in _allUnits)
+            {
                 foreach (var s in u.ResolvedSkills)
                     if (s.EffectiveInitialCooldown > 0)
                         _skillCooldowns[s.Id] = s.EffectiveInitialCooldown;
+                // Reaction skills have their own CD slot.
+                if (u.ReactionSkill?.EffectiveInitialCooldown > 0)
+                    _skillCooldowns[u.ReactionSkill.Id] = u.ReactionSkill.EffectiveInitialCooldown;
+            }
         }
 
         /// <summary>
@@ -355,6 +360,9 @@ namespace GameCore.Battle
             foreach (var s in actor.ResolvedSkills)
                 if (_skillCooldowns.TryGetValue(s.Id, out int cd) && cd > 0)
                     _skillCooldowns[s.Id] = cd - 1;
+            // Also tick the actor's reaction skill cooldown.
+            if (actor.ReactionSkill != null && _skillCooldowns.TryGetValue(actor.ReactionSkill.Id, out int rcd) && rcd > 0)
+                _skillCooldowns[actor.ReactionSkill.Id] = rcd - 1;
 
             // Resolve the effective skill for this action: applies any runtime skill modifiers
             // from active effects on the actor. The base compiled skill is never mutated.
@@ -590,7 +598,115 @@ namespace GameCore.Battle
             // Tick active effects: decrement durations and remove expired instances.
             produced.AddRange(TickActiveEffects(actor.Id));
 
+            // Reactions: fire after the full action resolves, before end-of-action checks.
+            // Reactions cannot trigger further reactions (no chaining).
+            produced.AddRange(ExecuteReactions(actor, targets, effectiveSkill));
+
             CheckEnd();
+            return produced;
+        }
+
+        // ── Reaction helpers ─────────────────────────────────────────────────
+
+        /// <summary>
+        /// Checks every unit that was in <paramref name="hitTargets"/> for a qualifying reaction
+        /// and fires it if all conditions are met. Reactions fire after the full action resolves
+        /// and cannot themselves trigger further reactions.
+        /// </summary>
+        private IReadOnlyList<BattleEvent> ExecuteReactions(
+            BattleUnit actor, List<BattleUnit> hitTargets, BattleSkill usedSkill)
+        {
+            bool isMeleeAttack = usedSkill.Range == SkillRange.Melee
+                && !usedSkill.IsHeal && !usedSkill.IsShield && !usedSkill.IsRestoreBar;
+
+            var produced = new List<BattleEvent>();
+
+            // Collect eligible reactors in AGI descending order (fastest reacts first).
+            var reactors = hitTargets
+                .Where(t => _hp[t.Id] > 0                          // must be alive after the action
+                    && t.ReactionSkill != null
+                    && !_frozenUnits.Contains(t.Id)                 // CC suppresses reactions
+                    && !_stunnedUnits.Contains(t.Id)
+                    && GetCooldown(t.ReactionSkill!.Id) <= 0)       // not on cooldown
+                .OrderByDescending(t => t.Agi)
+                .ToList();
+
+            foreach (var reactor in reactors)
+            {
+                var reaction = reactor.ReactionSkill!;
+                bool triggers = reaction.Trigger switch
+                {
+                    ReactionTrigger.OnHitByMelee => isMeleeAttack,
+                    _ => false,
+                };
+                if (!triggers) continue;
+                if (_hp[actor.Id] <= 0) continue;   // attacker already dead
+
+                produced.Add(AddEvent(reactor.Id,
+                    $"{reactor.Name} counters with {reaction.Name}!", "reaction"));
+                produced.AddRange(ExecuteReactionAction(reactor, actor, reaction));
+
+                // Put the reaction skill on cooldown.
+                if (reaction.Cooldown > 0)
+                    _skillCooldowns[reaction.Id] = reaction.Cooldown;
+            }
+
+            return produced;
+        }
+
+        /// <summary>
+        /// Executes a reaction skill fired by <paramref name="reactor"/> against
+        /// <paramref name="target"/> (the original attacker). Simplified execution:
+        /// no CD ticking, no MP cost, no Focus/Fury empowerment, no further reaction triggering.
+        /// Always executes a single hit unless the skill specifies BaseHits.
+        /// </summary>
+        private IReadOnlyList<BattleEvent> ExecuteReactionAction(
+            BattleUnit reactor, BattleUnit target, BattleSkill reaction)
+        {
+            var produced = new List<BattleEvent>();
+            var effect = reaction.Effects.Count > 0 ? reaction.Effects[0] : null;
+            if (effect == null || effect.Kind != EffectKind.Damage)
+                return produced;
+
+            // Hit count: use skill BaseHits if specified; otherwise 1 (no AGI scaling for reactions).
+            int hits = reaction.BaseHits != 1.0
+                ? Math.Max(1, (int)Math.Floor(reaction.BaseHits))
+                : 1;
+            double perHitMult = reaction.BaseHits != 1.0 ? reaction.BaseHits / hits : 1.0;
+
+            for (int i = 0; i < hits; i++)
+            {
+                var hitResults = DamageCalc.Compute(reactor, target, effect.DamagePerHit,
+                    reaction.DamageMultiplier,
+                    perHitMult, _rng,
+                    et => GetEffectiveResistance(target.Id, et),
+                    et => GetEffectivePenetration(reactor.Id, et),
+                    et => GetDamageDealtMultiplierForType(reactor.Id, et));
+
+                int totalDamage = 0;
+                foreach (var r in hitResults) totalDamage += r.FinalDamage;
+
+                // Barrier absorbs damage before HP.
+                int barrierCurrent = GetBar(target.Id, "barrier");
+                int barrierAbsorbed = Math.Min(barrierCurrent, totalDamage);
+                if (barrierAbsorbed > 0)
+                    _bars[target.Id]["barrier"] = barrierCurrent - barrierAbsorbed;
+                _hp[target.Id] = Math.Max(0, _hp[target.Id] - (totalDamage - barrierAbsorbed));
+
+                string hitLabel = hits > 1 ? $" (hit {i + 1}/{hits})" : "";
+                produced.Add(AddEvent(reactor.Id,
+                    $"  → {target.Name} takes {totalDamage} damage{hitLabel}.",
+                    "reaction", target.Id, totalDamage,
+                    skillId: reaction.Id, effectType: reaction.PrimaryEffectType,
+                    hitIndex: i, totalHits: hits));
+
+                if (_hp[target.Id] <= 0)
+                {
+                    produced.Add(AddEvent(target.Id, $"{target.Name} is defeated!", "death"));
+                    break;
+                }
+            }
+
             return produced;
         }
 

@@ -91,5 +91,10 @@ namespace GameCore.Content.Raw
         /// Values are <see cref="GameCore.Battle.WeaponType"/> names (e.g. "Blunt", "Slash").
         /// </summary>
         public List<string>? RequiredWeaponTypes { get; set; }
+        /// <summary>
+        /// The trigger condition for a reaction skill. Only meaningful when Category is "Reaction".
+        /// Value is a <see cref="GameCore.Battle.ReactionTrigger"/> name (e.g. "OnHitByMelee").
+        /// </summary>
+        public string? Trigger { get; set; }
     }
 }

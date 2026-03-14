@@ -26,5 +26,11 @@ namespace GameCore.Content.Raw
         /// skill variables (Cost, DamageMultiplier, etc.) in these modifiers are ignored.
         /// </summary>
         public List<string> Modifiers { get; set; } = new List<string>();
+        /// <summary>
+        /// The id of the reaction skill this unit is equipped with, if any.
+        /// The skill must exist in the skill dictionary and have Category = Reaction.
+        /// At most one reaction is allowed per unit.
+        /// </summary>
+        public string? Reaction { get; set; }
     }
 }
