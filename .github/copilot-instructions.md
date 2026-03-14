@@ -121,6 +121,62 @@ Skills can declare requirements a unit must meet to use them. Two kinds:
 
 `WeaponType` values: `None`, `Blunt`, `Slash`, `Pierce`, `Bow`, `Staff`. Set per-unit in YAML via `weaponType`; per-skill via `requiredWeaponType` and `requiredTrait`.
 
+### Barrier System
+`EffectKind.Shield` skills grant a barrier that absorbs incoming damage before HP. Key rules:
+- Stored as `barrier` key in the `_bars` dict. Not in `MaxBars` — it has no fixed cap.
+- Displayed as a light-blue overlay on the HP bar proportional to `MaxHp`.
+- Multiple grants accumulate additively.
+- Decays each round in `StartOfRound`: `max(5, 20 − WIS/10)%` of remaining barrier.
+- Focus/Fury empowerment does not apply to Shield skills.
+
+### Status Bars: Thermal & Disruption
+Two independent buildup-bar families drive CC. All bars run 0–100 via the `MaxBars`/`InitialBars` dict, so they flow automatically into `UnitState`, `BattleView`, and sandbox rendering.
+
+**Thermal (`ThermalSystem.cs` — static, authoritative):**
+- `cold` and `burn` bars oppose each other: cold cancels burn first, leftover builds cold.
+- Soft threshold 50 → `slow` (AGI hit count halved). Hard threshold 100 → `frozen` (1-turn skip, bar retains at 40).
+- Burn soft threshold 50 → `burning` DOT each turn (`0.5 × burn bar`). No hard freeze for burn.
+- Decay per turn: cold −15, burn −10.
+- `ApplyThermalBuildup(target, hitResults)` called per-hit in `ExecuteAction` for `Fire`/`Cold` components using `r.RawDamage` as thermal power.
+
+**Disruption (`DisruptionSystem.cs` — static, authoritative):**
+- Single `disruption` bar; no opposition mechanic.
+- Soft threshold 50 → `dizzy` (actor output ×0.8). Hard threshold 100 → `stunned` (1-turn skip, bar retains at 40).
+- Decay per turn: −20. `DisruptionPower` is explicit per-`SkillEffect` opt-in (default 0) — no blanket rule by damage type.
+- `DisruptionResistance` is a direct `int` field on `BattleUnit` (not in the `Resistances` dict).
+
+Frozen/stunned units are tracked in `_frozenUnits`/`_stunnedUnits` sets. `AutoAdvance` skips their turns automatically. `BuildStatusEffects` unifies thermal + disruption effects.
+
+### Active Effect System (Buffs/Debuffs)
+Runtime overlay system for temporary battle buffs and debuffs. Key types:
+- **`ActiveEffectDefinition`** — reusable template (id, name, duration kind, stacking policy, stat/skill modifiers).
+- **`ActiveEffectInstance`** — live session-scoped instance tracked per unit.
+- **`RuntimeStatModifier`** — stat overlay resolved Set→Add→Multiply.
+- **`RuntimeSkillModifier`** — skill overlay resolved Set→Modify→Add.
+- **`EffectDurationKind`**: `ForTargetTurns`, `ForSourceTurns`, `UntilNextAction`.
+- **`EffectStackingPolicy`**: `RefreshDuration`, `ReplaceIfStronger`, `StackIntensity`, `IndependentInstances`.
+
+Public entry point: `IBattleEngine.ApplyActiveEffect(targetUnitId, definition, sourceUnitId)`. Base compiled skill/unit data is never mutated — all resolution is ephemeral. `TickActiveEffects` runs at end of `ExecuteAction`.
+
+Supported `RuntimeStatKey` values include: `DamageDealtMultiplier`, `DamageTakenMultiplier`, per-type resistances (`PhysicalResistance`, `FireResistance`, …), per-type penetrations, and per-type damage dealt multipliers (`FireDamageDealtMultiplier`, …).
+
+### Resistance, Penetration & Per-type Damage Multipliers
+`BattleUnit` carries two attacker/defender stat groups:
+- **`Resistances`** (`IReadOnlyDictionary<EffectType, int>`) — defender-side per damage type.
+- **`Penetrations`** (`IReadOnlyDictionary<EffectType, int>`) — attacker-side, reduces effective resistance.
+- **`DisruptionResistance`** / **`DisruptionPenetration`** — separate `int` fields (disruption is a bar mechanic, not a damage type).
+
+In `DamageCalc.Compute`: effective resistance = `target.GetResistance(type) − actor.GetPenetration(type)`, applied before the damage formula. Per-type damage dealt multipliers (`RuntimeStatKey.*DamageDealtMultiplier`) apply as Layer 3 after resistance reduction.
+
+Authored in YAML via unit modifier dicts (`set: { physicalResistance: 20 }`) and passive skill dicts (`penetration: { physical: 20 }`).
+
+### Passive Skills
+Skills with `category: Passive` grant permanent battle stats for the duration of a battle:
+- YAML fields: `penetration` and `resistance` dicts (plus `disruption` key for disruption resistance/penetration).
+- `CompileSkill` parses the dicts into `BattleSkill.PassivePenetrations`, `PassiveResistances`, etc.
+- `CompileUnit` merges passive stats additively into the compiled `BattleUnit` after unit-level modifiers.
+- Passive skills are never treated as battle actions: filtered from AI skill selection and `BattlePendingInput`.
+
 ---
 
 ## Content Pipeline
