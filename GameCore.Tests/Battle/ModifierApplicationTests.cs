@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using GameCore.Battle;
@@ -412,6 +413,124 @@ skills:
             Assert.Equal(1, skill.Cooldown); // base 2 + (-1)
             Assert.Equal(2, skill.Effects[0].DamagePerHit.Count);
             Assert.Contains(skill.Effects[0].DamagePerHit, c => c.DamageType == EffectType.Fire);
+        }
+
+        // ── Exclusive modifier validation ─────────────────────────────────────
+
+        [Fact]
+        public void ExclusiveWith_Basic_And_Ultimate_ThrowsWhenCombined()
+        {
+            var ex = Assert.Throws<InvalidOperationException>(() => BuildDb(@"
+- id: basic
+  name: Basic
+  exclusiveWith:
+    - ultimate
+  set:
+    cost: 0
+    cooldown: 0
+- id: ultimate
+  name: Ultimate
+  exclusiveWith:
+    - basic
+  modify:
+    cooldown: 1
+", @"
+id: test-unit
+name: Test Unit
+level: 1
+str: 100
+wis: 80
+agi: 50
+skills:
+  - id: sword-strike
+    modifiers:
+      - basic
+      - ultimate
+"));
+            Assert.Contains("basic", ex.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("ultimate", ex.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("test-unit", ex.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("sword-strike", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void ExclusiveWith_Basic_Alone_DoesNotThrow()
+        {
+            var db = BuildDb(@"
+- id: basic
+  name: Basic
+  exclusiveWith:
+    - ultimate
+  set:
+    cost: 0
+    cooldown: 0
+- id: ultimate
+  name: Ultimate
+  exclusiveWith:
+    - basic
+  modify:
+    cooldown: 1
+", string.Format(UnitYaml, "basic"));
+
+            var skill = GetSkill(db, "test-unit", "sword-strike");
+            Assert.True(skill.IsBasic);
+            Assert.False(skill.IsUltimate);
+        }
+
+        [Fact]
+        public void ExclusiveWith_Ultimate_Alone_DoesNotThrow()
+        {
+            var db = BuildDb(@"
+- id: basic
+  name: Basic
+  exclusiveWith:
+    - ultimate
+  set:
+    cost: 0
+    cooldown: 0
+- id: ultimate
+  name: Ultimate
+  exclusiveWith:
+    - basic
+  modify:
+    cooldown: 1
+", string.Format(UnitYaml, "ultimate"));
+
+            var skill = GetSkill(db, "test-unit", "sword-strike");
+            Assert.False(skill.IsBasic);
+            Assert.True(skill.IsUltimate);
+        }
+
+        [Fact]
+        public void ExclusiveWith_ModifierWithoutExclusiveWith_CombinesFreely()
+        {
+            // Modifiers that declare no exclusiveWith can be combined with anything.
+            var db = BuildDb(@"
+- id: mod-a
+  name: Mod A
+  set:
+    cost: 0
+- id: mod-b
+  name: Mod B
+  modify:
+    cooldown: -1
+", @"
+id: test-unit
+name: Test Unit
+level: 1
+str: 100
+wis: 80
+agi: 50
+skills:
+  - id: sword-strike
+    modifiers:
+      - mod-a
+      - mod-b
+");
+
+            var skill = GetSkill(db, "test-unit", "sword-strike");
+            Assert.Equal(0, skill.Cost);
+            Assert.Equal(1, skill.Cooldown); // base 2 + (-1)
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────

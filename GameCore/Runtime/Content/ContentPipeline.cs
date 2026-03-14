@@ -127,7 +127,8 @@ namespace GameCore.Content
                             .Select(c => new DamageComponent(
                                 c.DamageType != null ? Enum.Parse<EffectType>(c.DamageType, ignoreCase: true) : (EffectType?)null,
                                 c.Scaling.Select(s => new DamageScaling(s.Stat, s.Scale)).ToArray()))
-                            .ToArray());
+                            .ToArray(),
+                    ExclusiveWith: raw.ExclusiveWith.Count > 0 ? raw.ExclusiveWith.ToArray() : null);
             }
         }
 
@@ -187,6 +188,20 @@ namespace GameCore.Content
                             : throw new KeyNotFoundException(
                                 $"Unit '{raw.Id}' skill slot '{slot.Id}' references unknown modifier '{modId}'."))
                         .ToArray();
+
+                    // Validate exclusive modifiers: if a modifier declares ExclusiveWith entries,
+                    // none of those IDs may appear in the same skill slot's modifier list.
+                    var modIds = new HashSet<string>(compiledMods.Select(m => m.Id), StringComparer.OrdinalIgnoreCase);
+                    foreach (var mod in compiledMods)
+                    {
+                        if (mod.ExclusiveWith == null) continue;
+                        foreach (var exclusiveId in mod.ExclusiveWith)
+                        {
+                            if (modIds.Contains(exclusiveId))
+                                throw new InvalidOperationException(
+                                    $"Unit '{raw.Id}' skill slot '{slot.Id}': modifiers '{mod.Id}' and '{exclusiveId}' are mutually exclusive and cannot be combined.");
+                        }
+                    }
 
                     // Apply modifier action groups in deterministic order: Set → Modify → Add.
                     // Set: last modifier with a given key wins (override/replace).

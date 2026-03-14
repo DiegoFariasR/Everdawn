@@ -38,6 +38,12 @@ namespace GameCore.Battle
         /// Damage components appended to the first effect's DamagePerHit after Set and Modify.
         /// Null when none. Only affects Attack skills, not Spells.
         /// </summary>
-        IReadOnlyList<DamageComponent>? AddDamagePerHit = null
+        IReadOnlyList<DamageComponent>? AddDamagePerHit = null,
+        /// <summary>
+        /// IDs of modifiers that cannot be combined with this one in the same skill slot.
+        /// The content pipeline throws <see cref="System.InvalidOperationException"/> if a skill
+        /// slot contains both this modifier and any modifier listed here.
+        /// </summary>
+        IReadOnlyList<string>? ExclusiveWith = null
     );
 }
