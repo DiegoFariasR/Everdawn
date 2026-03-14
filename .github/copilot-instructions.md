@@ -112,6 +112,15 @@ All projects in the solution use **C# 9.0**, set explicitly via `<LangVersion>9.
   - next turn
   - replay from start
 
+### Skill Requirements
+Skills can declare requirements a unit must meet to use them. Two kinds:
+- **`RequiredTrait`** (`BattleTrait?`) — unit must have this trait (e.g. `MagicUser` for spells).
+- **`RequiredWeaponType`** (`WeaponType?`) — unit must carry a matching weapon (e.g. `Blunt` for mace skills).
+
+`BattleSkill.MeetsRequirements(actor)` tests both. `InteractiveBattleSession` applies it to `AvailableSkillIds` and AI skill selection. `ValidationErrorCode.RequirementNotMet` is returned when a player submits a disqualified skill.
+
+`WeaponType` values: `None`, `Blunt`, `Slash`, `Pierce`, `Bow`, `Staff`. Set per-unit in YAML via `weaponType`; per-skill via `requiredWeaponType` and `requiredTrait`.
+
 ---
 
 ## Content Pipeline

@@ -53,6 +53,29 @@
 - [x] Spell (can be silenced)
 - [x] Passive
 
+## Skill Requirements
+
+Skills can declare requirements that a unit must meet before the skill can be used or selected by AI.
+
+### Requirement Types
+- [x] **RequiredTrait** — the unit must have a specific `BattleTrait` (e.g. `MagicUser` for spells)
+- [x] **RequiredWeaponType** — the unit must carry a matching `WeaponType` (e.g. `Blunt` for mace skills)
+
+### Weapon Types
+- [x] `None` — unarmed or weapon type not relevant
+- [x] `Blunt` — maces, hammers (mace-strike, mace-crush, mace-shatter, shield-bash)
+- [x] `Slash` — swords, axes (sword-strike, sword-cleave)
+- [x] `Pierce` — daggers, spears (dagger-strike, dagger-flurry, rogue-mark)
+- [x] `Bow` — bows, crossbows (bow-shot, bow-precise, bow-volley)
+- [x] `Staff` — staves, wands (mage and necromancer spells)
+
+### Rules
+- A skill with neither requirement is always available (no gate).
+- Both requirements must be met simultaneously if both are specified.
+- Unmet requirements exclude the skill from `AvailableSkillIds` (player view) and from AI skill selection.
+- Attempting to use a skill with an unmet requirement returns `ValidationErrorCode.RequirementNotMet`.
+- Weapon type and required trait are authored in YAML (`requiredWeaponType`, `requiredTrait`) and on `BattleUnit` (`weaponType`).
+
 ## Open Questions
 
 ### Damage of multiple types/elements on the same attack
