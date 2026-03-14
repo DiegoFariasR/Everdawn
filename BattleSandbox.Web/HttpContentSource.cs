@@ -20,7 +20,8 @@ namespace BattleSandbox.Web
     /// <para>
     /// The list of available files is read from a <c>content-index.json</c> manifest
     /// published alongside the content in the app's <c>wwwroot</c>. The manifest is
-    /// committed to the repository and updated whenever content files are added or removed.
+    /// auto-generated from all <c>*.yml</c> files in <c>GameData/Base/</c> on every
+    /// build — never edit it by hand.
     /// </para>
     /// </summary>
     public sealed class HttpContentSource : IContentSource

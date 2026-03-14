@@ -30,6 +30,15 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Generate content-index.json
+        run: |
+          python3 -c "
+          import json, pathlib
+          base = pathlib.Path('GameData/Base')
+          files = sorted(p.relative_to(base).as_posix() for p in base.rglob('*.yml'))
+          base.joinpath('content-index.json').write_text(json.dumps(files, indent=2) + chr(10))
+          "
+
       - name: Publish Blazor WASM
         run: dotnet publish BattleSandbox.Web/BattleSandbox.Web.csproj -c Release -o output
 

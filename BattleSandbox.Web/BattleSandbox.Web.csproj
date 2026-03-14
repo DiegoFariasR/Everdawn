@@ -19,35 +19,35 @@
   </ItemGroup>
 
   <!--
-    Copy GameData/Base YAML files into wwwroot/GameData/Base/ before each build so the
-    Blazor WASM dev server can serve them via HTTP. The static web asset system requires
-    files to be physically present in the project wwwroot; linking external paths via
-    <Content><Link> registers the correct URL but the dev server resolves the physical
-    file from (ContentRoot=wwwroot) + SubPath, which fails for out-of-project sources.
-    The copied files are generated outputs — add GameData/**/*.yml to .gitignore if you
-    don't want them committed from wwwroot.
-    Update content-index.json whenever files are added to or removed from GameData/Base/.
-
-    IMPORTANT: After copying, delete the static asset manifest cache files so the
-    manifest is always rebuilt from the current wwwroot contents. This is required
-    because MSBuild evaluates the wwwroot/** item glob at project-load time (before
-    any targets run). New YAML files that did not exist in wwwroot at load time are
-    not in the item list for the current build; they appear in the next build's item
-    list. Without cache deletion the incremental manifest is never invalidated to
-    pick them up. Deleting the cache costs only a few extra seconds per build but
-    guarantees correctness: every build produces a manifest that reflects the current
-    wwwroot contents, so the second build after adding a new YAML always works.
+    Before each build:
+      1. Generate content-index.json from all *.yml files in GameData/Base/.
+         This file is auto-generated — never edit it by hand. It is committed to
+         the repo so that the last known state is visible in diffs, but it is
+         always overwritten here before the YAML files are copied to wwwroot.
+      2. Copy GameData/Base YAML files (including the freshly-written index) into
+         wwwroot/GameData/Base/ so the Blazor WASM dev server can serve them via HTTP.
+      3. Delete the incremental static asset manifest caches so the manifest is
+         always rebuilt from the current wwwroot contents (required because MSBuild
+         evaluates the wwwroot/** item glob at project-load time, before any targets
+         run — new files copied by step 2 would otherwise not appear in the manifest
+         until the next build).
   -->
   <Target Name="CopyGameDataToWwwroot" BeforeTargets="BeforeBuild">
+    <!-- Step 1: regenerate content-index.json from the actual YAML files on disk -->
+    <Exec Condition="'$(OS)' == 'Windows_NT'"
+          Command="powershell -NoProfile -NonInteractive -Command &quot;$b = (Resolve-Path '$(MSBuildProjectDirectory)\..\GameData\Base').Path; $fs = @(Get-ChildItem -Path $b -Recurse -Filter '*.yml' | ForEach-Object { $_.FullName.Substring($b.Length + 1).Replace('\', '/') } | Sort-Object); [System.IO.File]::WriteAllText((Join-Path $b 'content-index.json'), (ConvertTo-Json $fs), [System.Text.Encoding]::UTF8)&quot;" />
+    <Exec Condition="'$(OS)' != 'Windows_NT'"
+          Command="python3 -c &quot;import json, pathlib; base = pathlib.Path('$(MSBuildProjectDirectory)/../GameData/Base'); files = sorted(p.relative_to(base).as_posix() for p in base.rglob('*.yml')); base.joinpath('content-index.json').write_text(json.dumps(files, indent=2) + chr(10))&quot;" />
+
+    <!-- Step 2: copy all GameData/Base files (including the generated index) to wwwroot -->
     <ItemGroup>
       <_GameDataSource Include="..\GameData\Base\**" />
     </ItemGroup>
     <Copy SourceFiles="@(_GameDataSource)"
           DestinationFiles="@(_GameDataSource->'$(MSBuildProjectDirectory)\wwwroot\GameData\Base\%(RecursiveDir)%(Filename)%(Extension)')"
           SkipUnchangedFiles="true" />
-    <!-- Delete the incremental static asset manifest caches. Without this, newly
-         copied YAML files are never added to the manifest (they were not in wwwroot
-         at item-evaluation time, so the old cache entry will persist indefinitely). -->
+
+    <!-- Step 3: invalidate incremental static asset manifest caches -->
     <Delete Files="$(IntermediateOutputPath)staticwebassets.build.json.cache"
             Condition="Exists('$(IntermediateOutputPath)staticwebassets.build.json.cache')" />
     <Delete Files="$(IntermediateOutputPath)$(AssemblyName).assets.cache"
