@@ -28,6 +28,7 @@ namespace GameCore.Content.Raw
         public bool? IsAoe { get; set; }
         public int? Cooldown { get; set; }
         public int? InitialCooldown { get; set; }
+        public double? ExtraHits { get; set; }
 
         /// <summary>
         /// Resistance overrides keyed by type name (e.g. "physical", "fire", "disruption").
@@ -59,6 +60,7 @@ namespace GameCore.Content.Raw
         public double? DamageMultiplier { get; set; }
         public double? Cooldown { get; set; }
         public double? InitialCooldown { get; set; }
+        public double? ExtraHits { get; set; }
 
         /// <summary>Resistance deltas keyed by type name (elemental or CC, e.g. "disruption").</summary>
         public Dictionary<string, double> Resistance { get; set; } = new Dictionary<string, double>();

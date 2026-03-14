@@ -878,6 +878,7 @@ namespace GameCore.Battle
             int cost = skill.Cost;
             bool isAoe = skill.IsAoe;
             int cooldown = skill.Cooldown;
+            double baseHits = skill.BaseHits;
 
             foreach (var mod in modifiers)
             {
@@ -890,6 +891,8 @@ namespace GameCore.Battle
                     isAoe = System.Convert.ToBoolean(aoe);
                 if (mod.Set.TryGetValue(ModifierVariable.Cooldown, out var cd))
                     cooldown = System.Convert.ToInt32(cd);
+                if (mod.Set.TryGetValue(ModifierVariable.ExtraHits, out var eh))
+                    baseHits = System.Convert.ToDouble(eh);
             }
 
             // ── Phase 2: Modify (sum all deltas) ─────────────────────────────
@@ -902,6 +905,8 @@ namespace GameCore.Battle
                     cost += (int)c;
                 if (mod.Modify.TryGetValue(ModifierVariable.Cooldown, out var cd))
                     cooldown += (int)cd;
+                if (mod.Modify.TryGetValue(ModifierVariable.ExtraHits, out var eh))
+                    baseHits += eh;
             }
 
             // ── Phase 3: Add (append damage components to first effect) ──────
@@ -929,6 +934,7 @@ namespace GameCore.Battle
                 Cost = Math.Max(0, cost),
                 IsAoe = isAoe,
                 Cooldown = Math.Max(0, cooldown),
+                BaseHits = Math.Max(0.5, baseHits),
                 Effects = newEffects,
             };
         }

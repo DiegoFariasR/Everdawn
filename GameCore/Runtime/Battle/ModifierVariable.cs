@@ -4,8 +4,8 @@ namespace GameCore.Battle
     /// The skill and unit variables that a modifier can override (Set) or adjust (Modify).
     /// <para>
     /// Skill variables (<see cref="Cost"/>, <see cref="DamageMultiplier"/>, <see cref="IsAoe"/>,
-    /// <see cref="Cooldown"/>, <see cref="InitialCooldown"/>) are applied when a modifier appears
-    /// in a skill slot's modifier list.
+    /// <see cref="Cooldown"/>, <see cref="InitialCooldown"/>, <see cref="ExtraHits"/>) are applied
+    /// when a modifier appears in a skill slot's modifier list.
     /// </para>
     /// <para>
     /// Disruption variables (<see cref="DisruptionResistance"/>, <see cref="DisruptionPenetration"/>)
@@ -28,6 +28,12 @@ namespace GameCore.Battle
         Cooldown,
         /// <summary>Cooldown the skill starts with at the beginning of battle.</summary>
         InitialCooldown,
+        /// <summary>
+        /// Adjustment to the skill's base hit count (<see cref="BattleSkill.BaseHits"/>).
+        /// Use Set to override the base hit count entirely; use Modify to add extra hits on top.
+        /// Fractional values are supported (e.g. 0.5 adds a half-power bonus hit).
+        /// </summary>
+        ExtraHits,
 
         // ── Disruption variables ─────────────────────────────────────────────
 
