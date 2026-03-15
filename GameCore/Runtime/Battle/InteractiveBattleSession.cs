@@ -578,6 +578,27 @@ namespace GameCore.Battle
                     continue;
                 }
 
+                // Dispel: removes one random buff or debuff from the target.
+                // Applied once per target, not per hit. No damage is dealt.
+                if (effect?.Kind == EffectKind.Dispel)
+                {
+                    EffectAlignment? alignment = effect.DispelAlignment;
+                    var candidates = CollectDispelCandidates(target.Id, alignment);
+                    if (candidates.Count == 0)
+                    {
+                        string noneKind = alignment == EffectAlignment.Buff ? "buff" : "debuff";
+                        produced.Add(AddEvent(actor.Id, $"{target.Name} has no {noneKind} to dispel!", "status", target.Id, skillId: skill.Id));
+                    }
+                    else
+                    {
+                        string chosen = candidates[_rng.Next(candidates.Count)];
+                        string removedName = GetEffectDisplayName(target.Id, chosen);
+                        DispelEffect(target.Id, chosen);
+                        produced.Add(AddEvent(actor.Id, $"{actor.Name} dispels {removedName} from {target.Name}!", evType, target.Id, skillId: skill.Id));
+                    }
+                    continue;
+                }
+
                 for (int i = 0; i < effectiveHits; i++)
                 {
                     if (effect?.Kind == EffectKind.Heal)
@@ -1207,7 +1228,8 @@ namespace GameCore.Battle
                 DamageDealtMultiplierByType: definition.DamageDealtMultiplierByType,
                 DamageTakenMultiplierByType: definition.DamageTakenMultiplierByType,
                 ResistanceModifierByType: definition.ResistanceModifierByType,
-                PenetrationModifierByType: definition.PenetrationModifierByType
+                PenetrationModifierByType: definition.PenetrationModifierByType,
+                Alignment: definition.Alignment
             ));
         }
 
@@ -1503,7 +1525,8 @@ namespace GameCore.Battle
                 return null;
             var views = new List<ActiveEffectView>(effects.Count);
             foreach (var e in effects)
-                views.Add(new ActiveEffectView(e.DefinitionId, e.Name, e.RemainingDuration, e.Stacks));
+                views.Add(new ActiveEffectView(e.DefinitionId, e.Name, e.RemainingDuration, e.Stacks,
+                    IsDebuff: e.Alignment == EffectAlignment.Debuff));
             return views;
         }
 
@@ -1525,6 +1548,97 @@ namespace GameCore.Battle
         {
             if (_activeEffects.TryGetValue(unitId, out var list))
                 list.RemoveAll(e => e.DefinitionId == definitionId);
+        }
+
+        // ── Dispel helpers ─────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Collects all effect IDs eligible for dispelling from a unit.
+        /// Includes active effect instances with matching alignment plus bar-derived
+        /// disruption statuses (dizzy, stunned) when debuffs are targeted.
+        /// </summary>
+        private List<string> CollectDispelCandidates(string unitId, EffectAlignment? alignment)
+        {
+            var candidates = new List<string>();
+            bool wantDebuff = alignment == null || alignment == EffectAlignment.Debuff;
+            bool wantBuff = alignment == null || alignment == EffectAlignment.Buff;
+
+            // Active effect instances.
+            if (_activeEffects.TryGetValue(unitId, out var effects))
+                foreach (var e in effects)
+                {
+                    bool isDebuff = e.Alignment == EffectAlignment.Debuff;
+                    if ((isDebuff && wantDebuff) || (!isDebuff && wantBuff))
+                        candidates.Add(e.DefinitionId);
+                }
+
+            // Disruption bar-derived statuses (not tracked as ActiveEffectInstances).
+            if (wantDebuff)
+            {
+                bool isStunned = _stunnedUnits.Contains(unitId);
+                int disruptionBar = GetBar(unitId, DisruptionSystem.BarDisruption);
+                if (isStunned)
+                    candidates.Add(DisruptionSystem.StatusStunned);
+                else if (disruptionBar >= DisruptionSystem.DizzyThreshold)
+                    candidates.Add(DisruptionSystem.StatusDizzy);
+            }
+
+            return candidates;
+        }
+
+        /// <summary>
+        /// Returns a display name for an effect ID — uses the active instance name when available,
+        /// falling back to the raw ID for bar-derived statuses (dizzy, stunned).
+        /// </summary>
+        private string GetEffectDisplayName(string unitId, string effectId)
+        {
+            if (_activeEffects.TryGetValue(unitId, out var effects))
+            {
+                var instance = effects.Find(e => e.DefinitionId == effectId);
+                if (instance != null)
+                    return instance.Name;
+            }
+            // Bar-derived effects: capitalize the ID as a fallback.
+            return char.ToUpperInvariant(effectId[0]) + effectId.Substring(1);
+        }
+
+        /// <summary>
+        /// Removes the named effect from a unit.
+        /// Bar-linked effects (slow, frozen, burning, dizzy, stunned) also reset
+        /// their backing bar so the status cannot immediately reapply.
+        /// </summary>
+        private void DispelEffect(string unitId, string effectId)
+        {
+            // Thermal bar-linked effects: reset the backing bar, then sync so the
+            // active-effect instances are removed automatically.
+            if (effectId == ThermalSystem.StatusSlow || effectId == ThermalSystem.StatusFrozen)
+            {
+                _bars[unitId][ThermalSystem.BarCold] = 0;
+                SyncThermalActiveEffects(unitId);
+                // frozen is not handled by SyncThermalActiveEffects — remove it explicitly.
+                if (effectId == ThermalSystem.StatusFrozen)
+                    RemoveActiveEffect(unitId, ThermalSystem.StatusFrozen);
+            }
+            else if (effectId == ThermalSystem.StatusBurning)
+            {
+                _bars[unitId][ThermalSystem.BarBurn] = 0;
+                SyncThermalActiveEffects(unitId);
+            }
+            // Disruption bar-derived statuses: reset the bar (and clear the stunned set if stunned).
+            else if (effectId == DisruptionSystem.StatusStunned)
+            {
+                _stunnedUnits.Remove(unitId);
+                _bars[unitId][DisruptionSystem.BarDisruption] = 0;
+            }
+            else if (effectId == DisruptionSystem.StatusDizzy)
+            {
+                _bars[unitId][DisruptionSystem.BarDisruption] = 0;
+            }
+            // Regular active effects: remove directly.
+            else
+            {
+                RemoveActiveEffect(unitId, effectId);
+            }
         }
 
         /// <summary>

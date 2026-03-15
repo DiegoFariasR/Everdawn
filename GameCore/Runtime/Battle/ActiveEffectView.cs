@@ -16,6 +16,9 @@ namespace GameCore.Battle
         int RemainingDuration,
 
         /// <summary>Stack count. Greater than 1 when <see cref="EffectStackingPolicy.StackIntensity"/> was used.</summary>
-        int Stacks
+        int Stacks,
+
+        /// <summary>True when this effect is a debuff (harmful); false when it is a buff (beneficial).</summary>
+        bool IsDebuff = false
     );
 }

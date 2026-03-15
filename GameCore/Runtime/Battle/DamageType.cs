@@ -25,6 +25,26 @@ namespace GameCore.Battle
         /// Applied once per target, not per hit. No damage is dealt.
         /// </summary>
         GrantFocusedBuff,
+        /// <summary>
+        /// Removes one random buff or debuff from the target, depending on
+        /// <see cref="SkillEffect.DispelAlignment"/>.
+        /// Applied once per target, not per hit. No damage is dealt.
+        /// Bar-linked status effects (slow, frozen, burning, dizzy, stunned) are also eligible;
+        /// their backing bars are reset when dispelled.
+        /// </summary>
+        Dispel,
+    }
+
+    /// <summary>
+    /// Classifies an active effect as beneficial (buff) or harmful (debuff).
+    /// Used to determine which effects are valid targets for dispel skills.
+    /// </summary>
+    public enum EffectAlignment
+    {
+        /// <summary>The effect is beneficial to its target (e.g. Attack Up, Defense Up).</summary>
+        Buff,
+        /// <summary>The effect is harmful to its target (e.g. Attack Down, Slow, Frozen).</summary>
+        Debuff,
     }
 
     /// <summary>

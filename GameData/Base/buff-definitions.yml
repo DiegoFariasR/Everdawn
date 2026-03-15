@@ -21,6 +21,7 @@
 
 - id: attack-down
   name: Attack Down
+  isDebuff: true
   duration: 2
   durationKind: ForTargetTurns
   stackingPolicy: RefreshDuration
@@ -30,6 +31,7 @@
 
 - id: defense-down
   name: Defense Down
+  isDebuff: true
   duration: 2
   durationKind: ForTargetTurns
   stackingPolicy: RefreshDuration
@@ -46,15 +48,18 @@
 
 - id: slow
   name: Slow
+  isDebuff: true
   durationKind: Permanent
   stackingPolicy: RefreshDuration
 
 - id: frozen
   name: Frozen
+  isDebuff: true
   durationKind: Permanent
   stackingPolicy: RefreshDuration
 
 - id: burning
   name: Burning
+  isDebuff: true
   durationKind: Permanent
   stackingPolicy: RefreshDuration

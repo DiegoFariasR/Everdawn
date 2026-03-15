@@ -64,7 +64,12 @@ namespace GameCore.Battle
         /// The active effect to apply when <see cref="Kind"/> is <see cref="EffectKind.ApplyEffect"/>.
         /// Applied once per target, not per hit. Null for all other effect kinds.
         /// </summary>
-        ActiveEffectDefinition? EffectDefinition = null
+        ActiveEffectDefinition? EffectDefinition = null,
+        /// <summary>
+        /// Whether a <see cref="EffectKind.Dispel"/> effect removes buffs or debuffs.
+        /// Ignored for all other effect kinds.
+        /// </summary>
+        EffectAlignment? DispelAlignment = null
     );
 
     /// <summary>
@@ -219,6 +224,9 @@ namespace GameCore.Battle
 
         /// <summary>True if this skill grants the Focused buff (Self-targeting setup action, no damage).</summary>
         public bool IsGrantFocusedBuff => Effects.Count > 0 && Effects[0].Kind == EffectKind.GrantFocusedBuff;
+
+        /// <summary>True if this skill dispels a buff or debuff from its target.</summary>
+        public bool IsDispel => Effects.Count > 0 && Effects[0].Kind == EffectKind.Dispel;
 
         /// <summary>Target side of the first effect. Defaults to Enemy if Effects is empty.</summary>
         public BattleSkillTarget Target => Effects.Count > 0 ? Effects[0].Target : BattleSkillTarget.Enemy;

@@ -223,7 +223,8 @@ namespace GameCore.Content
                 DamageDealtMultiplierByType: damageDealt,
                 DamageTakenMultiplierByType: damageTaken,
                 ResistanceModifierByType: resistance,
-                PenetrationModifierByType: penetration);
+                PenetrationModifierByType: penetration,
+                Alignment: raw.IsDebuff ? EffectAlignment.Debuff : EffectAlignment.Buff);
         }
 
         private static IEnumerable<BattleSkill> LoadSkills(IContentSource source, IReadOnlyDictionary<string, ActiveEffectDefinition> buffDefs)
@@ -531,7 +532,10 @@ namespace GameCore.Content
                         .ToArray();
                     components.Add(new DamageComponent(damageType, scaling, rawComp.BuildupPower));
                 }
-                effects.Add(new SkillEffect(kind, target, components, BarKey: rawEffect.BarKey, BarAmount: rawEffect.BarAmount, EffectDefinition: CompileEffectDefinition(kind, rawEffect, buffDefs)));
+                EffectAlignment? dispelAlignment = null;
+                if (kind == EffectKind.Dispel && rawEffect.DispelAlignment != null)
+                    dispelAlignment = Enum.Parse<EffectAlignment>(rawEffect.DispelAlignment, ignoreCase: true);
+                effects.Add(new SkillEffect(kind, target, components, BarKey: rawEffect.BarKey, BarAmount: rawEffect.BarAmount, EffectDefinition: CompileEffectDefinition(kind, rawEffect, buffDefs), DispelAlignment: dispelAlignment));
             }
 
             // ── Passive stat bonuses ──────────────────────────────────────────

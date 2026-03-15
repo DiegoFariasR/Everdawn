@@ -62,6 +62,12 @@ namespace GameCore.Battle
         /// <summary>
         /// Per-damage-type flat penetration modifier (additive %). Positive = pierces more resistance.
         /// </summary>
-        IReadOnlyDictionary<EffectType, int>? PenetrationModifierByType = null
+        IReadOnlyDictionary<EffectType, int>? PenetrationModifierByType = null,
+
+        /// <summary>
+        /// Whether this effect is a buff (beneficial) or a debuff (harmful).
+        /// Determines eligibility for dispel skills targeting buffs or debuffs.
+        /// </summary>
+        EffectAlignment Alignment = EffectAlignment.Buff
     );
 }
