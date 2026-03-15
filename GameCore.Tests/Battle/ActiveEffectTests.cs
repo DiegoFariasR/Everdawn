@@ -95,10 +95,7 @@ namespace GameCore.Tests.Battle
             Name: "Fire Resist Up",
             DurationKind: EffectDurationKind.ForTargetTurns,
             Duration: 2,
-            StatModifiers: new RuntimeStatModifier[]
-            {
-                new RuntimeStatModifier(RuntimeStatKey.FireResistance, ModifierOperation.Add, 50)
-            }
+            ResistanceModifierByType: new System.Collections.Generic.Dictionary<EffectType, int> { { EffectType.Fire, 50 } }
         );
 
         private static readonly ActiveEffectDefinition ColdResistUp = new ActiveEffectDefinition(
@@ -106,10 +103,7 @@ namespace GameCore.Tests.Battle
             Name: "Cold Resist Up",
             DurationKind: EffectDurationKind.ForTargetTurns,
             Duration: 2,
-            StatModifiers: new RuntimeStatModifier[]
-            {
-                new RuntimeStatModifier(RuntimeStatKey.ColdResistance, ModifierOperation.Add, 100)
-            }
+            ResistanceModifierByType: new System.Collections.Generic.Dictionary<EffectType, int> { { EffectType.Cold, 100 } }
         );
 
         private static readonly ActiveEffectDefinition DisruptionResistUp = new ActiveEffectDefinition(
@@ -879,12 +873,7 @@ namespace GameCore.Tests.Battle
 
             var fireBoost = new ActiveEffectDefinition("fireboost", "Fire Boost",
                 EffectDurationKind.ForTargetTurns, Duration: 5,
-                StatModifiers: new RuntimeStatModifier[]
-                {
-                    new RuntimeStatModifier(RuntimeStatKey.FireDamageDealtMultiplier, ModifierOperation.Multiply, 2.0)
-                });
-
-            // Measure fire damage without buff.
+                DamageDealtMultiplierByType: new System.Collections.Generic.Dictionary<EffectType, double> { { EffectType.Fire, 2.0 } });
             int fireDamageNoBuff = MeasureTypeDamage(player, enemy, "fire-skill", applyBuff: null, seed: 42);
 
             // Measure fire damage WITH fire buff.
@@ -917,10 +906,7 @@ namespace GameCore.Tests.Battle
 
             var fireBoost = new ActiveEffectDefinition("fireboost", "Fire Boost",
                 EffectDurationKind.ForTargetTurns, Duration: 5,
-                StatModifiers: new RuntimeStatModifier[]
-                {
-                    new RuntimeStatModifier(RuntimeStatKey.FireDamageDealtMultiplier, ModifierOperation.Multiply, 2.0)
-                });
+                DamageDealtMultiplierByType: new System.Collections.Generic.Dictionary<EffectType, double> { { EffectType.Fire, 2.0 } });
 
             int damageNoBuff = MeasureTypeDamage(player, enemy, "fire-skill", applyBuff: null, seed: 7);
             int damageGlobalOnly = MeasureTypeDamage(player, enemy, "fire-skill", applyBuff: globalBoost, seed: 7);

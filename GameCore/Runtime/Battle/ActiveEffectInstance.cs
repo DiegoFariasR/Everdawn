@@ -39,6 +39,15 @@ namespace GameCore.Battle
         RuntimeSkillModifier? SkillModifier = null,
 
         /// <summary>Stat modifiers contributed by this instance. Null when the effect only modifies skills.</summary>
-        IReadOnlyList<RuntimeStatModifier>? StatModifiers = null
+        IReadOnlyList<RuntimeStatModifier>? StatModifiers = null,
+
+        /// <summary>Per-damage-type outgoing damage multipliers. See <see cref="ActiveEffectDefinition.DamageDealtMultiplierByType"/>.</summary>
+        IReadOnlyDictionary<EffectType, double>? DamageDealtMultiplierByType = null,
+
+        /// <summary>Per-damage-type flat resistance modifier (additive %).</summary>
+        IReadOnlyDictionary<EffectType, int>? ResistanceModifierByType = null,
+
+        /// <summary>Per-damage-type flat penetration modifier (additive %).</summary>
+        IReadOnlyDictionary<EffectType, int>? PenetrationModifierByType = null
     );
 }

@@ -38,8 +38,24 @@ namespace GameCore.Battle
 
         /// <summary>
         /// Stat modifiers applied while this effect is active on the target unit.
-        /// Affects outgoing damage, incoming damage, elemental resistances, and disruption resistance.
+        /// Affects outgoing damage, incoming damage, and disruption resistance.
         /// </summary>
-        IReadOnlyList<RuntimeStatModifier>? StatModifiers = null
+        IReadOnlyList<RuntimeStatModifier>? StatModifiers = null,
+
+        /// <summary>
+        /// Per-damage-type outgoing damage multipliers. Each entry multiplies the actor's damage
+        /// for that type (e.g. Physical → 1.2 for +20% physical damage dealt).
+        /// </summary>
+        IReadOnlyDictionary<EffectType, double>? DamageDealtMultiplierByType = null,
+
+        /// <summary>
+        /// Per-damage-type flat resistance modifier (additive %). Positive = more resistance.
+        /// </summary>
+        IReadOnlyDictionary<EffectType, int>? ResistanceModifierByType = null,
+
+        /// <summary>
+        /// Per-damage-type flat penetration modifier (additive %). Positive = pierces more resistance.
+        /// </summary>
+        IReadOnlyDictionary<EffectType, int>? PenetrationModifierByType = null
     );
 }

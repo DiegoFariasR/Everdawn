@@ -1052,7 +1052,10 @@ namespace GameCore.Battle
                 RemainingDuration: definition.Duration,
                 DurationKind: definition.DurationKind,
                 SkillModifier: definition.SkillModifier,
-                StatModifiers: definition.StatModifiers
+                StatModifiers: definition.StatModifiers,
+                DamageDealtMultiplierByType: definition.DamageDealtMultiplierByType,
+                ResistanceModifierByType: definition.ResistanceModifierByType,
+                PenetrationModifierByType: definition.PenetrationModifierByType
             ));
         }
 
@@ -1153,12 +1156,17 @@ namespace GameCore.Battle
 
         /// <summary>
         /// Returns the effective per-type damage dealt multiplier for a unit and damage type from active effects.
-        /// Base value is 1.0 (no change). Stacks multiplicatively with <see cref="GetDamageDealtMultiplier"/>.
+        /// Base value is 1.0 (no change). Stacks multiplicatively across all active effect instances.
         /// </summary>
         private double GetDamageDealtMultiplierForType(string unitId, EffectType effectType)
         {
-            RuntimeStatKey key = EffectTypeToDamageDealtKey(effectType);
-            return ResolveStatModifier(unitId, key, baseValue: 1.0);
+            if (!_activeEffects.TryGetValue(unitId, out var effects) || effects.Count == 0)
+                return 1.0;
+            double value = 1.0;
+            foreach (var effect in effects)
+                if (effect.DamageDealtMultiplierByType != null && effect.DamageDealtMultiplierByType.TryGetValue(effectType, out double m))
+                    value *= m;
+            return value;
         }
 
         /// <summary>Returns the effective damage-taken multiplier for a unit from active effects.</summary>
@@ -1180,9 +1188,12 @@ namespace GameCore.Battle
         private int GetEffectiveResistance(string unitId, EffectType effectType)
         {
             var unit = _allUnits.First(u => u.Id == unitId);
-            int baseResistance = unit.GetResistance(effectType);
-            RuntimeStatKey key = EffectTypeToResistanceKey(effectType);
-            return (int)ResolveStatModifier(unitId, key, baseValue: baseResistance);
+            int value = unit.GetResistance(effectType);
+            if (_activeEffects.TryGetValue(unitId, out var effects))
+                foreach (var effect in effects)
+                    if (effect.ResistanceModifierByType != null && effect.ResistanceModifierByType.TryGetValue(effectType, out int r))
+                        value += r;
+            return value;
         }
 
         /// <summary>
@@ -1192,9 +1203,12 @@ namespace GameCore.Battle
         private int GetEffectivePenetration(string unitId, EffectType effectType)
         {
             var unit = _allUnits.First(u => u.Id == unitId);
-            int basePenetration = unit.GetPenetration(effectType);
-            RuntimeStatKey key = EffectTypeToPenetrationKey(effectType);
-            return (int)ResolveStatModifier(unitId, key, baseValue: basePenetration);
+            int value = unit.GetPenetration(effectType);
+            if (_activeEffects.TryGetValue(unitId, out var effects))
+                foreach (var effect in effects)
+                    if (effect.PenetrationModifierByType != null && effect.PenetrationModifierByType.TryGetValue(effectType, out int p))
+                        value += p;
+            return value;
         }
 
         /// <summary>
@@ -1331,38 +1345,5 @@ namespace GameCore.Battle
                     return e;
             return null;
         }
-
-        private static RuntimeStatKey EffectTypeToResistanceKey(EffectType effectType) => effectType switch
-        {
-            EffectType.Physical => RuntimeStatKey.PhysicalResistance,
-            EffectType.Fire => RuntimeStatKey.FireResistance,
-            EffectType.Cold => RuntimeStatKey.ColdResistance,
-            EffectType.Lightning => RuntimeStatKey.LightningResistance,
-            EffectType.Holy => RuntimeStatKey.HolyResistance,
-            EffectType.Void => RuntimeStatKey.VoidResistance,
-            _ => RuntimeStatKey.PhysicalResistance,
-        };
-
-        private static RuntimeStatKey EffectTypeToPenetrationKey(EffectType effectType) => effectType switch
-        {
-            EffectType.Physical => RuntimeStatKey.PhysicalPenetration,
-            EffectType.Fire => RuntimeStatKey.FirePenetration,
-            EffectType.Cold => RuntimeStatKey.ColdPenetration,
-            EffectType.Lightning => RuntimeStatKey.LightningPenetration,
-            EffectType.Holy => RuntimeStatKey.HolyPenetration,
-            EffectType.Void => RuntimeStatKey.VoidPenetration,
-            _ => RuntimeStatKey.PhysicalPenetration,
-        };
-
-        private static RuntimeStatKey EffectTypeToDamageDealtKey(EffectType effectType) => effectType switch
-        {
-            EffectType.Physical => RuntimeStatKey.PhysicalDamageDealtMultiplier,
-            EffectType.Fire => RuntimeStatKey.FireDamageDealtMultiplier,
-            EffectType.Cold => RuntimeStatKey.ColdDamageDealtMultiplier,
-            EffectType.Lightning => RuntimeStatKey.LightningDamageDealtMultiplier,
-            EffectType.Holy => RuntimeStatKey.HolyDamageDealtMultiplier,
-            EffectType.Void => RuntimeStatKey.VoidDamageDealtMultiplier,
-            _ => RuntimeStatKey.PhysicalDamageDealtMultiplier,
-        };
     }
 }
