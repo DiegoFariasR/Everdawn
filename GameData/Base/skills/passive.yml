@@ -4,18 +4,21 @@
 
 - id: warrior-passive
   name: Battle Hardening
+  iconDescription: "A cracked shield with reinforced steel plates riveted over the cracks."
   category: Passive
   penetration:
     physical: 20
 
 - id: mage-passive
   name: Arcane Insight
+  iconDescription: "An open spellbook with a glowing rune of fire on its page."
   category: Passive
   penetration:
     fire: 20
 
 - id: rogue-passive
   name: Concussion Ward
+  iconDescription: "A helmet with an inner padding layer, a subtle shield glyph on the brow."
   category: Passive
   resistance:
     disruption: 40

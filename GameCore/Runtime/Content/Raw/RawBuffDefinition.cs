@@ -18,5 +18,10 @@ namespace GameCore.Content.Raw
         /// Determines eligibility as a target for dispel skills.
         /// </summary>
         public bool IsDebuff { get; set; } = false;
+        /// <summary>
+        /// Optional authoring description used to generate an SVG icon for this buff/debuff.
+        /// Not used at runtime. Format: one short sentence describing the intended visual.
+        /// </summary>
+        public string? IconDescription { get; set; }
     }
 }

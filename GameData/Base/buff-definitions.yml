@@ -3,6 +3,7 @@
 
 - id: attack-up
   name: Attack Up
+  iconDescription: "An upward red arrow overlaid on a crossed swords icon."
   duration: 2
   durationKind: ForTargetTurns
   stackingPolicy: RefreshDuration
@@ -12,6 +13,7 @@
 
 - id: defense-up
   name: Defense Up
+  iconDescription: "An upward blue arrow overlaid on a shield icon."
   duration: 2
   durationKind: ForTargetTurns
   stackingPolicy: RefreshDuration
@@ -21,6 +23,7 @@
 
 - id: attack-down
   name: Attack Down
+  iconDescription: "A downward red arrow overlaid on a crossed swords icon."
   isDebuff: true
   duration: 2
   durationKind: ForTargetTurns
@@ -31,6 +34,7 @@
 
 - id: defense-down
   name: Defense Down
+  iconDescription: "A downward blue arrow overlaid on a cracked shield icon."
   isDebuff: true
   duration: 2
   durationKind: ForTargetTurns
@@ -48,30 +52,35 @@
 
 - id: slow
   name: Slow
+  iconDescription: "A blue snowflake with a small clock, suggesting slowed movement."
   isDebuff: true
   durationKind: Permanent
   stackingPolicy: RefreshDuration
 
 - id: frozen
   name: Frozen
+  iconDescription: "A unit silhouette encased in a solid ice block."
   isDebuff: true
   durationKind: Permanent
   stackingPolicy: RefreshDuration
 
 - id: chilled
   name: Chilled
+  iconDescription: "A small blue snowflake, light and translucent, early frost forming."
   isDebuff: true
   durationKind: Permanent
   stackingPolicy: RefreshDuration
 
 - id: heated
   name: Heated
+  iconDescription: "A small orange flame with wavy heat lines rising, low and flickering."
   isDebuff: true
   durationKind: Permanent
   stackingPolicy: RefreshDuration
 
 - id: burning
   name: Burning
+  iconDescription: "A tall flame engulfing a silhouette, vivid orange with red embers."
   isDebuff: true
   durationKind: Permanent
   stackingPolicy: RefreshDuration
@@ -82,6 +91,7 @@
 
 - id: shaken
   name: Shaken
+  iconDescription: "A blunt strike icon with small concentric shock rings, subtle and early."
   isDebuff: true
   durationKind: Permanent
   stackingPolicy: RefreshDuration
@@ -92,12 +102,14 @@
 
 - id: scratched
   name: Scratched
+  iconDescription: "A small shallow cut with a thin trickle of blood, minor and fresh."
   isDebuff: true
   durationKind: Permanent
   stackingPolicy: RefreshDuration
 
 - id: bleeding
   name: Bleeding
+  iconDescription: "A deep gash with red blood drops actively falling beneath it."
   isDebuff: true
   durationKind: Permanent
   stackingPolicy: RefreshDuration

@@ -183,6 +183,11 @@ namespace GameCore.Content.Raw
         public string? FocusEffect { get; set; }
         /// <summary>Magnitude of the Focus effect (e.g. 1 = one extra hit, 25 = +25 crit chance).</summary>
         public double FocusEffectValue { get; set; }
+        /// <summary>
+        /// Optional authoring description used to generate an SVG icon for this skill.
+        /// Not used at runtime. Format: one short sentence describing the intended visual.
+        /// </summary>
+        public string? IconDescription { get; set; }
         // ── Fury system ────────────────────────────────────────────────────────
         /// <summary>
         /// When true, this skill is explicitly tagged as a STR/strength-based skill.

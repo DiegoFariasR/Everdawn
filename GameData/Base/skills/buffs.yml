@@ -2,6 +2,7 @@
 
 - id: battle-cry
   name: Battle Cry
+  iconDescription: "A fist raised with a radiant burst behind it and upward motion lines."
   cooldown: 4
   range: Self
   effects:
@@ -11,6 +12,7 @@
 
 - id: holy-purification
   name: Holy Purification
+  iconDescription: "A glowing white holy cross dissolving a dark cloud of debuff smoke."
   cooldown: 3
   range: Self
   effects:
@@ -20,6 +22,7 @@
 
 - id: profane-dispel
   name: Profane Dispel
+  iconDescription: "A dark rune shattering a golden buff aura into fragments."
   cooldown: 3
   range: Ranged
   effects:

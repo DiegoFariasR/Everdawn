@@ -6,6 +6,7 @@
 
 - id: focus
   name: Focus
+  iconDescription: "A single open eye with a diamond pupil, radiating concentration lines."
   focusCost: 100
   refundsAction: true
   range: Self

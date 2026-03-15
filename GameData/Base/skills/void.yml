@@ -1,5 +1,6 @@
 - id: mage-bolt
   name: Magic Bolt
+  iconDescription: "A bright orange fireball with trailing embers, compact and fast."
   requiredTrait: MagicUser
   effects:
     - kind: damage
@@ -12,6 +13,7 @@
 
 - id: mage-burst
   name: Arcane Burst
+  iconDescription: "A burst of fire exploding outward from a central point in a star pattern."
   cooldown: 3
   requiredTrait: MagicUser
   effects:
@@ -26,6 +28,7 @@
 
 - id: mage-meteor
   name: Meteor
+  iconDescription: "A flaming rock plummeting from above with a fiery tail, striking multiple targets below."
   isAoe: true
   cooldown: 3
   requiredTrait: MagicUser
@@ -41,6 +44,7 @@
 
 - id: mage-barrier
   name: Arcane Barrier
+  iconDescription: "A translucent blue hexagonal shield dome glowing at its edges."
   isAoe: true
   cooldown: 4
   category: Spell
@@ -55,6 +59,7 @@
 
 - id: mage-meditate
   name: Meditate
+  iconDescription: "A silhouette seated in meditation with arcane runes orbiting it."
   cooldown: 4
   range: Self
   category: Spell
@@ -67,6 +72,7 @@
 
 - id: necro-bolt
   name: Dark Bolt
+  iconDescription: "A dark purple orb with a swirling void spiral inside it."
   requiredTrait: MagicUser
   effects:
     - kind: damage
@@ -79,6 +85,7 @@
 
 - id: necro-drain
   name: Life Drain
+  iconDescription: "A black tendril reaching from a skull toward a glowing red heart, draining it."
   cooldown: 3
   requiredTrait: MagicUser
   effects:
@@ -93,6 +100,7 @@
 
 - id: necro-soul
   name: Soul Siphon
+  iconDescription: "A ghostly soul being pulled out of a body into a dark vortex."
   cooldown: 3
   requiredTrait: MagicUser
   effects:
@@ -115,6 +123,7 @@
 # Missiles: lower WIS per hit, hit count scales with AGI.
 - id: spell-missiles
   name: Magic Missiles
+  iconDescription: "Three small glowing bolts fanning outward in a spread."
   requiredTrait: MagicUser
   scalingHits:
     - stat: agi
@@ -132,6 +141,7 @@
 # Burst: medium WIS, 2 fixed hits, no AGI hit scaling.
 - id: spell-burst
   name: Arcane Burst
+  iconDescription: "Two concentric fire rings exploding outward simultaneously."
   requiredTrait: MagicUser
   baseHits: 2.0
   effects:
@@ -147,6 +157,7 @@
 # Volley: lower WIS per hit, 3 fixed hits, no AGI hit scaling.
 - id: spell-volley
   name: Magic Volley
+  iconDescription: "Three fire bolts stacked vertically, suggesting sequential rapid casts."
   requiredTrait: MagicUser
   baseHits: 3.0
   effects:
