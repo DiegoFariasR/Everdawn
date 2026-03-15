@@ -8,3 +8,21 @@
     - kind: applyEffect
       target: ally
       effectRef: attack-up
+
+- id: holy-purification
+  name: Holy Purification
+  cooldown: 3
+  range: Self
+  effects:
+    - kind: dispel
+      target: Ally
+      dispelAlignment: Debuff
+
+- id: profane-dispel
+  name: Profane Dispel
+  cooldown: 3
+  range: Ranged
+  effects:
+    - kind: dispel
+      target: Enemy
+      dispelAlignment: Buff

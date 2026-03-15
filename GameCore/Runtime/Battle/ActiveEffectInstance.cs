@@ -51,6 +51,12 @@ namespace GameCore.Battle
         IReadOnlyDictionary<EffectType, int>? ResistanceModifierByType = null,
 
         /// <summary>Per-damage-type flat penetration modifier (additive %).</summary>
-        IReadOnlyDictionary<EffectType, int>? PenetrationModifierByType = null
+        IReadOnlyDictionary<EffectType, int>? PenetrationModifierByType = null,
+
+        /// <summary>
+        /// Whether this instance is a buff or debuff, copied from the originating
+        /// <see cref="ActiveEffectDefinition.Alignment"/> when the instance is created.
+        /// </summary>
+        EffectAlignment Alignment = EffectAlignment.Buff
     );
 }

@@ -60,6 +60,11 @@ namespace GameCore.Content.Raw
         /// Stat changes to apply while the effect is active.
         /// </summary>
         public RawEffectStats Stats { get; set; } = new RawEffectStats();
+        /// <summary>
+        /// For Kind=dispel: whether to remove a buff or a debuff from the target.
+        /// Values: "Buff" or "Debuff". Required when Kind is "dispel".
+        /// </summary>
+        public string? DispelAlignment { get; set; }
     }
 
     /// <summary>
