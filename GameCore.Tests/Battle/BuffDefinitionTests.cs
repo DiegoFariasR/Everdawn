@@ -136,14 +136,14 @@ namespace GameCore.Tests.Battle
         public void Warrior_HasBattleCry()
         {
             var warrior = Content.GetUnit("warrior");
-            Assert.Contains(warrior.Skills, s => s.Id == "battle-cry");
+            Assert.Contains(warrior.Skills ?? System.Array.Empty<BattleSkill>(), s => s.Id == "battle-cry");
         }
 
         [Fact]
         public void Mage_HasBattleCry()
         {
             var mage = Content.GetUnit("mage");
-            Assert.Contains(mage.Skills, s => s.Id == "battle-cry");
+            Assert.Contains(mage.Skills ?? System.Array.Empty<BattleSkill>(), s => s.Id == "battle-cry");
         }
     }
 }
