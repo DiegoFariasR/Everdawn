@@ -1598,7 +1598,7 @@ namespace GameCore.Battle
                 if (instance != null)
                     return instance.Name;
             }
-            // Bar-derived effects: capitalise the ID as a fallback.
+            // Bar-derived effects: capitalize the ID as a fallback.
             return char.ToUpperInvariant(effectId[0]) + effectId.Substring(1);
         }
 
