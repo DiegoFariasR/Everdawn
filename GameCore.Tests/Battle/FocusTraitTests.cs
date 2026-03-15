@@ -18,10 +18,11 @@ namespace GameCore.Tests.Battle
         }
 
         [Fact]
-        public void Focus_InitialFocus_IsFifty()
+        public void Focus_InitialFocus_IsOneHundred()
         {
+            // Focus starts at full so units can immediately use the Focus skill.
             var unit = MakeUnit(traits: new[] { BattleTrait.Focus });
-            Assert.Equal(50, unit.InitialBars.TryGetValue("focus", out int v) ? v : 0);
+            Assert.Equal(100, unit.InitialBars.TryGetValue("focus", out int v) ? v : 0);
         }
 
         [Fact]
@@ -38,114 +39,146 @@ namespace GameCore.Tests.Battle
             Assert.False(unit.InitialBars.ContainsKey("focus"));
         }
 
-        // ── Focus starts at 50 ────────────────────────────────────────────────
+        // ── Initial state ─────────────────────────────────────────────────────
 
         [Fact]
-        public void FocusUnit_StartsWithFiftyFocus()
+        public void FocusUnit_StartsAtFullFocus()
         {
             // Player goes first (Agi 50 > enemy Agi 1) — enemy never acts before the initial view.
-            var session = StartSimpleFocusBattle(playerAgi: 50);
-            var focusUnit = session.GetView().Units.First(u => u.UnitId == "focus-unit");
-            Assert.Equal(50, focusUnit.GetBar("focus"));
+            var session = StartFocusBattle(playerAgi: 50);
+            var state = session.GetView().Units.First(u => u.UnitId == "focus-unit");
+            Assert.Equal(100, state.GetBar("focus"));
         }
 
-        // ── Focus gain per hit ────────────────────────────────────────────────
+        // ── Focus skill: spend focus, grant Focused buff, refund action ────────
 
         [Fact]
-        public void FocusUnit_GainsTenFocusPerOffensiveHit()
+        public void FocusSkill_SpendsFocusCost()
         {
-            // Player Str 200 (attack 1600) one-shots a weak enemy (Str 1 = 100 HP).
-            // Enemy cannot retaliate after dying, so the +10 focus from the hit is preserved.
-            var session = StartSimpleFocusBattle(playerAgi: 50);
-            session.TryExecute(new PlayerActionCommand("basic", "target"));
-            var focusUnit = session.GetView().Units.First(u => u.UnitId == "focus-unit");
-            // Started at 50, gained 10 from 1 hit, no retaliation (enemy dead) → 60
-            Assert.Equal(60, focusUnit.GetBar("focus"));
-        }
-
-        [Fact]
-        public void FocusUnit_MultiHit_GainsTenFocusPerHit()
-        {
-            // Player Agi 150 → HitCount = 2. Str 200 → attack 1600, variance 320.
-            // Enemy Str 20 → HP 2000. First hit (max 1920) always survives; second (min 1280) always kills.
-            // Both hits land before retaliation → +20 focus total.
-            var session = StartSimpleFocusBattle(playerAgi: 150, enemyStr: 20);
-            session.TryExecute(new PlayerActionCommand("basic", "target"));
-            var focusUnit = session.GetView().Units.First(u => u.UnitId == "focus-unit");
-            // Started at 50, gained 20 from 2 hits, no retaliation (enemy dead) → 70
-            Assert.Equal(70, focusUnit.GetBar("focus"));
-        }
-
-        // ── Focus empowerment ─────────────────────────────────────────────────
-
-        [Fact]
-        public void FocusUnit_AtFullFocus_NonBasicSkill_FiresEmpowermentEvent()
-        {
-            // Use ResumeFromSnapshotCommand to jump straight to focus = 100.
-            var session = StartFocusBattleAt100();
-            var result = session.TryExecute(new PlayerActionCommand("special", "target"));
-            Assert.Contains(result.Events, e => e.Description.Contains("empowers"));
+            // Using the Focus skill deducts FocusCost (100) from the bar.
+            var session = StartFocusBattle();
+            session.TryExecute(new PlayerActionCommand("focus-skill", null));
+            var state = session.GetView().Units.First(u => u.UnitId == "focus-unit");
+            Assert.Equal(0, state.GetBar("focus"));
         }
 
         [Fact]
-        public void FocusUnit_AfterEmpowerment_FocusResets()
+        public void FocusSkill_EmitsFocusedEvent()
         {
-            // Empowerment resets focus to 50; the killing blow adds +10 → final 60.
-            var session = StartFocusBattleAt100();
-            session.TryExecute(new PlayerActionCommand("special", "target"));
-            var focusUnit = session.GetView().Units.First(u => u.UnitId == "focus-unit");
-            Assert.Equal(60, focusUnit.GetBar("focus"));
+            var session = StartFocusBattle();
+            var result = session.TryExecute(new PlayerActionCommand("focus-skill", null));
+            Assert.Contains(result.Events, e => e.Description.Contains("focuses intently"));
         }
 
         [Fact]
-        public void FocusUnit_AtFullFocus_BasicAttack_DoesNotConsumeEmpowerment()
+        public void FocusSkill_RefundsAction_PlayerStillActive()
         {
-            // Basic attack (skillIdx 0) must NOT trigger empowerment even when focus is 100.
-            var session = StartFocusBattleAt100();
-            var result = session.TryExecute(new PlayerActionCommand("basic", "target"));
-            Assert.DoesNotContain(result.Events, e => e.Description.Contains("empowers"));
-            // Focus stays at 100 (was 100, +10 from hit but capped at 100).
-            var focusUnit = session.GetView().Units.First(u => u.UnitId == "focus-unit");
-            Assert.Equal(100, focusUnit.GetBar("focus"));
+            // After using the Focus skill the turn is not consumed — PendingInput still present.
+            var session = StartFocusBattle();
+            var result = session.TryExecute(new PlayerActionCommand("focus-skill", null));
+            Assert.NotNull(result.View.PendingInput);
+            Assert.Equal("focus-unit", result.View.PendingInput!.ActorId);
         }
 
-        // ── Focus loss on incoming damage ─────────────────────────────────────
-
         [Fact]
-        public void FocusUnit_LosesTenFocusPerIncomingHit()
+        public void FocusSkill_NotAvailable_WhenInsufficientFocus()
         {
-            // Enemy Agi 200 > player Agi 1 → enemy is first in turn order and acts during
-            // the initial AutoAdvance inside Start(), before player ever moves.
-            var setup = new BattleSetup
+            // Inject focus = 0 so the Focus skill (cost 100) is absent from AvailableSkillIds.
+            var session = StartFocusBattle();
+            var snapshotState = new[]
             {
-                PlayerUnits = new List<BattleUnit>
-                {
-                    new("focus-unit", "Fighter", "player", Level: 1, Str: 200, Wis: 0, Agi: 1,
-                        Skills: new BattleSkill[] { new("basic", "Strike", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect()) },
-                        Traits: new[] { BattleTrait.Focus }),
-                },
-                EnemyUnits = new List<BattleUnit>
-                {
-                    // Agi 2 > player Agi 1 (enemy goes first) but HitCount = 1 + 2/100 = 1 (single hit).
-                    new("attacker", "Enemy", "enemy", Level: 1, Str: 10, Wis: 0, Agi: 2,
-                        Skills: new BattleSkill[] { new("e-basic", "Hit", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect()) }),
-                },
+                new UnitState("focus-unit", 200 * 100, true, new Dictionary<string, int> { ["focus"] = 0 }),
+                new UnitState("target", 1 * 100, true, null),
             };
-            var session = new BattleSession(seed: 0);
-            session.Start(setup);
-            // Enemy acted first → player focus: 50 → 40.
-            var focusUnit = session.GetView().Units.First(u => u.UnitId == "focus-unit");
-            Assert.Equal(40, focusUnit.GetBar("focus"));
+            session.TryExecute(new ResumeFromSnapshotCommand(snapshotState, LastActorId: "target", AtStep: 0));
+            var pending = session.GetView().PendingInput!;
+            Assert.DoesNotContain("focus-skill", pending.AvailableSkillIds);
+        }
+
+        // ── Focused buff: consumed by the first compatible skill ──────────────
+
+        [Fact]
+        public void Focused_OnCompatibleSkill_AddsExtraHit()
+        {
+            // Player Agi 100 → HitCount = 2. After Focus, compatible skill gets +1 hit = 3 total.
+            // We verify via TotalHits on the first damage event (set before the hit loop), so the
+            // test is not sensitive to whether the target survives all hits.
+            var session = StartFocusBattle(playerAgi: 100);
+
+            // Step 1: use Focus skill (refunded action).
+            session.TryExecute(new PlayerActionCommand("focus-skill", null));
+
+            // Step 2: use compatible skill — Focused consumed, +1 hit applied.
+            var result = session.TryExecute(new PlayerActionCommand("compatible", "target"));
+
+            // TotalHits on any damage event reflects effectiveHits at time of the action.
+            var hit = result.Events.FirstOrDefault(e => e.TargetId == "target" && e.Value > 0);
+            Assert.NotNull(hit);
+            Assert.Equal(3, hit!.TotalHits);
+        }
+
+        [Fact]
+        public void Focused_OnCompatibleSkill_EmitsSharpenEvent()
+        {
+            var session = StartFocusBattle();
+            session.TryExecute(new PlayerActionCommand("focus-skill", null));
+            var result = session.TryExecute(new PlayerActionCommand("compatible", "target"));
+            Assert.Contains(result.Events, e => e.Description.Contains("sharpens"));
+        }
+
+        [Fact]
+        public void Focused_OnIncompatibleSkill_NoSharpenEvent()
+        {
+            // Using an incompatible skill during the refunded action should not trigger Focus empowerment.
+            var session = StartFocusBattle();
+            session.TryExecute(new PlayerActionCommand("focus-skill", null));
+            var result = session.TryExecute(new PlayerActionCommand("basic", "target"));
+            Assert.DoesNotContain(result.Events, e => e.Description.Contains("sharpens"));
+        }
+
+        [Fact]
+        public void Focused_OnIncompatibleSkill_NoExtraHit_BaseHitCount()
+        {
+            // Player Agi 50 → HitCount = 1. Basic skill is incompatible → no extra hit.
+            var session = StartFocusBattle(playerAgi: 50);
+            session.TryExecute(new PlayerActionCommand("focus-skill", null));
+            var result = session.TryExecute(new PlayerActionCommand("basic", "target"));
+            int damageEvents = result.Events.Count(e => e.TargetId == "target" && e.Value > 0);
+            Assert.Equal(1, damageEvents);
+        }
+
+        // ── Focus regen ───────────────────────────────────────────────────────
+
+        [Fact]
+        public void Focus_RegensPerTurn()
+        {
+            // Inject focus = 0 via Resume, then player takes an action.
+            // StartOfTurn fires and adds FocusRegenPerTurn (20) before the action.
+            var session = StartFocusBattle(playerAgi: 50);
+            var snapshotState = new[]
+            {
+                new UnitState("focus-unit", 200 * 100, true, new Dictionary<string, int> { ["focus"] = 0 }),
+                new UnitState("target", 1 * 100, true, null),
+            };
+            session.TryExecute(new ResumeFromSnapshotCommand(snapshotState, LastActorId: "target", AtStep: 0));
+
+            // Player uses basic (non-Focus skill) — StartOfTurn adds 20 focus.
+            session.TryExecute(new PlayerActionCommand("basic", "target"));
+
+            // Battle ends (player one-shots the enemy), but we can check the post-action view.
+            // Focus = 0 (start) + 20 (regen) = 20. No other focuses costs were paid.
+            var state = session.GetView().Units.First(u => u.UnitId == "focus-unit");
+            Assert.Equal(20, state.GetBar("focus"));
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Strong focus attacker (Str 200 = 1600 attack) vs a weak enemy.
-        /// Default enemyStr 1 → 100 HP: player one-shots in a single basic hit.
-        /// enemyStr 20 → 2000 HP: player needs exactly 2 hits (HitCount 2) to kill.
+        /// Sets up a battle with a focus-capable player unit vs a weak dummy enemy.
+        /// Player has: basic (incompatible), compatible (ExtraHit +1, IsFocusCompatible), focus-skill (IsFocusSkill).
+        /// playerAgi controls HitCount (HitCount = 1 + Agi/100). Default Agi 50 → 1 hit.
         /// </summary>
-        private static BattleSession StartSimpleFocusBattle(int playerAgi = 50, int enemyStr = 1)
+        private static BattleSession StartFocusBattle(int playerAgi = 50)
         {
             var setup = new BattleSetup
             {
@@ -154,58 +187,23 @@ namespace GameCore.Tests.Battle
                     new("focus-unit", "Fighter", "player", Level: 1, Str: 200, Wis: 0, Agi: playerAgi,
                         Skills: new BattleSkill[]
                         {
-                            new("basic",   "Strike",     Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(), Modifiers: new[] { "basic" }, ModifierTags: new[] { "basic" }),
-                            new("special", "Power Blow", Cost: 0, DamageMultiplier: 1.5, Effects: PhysEffect(1.5), Cooldown: 2),
+                            new("basic",      "Strike",      Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(),
+                                Modifiers: new[] { "basic" }, ModifierTags: new[] { "basic" }),
+                            new("compatible", "Power Strike", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(),
+                                IsFocusCompatible: true, FocusEffect: FocusEffectKind.ExtraHit, FocusEffectValue: 1),
+                            new("focus-skill", "Focus",       Cost: 0, DamageMultiplier: 1.0, Effects: System.Array.Empty<SkillEffect>(),
+                                Range: SkillRange.Self, IsFocusSkill: true, FocusCost: 100, RefundsAction: true),
                         },
                         Traits: new[] { BattleTrait.Focus }),
                 },
                 EnemyUnits = new List<BattleUnit>
                 {
-                    new("target", "Dummy", "enemy", Level: 1, Str: enemyStr, Wis: 0, Agi: 1,
+                    new("target", "Dummy", "enemy", Level: 1, Str: 10, Wis: 0, Agi: 1,
                         Skills: new BattleSkill[] { new("def-basic", "Slash", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect()) }),
                 },
             };
             var session = new BattleSession(seed: 0);
             session.Start(setup);
-            return session;
-        }
-
-        /// <summary>
-        /// Returns a session where it is the player's turn and their focus is already at 100.
-        /// Uses ResumeFromSnapshotCommand to inject the pre-condition state directly.
-        /// </summary>
-        private static BattleSession StartFocusBattleAt100()
-        {
-            const int playerStr = 200;
-            const int enemyStr = 1;
-            var setup = new BattleSetup
-            {
-                PlayerUnits = new List<BattleUnit>
-                {
-                    new("focus-unit", "Fighter", "player", Level: 1, Str: playerStr, Wis: 0, Agi: 50,
-                        Skills: new BattleSkill[]
-                        {
-                            new("basic",   "Strike",     Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(), Modifiers: new[] { "basic" }, ModifierTags: new[] { "basic" }),
-                            new("special", "Power Blow", Cost: 0, DamageMultiplier: 1.5, Effects: PhysEffect(1.5), Cooldown: 2),
-                        },
-                        Traits: new[] { BattleTrait.Focus }),
-                },
-                EnemyUnits = new List<BattleUnit>
-                {
-                    new("target", "Dummy", "enemy", Level: 1, Str: enemyStr, Wis: 0, Agi: 1,
-                        Skills: new BattleSkill[] { new("def-basic", "Slash", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect()) }),
-                },
-            };
-            var session = new BattleSession(seed: 0);
-            session.Start(setup);
-            // Inject full-focus state: player at max HP with focus 100, enemy at max HP.
-            UnitState[] state = new[]
-            {
-                new UnitState("focus-unit", playerStr * 100, true, new Dictionary<string, int> { ["focus"] = 100 }),
-                new UnitState("target",     enemyStr  * 100, true, null),
-            };
-            // Resume as if the enemy (last in turn order by Agi) just acted → player goes next.
-            session.TryExecute(new ResumeFromSnapshotCommand(state, LastActorId: "target", AtStep: 0));
             return session;
         }
 

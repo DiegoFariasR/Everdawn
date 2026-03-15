@@ -23,6 +23,8 @@ namespace GameCore.Battle
         InvalidTarget,
         /// <summary>The actor does not meet the trait or weapon-type requirement for the skill.</summary>
         RequirementNotMet,
+        /// <summary>The actor does not have enough Focus to use this skill.</summary>
+        InsufficientFocus,
     }
 
     /// <summary>

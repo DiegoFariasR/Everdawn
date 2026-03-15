@@ -6,6 +6,21 @@ namespace GameCore.Battle
 {
     public enum BattleSkillTarget { Enemy, Ally }
 
+    /// <summary>Defines what Focus empowerment does to a skill when the actor has the Focused buff.</summary>
+    public enum FocusEffectKind
+    {
+        /// <summary>Adds <see cref="BattleSkill.FocusEffectValue"/> extra hits to the skill's effective hit count.</summary>
+        ExtraHit,
+        /// <summary>Adds extra projectiles to a spell (mechanically identical to ExtraHit, distinct flavor).</summary>
+        ExtraProjectile,
+        /// <summary>Grants a bonus crit chance for this skill use. Reserved — requires a future crit system.</summary>
+        BonusCrit,
+        /// <summary>Improves the chance that CC or status effects from this skill apply. Reserved — not yet implemented.</summary>
+        BonusStatusChance,
+        /// <summary>Ignores a portion of the target's evasion. Reserved — requires a future evasion system.</summary>
+        IgnoreEvasion,
+    }
+
     /// <summary>One stat-to-damage scaling entry within a damage component.</summary>
     public record DamageScaling(string Stat, double Scale = 1.0);
 
@@ -134,7 +149,34 @@ namespace GameCore.Battle
         /// When null or empty, any damaging hit will fire the reaction.
         /// Multiple conditions are AND-ed: all must match simultaneously.
         /// </summary>
-        IReadOnlyList<TriggerCondition>? TriggerConditions = null
+        IReadOnlyList<TriggerCondition>? TriggerConditions = null,
+        /// <summary>
+        /// When true, using this skill spends <see cref="FocusCost"/> Focus, grants the Focused buff,
+        /// and refunds the actor's action so they act again immediately.
+        /// </summary>
+        bool IsFocusSkill = false,
+        /// <summary>
+        /// Amount of Focus consumed when <see cref="IsFocusSkill"/> is true.
+        /// Validated against the actor's Focus bar before the skill may be selected.
+        /// </summary>
+        int FocusCost = 0,
+        /// <summary>
+        /// When true, the turn order does not advance after this skill resolves — the actor acts again immediately.
+        /// Used by the Focus skill to grant a free follow-up action.
+        /// </summary>
+        bool RefundsAction = false,
+        /// <summary>
+        /// When true, the Focused buff (if active on the actor) is consumed and <see cref="FocusEffect"/> is applied.
+        /// If the actor does not have Focused, the skill executes normally with no change.
+        /// </summary>
+        bool IsFocusCompatible = false,
+        /// <summary>The empowerment kind applied when <see cref="IsFocusCompatible"/> is true and Focused is active.</summary>
+        FocusEffectKind? FocusEffect = null,
+        /// <summary>
+        /// Magnitude of <see cref="FocusEffect"/> (e.g. 1 = one extra hit/projectile, 25 = +25% crit chance).
+        /// Ignored when <see cref="FocusEffect"/> is null.
+        /// </summary>
+        double FocusEffectValue = 0.0
     )
     {
         /// <summary>Returns true if this skill carries the given modifier (case-insensitive).</summary>

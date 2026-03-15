@@ -137,7 +137,7 @@ namespace GameCore.Battle
                 var d = new Dictionary<string, int>();
                 int mp = HasTrait(BattleTrait.MagicUser) ? Wis * 10 : MaxMpOverride;
                 if (mp > 0) d["mp"] = mp;                         // mana starts full
-                if (HasTrait(BattleTrait.Focus)) d["focus"] = 50; // focus starts half
+                if (HasTrait(BattleTrait.Focus)) d["focus"] = 100; // focus starts full; regenerates per turn
                 if (HasTrait(BattleTrait.Fury)) d["fury"] = 0;    // fury starts empty
                 d[ThermalSystem.BarCold] = 0;                      // thermal bars start empty
                 d[ThermalSystem.BarBurn] = 0;

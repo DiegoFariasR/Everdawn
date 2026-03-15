@@ -164,6 +164,24 @@ namespace GameCore.Content.Raw
         /// When empty or absent, any damaging hit fires the reaction.
         /// </summary>
         public List<RawTriggerCondition>? TriggerConditions { get; set; }
+        /// <summary>
+        /// When true, using this skill spends <see cref="FocusCost"/> Focus, grants the Focused buff,
+        /// and refunds the actor's action so they may act again immediately.
+        /// </summary>
+        public bool IsFocusSkill { get; set; }
+        /// <summary>Focus bar cost when <see cref="IsFocusSkill"/> is true. Not an MP cost.</summary>
+        public int FocusCost { get; set; }
+        /// <summary>When true, the turn does not advance after this skill resolves — the actor acts again.</summary>
+        public bool RefundsAction { get; set; }
+        /// <summary>When true, this skill can be empowered by the Focused buff.</summary>
+        public bool IsFocusCompatible { get; set; }
+        /// <summary>
+        /// The Focus empowerment effect applied when the actor has the Focused buff.
+        /// Valid values: ExtraHit, ExtraProjectile, BonusCrit, BonusStatusChance, IgnoreEvasion.
+        /// </summary>
+        public string? FocusEffect { get; set; }
+        /// <summary>Magnitude of the Focus effect (e.g. 1 = one extra hit, 25 = +25 crit chance).</summary>
+        public double FocusEffectValue { get; set; }
     }
 
     /// <summary>

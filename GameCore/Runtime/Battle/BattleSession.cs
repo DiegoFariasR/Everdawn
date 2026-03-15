@@ -177,14 +177,19 @@ namespace GameCore.Battle
                         ValidationErrorCode.RequirementNotMet,
                         $"Skill '{cmd.SkillId}' requires a trait or weapon type this unit does not have."
                     );
+                if (skill.IsFocusSkill)
+                    return Rejected(
+                        ValidationErrorCode.InsufficientFocus,
+                        $"Not enough Focus to use '{cmd.SkillId}' (requires {skill.FocusCost})."
+                    );
                 return Rejected(
                     ValidationErrorCode.InsufficientMp,
                     $"Not enough MP to use '{cmd.SkillId}'."
                 );
             }
 
-            // Validate target for single-target skills.
-            if (!skill.IsAoe)
+            // Validate target for single-target non-Self skills.
+            if (!skill.IsAoe && skill.Range != SkillRange.Self)
             {
                 if (cmd.TargetId == null)
                     return Rejected(

@@ -89,11 +89,11 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void Unit_WithMultipleTraits_BothDerivedStatsAreActive()
         {
-            // MagicUser → MaxMp = WIS × 10. Focus → MaxFocus = 100, InitialFocus = 50.
+            // MagicUser → MaxMp = WIS × 10. Focus → MaxFocus = 100, InitialFocus = 100.
             var unit = MakeUnit(wis: 100, traits: new[] { BattleTrait.MagicUser, BattleTrait.Focus });
             Assert.Equal(1000, unit.MaxBars.TryGetValue("mp", out int mp) ? mp : 0);
             Assert.Equal(100, unit.MaxBars.TryGetValue("focus", out int maxF) ? maxF : 0);
-            Assert.Equal(50, unit.InitialBars.TryGetValue("focus", out int initF) ? initF : 0);
+            Assert.Equal(100, unit.InitialBars.TryGetValue("focus", out int initF) ? initF : 0);
         }
 
         [Fact]
@@ -119,8 +119,8 @@ namespace GameCore.Tests.Battle
             var state = session.GetView().Units.First(u => u.UnitId == "hero");
             // MagicUser → MaxMp = WIS × 10 = 1000; starts at full
             Assert.Equal(1000, state.GetBar("mp"));
-            // Focus → starts at 50
-            Assert.Equal(50, state.GetBar("focus"));
+            // Focus → starts at 100 (full)
+            Assert.Equal(100, state.GetBar("focus"));
         }
         // ── Helpers ───────────────────────────────────────────────────────────
 

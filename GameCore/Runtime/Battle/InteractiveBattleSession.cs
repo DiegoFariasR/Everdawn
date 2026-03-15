@@ -30,6 +30,16 @@ namespace GameCore.Battle
             new Dictionary<string, List<ActiveEffectInstance>>();
         // Counter for generating unique runtime instance IDs within this session.
         private int _nextEffectId;
+        // Units that currently carry the Focused buff (granted by the Focus skill).
+        // Focused is consumed by the first IsFocusCompatible skill the unit uses, or expires when their turn ends.
+        private readonly HashSet<string> _focusedUnits = new HashSet<string>();
+        // Set by ExecuteAction when a skill has RefundsAction=true. Callers must skip AdvanceTurn for this action.
+        private bool _actionRefunded;
+        // Set after StartOfTurn runs for the current _turnIndex.
+        // Prevents re-applying burn DOT and bar decay on the free follow-up action granted by Focus.
+        private bool _startOfTurnDone;
+        // Focus points regenerated at the start of each turn for units with a Focus bar.
+        private const int FocusRegenPerTurn = 20;
 
         public InteractiveBattleSession(BattleSetup setup, int seed)
         {
@@ -109,9 +119,15 @@ namespace GameCore.Battle
                 throw new InvalidOperationException("Not a player turn.");
 
             var actor = _turnOrder[_turnIndex];
+            var newEvents = new List<BattleEvent>();
 
-            // Start-of-turn phase.
-            var newEvents = new List<BattleEvent>(StartOfTurn(actor));
+            // Start-of-turn phase — only once per actual turn (Focus refunds the action, not the full turn).
+            if (!_startOfTurnDone)
+            {
+                newEvents.AddRange(StartOfTurn(actor));
+                _startOfTurnDone = true;
+                if (_isOver) return BuildResponse(newEvents);
+            }
 
             // If the player is frozen, their chosen action is skipped and the turn is consumed.
             if (_frozenUnits.Contains(actor.Id))
@@ -137,7 +153,12 @@ namespace GameCore.Battle
                          ?? throw new ArgumentException($"Unknown skill: {r.SkillId}");
 
             List<BattleUnit> targets;
-            if (skill.IsAoe)
+            if (skill.Range == SkillRange.Self)
+            {
+                // Self-range skills always target the actor; no target ID needed.
+                targets = new List<BattleUnit> { actor };
+            }
+            else if (skill.IsAoe)
             {
                 targets = _allUnits.Where(u => TargetSideMatch(u, actor, skill.Target) && _hp[u.Id] > 0).ToList();
             }
@@ -149,6 +170,15 @@ namespace GameCore.Battle
             }
 
             newEvents.AddRange(ExecuteAction(actor, targets, skill));
+
+            // If the action was refunded (e.g., Focus skill), return without advancing the turn.
+            // The actor remains active and the player must submit their next action.
+            if (_actionRefunded)
+            {
+                _actionRefunded = false;
+                return BuildResponse(newEvents);
+            }
+
             if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
             newEvents.AddRange(AutoAdvance());
             return BuildResponse(newEvents);
@@ -162,9 +192,14 @@ namespace GameCore.Battle
                 throw new InvalidOperationException("Not a player turn.");
 
             var actor = _turnOrder[_turnIndex];
+            var newEvents = new List<BattleEvent>();
 
-            // Start-of-turn phase.
-            var newEvents = new List<BattleEvent>(StartOfTurn(actor));
+            if (!_startOfTurnDone)
+            {
+                newEvents.AddRange(StartOfTurn(actor));
+                _startOfTurnDone = true;
+                if (_isOver) return BuildResponse(newEvents);
+            }
 
             if (_frozenUnits.Contains(actor.Id))
             {
@@ -184,7 +219,7 @@ namespace GameCore.Battle
                 return BuildResponse(newEvents);
             }
 
-            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor)).LastOrDefault();
+            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (!s.IsFocusSkill || GetBar(actor.Id, "focus") >= s.FocusCost)).LastOrDefault();
             if (skill == null)
             {
                 newEvents.Add(AddEvent(actor.Id, $"{actor.Name} waits.", "status"));
@@ -197,6 +232,7 @@ namespace GameCore.Battle
             if (targets.Count == 0) { CheckEnd(); return BuildResponse(Array.Empty<BattleEvent>()); }
 
             newEvents.AddRange(ExecuteAction(actor, targets, skill));
+            if (_actionRefunded) _actionRefunded = false; // auto-mode: treat refund as consumed, advance normally
             if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
             newEvents.AddRange(AutoAdvance());
             return BuildResponse(newEvents);
@@ -208,10 +244,14 @@ namespace GameCore.Battle
             if (_isOver) return BuildResponse(Array.Empty<BattleEvent>());
 
             var actor = _turnOrder[_turnIndex];
+            var newEvents = new List<BattleEvent>();
 
-            // Start-of-turn phase.
-            var newEvents = new List<BattleEvent>(StartOfTurn(actor));
-            if (_isOver) return BuildResponse(newEvents);
+            if (!_startOfTurnDone)
+            {
+                newEvents.AddRange(StartOfTurn(actor));
+                _startOfTurnDone = true;
+                if (_isOver) return BuildResponse(newEvents);
+            }
 
             if (_frozenUnits.Contains(actor.Id))
             {
@@ -231,7 +271,7 @@ namespace GameCore.Battle
                 return BuildResponse(newEvents);
             }
 
-            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor)).LastOrDefault();
+            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (!s.IsFocusSkill || GetBar(actor.Id, "focus") >= s.FocusCost)).LastOrDefault();
             if (skill == null)
             {
                 newEvents.Add(AddEvent(actor.Id, $"{actor.Name} waits.", "status"));
@@ -243,6 +283,7 @@ namespace GameCore.Battle
             if (targets.Count == 0) { CheckEnd(); return BuildResponse(newEvents); }
 
             newEvents.AddRange(ExecuteAction(actor, targets, skill));
+            if (_actionRefunded) _actionRefunded = false; // step mode: treat refund as consumed, advance normally
             if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
             return BuildResponse(newEvents);
         }
@@ -259,7 +300,7 @@ namespace GameCore.Battle
                 pending = new BattlePendingInput(
                     Actor: actor,
                     Skills: skills,
-                    AvailableSkillIds: skills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor)).Select(s => s.Id).ToArray(),
+                    AvailableSkillIds: skills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (!s.IsFocusSkill || GetBar(actor.Id, "focus") >= s.FocusCost)).Select(s => s.Id).ToArray(),
                     EnemyTargets: _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToArray(),
                     AllyTargets: _allUnits.Where(u => u.Team == actor.Team && _hp[u.Id] > 0).ToArray(),
                     SkillCooldowns: skills.Where(s => GetCooldown(s.Id) > 0)
@@ -296,9 +337,14 @@ namespace GameCore.Battle
                 // Stop when it is a living, non-frozen, non-stunned player's turn — they need to provide input.
                 if (!isFrozen && !isStunned && actor.Team == "player") break;
 
-                // Process start-of-turn effects for this actor (burn DOT, thermal decay, disruption decay).
-                produced.AddRange(StartOfTurn(actor));
-                if (_isOver) break;
+                // Process start-of-turn effects for this actor — only once per actual turn.
+                // When Focus refunds the action, the loop continues for the same actor without re-running these.
+                if (!_startOfTurnDone)
+                {
+                    produced.AddRange(StartOfTurn(actor));
+                    _startOfTurnDone = true;
+                    if (_isOver) break;
+                }
 
                 if (isFrozen)
                 {
@@ -319,7 +365,7 @@ namespace GameCore.Battle
                 }
 
                 // Auto-resolve enemy action.
-                var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor)).LastOrDefault();
+                var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (!s.IsFocusSkill || GetBar(actor.Id, "focus") >= s.FocusCost)).LastOrDefault();
                 if (skill == null)
                 {
                     produced.Add(AddEvent(actor.Id, $"{actor.Name} waits.", "status"));
@@ -331,6 +377,15 @@ namespace GameCore.Battle
                 if (targets.Count == 0) { CheckEnd(); break; }
 
                 produced.AddRange(ExecuteAction(actor, targets, skill));
+
+                // If the skill refunded the action (e.g., AI used the Focus skill),
+                // continue the loop for the same actor — StartOfTurn guard prevents re-running.
+                if (_actionRefunded)
+                {
+                    _actionRefunded = false;
+                    continue;
+                }
+
                 if (AdvanceTurn()) produced.AddRange(StartOfRound());
             }
             return produced;
@@ -386,6 +441,24 @@ namespace GameCore.Battle
             if (actor.ReactionSkill != null && _skillCooldowns.TryGetValue(actor.ReactionSkill.Id, out int rcd) && rcd > 0)
                 _skillCooldowns[actor.ReactionSkill.Id] = rcd - 1;
 
+            // Focus skill: spend Focus, grant Focused buff, refund the action.
+            // The actor does not advance in the turn order — they immediately get another action.
+            if (skill.IsFocusSkill)
+            {
+                int currentFocus = GetBar(actor.Id, "focus");
+                if (currentFocus < skill.FocusCost)
+                {
+                    produced.Add(AddEvent(actor.Id, $"{actor.Name} does not have enough Focus!", "status"));
+                    return produced;
+                }
+                _bars[actor.Id]["focus"] = currentFocus - skill.FocusCost;
+                _focusedUnits.Add(actor.Id);
+                produced.Add(AddEvent(actor.Id, $"{actor.Name} focuses intently!", "skill"));
+                if (skill.Cooldown > 0) _skillCooldowns[skill.Id] = skill.Cooldown;
+                _actionRefunded = true;
+                return produced;
+            }
+
             // Resolve the effective skill for this action: applies any runtime skill modifiers
             // from active effects on the actor. The base compiled skill is never mutated.
             var effectiveSkill = ResolveEffectiveSkill(actor, skill);
@@ -398,18 +471,14 @@ namespace GameCore.Battle
             string evType = (effectiveSkill.IsHeal || effectiveSkill.IsShield || effectiveSkill.IsRestoreBar) ? "skill"
                            : effectiveSkill.IsBasic ? "attack" : effectiveSkill.IsUltimate ? "soulburn" : "skill";
 
-            // Focus empowerment: fires when focus is full and the actor uses a non-basic offensive skill
-            bool isFocusEmpowered = actor.HasTrait(BattleTrait.Focus)
-                && GetBar(actor.Id, "focus") == 100
-                && !effectiveSkill.IsBasic
-                && !effectiveSkill.IsHeal
-                && !effectiveSkill.IsShield
-                && !effectiveSkill.IsRestoreBar
-                && !effectiveSkill.IsApplyEffect;
+            // Focused buff: consumed by the first IsFocusCompatible skill used after a Focus action.
+            // Grants the skill's configured effect (extra hit, extra projectile, etc.).
+            // Does not modify damage multipliers — Focus is a precision layer, not a raw damage boost.
+            bool isFocusEmpowered = _focusedUnits.Contains(actor.Id) && effectiveSkill.IsFocusCompatible;
             if (isFocusEmpowered)
             {
-                _bars[actor.Id]["focus"] = 50;
-                produced.Add(AddEvent(actor.Id, $"{actor.Name}'s Focus empowers their attack!", "skill"));
+                _focusedUnits.Remove(actor.Id);
+                produced.Add(AddEvent(actor.Id, $"{actor.Name}'s Focus sharpens {effectiveSkill.Name}!", "skill"));
             }
             // Fury empowerment: fires when fury is full and the actor uses a non-basic offensive skill
             bool isFuryEmpowered = actor.HasTrait(BattleTrait.Fury)
@@ -424,9 +493,8 @@ namespace GameCore.Battle
                 _bars[actor.Id]["fury"] = 0;
                 produced.Add(AddEvent(actor.Id, $"{actor.Name}'s Fury empowers their attack!", "skill"));
             }
-            // Flat (global) DamageDealtMultiplier from active effects stacks with focus/fury empowerment.
+            // Flat (global) DamageDealtMultiplier from active effects stacks with fury empowerment.
             double empowerMult = GetFlatDamageDealtMultiplier(actor.Id);
-            if (isFocusEmpowered) empowerMult *= 1.5;
             if (isFuryEmpowered) empowerMult *= 1.5;
 
             if (effectiveSkill.IsAoe && targets.Count > 1)
@@ -465,6 +533,11 @@ namespace GameCore.Battle
                 effectiveHits = (effectiveSkill.IsHeal || effectiveSkill.IsShield || effectiveSkill.IsRestoreBar) ? 1 : ThermalSystem.ResolveAgiHits(actor.Agi, actorIsSlow);
                 perHitHitsMult = 1.0;
             }
+
+            // Focus ExtraHit / ExtraProjectile: add the configured number of extra hits.
+            // Extra hits share the same per-hit power as the base hits (perHitHitsMult unchanged).
+            if (isFocusEmpowered && (effectiveSkill.FocusEffect == FocusEffectKind.ExtraHit || effectiveSkill.FocusEffect == FocusEffectKind.ExtraProjectile))
+                effectiveHits += Math.Max(1, (int)effectiveSkill.FocusEffectValue);
 
             var effect = effectiveSkill.Effects.Count > 0 ? effectiveSkill.Effects[0] : null;
 
@@ -598,11 +671,6 @@ namespace GameCore.Battle
                             skillId: skill.Id, effectType: primaryType,
                             hitIndex: i, totalHits: effectiveHits));
 
-                        // Focus: actor gains 10 per offensive hit; target loses 10 per incoming hit
-                        if (actor.HasTrait(BattleTrait.Focus))
-                            _bars[actor.Id]["focus"] = Math.Min(100, GetBar(actor.Id, "focus") + 10);
-                        if (target.HasTrait(BattleTrait.Focus))
-                            _bars[target.Id]["focus"] = Math.Max(0, GetBar(target.Id, "focus") - 10);
                         // Fury: target gains 10–20 per incoming hit
                         if (target.HasTrait(BattleTrait.Fury))
                             _bars[target.Id]["fury"] = Math.Min(100, GetBar(target.Id, "fury") + _rng.Next(10, 21));
@@ -787,6 +855,9 @@ namespace GameCore.Battle
         private bool AdvanceTurn()
         {
             if (_isOver) return false;
+            // Clear the Focused buff and turn-start flag for the actor whose turn just ended.
+            _focusedUnits.Remove(_turnOrder[_turnIndex].Id);
+            _startOfTurnDone = false;
             int prev = _turnIndex;
             for (int i = 0; i < _turnOrder.Count; i++)
             {
@@ -839,6 +910,14 @@ namespace GameCore.Battle
             int disruptionBar = GetBar(actor.Id, DisruptionSystem.BarDisruption);
             int newDisruption = DisruptionSystem.ApplyDecay(disruptionBar);
             if (newDisruption != disruptionBar) _bars[actor.Id][DisruptionSystem.BarDisruption] = newDisruption;
+
+            // Focus regeneration: each turn, units with a Focus bar regain FocusRegenPerTurn points.
+            if (_bars[actor.Id].TryGetValue("focus", out int currentFocus))
+            {
+                int maxFocus = actor.MaxBars.TryGetValue("focus", out int mf) ? mf : 100;
+                int newFocus = Math.Min(currentFocus + FocusRegenPerTurn, maxFocus);
+                if (newFocus != currentFocus) _bars[actor.Id]["focus"] = newFocus;
+            }
 
             return events;
         }

@@ -596,7 +596,14 @@ namespace GameCore.Content
                 TriggerConditions: raw.TriggerConditions?.Select(c => new TriggerCondition(
                     Range: c.Range != null ? Enum.Parse<SkillRange>(c.Range, ignoreCase: true) : (SkillRange?)null,
                     DamageType: c.DamageType != null ? Enum.Parse<EffectType>(c.DamageType, ignoreCase: true) : (EffectType?)null
-                )).ToArray());
+                )).ToArray(),
+                IsFocusSkill: raw.IsFocusSkill,
+                FocusCost: raw.FocusCost,
+                RefundsAction: raw.RefundsAction,
+                IsFocusCompatible: raw.IsFocusCompatible,
+                FocusEffect: raw.FocusEffect != null && Enum.TryParse<FocusEffectKind>(raw.FocusEffect, ignoreCase: true, out var fek)
+                    ? fek : (FocusEffectKind?)null,
+                FocusEffectValue: raw.FocusEffectValue);
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────
