@@ -9,29 +9,27 @@ HP reduction. Every node maps to a specific piece of code — update both togeth
 
 ```mermaid
 flowchart TD
-    A([Actor's turn]) --> FS{"skill.RefundsAction = true?"}
-
-    FS -- yes --> FK["Deduct skill.FocusCost from Focus bar (if > 0)<br/>Execute skill effects (e.g. GrantFocusedBuff)<br/>Action refunded → player acts again"]
-    FK --> A
-
-    FS -- no --> B
+    A([Actor's turn]) --> PRE
 
     subgraph PRE["Pre-hit resolution  (once per action)"]
-        B["Resolve effective hit count<br/>· AGI-derived  OR  skill BaseHits<br/>· Slow status: AGI hits halved"]
-        B --> FC{"Actor has Focused buff AND skill is Attack or Spell?"}
-        FC -- yes --> FE["Consume Focused buff<br/>Emit 'sharpens' event<br/>effectiveHits += FocusEffectValue<br/>(ExtraHit or ExtraProjectile)"]
-        FC -- no  --> GM
-        FE --> GM["Compute empowerMult<br/>= DamageDealtMultiplier from active effects<br/>× furyDamageMult (FuryUser: 1.0 + FuryDamageScale × fury/100; else 1.0)"]
-        GM --> F["Snapshot actorIsDizzy (Disruption bar ≥ 50)<br/>Snapshot damageTakenMult (target's DamageTakenMultiplier)"]
+        CDT["Tick actor cooldowns"] --> RSK
+        RSK["Resolve effective skill<br/>(apply runtime skill modifiers from active effects)"] --> CST
+        CST["Consume skill cost from bar (MP or Focus)"] --> FCS
+        FCS{"Focused buff active<br/>AND skill is Attack or Spell?"}
+        FCS -- yes --> FCA["Consume Focused buff<br/>Emit 'sharpens' event"]
+        FCS -- no  --> HCR
+        FCA --> HCR["Resolve effective hit count<br/>· BaseHits/ScalingHits override  OR  AGI-derived<br/>· Slow: AGI hits halved · Focus: +ExtraHits from buff"]
+        HCR --> EMP["Compute empowerMult<br/>= DamageDealtMultiplier from active effects<br/>× furyDamageMult  (FuryUser: 1.0 + FuryDamageScale × fury/100)"]
+        EMP --> DIZ["Snapshot actorIsDizzy  (Disruption bar ≥ 50)"]
     end
 
-    F --> LOOP
+    DIZ --> LOOP
 
-    subgraph LOOP["Per-hit loop  (repeated effectiveHits times)"]
+    subgraph LOOP["Per-hit loop  (repeated effectiveHits times, per target)"]
 
         subgraph PIPE["DamageCalc.Compute  — full audit trail in DamageResult.Steps"]
-            L1["Layer 1 — Base<br/>Σ (stat × scaling) × DamageMultiplier × empowerMult × perHitMult<br/>± variance (±20 % of stat base)"]
-            L1 --> L2["Layer 2 — Resistance<br/>effectiveResistance = target.Resistance − actor.Penetration<br/>capped at 90  →  always ≥ 10 % damage lands<br/>× (1 − resistance / 100)"]
+            L1["Layer 1 — Base<br/>Σ (stat × scaling) × TotalDamageMultiplier × empowerMult × perHitMult<br/>± variance (±20 % of stat base)"]
+            L1 --> L2["Layer 2 — Resistance<br/>effectiveResistance = target.Resistance − actor.Penetration<br/>capped at 90  →  always ≥ 10 % lands<br/>× (1 − resistance / 100)"]
             L2 --> L3["Layer 3 — OutgoingTypeMult<br/>actor's per-type dealt multiplier from active effects<br/>skipped when = 1.0"]
             L3 --> L4["Layer 4 — IncomingTypeMult<br/>target's per-type taken multiplier from active effects<br/>skipped when = 1.0"]
             L4 --> L5["Layer 5 — AttackerOutput<br/>Dizzy → × 0.8<br/>skipped when = 1.0"]
@@ -42,15 +40,16 @@ flowchart TD
         SUM --> BAR{"Target has Barrier?"}
         BAR -- yes --> BABSORB["Barrier absorbs min(barrier, totalDamage)<br/>Remainder applied to HP"]
         BAR -- no  --> HP["Full totalDamage applied to HP"]
-        BABSORB --> DEAD
-        HP --> DEAD{"Target HP ≤ 0?"}
+        BABSORB --> PHIT
+        HP --> PHIT["Fury gain for target  (FuryUser: flat + HP% bonus per hit)<br/>CC buildup: Thermal / Disruption / Bleed"]
+        PHIT --> DEAD{"Target HP ≤ 0?"}
         DEAD -- yes --> KILL([Target defeated · break hit loop])
         DEAD -- no  --> MORE{"More hits?"}
         MORE -- yes --> L1
-        MORE -- no  --> POST
+        MORE -- no  --> ACT
     end
 
-    POST([End of action]) --> W["Post-action<br/>Tick active effects · Fury gain<br/>Thermal & Disruption buildup · Reactions"]
+    ACT([End of action]) --> W["Apply skill cooldown<br/>Actor Fury gain  (FuryUser + direct damage: +SkillUseGain once per action)<br/>Tick active effects<br/>Execute reactions<br/>CheckEnd"]
 
     style PRE  fill:#1a1a2e,stroke:#4e4e8f,color:#ccc
     style LOOP fill:#12232e,stroke:#4e8f6e,color:#ccc
@@ -66,12 +65,13 @@ pipeline, update the matching row here and the Mermaid above.
 
 | Diagram node | `DamageStep` name in `DamageResult.Steps` | Code location |
 |---|---|---|
-| RefundsAction branch | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `if (skill.RefundsAction)` early-return block |
+| Tick cooldowns | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — cooldown tick loop at top |
+| Resolve effective skill | *(not in pipeline)* | `InteractiveBattleSession.ResolveEffectiveSkill` |
+| Consume skill cost | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `CostBarKey` deduction block |
+| Focus ExtraHits | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `isFocusEmpowered` + `ExtraHits` block |
 | Hit count (AGI / BaseHits) | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `effectiveHits` resolution block |
-| Focus ExtraHit/ExtraProjectile | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `if (isFocusEmpowered && ...)` |
-| Fury scaling | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `furyDamageMult` block (continuous: `1.0 + FuryDamageScale × fury/100`; no drain) |
-| Dizzy snapshot | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `actorIsDizzy` + `attackerOutputMult` |
-| DamageTaken snapshot | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `GetDamageTakenMultiplier` + `defenderDamageTakenMult` |
+| empowerMult / Fury scaling | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `furyDamageMult` + `GetFlatDamageDealtMultiplier` block |
+| actorIsDizzy snapshot | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `actorIsDizzy` line before target loop |
 | **Layer 1 — Base** | `"Base"` | `DamageCalc.cs` — Layer 1 block |
 | **Layer 2 — Resistance** | `"Resistance"` | `DamageCalc.cs` — Layer 2 block |
 | **Layer 3 — OutgoingTypeMult** | `"OutgoingTypeMult"` | `DamageCalc.cs` — Layer 3 block |
@@ -79,6 +79,11 @@ pipeline, update the matching row here and the Mermaid above.
 | **Layer 5 — AttackerOutput** | `"AttackerOutput"` | `DamageCalc.cs` — Layer 5 block |
 | **Layer 6 — DamageTaken** | `"DamageTaken"` | `DamageCalc.cs` — Layer 6 block |
 | Barrier absorption | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — barrier block after `DamageCalc.Compute` |
+| Fury gain (target) | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `FurySystem.ComputeHitGain` block inside hit loop |
+| CC buildup | *(not in pipeline)* | `InteractiveBattleSession.ApplyCCBuildup` + `ApplyDisruptionBuildup` |
+| Actor Fury gain (skill use) | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `SkillUseGain` block after hit loop |
+| Tick active effects | *(not in pipeline)* | `InteractiveBattleSession.TickActiveEffects` |
+| Execute reactions | *(not in pipeline)* | `InteractiveBattleSession.ExecuteReactions` |
 
 > `DamageStep` names are the string keys you query in `DamageResult.Steps` and in the
 > BattleSandbox hit log. They are the canonical identifiers — keep diagram, table, and
