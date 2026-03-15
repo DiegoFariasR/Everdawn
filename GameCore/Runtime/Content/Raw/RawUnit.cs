@@ -19,6 +19,7 @@ namespace GameCore.Content.Raw
         public string EquipmentType { get; set; } = "None";
         public List<RawUnitSkill> Skills { get; set; } = new List<RawUnitSkill>();  // resolved by ContentPipeline
         public Dictionary<string, int> Resistances { get; set; } = new Dictionary<string, int>();
+        public double FuryDamageScale { get; set; }  // unit-level scaling; applied to all damaging skills when actor has FuryUser trait
 
         /// <summary>
         /// Unit-level modifier IDs applied to this unit's resistances.

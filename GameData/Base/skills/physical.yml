@@ -5,8 +5,6 @@
   name: Mace Strike
   iconDescription: "A heavy mace head striking downward, cracking stone beneath it."
   permittedEquipmentTypes: [Blunt]
-  isStrSkill: true
-  furyDamageScale: 0.4
   effects:
     - kind: damage
       target: enemy
@@ -21,8 +19,6 @@
   iconDescription: "A mace smashing through armour with radial cracks spreading outward."
   cooldown: 3
   permittedEquipmentTypes: [Blunt]
-  isStrSkill: true
-  furyDamageScale: 0.4
   effects:
     - kind: damage
       target: enemy
@@ -38,8 +34,6 @@
   iconDescription: "A mace impact with a large burst of shards and a shockwave ring."
   cooldown: 3
   permittedEquipmentTypes: [Blunt]
-  isStrSkill: true
-  furyDamageScale: 0.4
   effects:
     - kind: damage
       target: enemy
@@ -57,8 +51,6 @@
   name: Sword Strike
   iconDescription: "A straight sword slashing diagonally with a clean sharp motion line."
   permittedEquipmentTypes: [Slash]
-  isStrSkill: true
-  furyDamageScale: 0.3
   scalingHits:
     - stat: agi
       scale: 0.01
@@ -76,8 +68,6 @@
   iconDescription: "A broad sweeping sword arc cutting through two silhouettes at once."
   cooldown: 3
   permittedEquipmentTypes: [Slash]
-  isStrSkill: true
-  furyDamageScale: 0.3
   scalingHits:
     - stat: agi
       scale: 0.01
@@ -181,8 +171,6 @@
   iconDescription: "A round shield slamming forward with a stunned impact starburst."
   cooldown: 3
   permittedEquipmentTypes: [Blunt]
-  isStrSkill: true
-  furyDamageScale: 0.35
   effects:
     - kind: damage
       target: enemy

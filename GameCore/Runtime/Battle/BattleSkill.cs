@@ -51,10 +51,7 @@ namespace GameCore.Battle
         ActiveEffectDefinition? PassiveEffect = null,      // non-null for Passive skills; carries penetration/resistance bonuses
 
         ReactionTrigger? Trigger = null,                   // non-null only on Reaction skills; event kind that fires the reaction
-        IReadOnlyList<TriggerCondition>? TriggerConditions = null,    // optional filters on Trigger; null/empty = any qualifying hit triggers
-
-        bool IsStrSkill = false,       // must be set explicitly; never inferred from scaling
-        double FuryDamageScale = 0.0   // max damage bonus at full Fury; bonus = scale × (fury/100)
+        IReadOnlyList<TriggerCondition>? TriggerConditions = null     // optional filters on Trigger; null/empty = any qualifying hit triggers
     )
     {
         public bool HasModifier(string id) =>
@@ -75,6 +72,7 @@ namespace GameCore.Battle
         public bool IsRestoreBar => Effects.Count > 0 && Effects[0].Kind == EffectKind.RestoreBar;
         public bool IsApplyEffect => Effects.Count > 0 && Effects[0].Kind == EffectKind.ApplyEffect;
         public bool IsDispel => Effects.Count > 0 && Effects[0].Kind == EffectKind.Dispel;
+        public bool IsDirectDamage => Effects.Any(e => e.Kind == EffectKind.Damage);
         public BattleSkillTarget Target => Effects.Count > 0 ? Effects[0].Target : BattleSkillTarget.Enemy;
         public EffectType? PrimaryEffectType =>
             Effects.Count > 0 && Effects[0].DamagePerHit.Count > 0

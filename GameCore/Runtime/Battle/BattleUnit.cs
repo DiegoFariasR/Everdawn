@@ -20,6 +20,7 @@ namespace GameCore.Battle
         IReadOnlyDictionary<EffectType, int>? Penetrations = null,  // effect type → penetration %; reduces target resistance
         int DisruptionPenetration = 0,                              // reduces target's effective disruption resistance
         int ThermalProtection = 0,                                  // boosts fire/cold resistance for buildup only; does not affect damage reduction
+        double FuryDamageScale = 0.0,                               // fury bar bonus multiplier; applied to all damaging skills when actor has FuryUser trait
         EquipmentType EquipmentType = EquipmentType.None,
         BattleSkill? ReactionSkill = null                          // fires on trigger; not in ResolvedSkills
     )

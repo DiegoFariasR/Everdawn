@@ -5,6 +5,7 @@ str: 70
 wis: 0
 agi: 50
 traits: [FuryUser]
+furyDamageScale: 0.4
 equipmentType: Blunt
 skills:
   - id: mace-strike

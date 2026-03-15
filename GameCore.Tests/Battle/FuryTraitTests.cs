@@ -97,9 +97,9 @@ namespace GameCore.Tests.Battle
         // ── Fury gain: from STR skill use ────────────────────────────────────
 
         [Fact]
-        public void FuryUnit_GainsFuryFromStrSkillUse()
+        public void FuryUnit_GainsFuryFromDamagingSkillUse()
         {
-            // Using a STR-tagged skill should grant SkillUseGain fury.
+            // Using any damaging skill grants SkillUseGain fury.
             var session = StartFuryBattle();
             session.TryExecute(new PlayerActionCommand("str-skill", "target"));
             var state = session.GetView().Units.First(u => u.UnitId == "fury-unit");
@@ -108,19 +108,19 @@ namespace GameCore.Tests.Battle
         }
 
         [Fact]
-        public void FuryUnit_DoesNotGainFuryFromNonStrSkill()
+        public void FuryUnit_GainsFuryFromAnyDamagingSkill()
         {
-            // Using a non-STR skill (isStrSkill: false) should NOT grant Fury.
+            // The non-str-skill also deals damage — it must also grant fury now.
             var session = StartFuryBattle();
             session.TryExecute(new PlayerActionCommand("non-str-skill", "target"));
             var state = session.GetView().Units.First(u => u.UnitId == "fury-unit");
-            Assert.Equal(0, state.GetBar("fury"));
+            Assert.Equal(FurySystem.SkillUseGain, state.GetBar("fury"));
         }
 
         [Fact]
-        public void FuryGain_StrSkill_IsOncePerExecution_NotPerHit()
+        public void FuryGain_IsOncePerExecution_NotPerHit()
         {
-            // A STR skill with multiple hits must still only grant SkillUseGain once.
+            // A skill with multiple hits must still only grant SkillUseGain once.
             var session = StartFuryBattle(playerAgi: 200); // 3 hits
             session.TryExecute(new PlayerActionCommand("str-skill", "target"));
             var state = session.GetView().Units.First(u => u.UnitId == "fury-unit");
@@ -145,15 +145,15 @@ namespace GameCore.Tests.Battle
             };
             session.TryExecute(new ResumeFromSnapshotCommand(snap, LastActorId: "target", AtStep: 0));
 
-            // Player acts with a non-STR skill (no fury gain from skill use).
-            session.TryExecute(new PlayerActionCommand("non-str-skill", "target"));
+            // Player acts with a damaging skill — gains SkillUseGain fury on top of the injected value.
+            session.TryExecute(new PlayerActionCommand("str-skill", "target"));
 
             // After the player's turn: enemy acts (hits player with a weak strike → flat fury gain only).
             // Then player's next StartOfTurn fires decay.
             // fury-unit Str:100 → MaxHp=10000. Enemy Str:10 → PhysAttack=80. HP%=0.8% → bonus=0.
-            // Expected: 50 (start) + FlatGainOnHit (enemy hit) - DecayPerTurn (next start-of-turn).
+            // Expected: 50 + SkillUseGain + FlatGainOnHit - DecayPerTurn.
             var state = session.GetView().Units.First(u => u.UnitId == "fury-unit");
-            int expectedAfterHitAndDecay = 50 + FurySystem.FlatGainOnHit - FurySystem.DecayPerTurn;
+            int expectedAfterHitAndDecay = 50 + FurySystem.SkillUseGain + FurySystem.FlatGainOnHit - FurySystem.DecayPerTurn;
             Assert.Equal(expectedAfterHitAndDecay, state.GetBar("fury"));
         }
 
@@ -193,56 +193,29 @@ namespace GameCore.Tests.Battle
         }
 
         [Fact]
-        public void StrSkill_DealsBonusDamageAtHighFury()
+        public void DamagingSkill_DealsBonusDamageAtHighFury()
         {
-            // At Fury = 0, a STR skill deals its base damage.
-            // At Fury = 100, a STR skill with FuryDamageScale = 0.4 deals 40% more.
-            // We verify by injecting two battles: one at low fury, one at high fury.
-            // The high-fury battle must do more damage on the same target.
-
-            int lowFuryDmg = RunStrSkillDamage(injectedFury: 0);
-            int highFuryDmg = RunStrSkillDamage(injectedFury: 100);
+            // At Fury = 0, a skill deals its base damage.
+            // At Fury = 100, a unit with FuryDamageScale = 0.4 deals 40% more.
+            int lowFuryDmg = RunDamagingSkillDamage(injectedFury: 0);
+            int highFuryDmg = RunDamagingSkillDamage(injectedFury: 100);
             Assert.True(highFuryDmg > lowFuryDmg,
                 $"High Fury ({highFuryDmg}) should deal more damage than low Fury ({lowFuryDmg}).");
         }
 
-        [Fact]
-        public void NonStrSkill_DamageNotAffectedByFury()
-        {
-            // Non-STR skill should ignore Fury entirely.
-            int lowFuryDmg = RunNonStrSkillDamage(injectedFury: 0);
-            int highFuryDmg = RunNonStrSkillDamage(injectedFury: 100);
-            Assert.Equal(lowFuryDmg, highFuryDmg);
-        }
-
-        // ── IsStrSkill flag on BattleSkill ────────────────────────────────────
+        // ── BattleUnit FuryDamageScale field ─────────────────────────────────
 
         [Fact]
-        public void BattleSkill_IsStrSkill_DefaultIsFalse()
+        public void BattleUnit_FuryDamageScale_DefaultIsZero()
         {
-            var skill = new BattleSkill("id", "Name", Cost: 0, TotalDamageMultiplier: 1.0, Effects: Array.Empty<SkillEffect>());
-            Assert.False(skill.IsStrSkill);
-        }
-
-        [Fact]
-        public void BattleSkill_IsStrSkill_CanBeSetTrue()
-        {
-            var skill = new BattleSkill("id", "Name", Cost: 0, TotalDamageMultiplier: 1.0,
-                Effects: Array.Empty<SkillEffect>(), IsStrSkill: true);
-            Assert.True(skill.IsStrSkill);
-        }
-
-        [Fact]
-        public void BattleSkill_FuryDamageScale_DefaultIsZero()
-        {
-            var skill = new BattleSkill("id", "Name", Cost: 0, TotalDamageMultiplier: 1.0, Effects: Array.Empty<SkillEffect>());
-            Assert.Equal(0.0, skill.FuryDamageScale);
+            var unit = MakeUnit(traits: null);
+            Assert.Equal(0.0, unit.FuryDamageScale);
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────
 
-        // Runs a STR skill action and returns total damage at the given injected Fury.
-        private static int RunStrSkillDamage(int injectedFury)
+        // Runs a damaging skill action and returns total damage at the given injected Fury.
+        private static int RunDamagingSkillDamage(int injectedFury)
         {
             var session = StartFuryBattle(seed: 42);
             if (injectedFury != 0)
@@ -258,23 +231,7 @@ namespace GameCore.Tests.Battle
             return result.Events.Where(e => e.TargetId == "target" && e.Value > 0).Sum(e => e.Value);
         }
 
-        private static int RunNonStrSkillDamage(int injectedFury)
-        {
-            var session = StartFuryBattle(seed: 42);
-            if (injectedFury != 0)
-            {
-                var snap = new[]
-                {
-                    new UnitState("fury-unit", 100 * 100, true, new Dictionary<string, int> { ["fury"] = injectedFury }),
-                    new UnitState("target", 100 * 100, true, null),
-                };
-                session.TryExecute(new ResumeFromSnapshotCommand(snap, LastActorId: "target", AtStep: 0));
-            }
-            var result = session.TryExecute(new PlayerActionCommand("non-str-skill", "target"));
-            return result.Events.Where(e => e.TargetId == "target" && e.Value > 0).Sum(e => e.Value);
-        }
-
-        // Player: str-skill (IsStrSkill=true, FuryDamageScale=0.4), non-str-skill (IsStrSkill=false).
+        // Player: str-skill (damaging), non-str-skill (also damaging). FuryDamageScale is on the unit.
         private static BattleSession StartFuryBattle(
             bool enemyGoesFirst = false,
             int playerAgi = 50,
@@ -287,15 +244,14 @@ namespace GameCore.Tests.Battle
                 PlayerUnits = new List<BattleUnit>
                 {
                     new("fury-unit", "Barbarian", "player", Level: 1, Str: 100, Wis: 0, Agi: playerAgiForOrder,
+                        FuryDamageScale: 0.4,
                         Skills: new BattleSkill[]
                         {
                             new("str-skill", "Mace Strike", Cost: 0, TotalDamageMultiplier: 1.0,
                                 Effects: PhysEffect(),
-                                IsStrSkill: true, FuryDamageScale: 0.4,
                                 Modifiers: new[] { "basic" }, ModifierTags: new[] { "basic" }),
                             new("non-str-skill", "Support Bash", Cost: 0, TotalDamageMultiplier: 1.0,
-                                Effects: PhysEffect(),
-                                IsStrSkill: false),
+                                Effects: PhysEffect()),
                         },
                         Traits: new[] { BattleTrait.FuryUser }),
                 },
@@ -306,7 +262,6 @@ namespace GameCore.Tests.Battle
                         {
                             new("def-basic", "Slam", Cost: 0, TotalDamageMultiplier: 1.0,
                                 Effects: PhysEffect(),
-                                IsStrSkill: true,
                                 Modifiers: new[] { "basic" }, ModifierTags: new[] { "basic" }),
                         }),
                 },

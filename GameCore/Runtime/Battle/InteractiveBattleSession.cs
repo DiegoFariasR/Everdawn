@@ -494,13 +494,14 @@ namespace GameCore.Battle
             bool isFocusEmpowered = HasActiveEffect(actor.Id, "focused") && effectiveSkill.IsFocusCompatible;
             if (isFocusEmpowered)
                 produced.Add(AddEvent(actor.Id, $"{actor.Name}'s Focus sharpens {effectiveSkill.Name}!", "skill"));
-            // Fury scaling: STR-tagged skills deal more damage based on the actor's current Fury.
+            // Fury scaling: FuryUser units deal more damage on all damaging skills based on their current Fury bar.
             // Scales continuously — no consumption. High Fury = stronger hits; low Fury = normal hits.
+            // FuryDamageScale is a unit stat; the bonus applies equally to every damaging skill.
             double furyDamageMult = 1.0;
-            if (actor.HasTrait(BattleTrait.FuryUser) && effectiveSkill.IsStrSkill && effectiveSkill.FuryDamageScale > 0)
+            if (actor.HasTrait(BattleTrait.FuryUser) && actor.FuryDamageScale > 0 && effectiveSkill.IsDirectDamage)
             {
                 int currentFury = GetBar(actor.Id, FurySystem.BarFury);
-                furyDamageMult = FurySystem.ComputeDamageBonus(currentFury, effectiveSkill.FuryDamageScale);
+                furyDamageMult = FurySystem.ComputeDamageBonus(currentFury, actor.FuryDamageScale);
             }
             // Flat (global) DamageDealtMultiplier from active effects stacks multiplicatively.
             double empowerMult = GetFlatDamageDealtMultiplier(actor.Id) * furyDamageMult;
@@ -750,9 +751,9 @@ namespace GameCore.Battle
                 return produced;
             }
 
-            // Fury: actor gains Fury once when using a STR-tagged skill.
+            // Fury: actor gains Fury once when using any damaging skill.
             // Granted once per skill execution, not per hit or per target.
-            if (actor.HasTrait(BattleTrait.FuryUser) && effectiveSkill.IsStrSkill)
+            if (actor.HasTrait(BattleTrait.FuryUser) && effectiveSkill.IsDirectDamage)
                 _bars[actor.Id][FurySystem.BarFury] = Math.Min(FurySystem.MaxBar,
                     GetBar(actor.Id, FurySystem.BarFury) + FurySystem.SkillUseGain);
 

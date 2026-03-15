@@ -517,6 +517,7 @@ namespace GameCore.Content
                 Penetrations: penetrations,
                 DisruptionPenetration: disruptionPenetration,
                 ThermalProtection: thermalProtection,
+                FuryDamageScale: raw.FuryDamageScale,
                 EquipmentType: Enum.Parse<EquipmentType>(raw.EquipmentType, ignoreCase: true),
                 ReactionSkill: reactionSkill);
         }
@@ -615,9 +616,7 @@ namespace GameCore.Content
                 TriggerConditions: raw.TriggerConditions?.Select(c => new TriggerCondition(
                     Range: c.Range != null ? Enum.Parse<SkillRange>(c.Range, ignoreCase: true) : (SkillRange?)null,
                     DamageType: c.DamageType != null ? Enum.Parse<EffectType>(c.DamageType, ignoreCase: true) : (EffectType?)null
-                )).ToArray(),
-                IsStrSkill: raw.IsStrSkill,
-                FuryDamageScale: raw.FuryDamageScale);
+                )).ToArray());
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────

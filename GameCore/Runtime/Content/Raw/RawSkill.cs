@@ -70,9 +70,6 @@ namespace GameCore.Content.Raw
         public string? Trigger { get; set; }               // ReactionTrigger name (e.g. "OnHitBy")
         public List<RawTriggerCondition>? TriggerConditions { get; set; }
         public string? IconDescription { get; set; } // authoring note for icon generation; not used at runtime
-        // ── Fury system ────────────────────────────────────────────────────────
-        public bool IsStrSkill { get; set; }    // must be set explicitly; never inferred
-        public double FuryDamageScale { get; set; } // max damage bonus at full Fury (0.5 = +50%)
     }
 
     public class RawTriggerCondition
