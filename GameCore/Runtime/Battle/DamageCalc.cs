@@ -11,6 +11,11 @@ namespace GameCore.Battle
     /// full audit trail — use it to debug or predict any hit precisely.
     /// </para>
     /// <para>
+    /// The full flow diagram and traceability table live in
+    /// <c>Docs/Design/damage-pipeline.md</c>. Keep the <c>DamageStep</c> name
+    /// strings, the diagram, and that table in sync whenever a layer changes.
+    /// </para>
+    /// <para>
     /// To add a new layer: append a step block below the existing ones in <see cref="Compute"/>.
     /// Read the current <c>value</c>, compute the transformed result, record a new
     /// <see cref="DamageStep"/>, then update <c>value</c>.
