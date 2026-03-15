@@ -1,11 +1,16 @@
 ﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <rect x="0" y="0" width="64" height="64" rx="8" fill="#1e2a3a" stroke="#3a5a80" stroke-width="1.5"/>
-  <rect x="8"  y="18" width="22" height="30" rx="2" fill="#3949ab" stroke="#7986cb" stroke-width="1.5"/>
-  <rect x="34" y="18" width="22" height="30" rx="2" fill="#3949ab" stroke="#7986cb" stroke-width="1.5"/>
-  <rect x="28" y="16" width="8"  height="34" rx="2" fill="#5c6bc0"/>
-  <line x1="12" y1="26" x2="26" y2="26" stroke="#9fa8da" stroke-width="1" opacity="0.7"/>
-  <line x1="12" y1="30" x2="26" y2="30" stroke="#9fa8da" stroke-width="1" opacity="0.7"/>
-  <line x1="12" y1="34" x2="26" y2="34" stroke="#9fa8da" stroke-width="1" opacity="0.7"/>
-  <path d="M44 46 Q40 40 44 32 Q46 38 50 34 Q48 40 46 38 Q48 44 44 46" fill="#ff7043"/>
-  <path d="M44 46 Q42 42 44 36 Q46 40 44 46" fill="#ffd54f"/>
+  <rect x="8"  y="14" width="20" height="34" rx="2" fill="#283593" stroke="#5c6bc0" stroke-width="1.5"/>
+  <rect x="36" y="14" width="20" height="34" rx="2" fill="#283593" stroke="#5c6bc0" stroke-width="1.5"/>
+  <rect x="26" y="12" width="12" height="38" rx="2" fill="#1a237e" stroke="#3949ab" stroke-width="1.5"/>
+  <line x1="12" y1="22" x2="24" y2="22" stroke="#9fa8da" stroke-width="1" opacity="0.7"/>
+  <line x1="12" y1="27" x2="24" y2="27" stroke="#9fa8da" stroke-width="1" opacity="0.7"/>
+  <line x1="12" y1="32" x2="24" y2="32" stroke="#9fa8da" stroke-width="1" opacity="0.7"/>
+  <line x1="12" y1="37" x2="24" y2="37" stroke="#9fa8da" stroke-width="1" opacity="0.7"/>
+  <line x1="40" y1="22" x2="52" y2="22" stroke="#9fa8da" stroke-width="1" opacity="0.7"/>
+  <line x1="40" y1="27" x2="52" y2="27" stroke="#9fa8da" stroke-width="1" opacity="0.7"/>
+  <line x1="40" y1="32" x2="52" y2="32" stroke="#9fa8da" stroke-width="1" opacity="0.7"/>
+  <path d="M 32,50 Q 28,42 30,34 Q 32,28 32,24 Q 34,30 36,28 Q 34,36 34,42 Q 33,46 32,50" fill="#ff7043"/>
+  <path d="M 32,48 Q 28,42 30,34 Q 32,30 32,26 Q 34,32 32,38 Q 31,44 32,48" fill="#ff9800"/>
+  <path d="M 32,46 Q 30,38 32,32 Q 33,36 32,42 Q 32,44 32,46" fill="#ffd54f"/>
 </svg>

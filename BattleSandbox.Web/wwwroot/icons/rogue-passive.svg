@@ -1,7 +1,13 @@
 ﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <rect x="0" y="0" width="64" height="64" rx="8" fill="#1e2a3a" stroke="#3a5a80" stroke-width="1.5"/>
-  <path d="M14 42 Q14 14 32 10 Q50 14 50 42 Z" fill="#546e7a" stroke="#78909c" stroke-width="2"/>
-  <rect x="12" y="40" width="40" height="14" rx="3" fill="#37474f" stroke="#78909c" stroke-width="1.5"/>
-  <rect x="16" y="43" width="32" height="7"  rx="2" fill="#1e2a3a"/>
-  <path d="M18 40 Q32 34 46 40" fill="none" stroke="#78909c" stroke-width="1.5" opacity="0.5"/>
+  <path d="M 8,20 Q 32,8 56,20 L 56,44 Q 44,58 32,62 Q 20,58 8,44 Z" fill="#1c2e38" stroke="#37474f" stroke-width="1.5"/>
+  <path d="M 12,22 Q 32,12 52,22 L 52,42 Q 42,54 32,58 Q 22,54 12,42 Z" fill="#102030"/>
+  <circle cx="22" cy="30" r="4" fill="#ef5350" stroke="#b71c1c" stroke-width="1"/>
+  <circle cx="22" cy="30" r="2" fill="#b71c1c"/>
+  <circle cx="42" cy="30" r="4" fill="#ef5350" stroke="#b71c1c" stroke-width="1"/>
+  <circle cx="42" cy="30" r="2" fill="#b71c1c"/>
+  <line x1="24" y1="34" x2="40" y2="34" stroke="#37474f" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 40,44 Q 38,40 38,36 Q 40,38 44,36 Q 42,40 46,42 Q 42,42 40,44" fill="#eceff1" stroke="#90a4ae" stroke-width="0.8"/>
+  <line x1="38" y1="36" x2="42" y2="54" stroke="#90a4ae" stroke-width="3" stroke-linecap="round"/>
+  <rect x="28" y="36" width="8" height="3" rx="1.5" fill="#37474f"/>
 </svg>
