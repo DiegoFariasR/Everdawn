@@ -1,0 +1,10 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="0" y="0" width="64" height="64" rx="8" fill="#2e1414" stroke="#802020" stroke-width="1.5"/>
+  <path d="M32 60 Q14 48 16 32 Q18 16 28 8 Q30 20 32 16 Q36 8 38 18 Q44 12 42 28 Q44 44 32 60" fill="#ff5722"/>
+  <path d="M32 58 Q18 46 20 32 Q22 20 30 12 Q32 20 32 26 Q36 16 38 22 Q42 28 40 40 Q38 50 32 58" fill="#ff7043"/>
+  <path d="M32 54 Q24 44 24 34 Q26 22 32 18 Q38 26 36 36 Q36 46 32 54" fill="#ff9800"/>
+  <path d="M32 50 Q28 42 28 34 Q30 26 32 24 Q36 30 34 38 Q34 44 32 50" fill="#ffd54f"/>
+  <circle cx="20" cy="34" r="2"   fill="#ffd54f" opacity="0.6"/>
+  <circle cx="46" cy="28" r="1.5" fill="#ffd54f" opacity="0.5"/>
+  <circle cx="24" cy="18" r="1.5" fill="#ffd54f" opacity="0.4"/>
+</svg>
