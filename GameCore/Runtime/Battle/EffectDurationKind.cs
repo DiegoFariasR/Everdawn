@@ -23,5 +23,13 @@ namespace GameCore.Battle
         /// Use for one-shot reactive effects (e.g. "until your next attack").
         /// </summary>
         UntilNextAction,
+
+        /// <summary>
+        /// The effect never expires automatically. It must be removed explicitly by the
+        /// system that applied it (e.g. when the triggering bar drops below its threshold).
+        /// Used for bar-driven status effects such as <c>slow</c> and <c>burning</c>, and
+        /// for one-shot CC such as <c>frozen</c> that is consumed on the unit's next turn.
+        /// </summary>
+        Permanent,
     }
 }

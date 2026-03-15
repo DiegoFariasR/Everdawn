@@ -30,6 +30,26 @@ namespace GameCore.Tests.Battle
         }
 
         [Fact]
+        public void ThermalBuffDefinitions_AreLoadedFromContent()
+        {
+            var ids = Content.AllBuffDefinitions.Select(d => d.Id).ToHashSet();
+            Assert.Contains(ThermalSystem.StatusSlow, ids);
+            Assert.Contains(ThermalSystem.StatusFrozen, ids);
+            Assert.Contains(ThermalSystem.StatusBurning, ids);
+        }
+
+        [Fact]
+        public void ThermalBuffDefinitions_HavePermanentDuration()
+        {
+            foreach (var id in new[] { ThermalSystem.StatusSlow, ThermalSystem.StatusFrozen, ThermalSystem.StatusBurning })
+            {
+                var def = Content.GetBuffDefinition(id);
+                Assert.Equal(EffectDurationKind.Permanent, def.DurationKind);
+                Assert.Equal(EffectStackingPolicy.RefreshDuration, def.StackingPolicy);
+            }
+        }
+
+        [Fact]
         public void AttackUp_HasCorrectDuration()
         {
             var def = Content.GetBuffDefinition("attack-up");
