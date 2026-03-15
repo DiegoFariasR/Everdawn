@@ -1,74 +1,31 @@
 namespace GameCore.Battle
 {
-    /// <summary>
-    /// What an effect does — routes heal and shield logic separately from damage.
-    /// </summary>
     public enum EffectKind
     {
         Damage,
         Heal,
         Shield,
-        /// <summary>
-        /// Adds or subtracts a fixed amount from a named bar on the target (e.g. MP, Focus, Fury).
-        /// Positive <see cref="SkillEffect.BarAmount"/> restores; negative drains.
-        /// </summary>
-        RestoreBar,
-        /// <summary>
-        /// Applies an active buff or debuff to the target for a fixed duration.
-        /// The effect definition is compiled inline from the skill's YAML data.
-        /// Applied once per target (not per hit). No damage is dealt.
-        /// </summary>
-        ApplyEffect,
-        /// <summary>
-        /// Grants the Focused buff to the actor (Self-targeting).
-        /// Used by the Focus skill to set up the Focused state before the refunded follow-up action.
-        /// Applied once per target, not per hit. No damage is dealt.
-        /// </summary>
-        GrantFocusedBuff,
-        /// <summary>
-        /// Removes one random buff or debuff from the target, depending on
-        /// <see cref="SkillEffect.DispelAlignment"/>.
-        /// Applied once per target, not per hit. No damage is dealt.
-        /// Bar-linked status effects (slow, frozen, burning, dizzy, stunned) are also eligible;
-        /// their backing bars are reset when dispelled.
-        /// </summary>
-        Dispel,
+        RestoreBar,      // adds/drains a named bar (MP, Focus, Fury…); positive = restore
+        ApplyEffect,     // applies a buff or debuff once per target (not per hit)
+        GrantFocusedBuff, // grants Focused to actor for use with a refunded follow-up action
+        Dispel,          // removes one buff or debuff; bar-linked statuses also eligible
     }
 
-    /// <summary>
-    /// Classifies an active effect as beneficial (buff) or harmful (debuff).
-    /// Used to determine which effects are valid targets for dispel skills.
-    /// </summary>
+    // Determines dispel eligibility.
     public enum EffectAlignment
     {
-        /// <summary>The effect is beneficial to its target (e.g. Attack Up, Defense Up).</summary>
-        Buff,
-        /// <summary>The effect is harmful to its target (e.g. Attack Down, Slow, Frozen).</summary>
-        Debuff,
+        Buff,   // beneficial (e.g. Attack Up, Defense Up)
+        Debuff, // harmful (e.g. Attack Down, Slow, Frozen)
     }
 
-    /// <summary>
-    /// The elemental category of a skill's effect.
-    /// Determines which attacker stat and defender resistance apply.
-    /// <list type="bullet">
-    ///   <item><see cref="Physical"/> — uses STR (PhysAttack). Generic physical with no CC.</item>
-    ///   <item><see cref="Blunt"/> — uses STR (PhysAttack). Physical sub-type; inherits Physical resistance + builds disruption bar.</item>
-    ///   <item><see cref="Slash"/> — uses STR (PhysAttack). Physical sub-type; inherits Physical resistance + builds bleed bar.</item>
-    ///   <item>All other types — use WIS (MagicAttack)</item>
-    /// </list>
-    /// <para>
-    /// <see cref="Blunt"/> and <see cref="Slash"/> are physical sub-types: their effective resistance
-    /// and penetration stack with the target's/actor's <see cref="Physical"/> stat. Active-effect
-    /// modifiers keyed on <see cref="Physical"/> also apply to both sub-types.
-    /// </para>
-    /// </summary>
+    // Elemental category; determines attacker stat and defender resistance.
+    // Blunt and Slash are Physical sub-types (use STR, inherit Physical resistance/pen).
+    // All other types use WIS.
     public enum EffectType
     {
         Physical,
-        /// <summary>Physical sub-type (STR). Inherits Physical resistance. Builds disruption bar from DamageComponent.BuildupPower.</summary>
-        Blunt,
-        /// <summary>Physical sub-type (STR). Inherits Physical resistance. Builds bleed bar from DamageComponent.BuildupPower.</summary>
-        Slash,
+        Blunt,     // Physical sub-type (STR). Inherits Physical resistance. Builds disruption bar.
+        Slash,     // Physical sub-type (STR). Inherits Physical resistance. Builds bleed bar.
         Fire,
         Cold,
         Lightning,
@@ -76,7 +33,6 @@ namespace GameCore.Battle
         Void,
     }
 
-    /// <summary>How a skill is delivered to its target.</summary>
     public enum SkillRange
     {
         Melee,
@@ -84,50 +40,24 @@ namespace GameCore.Battle
         Self,
     }
 
-    /// <summary>
-    /// High-level ability category.
-    /// Drives silencing, UI tagging, and future mechanic hooks.
-    /// </summary>
     public enum SkillCategory
     {
         Attack,
         Spell,
         Passive,
-        /// <summary>
-        /// Reaction skills fire automatically in response to a trigger, never as a chosen action.
-        /// Each unit may equip at most one reaction skill (stored in <see cref="BattleUnit.ReactionSkill"/>).
-        /// </summary>
-        Reaction,
+        Reaction, // fires on trigger, never chosen; at most one per unit
     }
 
-    /// <summary>
-    /// The condition that causes a <see cref="SkillCategory.Reaction"/> skill to fire.
-    /// </summary>
     public enum ReactionTrigger
     {
-        /// <summary>
-        /// Fires after the unit takes a hit from a damaging action (not heals or shields).
-        /// Filter what counts as a trigger by adding <see cref="TriggerCondition"/> entries to the skill.
-        /// When no conditions are specified, any damaging hit will fire the reaction.
-        /// </summary>
-        OnHitBy,
+        OnHitBy, // fires after taking a damaging hit (not heals/shields)
     }
 
-    /// <summary>
-    /// A filter condition for a <see cref="ReactionTrigger.OnHitBy"/> trigger.
-    /// All non-null fields in a single instance must match simultaneously (AND logic).
-    /// Multiple conditions in the list also AND together.
-    /// </summary>
+    // All non-null fields AND together; multiple conditions in a list also AND.
     public class TriggerCondition
     {
-        /// <summary>If set, the incoming skill must use this range (e.g. <see cref="SkillRange.Melee"/>).</summary>
-        public SkillRange? Range { get; }
-
-        /// <summary>
-        /// If set, the incoming skill must contain at least one damage component of this type
-        /// (e.g. <see cref="EffectType.Physical"/> to only react to physical hits).
-        /// </summary>
-        public EffectType? DamageType { get; }
+        public SkillRange? Range { get; }      // incoming skill must match this range
+        public EffectType? DamageType { get; } // incoming skill must include a component of this type
 
         public TriggerCondition(SkillRange? Range = null, EffectType? DamageType = null)
         {
