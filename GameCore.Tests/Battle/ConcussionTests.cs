@@ -56,7 +56,9 @@ namespace GameCore.Tests.Battle
         public void ConcussionSystem_ApplyConcussion_ResistanceCapsAt90()
         {
             // 100% resistance is capped at 90%: 10% of 60 power still builds.
-            // Due to binary floating-point: (int)(60 * (1.0 - 90/100.0)) = (int)(60 * 0.0999...) = 5.
+            // IEEE 754 double-precision: 1.0 − (90 / 100.0) ≈ 0.0999999…, so
+            // (int)(60 × 0.0999999…) truncates to 5, not 6. This matches DisruptionSystem's
+            // documented behaviour and the test in DisruptionTests.cs.
             int built = ConcussionSystem.ApplyConcussion(60, physicalResistance: 100, currentBar: 0, out int newBar);
             Assert.Equal(5, built);
             Assert.Equal(5, newBar);
