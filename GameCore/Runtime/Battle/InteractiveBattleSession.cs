@@ -184,7 +184,15 @@ namespace GameCore.Battle
                 return BuildResponse(newEvents);
             }
 
-            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor)).Last();
+            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor)).LastOrDefault();
+            if (skill == null)
+            {
+                newEvents.Add(AddEvent(actor.Id, $"{actor.Name} waits.", "status"));
+                if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
+                newEvents.AddRange(AutoAdvance());
+                return BuildResponse(newEvents);
+            }
+
             var targets = ResolveAutoTargets(actor, skill);
             if (targets.Count == 0) { CheckEnd(); return BuildResponse(Array.Empty<BattleEvent>()); }
 
@@ -223,7 +231,14 @@ namespace GameCore.Battle
                 return BuildResponse(newEvents);
             }
 
-            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor)).Last();
+            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor)).LastOrDefault();
+            if (skill == null)
+            {
+                newEvents.Add(AddEvent(actor.Id, $"{actor.Name} waits.", "status"));
+                if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
+                return BuildResponse(newEvents);
+            }
+
             var targets = ResolveAutoTargets(actor, skill);
             if (targets.Count == 0) { CheckEnd(); return BuildResponse(newEvents); }
 
@@ -304,7 +319,14 @@ namespace GameCore.Battle
                 }
 
                 // Auto-resolve enemy action.
-                var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor)).Last();
+                var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor)).LastOrDefault();
+                if (skill == null)
+                {
+                    produced.Add(AddEvent(actor.Id, $"{actor.Name} waits.", "status"));
+                    if (AdvanceTurn()) produced.AddRange(StartOfRound());
+                    continue;
+                }
+
                 var targets = ResolveAutoTargets(actor, skill);
                 if (targets.Count == 0) { CheckEnd(); break; }
 

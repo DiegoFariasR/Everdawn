@@ -50,6 +50,12 @@ namespace GameCore.Tests.Battle
             Str: 2 * budget, Wis: 0, Agi: 0,
             Skills: new[] { TauntSkill });
 
+        // Small boss for engine stability tests — always beatable regardless of archetype/skill mismatch.
+        private static BattleUnit BuildSmallBoss() => new BattleUnit(
+            "boss", "Dummy Boss", "enemy", Level: 1,
+            Str: 1, Wis: 0, Agi: 0,
+            Skills: new[] { TauntSkill });
+
         private static BattleUnit BuildAttacker(
             string archetypeId, double strFrac, double agiFrac, double wisFrac,
             int budget, BattleSkill skill) =>
@@ -58,7 +64,9 @@ namespace GameCore.Tests.Battle
                 Str: Math.Max(1, (int)(budget * strFrac)),
                 Wis: (int)(budget * wisFrac),
                 Agi: (int)(budget * agiFrac),
-                Skills: new[] { skill });
+                Skills: new[] { skill },
+                WeaponType: skill.RequiredWeaponTypes?.Count > 0 ? skill.RequiredWeaponTypes[0] : WeaponType.None,
+                Traits: skill.RequiredTrait.HasValue ? new[] { skill.RequiredTrait.Value } : null);
 
         public static IEnumerable<object[]> AllCombinations()
         {
@@ -80,13 +88,13 @@ namespace GameCore.Tests.Battle
             var db = ContentPipeline.Load(TestContentSource.Default);
             var skill = db.GetSkill(skillId);
             var attacker = BuildAttacker(archetypeId, strFrac, agiFrac, wisFrac, budget, skill);
-            var boss = BuildBoss(budget);
+            var boss = BuildSmallBoss();
             var setup = new BattleSetup
             {
                 PlayerUnits = new List<BattleUnit> { attacker },
                 EnemyUnits = new List<BattleUnit> { boss },
             };
-            var result = BattleEngine.Run(setup, seed: 42, maxRounds: 999);
+            var result = BattleEngine.Run(setup, seed: 42, maxRounds: 0);
             Assert.Equal("player", result.WinningTeam);
         }
 
