@@ -202,31 +202,25 @@ namespace GameCore.Tests.Battle
                         new DamageComponent[]
                         {
                             new DamageComponent(EffectType.Physical, new DamageScaling[] { new DamageScaling("str", 0.001) })
-                        },
-                        DisruptionPower: 0)
+                        })
                 },
                 Modifiers: new string[] { "basic" });
 
-        /// <summary>Physical skill with large disruption power — guarantees stun in one hit.</summary>
-        private static BattleSkill MassiveDisruptionSkill(
-            string id = "mass-disrupt",
-            EffectType effectType = EffectType.Physical)
-        {
-            string statName = effectType == EffectType.Physical ? "str" : "wis";
-            return new BattleSkill(id, "Massive Disruption", Cost: 0, DamageMultiplier: 1.0,
+        /// <summary>Blunt skill with BuildupPower=100 — guarantees stun in one hit.</summary>
+        private static BattleSkill MassiveDisruptionSkill(string id = "mass-disrupt") =>
+            new BattleSkill(id, "Massive Disruption", Cost: 0, DamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
                         new DamageComponent[]
                         {
-                            new DamageComponent(effectType, new DamageScaling[] { new DamageScaling(statName, 0.001) })
-                        },
-                        DisruptionPower: 100)  // guaranteed stun in one hit
+                            new DamageComponent(EffectType.Blunt, new DamageScaling[] { new DamageScaling("str", 0.001) },
+                                BuildupPower: 100)  // guaranteed stun in one hit
+                        })
                 },
                 Modifiers: new string[] { "basic" });
-        }
 
-        /// <summary>Skill that sets disruption exactly to DizzyThreshold with no resistance.</summary>
+        /// <summary>Blunt strike with BuildupPower exactly at DizzyThreshold — sets bar to exactly 50 (dizzy, not stun).</summary>
         private static BattleSkill DizzySkill(string id = "dizzy-skill") =>
             new BattleSkill(id, "Dizzying Strike", Cost: 0, DamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
@@ -234,9 +228,9 @@ namespace GameCore.Tests.Battle
                     new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
                         new DamageComponent[]
                         {
-                            new DamageComponent(EffectType.Physical, new DamageScaling[] { new DamageScaling("str", 0.001) })
-                        },
-                        DisruptionPower: DisruptionSystem.DizzyThreshold)  // exactly 50 → dizzy
+                            new DamageComponent(EffectType.Blunt, new DamageScaling[] { new DamageScaling("str", 0.001) },
+                                BuildupPower: DisruptionSystem.DizzyThreshold)  // exactly 50 → dizzy
+                        })
                 },
                 Modifiers: new string[] { "basic" });
 
@@ -326,16 +320,16 @@ namespace GameCore.Tests.Battle
                 },
                 Modifiers: new string[] { "basic" });
 
-            // Enemy attacks player with a disruption skill to get player's bar to 50.
+            // Enemy attacks player with a blunt skill to get player's bar to 50.
             var enemyDisruptSkill = new BattleSkill("edisrupt", "Enemy Disrupt", Cost: 0, DamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
                         new DamageComponent[]
                         {
-                            new DamageComponent(EffectType.Physical, new DamageScaling[] { new DamageScaling("str", 0.001) })
-                        },
-                        DisruptionPower: 50)
+                            new DamageComponent(EffectType.Blunt, new DamageScaling[] { new DamageScaling("str", 0.001) },
+                                BuildupPower: 50)
+                        })
                 },
                 Modifiers: new string[] { "basic" });
 
@@ -469,21 +463,21 @@ namespace GameCore.Tests.Battle
             Assert.True(bar > 0, $"Lightning skill with DisruptionPower=30 should build disruption; bar={bar}");
         }
 
-        // ── Test 9: Impact/blunt (physical) skill can build disruption ─────────
+        // ── Test 9: Blunt skill type-driven disruption buildup ──────────────────────────
 
         [Fact]
-        public void Integration_PhysicalBluntSkillWithDisruptionPower_BuildsDisruption()
+        public void Integration_BluntSkill_BuildsDisruptionViaType()
         {
-            // A physical blunt skill with explicit DisruptionPower builds the bar.
+            // A blunt skill with BuildupPower=40 builds disruption through the type-driven path.
             var bluntSkill = new BattleSkill("slam", "Slam", Cost: 0, DamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
                         new DamageComponent[]
                         {
-                            new DamageComponent(EffectType.Physical, new DamageScaling[] { new DamageScaling("str", 0.001) })
-                        },
-                        DisruptionPower: 40)
+                            new DamageComponent(EffectType.Blunt, new DamageScaling[] { new DamageScaling("str", 0.001) },
+                                BuildupPower: 40)
+                        })
                 },
                 Modifiers: new string[] { "basic" });
 

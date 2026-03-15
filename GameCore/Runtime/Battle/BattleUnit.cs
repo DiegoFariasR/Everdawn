@@ -64,17 +64,31 @@ namespace GameCore.Battle
         /// <summary>
         /// Returns this unit's resistance percentage for <paramref name="type"/>.
         /// 0 = no mitigation. 50 = half damage. 100 = immune. Negative = weakness.
+        /// Blunt and Slash are physical sub-types: their resistance stacks additively with Physical resistance.
         /// </summary>
-        public int GetResistance(EffectType type) =>
-            Resistances != null && Resistances.TryGetValue(type, out int r) ? r : 0;
+        public int GetResistance(EffectType type)
+        {
+            int r = Resistances != null && Resistances.TryGetValue(type, out int rv) ? rv : 0;
+            // Physical sub-types inherit Physical resistance (parent stacking).
+            if (type == EffectType.Blunt || type == EffectType.Slash)
+                r += Resistances != null && Resistances.TryGetValue(EffectType.Physical, out int phys) ? phys : 0;
+            return r;
+        }
 
         /// <summary>
         /// Returns this unit's penetration percentage for <paramref name="type"/>.
         /// Subtracted from the target's resistance before the damage formula is applied.
         /// 0 = no penetration. Positive = pierces resistance. Negative = anti-penetration.
+        /// Blunt and Slash are physical sub-types: their penetration stacks additively with Physical penetration.
         /// </summary>
-        public int GetPenetration(EffectType type) =>
-            Penetrations != null && Penetrations.TryGetValue(type, out int p) ? p : 0;
+        public int GetPenetration(EffectType type)
+        {
+            int p = Penetrations != null && Penetrations.TryGetValue(type, out int pv) ? pv : 0;
+            // Physical sub-types inherit Physical penetration (parent stacking).
+            if (type == EffectType.Blunt || type == EffectType.Slash)
+                p += Penetrations != null && Penetrations.TryGetValue(EffectType.Physical, out int physPen) ? physPen : 0;
+            return p;
+        }
 
         // ── Derived stats ────────────────────────────────────────────────
         /// <summary>Max HP derived from STR.</summary>
@@ -85,9 +99,9 @@ namespace GameCore.Battle
         public int MagicAttack => Wis * 8;
         /// <summary>Effective attack power — highest of physical or magic.</summary>
         public int Attack => Math.Max(PhysAttack, MagicAttack);
-        /// <summary>Returns the base attack stat for the given effect type. Physical uses STR; all other types use WIS.</summary>
+        /// <summary>Returns the base attack stat for the given effect type. Physical, Blunt, and Slash use STR; all other types use WIS.</summary>
         public int GetBaseAttack(EffectType type) =>
-            type == EffectType.Physical ? PhysAttack : MagicAttack;
+            (type == EffectType.Physical || type == EffectType.Blunt || type == EffectType.Slash) ? PhysAttack : MagicAttack;
         /// <summary>
         /// Returns the derived attack value for a named stat.
         /// str → PhysAttack (Str × 8), wis → MagicAttack (Wis × 8), agi → Agi.
@@ -125,6 +139,8 @@ namespace GameCore.Battle
                 d[ThermalSystem.BarBurn] = ThermalSystem.MaxBar;
                 // Disruption bar: every unit can accumulate disruption.
                 d[DisruptionSystem.BarDisruption] = DisruptionSystem.MaxBar;
+                // Bleed bar: every unit can accumulate bleed.
+                d[BleedSystem.BarBleed] = BleedSystem.MaxBar;
                 return d;
             }
         }
@@ -142,6 +158,7 @@ namespace GameCore.Battle
                 d[ThermalSystem.BarCold] = 0;                      // thermal bars start empty
                 d[ThermalSystem.BarBurn] = 0;
                 d[DisruptionSystem.BarDisruption] = 0;             // disruption bar starts empty
+                d[BleedSystem.BarBleed] = 0;                       // bleed bar starts empty
                 return d;
             }
         }

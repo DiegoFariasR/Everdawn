@@ -32,6 +32,7 @@ namespace GameCore.Battle
         private readonly ActiveEffectDefinition _slowDef;
         private readonly ActiveEffectDefinition _frozenDef;
         private readonly ActiveEffectDefinition _burningDef;
+        private readonly ActiveEffectDefinition _bleedingDef;
         // Units that currently carry the Focused buff (granted by the Focus skill).
         // Focused is consumed by the first IsFocusCompatible skill the unit uses, or expires when their turn ends.
         private readonly HashSet<string> _focusedUnits = new HashSet<string>();
@@ -65,6 +66,7 @@ namespace GameCore.Battle
             _slowDef = ResolveThermalDef(setup, ThermalSystem.StatusSlow, "Slow");
             _frozenDef = ResolveThermalDef(setup, ThermalSystem.StatusFrozen, "Frozen");
             _burningDef = ResolveThermalDef(setup, ThermalSystem.StatusBurning, "Burning");
+            _bleedingDef = ResolveThermalDef(setup, BleedSystem.StatusBleeding, "Bleeding");
         }
 
         private static ActiveEffectDefinition ResolveThermalDef(
@@ -120,6 +122,8 @@ namespace GameCore.Battle
             // Frozen state is not persisted in snapshots, so it is intentionally not restored.
             foreach (var u in _allUnits)
                 if (_hp[u.Id] > 0) SyncThermalActiveEffects(u.Id);
+            foreach (var u in _allUnits)
+                if (_hp[u.Id] > 0) SyncBleedActiveEffects(u.Id);
             _turnIndex = NextAliveIndexAfter(r.LastActorId);
 
             CheckEnd();
@@ -719,8 +723,8 @@ namespace GameCore.Battle
                                 GetBar(target.Id, FurySystem.BarFury) + furyGain);
                         }
 
-                        // Thermal buildup: fire and cold hits build opposing bars on the target.
-                        produced.AddRange(ApplyThermalBuildup(target, hitResults));
+                        // Thermal, disruption, and bleed CC buildup from the damage hit results.
+                        produced.AddRange(ApplyCCBuildup(actor, target, hitResults));
 
                         // Disruption buildup: apply per-hit disruption power declared on the skill effect.
                         if (effect != null && effect.DisruptionPower > 0)
@@ -971,6 +975,29 @@ namespace GameCore.Battle
             int newDisruption = DisruptionSystem.ApplyDecay(disruptionBar);
             if (newDisruption != disruptionBar) _bars[actor.Id][DisruptionSystem.BarDisruption] = newDisruption;
 
+            // Bleed DOT: applied before decay so the damage reflects the current bar.
+            int bleedBar = GetBar(actor.Id, BleedSystem.BarBleed);
+            if (bleedBar >= BleedSystem.BleedingThreshold)
+            {
+                int bleedDot = BleedSystem.ComputeBleedDot(bleedBar);
+                if (bleedDot > 0)
+                {
+                    int barrierCurrent = GetBar(actor.Id, "barrier");
+                    int barrierAbsorbed = Math.Min(barrierCurrent, bleedDot);
+                    if (barrierAbsorbed > 0)
+                        _bars[actor.Id]["barrier"] = barrierCurrent - barrierAbsorbed;
+                    _hp[actor.Id] = Math.Max(0, _hp[actor.Id] - (bleedDot - barrierAbsorbed));
+                    events.Add(AddEvent(actor.Id, $"{actor.Name} takes {bleedDot} bleed damage!", "status",
+                        targetId: actor.Id, value: bleedDot));
+                    CheckEnd();
+                }
+            }
+
+            // Bleed bar decay.
+            int newBleed = BleedSystem.ApplyDecay(bleedBar);
+            if (newBleed != bleedBar) _bars[actor.Id][BleedSystem.BarBleed] = newBleed;
+            SyncBleedActiveEffects(actor.Id);
+
             // Focus regeneration: each turn, units with a Focus bar regain FocusRegenPerTurn points.
             if (_bars[actor.Id].TryGetValue("focus", out int currentFocus))
             {
@@ -991,11 +1018,11 @@ namespace GameCore.Battle
         }
 
         /// <summary>
-        /// Applies thermal buildup to <paramref name="target"/> from fire and cold hits in
-        /// <paramref name="hitResults"/>. Generates events for freeze triggers.
-        /// Uses runtime resistance modifiers from active effects when computing buildup.
+        /// Routes CC buildup from all damage results to the appropriate system:
+        /// Fire/Cold → thermal bars, Blunt → disruption bar, Slash → bleed bar.
+        /// Generates status events when CC thresholds are crossed.
         /// </summary>
-        private IReadOnlyList<BattleEvent> ApplyThermalBuildup(BattleUnit target, IReadOnlyList<DamageResult> hitResults)
+        private IReadOnlyList<BattleEvent> ApplyCCBuildup(BattleUnit actor, BattleUnit target, IReadOnlyList<DamageResult> hitResults)
         {
             var events = new List<BattleEvent>();
             foreach (var r in hitResults)
@@ -1035,8 +1062,18 @@ namespace GameCore.Battle
                     _bars[target.Id][ThermalSystem.BarCold] = newCold;
                     _bars[target.Id][ThermalSystem.BarBurn] = newBurn;
                 }
+                else if (r.EffectType == EffectType.Blunt)
+                {
+                    // Blunt damage builds disruption bar using DisruptionResistance/Penetration.
+                    events.AddRange(ApplyDisruptionBuildup(actor, target, r.BuildupPower));
+                }
+                else if (r.EffectType == EffectType.Slash)
+                {
+                    // Slash damage builds bleed bar using the target's effective Slash resistance.
+                    events.AddRange(ApplyBleedBuildup(target, r.BuildupPower));
+                }
             }
-            // Sync slow and burning active effects for the target after all hits resolve.
+            // Sync thermal active effects for the target after all hits resolve.
             SyncThermalActiveEffects(target.Id);
             return events;
         }
@@ -1070,8 +1107,42 @@ namespace GameCore.Battle
             return events;
         }
 
+        // ── Bleed helpers ────────────────────────────────────────────────────
+
         /// <summary>
-        /// Returns the active status effect IDs for a unit, or null when none are active.
+        /// Applies bleed power to <paramref name="target"/>'s bleed bar for one hit.
+        /// Bleed resistance is derived from the target's effective Slash resistance (stacks with Physical).
+        /// Generates the <c>bleeding</c> active effect when the bar reaches <see cref="BleedSystem.BleedingThreshold"/>.
+        /// </summary>
+        private IReadOnlyList<BattleEvent> ApplyBleedBuildup(BattleUnit target, int bleedPower)
+        {
+            var events = new List<BattleEvent>();
+            int current = GetBar(target.Id, BleedSystem.BarBleed);
+            // Bleed resistance is the effective Slash resistance (which stacks with Physical resistance).
+            int slashResistance = GetEffectiveResistance(target.Id, EffectType.Slash);
+            int built = BleedSystem.ApplyBleed(bleedPower, slashResistance, current, out int newBar);
+            _bars[target.Id][BleedSystem.BarBleed] = newBar;
+
+            if (built > 0)
+                events.Add(AddEvent(target.Id, $"{target.Name} takes {built} bleed buildup.", "status"));
+
+            SyncBleedActiveEffects(target.Id);
+            return events;
+        }
+
+        /// <summary>
+        /// Applies or removes the <c>bleeding</c> active effect based on the unit's current bleed bar.
+        /// Called after any bleed bar change (buildup or decay).
+        /// </summary>
+        private void SyncBleedActiveEffects(string unitId)
+        {
+            int bleedBar = GetBar(unitId, BleedSystem.BarBleed);
+            bool shouldBeBleeding = bleedBar >= BleedSystem.BleedingThreshold;
+            if (shouldBeBleeding && !HasActiveEffect(unitId, BleedSystem.StatusBleeding))
+                ApplyActiveEffect(unitId, _bleedingDef, unitId);
+            else if (!shouldBeBleeding)
+                RemoveActiveEffect(unitId, BleedSystem.StatusBleeding);
+        }
         /// Thermal effects (slow/frozen/burning) are tracked as active effects and appear here automatically.
         /// Disruption effects (dizzy/stunned) are derived from bars and the stunned set.
         /// </summary>
@@ -1339,8 +1410,15 @@ namespace GameCore.Battle
                 return 1.0;
             double value = 1.0;
             foreach (var effect in effects)
-                if (effect.DamageDealtMultiplierByType != null && effect.DamageDealtMultiplierByType.TryGetValue(effectType, out double m))
+            {
+                if (effect.DamageDealtMultiplierByType == null) continue;
+                if (effect.DamageDealtMultiplierByType.TryGetValue(effectType, out double m))
                     value *= m;
+                // Physical sub-types inherit Physical outgoing multipliers.
+                if ((effectType == EffectType.Blunt || effectType == EffectType.Slash)
+                    && effect.DamageDealtMultiplierByType.TryGetValue(EffectType.Physical, out double mPhys))
+                    value *= mPhys;
+            }
             return value;
         }
 
@@ -1355,8 +1433,15 @@ namespace GameCore.Battle
                 return 1.0;
             double value = 1.0;
             foreach (var effect in effects)
-                if (effect.DamageTakenMultiplierByType != null && effect.DamageTakenMultiplierByType.TryGetValue(effectType, out double m))
+            {
+                if (effect.DamageTakenMultiplierByType == null) continue;
+                if (effect.DamageTakenMultiplierByType.TryGetValue(effectType, out double m))
                     value *= m;
+                // Physical sub-types inherit Physical incoming multipliers.
+                if ((effectType == EffectType.Blunt || effectType == EffectType.Slash)
+                    && effect.DamageTakenMultiplierByType.TryGetValue(EffectType.Physical, out double mPhys))
+                    value *= mPhys;
+            }
             return value;
         }
 
@@ -1379,11 +1464,19 @@ namespace GameCore.Battle
         private int GetEffectiveResistance(string unitId, EffectType effectType)
         {
             var unit = _allUnits.First(u => u.Id == unitId);
+            // BattleUnit.GetResistance already stacks Physical for Blunt/Slash sub-types.
             int value = unit.GetResistance(effectType);
             if (_activeEffects.TryGetValue(unitId, out var effects))
                 foreach (var effect in effects)
-                    if (effect.ResistanceModifierByType != null && effect.ResistanceModifierByType.TryGetValue(effectType, out int r))
+                {
+                    if (effect.ResistanceModifierByType == null) continue;
+                    if (effect.ResistanceModifierByType.TryGetValue(effectType, out int r))
                         value += r;
+                    // Physical sub-types also inherit runtime Physical resistance modifiers.
+                    if ((effectType == EffectType.Blunt || effectType == EffectType.Slash)
+                        && effect.ResistanceModifierByType.TryGetValue(EffectType.Physical, out int rPhys))
+                        value += rPhys;
+                }
             return value;
         }
 
@@ -1394,11 +1487,19 @@ namespace GameCore.Battle
         private int GetEffectivePenetration(string unitId, EffectType effectType)
         {
             var unit = _allUnits.First(u => u.Id == unitId);
+            // BattleUnit.GetPenetration already stacks Physical for Blunt/Slash sub-types.
             int value = unit.GetPenetration(effectType);
             if (_activeEffects.TryGetValue(unitId, out var effects))
                 foreach (var effect in effects)
-                    if (effect.PenetrationModifierByType != null && effect.PenetrationModifierByType.TryGetValue(effectType, out int p))
+                {
+                    if (effect.PenetrationModifierByType == null) continue;
+                    if (effect.PenetrationModifierByType.TryGetValue(effectType, out int p))
                         value += p;
+                    // Physical sub-types also inherit runtime Physical penetration modifiers.
+                    if ((effectType == EffectType.Blunt || effectType == EffectType.Slash)
+                        && effect.PenetrationModifierByType.TryGetValue(EffectType.Physical, out int pPhys))
+                        value += pPhys;
+                }
             return value;
         }
 

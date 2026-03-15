@@ -51,13 +51,24 @@ namespace GameCore.Battle
     /// The elemental category of a skill's effect.
     /// Determines which attacker stat and defender resistance apply.
     /// <list type="bullet">
-    ///   <item><see cref="Physical"/> — uses STR (PhysAttack)</item>
+    ///   <item><see cref="Physical"/> — uses STR (PhysAttack). Generic physical with no CC.</item>
+    ///   <item><see cref="Blunt"/> — uses STR (PhysAttack). Physical sub-type; inherits Physical resistance + builds disruption bar.</item>
+    ///   <item><see cref="Slash"/> — uses STR (PhysAttack). Physical sub-type; inherits Physical resistance + builds bleed bar.</item>
     ///   <item>All other types — use WIS (MagicAttack)</item>
     /// </list>
+    /// <para>
+    /// <see cref="Blunt"/> and <see cref="Slash"/> are physical sub-types: their effective resistance
+    /// and penetration stack with the target's/actor's <see cref="Physical"/> stat. Active-effect
+    /// modifiers keyed on <see cref="Physical"/> also apply to both sub-types.
+    /// </para>
     /// </summary>
     public enum EffectType
     {
         Physical,
+        /// <summary>Physical sub-type (STR). Inherits Physical resistance. Builds disruption bar from DamageComponent.BuildupPower.</summary>
+        Blunt,
+        /// <summary>Physical sub-type (STR). Inherits Physical resistance. Builds bleed bar from DamageComponent.BuildupPower.</summary>
+        Slash,
         Fire,
         Cold,
         Lightning,

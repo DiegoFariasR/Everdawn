@@ -10,7 +10,8 @@
     - kind: damage
       target: enemy
       damagePerHit:
-        - damageType: physical
+        - damageType: blunt
+          buildupPower: 20
           scaling:
             - stat: str
 
@@ -24,7 +25,8 @@
     - kind: damage
       target: enemy
       damagePerHit:
-        - damageType: physical
+        - damageType: blunt
+          buildupPower: 30
           scaling:
             - stat: str
               scale: 1.6
@@ -39,7 +41,8 @@
     - kind: damage
       target: enemy
       damagePerHit:
-        - damageType: physical
+        - damageType: blunt
+          buildupPower: 40
           scaling:
             - stat: str
               scale: 2.4
@@ -59,7 +62,8 @@
     - kind: damage
       target: enemy
       damagePerHit:
-        - damageType: physical
+        - damageType: slash
+          buildupPower: 15
           scaling:
             - stat: str
 
@@ -76,7 +80,8 @@
     - kind: damage
       target: enemy
       damagePerHit:
-        - damageType: physical
+        - damageType: slash
+          buildupPower: 25
           scaling:
             - stat: str
               scale: 1.4
@@ -171,7 +176,8 @@
     - kind: damage
       target: enemy
       damagePerHit:
-        - damageType: physical
+        - damageType: blunt
+          buildupPower: 25
           scaling:
             - stat: str
               scale: 1.4

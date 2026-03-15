@@ -426,9 +426,9 @@ namespace GameCore.Tests.Battle
                             new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
                                 new DamageComponent[]
                                 {
-                                    new DamageComponent(EffectType.Physical, new DamageScaling[] { new DamageScaling("str", 1.0) })
-                                },
-                                DisruptionPower: 40)
+                                    new DamageComponent(EffectType.Blunt, new DamageScaling[] { new DamageScaling("str", 1.0) },
+                                        BuildupPower: 40)
+                                })
                         })
                 });
 
