@@ -82,6 +82,14 @@ namespace GameCore.Battle
         /// Called with the component's damage type; the returned value multiplies the damage for that type
         /// (e.g. 0.8 = target takes 20% less). Stacks multiplicatively. Null = 1.0 for all types (no change).
         /// </param>
+        /// <param name="attackerOutputMult">
+        /// Flat attacker-side output multiplier applied after per-type modifiers (Layer 5: "AttackerOutput").
+        /// Use this for status penalties such as Dizzy (×0.8). Default 1.0 = no change.
+        /// </param>
+        /// <param name="defenderDamageTakenMult">
+        /// Flat defender-side damage-taken multiplier applied last (Layer 6: "DamageTaken").
+        /// Sourced from the target's active-effect <c>DamageTakenMultiplier</c> stat. Default 1.0 = no change.
+        /// </param>
         public static IReadOnlyList<DamageResult> Compute(
             BattleUnit actor,
             BattleUnit target,
@@ -92,7 +100,9 @@ namespace GameCore.Battle
             Func<EffectType, int>? getEffectiveResistance = null,
             Func<EffectType, int>? getEffectivePenetration = null,
             Func<EffectType, double>? getOutgoingTypeMult = null,
-            Func<EffectType, double>? getIncomingTypeMult = null)
+            Func<EffectType, double>? getIncomingTypeMult = null,
+            double attackerOutputMult = 1.0,
+            double defenderDamageTakenMult = 1.0)
         {
             var results = new List<DamageResult>();
             foreach (var component in components)
@@ -158,6 +168,26 @@ namespace GameCore.Battle
                         steps.Add(new DamageStep("IncomingTypeMult", value, afterIncomingTypeMult));
                         value = afterIncomingTypeMult;
                     }
+                }
+
+                // ── Layer 5: AttackerOutput ─────────────────────────────────────
+                // Flat attacker-side output modifier. Applied after per-type multipliers.
+                // Primary use: Dizzy status (×0.8). Skipped when equal to 1.0.
+                if (attackerOutputMult != 1.0)
+                {
+                    int afterAttackerOutput = Math.Max(0, (int)(value * attackerOutputMult));
+                    steps.Add(new DamageStep("AttackerOutput", value, afterAttackerOutput));
+                    value = afterAttackerOutput;
+                }
+
+                // ── Layer 6: DamageTaken ─────────────────────────────────────────
+                // Flat defender-side damage-taken modifier from active effects.
+                // Runs last so it stacks over all other layers. Skipped when equal to 1.0.
+                if (defenderDamageTakenMult != 1.0)
+                {
+                    int afterDamageTaken = Math.Max(0, (int)(value * defenderDamageTakenMult));
+                    steps.Add(new DamageStep("DamageTaken", value, afterDamageTaken));
+                    value = afterDamageTaken;
                 }
 
                 // ── Add future layers here ───────────────────────────────────────

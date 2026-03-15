@@ -634,24 +634,20 @@ namespace GameCore.Battle
                     else
                     {
                         var components = effect?.DamagePerHit ?? System.Array.Empty<DamageComponent>();
-                        // Pass effective resistance, penetration, and per-type damage dealt multiplier
-                        // resolvers so runtime modifiers are applied.
+                        // Pass all per-hit modifiers into the pipeline so the full audit trail
+                        // in DamageResult.Steps explains the final number without external adjustments.
+                        double attackerOutputMult = actorIsDizzy ? DisruptionSystem.DizzyDamageMultiplier : 1.0;
+                        double damageTakenMult = GetDamageTakenMultiplier(target.Id);
                         var hitResults = DamageCalc.Compute(actor, target, components, effectiveSkill.DamageMultiplier,
                             empowerMult * perHitHitsMult, _rng,
                             et => GetEffectiveResistance(target.Id, et),
                             et => GetEffectivePenetration(actor.Id, et),
                             et => GetOutgoingTypeMultiplier(actor.Id, et),
-                            et => GetIncomingTypeMultiplier(target.Id, et));
+                            et => GetIncomingTypeMultiplier(target.Id, et),
+                            attackerOutputMult,
+                            damageTakenMult);
                         int totalDamage = 0;
                         foreach (var r in hitResults) totalDamage += r.FinalDamage;
-
-                        // Dizzy: reduce the actor's final damage output by 20%.
-                        totalDamage = DisruptionSystem.ApplyDizzyReduction(totalDamage, actorIsDizzy);
-
-                        // DamageTakenMultiplier (flat, from StatModifiers) from target's active effects.
-                        // Applied after dizzy and after per-type taken multiplier.
-                        double damageTakenMult = GetDamageTakenMultiplier(target.Id);
-                        totalDamage = (int)(totalDamage * damageTakenMult);
 
                         var primaryType = effectiveSkill.PrimaryEffectType;
 
