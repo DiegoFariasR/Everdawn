@@ -1,6 +1,8 @@
 ﻿[
+    "buff-definitions.yml",
     "modifiers.yml",
     "modifier-tag-rules.yml",
+    "skills/buffs.yml",
     "skills/passive.yml",
     "skills/physical.yml",
     "skills/void.yml",

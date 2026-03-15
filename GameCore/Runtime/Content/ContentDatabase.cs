@@ -14,15 +14,18 @@ namespace GameCore.Content
         private readonly IReadOnlyDictionary<string, BattleUnit> _units;
         private readonly IReadOnlyDictionary<string, BattleSkill> _skills;
         private readonly IReadOnlyDictionary<string, BattleModifier> _modifiers;
+        private readonly IReadOnlyDictionary<string, ActiveEffectDefinition> _buffDefinitions;
 
         internal ContentDatabase(
             IEnumerable<BattleUnit> units,
             IEnumerable<BattleSkill> skills,
-            IEnumerable<BattleModifier> modifiers)
+            IEnumerable<BattleModifier> modifiers,
+            IReadOnlyDictionary<string, ActiveEffectDefinition>? buffDefinitions = null)
         {
             _units = units.ToDictionary(u => u.Id);
             _skills = skills.ToDictionary(s => s.Id);
             _modifiers = modifiers.ToDictionary(m => m.Id, StringComparer.OrdinalIgnoreCase);
+            _buffDefinitions = buffDefinitions ?? new Dictionary<string, ActiveEffectDefinition>();
         }
 
         /// <summary>Returns the unit with the given ID. Throws if not found.</summary>
@@ -49,5 +52,12 @@ namespace GameCore.Content
 
         /// <summary>All modifiers in the database.</summary>
         public IReadOnlyCollection<BattleModifier> AllModifiers => _modifiers.Values.ToList();
+
+        /// <summary>Returns the buff definition with the given ID. Throws if not found.</summary>
+        public ActiveEffectDefinition GetBuffDefinition(string id) =>
+            _buffDefinitions.TryGetValue(id, out var d) ? d : throw new KeyNotFoundException($"Buff definition '{id}' not found in content database.");
+
+        /// <summary>All buff definitions in the database.</summary>
+        public IReadOnlyCollection<ActiveEffectDefinition> AllBuffDefinitions => _buffDefinitions.Values.ToList();
     }
 }

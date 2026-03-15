@@ -15,3 +15,4 @@ skills:
   - id: warrior-passive
   - id: mace-crush
     modifiers: [counter-strike]
+  - id: battle-cry

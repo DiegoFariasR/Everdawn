@@ -1,0 +1,10 @@
+# Buff-applying skills — use `effectRef` to reference a shared buff definition.
+
+- id: battle-cry
+  name: Battle Cry
+  cooldown: 4
+  range: Self
+  effects:
+    - kind: applyEffect
+      target: ally
+      effectRef: attack-up

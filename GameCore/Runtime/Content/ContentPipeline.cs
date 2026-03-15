@@ -41,11 +41,12 @@ namespace GameCore.Content
         /// </summary>
         public static ContentDatabase Load(IContentSource source)
         {
+            var buffDefs = LoadBuffDefinitions(source);
             var tagRules = LoadModifierTagRules(source);
             var modifiers = LoadModifiers(source).ToDictionary(m => m.Id, StringComparer.OrdinalIgnoreCase);
-            var skills = LoadSkills(source).ToDictionary(s => s.Id);
+            var skills = LoadSkills(source, buffDefs).ToDictionary(s => s.Id);
             var units = LoadUnits(source, skills, modifiers, tagRules);
-            return new ContentDatabase(units, skills.Values, modifiers.Values);
+            return new ContentDatabase(units, skills.Values, modifiers.Values, buffDefs);
         }
 
         /// <summary>
@@ -147,7 +148,85 @@ namespace GameCore.Content
 
         // ── Skills ────────────────────────────────────────────────────────────
 
-        private static IEnumerable<BattleSkill> LoadSkills(IContentSource source)
+        private static IReadOnlyDictionary<string, ActiveEffectDefinition> LoadBuffDefinitions(IContentSource source)
+        {
+            const string path = "buff-definitions.yml";
+            if (!source.FileExists(path))
+                return new Dictionary<string, ActiveEffectDefinition>();
+
+            var list = ParseYaml<List<Raw.RawBuffDefinition>>(source.ReadAllText(path));
+            var result = new Dictionary<string, ActiveEffectDefinition>(StringComparer.OrdinalIgnoreCase);
+            foreach (var raw in list)
+                result[raw.Id] = CompileBuffDefinition(raw);
+            return result;
+        }
+
+        private static ActiveEffectDefinition CompileBuffDefinition(Raw.RawBuffDefinition raw)
+        {
+            var durationKind = Enum.Parse<EffectDurationKind>(raw.DurationKind, ignoreCase: true);
+            var stackingPolicy = Enum.Parse<EffectStackingPolicy>(raw.StackingPolicy, ignoreCase: true);
+            var s = raw.Stats;
+
+            var statModifiers = new List<RuntimeStatModifier>();
+            if (s.ReceivingHealingMultiplier.HasValue)
+                statModifiers.Add(new RuntimeStatModifier(RuntimeStatKey.ReceivingHealingMultiplier, ModifierOperation.Multiply, s.ReceivingHealingMultiplier.Value));
+            if (s.ReceivingBarrierMultiplier.HasValue)
+                statModifiers.Add(new RuntimeStatModifier(RuntimeStatKey.ReceivingBarrierMultiplier, ModifierOperation.Multiply, s.ReceivingBarrierMultiplier.Value));
+
+            Dictionary<EffectType, double>? damageDealt = null;
+            if (s.DamageDealtMultiplier != null)
+                foreach (var entry in s.DamageDealtMultiplier)
+                    foreach (var kvp in entry)
+                        foreach (var et in ExpandDamageTypeKey(kvp.Key))
+                        {
+                            if (damageDealt == null) damageDealt = new Dictionary<EffectType, double>();
+                            damageDealt[et] = damageDealt.TryGetValue(et, out double prev) ? prev * kvp.Value : kvp.Value;
+                        }
+
+            Dictionary<EffectType, double>? damageTaken = null;
+            if (s.DamageTakenMultiplier != null)
+                foreach (var entry in s.DamageTakenMultiplier)
+                    foreach (var kvp in entry)
+                        foreach (var et in ExpandDamageTypeKey(kvp.Key))
+                        {
+                            if (damageTaken == null) damageTaken = new Dictionary<EffectType, double>();
+                            damageTaken[et] = damageTaken.TryGetValue(et, out double prev) ? prev * kvp.Value : kvp.Value;
+                        }
+
+            Dictionary<EffectType, int>? resistance = null;
+            if (s.Resistance != null)
+                foreach (var entry in s.Resistance)
+                    foreach (var kvp in entry)
+                        foreach (var et in ExpandDamageTypeKey(kvp.Key))
+                        {
+                            if (resistance == null) resistance = new Dictionary<EffectType, int>();
+                            resistance[et] = (resistance.TryGetValue(et, out int prev) ? prev : 0) + kvp.Value;
+                        }
+
+            Dictionary<EffectType, int>? penetration = null;
+            if (s.Penetration != null)
+                foreach (var entry in s.Penetration)
+                    foreach (var kvp in entry)
+                        foreach (var et in ExpandDamageTypeKey(kvp.Key))
+                        {
+                            if (penetration == null) penetration = new Dictionary<EffectType, int>();
+                            penetration[et] = (penetration.TryGetValue(et, out int prev) ? prev : 0) + kvp.Value;
+                        }
+
+            return new ActiveEffectDefinition(
+                Id: raw.Id,
+                Name: raw.Name ?? raw.Id,
+                DurationKind: durationKind,
+                Duration: raw.Duration,
+                StackingPolicy: stackingPolicy,
+                StatModifiers: statModifiers.Count > 0 ? statModifiers.ToArray() : null,
+                DamageDealtMultiplier: damageDealt,
+                DamageTakenMultiplierByType: damageTaken,
+                ResistanceModifierByType: resistance,
+                PenetrationModifierByType: penetration);
+        }
+
+        private static IEnumerable<BattleSkill> LoadSkills(IContentSource source, IReadOnlyDictionary<string, ActiveEffectDefinition> buffDefs)
         {
             const string dir = "skills";
             if (!source.DirectoryExists(dir))
@@ -157,7 +236,7 @@ namespace GameCore.Content
             {
                 var list = ParseYaml<List<RawSkill>>(source.ReadAllText(file));
                 foreach (var raw in list)
-                    yield return CompileSkill(raw);
+                    yield return CompileSkill(raw, buffDefs);
             }
         }
 
@@ -434,7 +513,7 @@ namespace GameCore.Content
                 ReactionSkill: reactionSkill);
         }
 
-        private static BattleSkill CompileSkill(RawSkill raw)
+        private static BattleSkill CompileSkill(RawSkill raw, IReadOnlyDictionary<string, ActiveEffectDefinition>? buffDefs = null)
         {
             var effects = new List<SkillEffect>();
             foreach (var rawEffect in raw.Effects)
@@ -452,7 +531,7 @@ namespace GameCore.Content
                         .ToArray();
                     components.Add(new DamageComponent(damageType, scaling, rawComp.BuildupPower));
                 }
-                effects.Add(new SkillEffect(kind, target, components, BarKey: rawEffect.BarKey, BarAmount: rawEffect.BarAmount, EffectDefinition: CompileEffectDefinition(kind, rawEffect)));
+                effects.Add(new SkillEffect(kind, target, components, BarKey: rawEffect.BarKey, BarAmount: rawEffect.BarAmount, EffectDefinition: CompileEffectDefinition(kind, rawEffect, buffDefs)));
             }
 
             // ── Passive stat bonuses ──────────────────────────────────────────
@@ -526,9 +605,21 @@ namespace GameCore.Content
         /// Builds an <see cref="ActiveEffectDefinition"/> from a raw skill effect when kind is ApplyEffect.
         /// Returns null for all other effect kinds.
         /// </summary>
-        private static ActiveEffectDefinition? CompileEffectDefinition(EffectKind kind, Raw.RawEffect rawEffect)
+        private static ActiveEffectDefinition? CompileEffectDefinition(EffectKind kind, Raw.RawEffect rawEffect, IReadOnlyDictionary<string, ActiveEffectDefinition>? buffDefs = null)
         {
-            if (kind != EffectKind.ApplyEffect || rawEffect.EffectId == null)
+            if (kind != EffectKind.ApplyEffect)
+                return null;
+
+            // EffectRef: resolve from the pre-compiled buff definition library
+            if (rawEffect.EffectRef != null)
+            {
+                if (buffDefs != null && buffDefs.TryGetValue(rawEffect.EffectRef, out var buffDef))
+                    return buffDef;
+                throw new InvalidOperationException(
+                    $"Buff definition '{rawEffect.EffectRef}' not found. Define it in buff-definitions.yml.");
+            }
+
+            if (rawEffect.EffectId == null)
                 return null;
 
             var durationKind = Enum.Parse<EffectDurationKind>(rawEffect.DurationKind, ignoreCase: true);
@@ -568,7 +659,7 @@ namespace GameCore.Content
             if (s.Resistance != null)
                 foreach (var entry in s.Resistance)
                     foreach (var kvp in entry)
-                        if (Enum.TryParse<EffectType>(kvp.Key, ignoreCase: true, out var et))
+                        foreach (var et in ExpandDamageTypeKey(kvp.Key))
                         {
                             if (resistanceByType == null) resistanceByType = new Dictionary<EffectType, int>();
                             resistanceByType[et] = (resistanceByType.TryGetValue(et, out int prev) ? prev : 0) + kvp.Value;
@@ -579,7 +670,7 @@ namespace GameCore.Content
             if (s.Penetration != null)
                 foreach (var entry in s.Penetration)
                     foreach (var kvp in entry)
-                        if (Enum.TryParse<EffectType>(kvp.Key, ignoreCase: true, out var et))
+                        foreach (var et in ExpandDamageTypeKey(kvp.Key))
                         {
                             if (penetrationByType == null) penetrationByType = new Dictionary<EffectType, int>();
                             penetrationByType[et] = (penetrationByType.TryGetValue(et, out int prev) ? prev : 0) + kvp.Value;

@@ -42,7 +42,13 @@ namespace GameCore.Content.Raw
         /// </summary>
         public int BarAmount { get; set; }
         // ── ApplyEffect fields ────────────────────────────────────────────────
-        /// <summary>Stable ID for the active effect definition. Required when Kind is "applyEffect".</summary>
+        /// <summary>
+        /// References a pre-compiled buff definition by ID (from buff-definitions.yml).
+        /// Mutually exclusive with inline <see cref="EffectId"/> / <see cref="Stats"/>.
+        /// When set, the duration, stacking policy, and stats all come from the buff definition.
+        /// </summary>
+        public string? EffectRef { get; set; }
+        /// <summary>Stable ID for the active effect definition. Required when Kind is "applyEffect" with inline stats.</summary>
         public string? EffectId { get; set; }
         /// <summary>Display name shown in the UI and battle log. Defaults to EffectId when omitted.</summary>
         public string? EffectName { get; set; }

@@ -1,0 +1,38 @@
+# Reusable buff/debuff definitions.
+# Skills reference these by ID via `effectRef: <id>` instead of repeating inline stats.
+
+- id: attack-up
+  name: Attack Up
+  duration: 2
+  durationKind: ForTargetTurns
+  stackingPolicy: RefreshDuration
+  stats:
+    damageDealtMultiplier:
+      - allTypes: 1.3
+
+- id: defense-up
+  name: Defense Up
+  duration: 2
+  durationKind: ForTargetTurns
+  stackingPolicy: RefreshDuration
+  stats:
+    damageTakenMultiplier:
+      - allTypes: 0.75
+
+- id: attack-down
+  name: Attack Down
+  duration: 2
+  durationKind: ForTargetTurns
+  stackingPolicy: RefreshDuration
+  stats:
+    damageDealtMultiplier:
+      - allTypes: 0.7
+
+- id: defense-down
+  name: Defense Down
+  duration: 2
+  durationKind: ForTargetTurns
+  stackingPolicy: RefreshDuration
+  stats:
+    resistance:
+      - allTypes: -20
