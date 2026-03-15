@@ -177,10 +177,10 @@ namespace GameCore.Battle
                         ValidationErrorCode.RequirementNotMet,
                         $"Skill '{cmd.SkillId}' requires a trait or weapon type this unit does not have."
                     );
-                if (skill.FocusCost > 0)
+                if (skill.CostBarKey == "focus")
                     return Rejected(
                         ValidationErrorCode.InsufficientFocus,
-                        $"Not enough Focus to use '{cmd.SkillId}' (requires {skill.FocusCost})."
+                        $"Not enough Focus to use '{cmd.SkillId}' (requires {skill.Cost})."
                     );
                 return Rejected(
                     ValidationErrorCode.InsufficientMp,

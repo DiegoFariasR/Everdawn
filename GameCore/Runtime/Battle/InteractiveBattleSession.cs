@@ -39,7 +39,10 @@ namespace GameCore.Battle
         // Units that currently carry the Focused buff (granted by the Focus skill).
         // Focused is consumed by the first IsFocusCompatible skill the unit uses, or expires when their turn ends.
         private readonly HashSet<string> _focusedUnits = new HashSet<string>();
-        // Set by ExecuteAction when a skill has RefundsAction=true. Callers must skip AdvanceTurn for this action.
+        // Units that have used a Preparation skill this turn.
+        // Cleared when the unit's turn ends. Blocks additional Preparation skills until next turn.
+        private readonly HashSet<string> _preparedUnits = new HashSet<string>();
+        // Set by ExecuteAction when a Preparation skill fires. Callers must skip AdvanceTurn for this action.
         private bool _actionRefunded;
         // Set after StartOfTurn runs for the current _turnIndex.
         // Prevents re-applying burn DOT and bar decay on the free follow-up action granted by Focus.
@@ -254,7 +257,7 @@ namespace GameCore.Battle
                 return BuildResponse(newEvents);
             }
 
-            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (s.FocusCost == 0 || GetBar(actor.Id, "focus") >= s.FocusCost)).LastOrDefault();
+            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, s.CostBarKey) >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && !(s.Category == SkillCategory.Preparation && _preparedUnits.Contains(actor.Id))).LastOrDefault();
             if (skill == null)
             {
                 newEvents.Add(AddEvent(actor.Id, $"{actor.Name} waits.", "status"));
@@ -306,7 +309,7 @@ namespace GameCore.Battle
                 return BuildResponse(newEvents);
             }
 
-            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (s.FocusCost == 0 || GetBar(actor.Id, "focus") >= s.FocusCost)).LastOrDefault();
+            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, s.CostBarKey) >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && !(s.Category == SkillCategory.Preparation && _preparedUnits.Contains(actor.Id))).LastOrDefault();
             if (skill == null)
             {
                 newEvents.Add(AddEvent(actor.Id, $"{actor.Name} waits.", "status"));
@@ -335,7 +338,7 @@ namespace GameCore.Battle
                 pending = new BattlePendingInput(
                     Actor: actor,
                     Skills: skills,
-                    AvailableSkillIds: skills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (s.FocusCost == 0 || GetBar(actor.Id, "focus") >= s.FocusCost)).Select(s => s.Id).ToArray(),
+                    AvailableSkillIds: skills.Where(s => GetBar(actor.Id, s.CostBarKey) >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && !(s.Category == SkillCategory.Preparation && _preparedUnits.Contains(actor.Id))).Select(s => s.Id).ToArray(),
                     EnemyTargets: _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToArray(),
                     AllyTargets: _allUnits.Where(u => u.Team == actor.Team && _hp[u.Id] > 0).ToArray(),
                     SkillCooldowns: skills.Where(s => GetCooldown(s.Id) > 0)
@@ -400,7 +403,7 @@ namespace GameCore.Battle
                 }
 
                 // Auto-resolve enemy action.
-                var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (s.FocusCost == 0 || GetBar(actor.Id, "focus") >= s.FocusCost)).LastOrDefault();
+                var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, s.CostBarKey) >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && !(s.Category == SkillCategory.Preparation && _preparedUnits.Contains(actor.Id))).LastOrDefault();
                 if (skill == null)
                 {
                     produced.Add(AddEvent(actor.Id, $"{actor.Name} waits.", "status"));
@@ -476,27 +479,13 @@ namespace GameCore.Battle
             if (actor.ReactionSkill != null && _skillCooldowns.TryGetValue(actor.ReactionSkill.Id, out int rcd) && rcd > 0)
                 _skillCooldowns[actor.ReactionSkill.Id] = rcd - 1;
 
-            // Deduct focus cost for any skill that requires Focus.
-            // Availability is already filtered in BuildResponse and BattleSession, but we guard
-            // here too in case the engine is driven directly (e.g. tests, AI).
-            if (skill.FocusCost > 0)
-            {
-                int currentFocus = GetBar(actor.Id, "focus");
-                if (currentFocus < skill.FocusCost)
-                {
-                    produced.Add(AddEvent(actor.Id, $"{actor.Name} does not have enough Focus!", "status"));
-                    return produced;
-                }
-                _bars[actor.Id]["focus"] = currentFocus - skill.FocusCost;
-            }
-
             // Resolve the effective skill for this action: applies any runtime skill modifiers
             // from active effects on the actor. The base compiled skill is never mutated.
             var effectiveSkill = ResolveEffectiveSkill(actor, skill);
 
-            // Consume the skill's cost from the unit's mana bar, if they have one.
-            if (_bars[actor.Id].ContainsKey("mp"))
-                _bars[actor.Id]["mp"] = Math.Max(0, _bars[actor.Id]["mp"] - effectiveSkill.Cost);
+            // Consume the skill's cost from the appropriate resource bar (focus for FocusUser skills, mp otherwise).
+            if (effectiveSkill.Cost > 0 && _bars[actor.Id].ContainsKey(effectiveSkill.CostBarKey))
+                _bars[actor.Id][effectiveSkill.CostBarKey] = Math.Max(0, _bars[actor.Id][effectiveSkill.CostBarKey] - effectiveSkill.Cost);
 
             // Determine event type from skill modifier
             string evType = (effectiveSkill.IsHeal || effectiveSkill.IsShield || effectiveSkill.IsRestoreBar) ? "skill"
@@ -505,7 +494,7 @@ namespace GameCore.Battle
             // Focused buff: consumed by the first IsFocusCompatible skill used after a Focus action.
             // Grants the skill's configured effect (extra hit, extra projectile, etc.).
             // Does not modify damage multipliers — Focus is a precision layer, not a raw damage boost.
-            bool isFocusEmpowered = _focusedUnits.Contains(actor.Id) && effectiveSkill.IsFocusCompatible;
+            bool isFocusEmpowered = (_focusedUnits.Contains(actor.Id) || HasActiveEffect(actor.Id, "focused")) && effectiveSkill.IsFocusCompatible;
             if (isFocusEmpowered)
             {
                 _focusedUnits.Remove(actor.Id);
@@ -758,11 +747,13 @@ namespace GameCore.Battle
             if (skill.Cooldown > 0)
                 _skillCooldowns[skill.Id] = skill.Cooldown;
 
-            // RefundsAction: the actor gets another action immediately without advancing turn order.
-            // Skip post-action processing (fury gain, active-effect ticking, reactions) — those belong
-            // to the follow-up action so they are not applied twice in the same logical turn.
-            if (skill.RefundsAction)
+            // Preparation skills refund the action: the actor gets another action immediately without
+            // advancing turn order. Skip post-action processing (fury gain, active-effect ticking,
+            // reactions) — those belong to the follow-up action, not the setup action.
+            if (skill.Category == SkillCategory.Preparation)
             {
+                if (skill.Category == SkillCategory.Preparation)
+                    _preparedUnits.Add(actor.Id);
                 _actionRefunded = true;
                 CheckEnd();
                 return produced;
@@ -931,7 +922,10 @@ namespace GameCore.Battle
         {
             if (_isOver) return false;
             // Clear the Focused buff and turn-start flag for the actor whose turn just ended.
-            _focusedUnits.Remove(_turnOrder[_turnIndex].Id);
+            string endingActorId = _turnOrder[_turnIndex].Id;
+            _focusedUnits.Remove(endingActorId);
+            RemoveActiveEffect(endingActorId, "focused");
+            _preparedUnits.Remove(endingActorId);
             _startOfTurnDone = false;
             int prev = _turnIndex;
             for (int i = 0; i < _turnOrder.Count; i++)

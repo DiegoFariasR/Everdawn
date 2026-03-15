@@ -45,7 +45,8 @@ namespace GameCore.Battle
         Attack,
         Spell,
         Passive,
-        Reaction, // fires on trigger, never chosen; at most one per unit
+        Reaction,    // fires on trigger, never chosen; at most one per unit
+        Preparation, // refunds action; at most one Preparation buff active per unit at a time
     }
 
     public enum ReactionTrigger

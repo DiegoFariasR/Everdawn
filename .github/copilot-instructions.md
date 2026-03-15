@@ -205,6 +205,17 @@ Key rules:
 
 Design doc: `Docs/Design/reactions.md`.
 
+### Preparation Skills
+`SkillCategory.Preparation` is a skill category for setup actions that refund the actor's action. Using a Preparation skill does not consume the turn — the actor then takes a follow-up action in the same turn.
+
+Key rules:
+- Tagged `category: Preparation` in YAML. `refundsAction: true` is **auto-set by the ContentPipeline**; no need to write it in YAML.
+- Once per turn per unit: a unit cannot use a second Preparation skill in the same turn. Tracked via `_preparedUnits: HashSet<string>` (set when a Preparation skill fires; cleared in `AdvanceTurn()` when the unit's turn ends).
+- The once-per-turn lock is enforced in `AvailableSkillIds` and all AI skill selection paths.
+- Preparation skills do not go through focus/fury empowerment, do not tick active effects, and do not fire reactions — same as any refunded action.
+- The `focus` skill uses `category: Preparation` + `effectRef: Focused`; granting the Focused buff is its effect, not a special-cased mechanism.
+- In C# test code, `BattleSkill` is constructed directly and `RefundsAction` does **not** need to be set — the runtime checks `Category == Preparation` directly, so the refund works without it.
+
 ---
 
 ## Content Pipeline

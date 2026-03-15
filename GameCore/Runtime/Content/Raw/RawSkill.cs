@@ -67,8 +67,6 @@ namespace GameCore.Content.Raw
         public List<string>? PermittedEquipmentTypes { get; set; } // unit needs one of these
         public string? Trigger { get; set; }               // ReactionTrigger name (e.g. "OnHitBy")
         public List<RawTriggerCondition>? TriggerConditions { get; set; }
-        public int FocusCost { get; set; }
-        public bool RefundsAction { get; set; }
         public bool IsFocusCompatible { get; set; }
         public string? FocusEffect { get; set; }
         public double FocusEffectValue { get; set; }

@@ -43,6 +43,18 @@
     resistance:
       - allTypes: -20
 
+# ── Preparation status effects ────────────────────────────────────────────────
+# Focused: applied by Preparation skills; consumed when the unit next acts.
+# No stat modifiers — the empowerment is handled in code (isFocusCompatible check).
+# Duration 1 with UntilNextAction: ticked and removed after the follow-up action.
+
+- id: focused
+  name: Focused
+  iconDescription: "A sharp diamond pupil with concentration lines, poised to strike."
+  durationKind: UntilNextAction
+  duration: 1
+  stackingPolicy: RefreshDuration
+
 # ── Thermal status effects ────────────────────────────────────────────────────
 # These are bar-driven: applied and removed automatically by the thermal system.
 # They carry no stat modifiers — the mechanical effects are implemented in code.

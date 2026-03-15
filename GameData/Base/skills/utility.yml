@@ -1,15 +1,18 @@
 # Utility skills — Focus and other non-offensive actions.
 #
-# Focus: spends 100 FocusUser, grants the Focused buff, and immediately refunds the action.
-# The next Focus-compatible skill used by this unit consumes Focused and is empowered.
-# Focused expires at turn end if no eligible skill is used.
+# Focus: a Preparation skill that spends 100 Focus and applies the Focused buff.
+# category: Preparation auto-sets refundsAction, so the next action is not consumed.
+# The Focused buff expires UntilNextAction. The next Focus-compatible skill the unit uses
+# consumes it for empowerment. If no compatible skill is used, Focused expires naturally.
 
 - id: focus
   name: Focus
   iconDescription: "A single open eye with a diamond pupil, radiating concentration lines."
-  focusCost: 100
-  refundsAction: true
+  cost: 100
+  category: Preparation
+  permittedTraits: [FocusUser]
   range: Self
   effects:
-    - kind: grantFocusedBuff
+    - kind: applyEffect
       target: Ally
+      effectRef: Focused

@@ -59,8 +59,6 @@ namespace GameCore.Battle
         IReadOnlyList<TriggerCondition>? TriggerConditions = null,
         bool IsStrSkill = false,       // must be set explicitly; never inferred from scaling
         double FuryDamageScale = 0.0,  // max damage bonus at full Fury; bonus = scale × (fury/100)
-        int FocusCost = 0,
-        bool RefundsAction = false,    // actor acts again immediately after this resolves
         bool IsFocusCompatible = false,
         FocusEffectKind? FocusEffect = null,
         double FocusEffectValue = 0.0
@@ -93,6 +91,9 @@ namespace GameCore.Battle
         public bool IsBasic => ModifierTags?.Any(t => string.Equals(t, "basic", StringComparison.OrdinalIgnoreCase)) ?? false;
         public bool IsUltimate => ModifierTags?.Any(t => string.Equals(t, "ultimate", StringComparison.OrdinalIgnoreCase)) ?? false;
         public bool IsReaction => Category == SkillCategory.Reaction;
+        // Bar that Cost is deducted from: FocusUser-gated skills use the focus bar, all others use mp.
+        public string CostBarKey =>
+            PermittedTraits != null && PermittedTraits.Contains(BattleTrait.FocusUser) ? "focus" : "mp";
         // ultimates automatically start with at least 1 round of cooldown
         public int EffectiveInitialCooldown => IsUltimate ? Math.Max(1, InitialCooldown) : InitialCooldown;
 
