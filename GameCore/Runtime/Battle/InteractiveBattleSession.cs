@@ -514,7 +514,7 @@ namespace GameCore.Battle
             // Fury scaling: STR-tagged skills deal more damage based on the actor's current Fury.
             // Scales continuously — no consumption. High Fury = stronger hits; low Fury = normal hits.
             double furyDamageMult = 1.0;
-            if (actor.HasTrait(BattleTrait.Fury) && effectiveSkill.IsStrSkill && effectiveSkill.FuryDamageScale > 0)
+            if (actor.HasTrait(BattleTrait.FuryUser) && effectiveSkill.IsStrSkill && effectiveSkill.FuryDamageScale > 0)
             {
                 int currentFury = GetBar(actor.Id, FurySystem.BarFury);
                 furyDamageMult = FurySystem.ComputeDamageBonus(currentFury, effectiveSkill.FuryDamageScale);
@@ -725,7 +725,7 @@ namespace GameCore.Battle
 
                         // Fury: target gains fury from taking direct damage (flat + HP% bonus).
                         // Gain is per hit to reward tanking multiple strikes; HP% rewards low-armour builds.
-                        if (target.HasTrait(BattleTrait.Fury) && hpActuallyLost > 0)
+                        if (target.HasTrait(BattleTrait.FuryUser) && hpActuallyLost > 0)
                         {
                             int furyGain = FurySystem.ComputeHitGain(hpActuallyLost, target.MaxHp);
                             _bars[target.Id][FurySystem.BarFury] = Math.Min(FurySystem.MaxBar,
@@ -770,7 +770,7 @@ namespace GameCore.Battle
 
             // Fury: actor gains Fury once when using a STR-tagged skill.
             // Granted once per skill execution, not per hit or per target.
-            if (actor.HasTrait(BattleTrait.Fury) && effectiveSkill.IsStrSkill)
+            if (actor.HasTrait(BattleTrait.FuryUser) && effectiveSkill.IsStrSkill)
                 _bars[actor.Id][FurySystem.BarFury] = Math.Min(FurySystem.MaxBar,
                     GetBar(actor.Id, FurySystem.BarFury) + FurySystem.SkillUseGain);
 

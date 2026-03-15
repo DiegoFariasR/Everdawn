@@ -4,7 +4,7 @@
 - id: mace-strike
   name: Mace Strike
   iconDescription: "A heavy mace head striking downward, cracking stone beneath it."
-  requiredEquipmentTypes: [Blunt]
+  permittedEquipmentTypes: [Blunt]
   isStrSkill: true
   furyDamageScale: 0.4
   effects:
@@ -20,7 +20,7 @@
   name: Crushing Blow
   iconDescription: "A mace smashing through armour with radial cracks spreading outward."
   cooldown: 3
-  requiredEquipmentTypes: [Blunt]
+  permittedEquipmentTypes: [Blunt]
   isStrSkill: true
   furyDamageScale: 0.4
   effects:
@@ -37,7 +37,7 @@
   name: Shattering Blow
   iconDescription: "A mace impact with a large burst of shards and a shockwave ring."
   cooldown: 3
-  requiredEquipmentTypes: [Blunt]
+  permittedEquipmentTypes: [Blunt]
   isStrSkill: true
   furyDamageScale: 0.4
   effects:
@@ -56,7 +56,7 @@
 - id: sword-strike
   name: Sword Strike
   iconDescription: "A straight sword slashing diagonally with a clean sharp motion line."
-  requiredEquipmentTypes: [Slash]
+  permittedEquipmentTypes: [Slash]
   isStrSkill: true
   furyDamageScale: 0.3
   scalingHits:
@@ -75,7 +75,7 @@
   name: Cleave
   iconDescription: "A broad sweeping sword arc cutting through two silhouettes at once."
   cooldown: 3
-  requiredEquipmentTypes: [Slash]
+  permittedEquipmentTypes: [Slash]
   isStrSkill: true
   furyDamageScale: 0.3
   scalingHits:
@@ -97,7 +97,7 @@
 - id: bow-shot
   name: Arrow Shot
   iconDescription: "A single arrow in flight, simple and straight."
-  requiredEquipmentTypes: [Bow]
+  permittedEquipmentTypes: [Bow]
   baseHits: 1.8
   effects:
     - kind: damage
@@ -111,7 +111,7 @@
   name: Precise Shot
   iconDescription: "An arrow centred on a target reticle, tip glowing."
   cooldown: 3
-  requiredEquipmentTypes: [Bow]
+  permittedEquipmentTypes: [Bow]
   baseHits: 2.2
   effects:
     - kind: damage
@@ -125,7 +125,7 @@
   name: Volley
   iconDescription: "Three arrows fanned out and arcing upward in a spread pattern."
   cooldown: 3
-  requiredEquipmentTypes: [Bow]
+  permittedEquipmentTypes: [Bow]
   baseHits: 3.0
   effects:
     - kind: damage
@@ -142,7 +142,7 @@
 - id: dagger-strike
   name: Dagger Strike
   iconDescription: "A thin dagger thrusting forward with twin motion lines behind it."
-  requiredEquipmentTypes: [Pierce]
+  permittedEquipmentTypes: [Pierce]
   baseHits: 2.0
   scalingHits:
     - stat: agi
@@ -160,7 +160,7 @@
   name: Flurry
   iconDescription: "Four daggers in a circular blur pattern suggesting rapid spinning strikes."
   cooldown: 3
-  requiredEquipmentTypes: [Pierce]
+  permittedEquipmentTypes: [Pierce]
   baseHits: 3.0
   scalingHits:
     - stat: agi
@@ -180,7 +180,7 @@
   name: Shield Bash
   iconDescription: "A round shield slamming forward with a stunned impact starburst."
   cooldown: 3
-  requiredEquipmentTypes: [Blunt]
+  permittedEquipmentTypes: [Blunt]
   isStrSkill: true
   furyDamageScale: 0.35
   effects:
@@ -209,7 +209,7 @@
   name: Death Mark
   iconDescription: "A dagger with a skull crosshair mark overlaid on its blade."
   cooldown: 3
-  requiredEquipmentTypes: [Pierce]
+  permittedEquipmentTypes: [Pierce]
   baseHits: 2.5
   scalingHits:
     - stat: agi
@@ -227,7 +227,7 @@
   iconDescription: "A closed eye with a focused beam of light emanating from the brow."
   cooldown: 4
   range: Self
-  requiredTraits: [Focus]
+  permittedTraits: [FocusUser]
   effects:
     - kind: restoreBar
       target: ally

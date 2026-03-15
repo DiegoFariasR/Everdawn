@@ -13,7 +13,7 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void Focus_MaxFocus_IsOneHundred()
         {
-            var unit = MakeUnit(traits: new[] { BattleTrait.Focus });
+            var unit = MakeUnit(traits: new[] { BattleTrait.FocusUser });
             Assert.Equal(100, unit.MaxBars.TryGetValue("focus", out int v) ? v : 0);
         }
 
@@ -21,7 +21,7 @@ namespace GameCore.Tests.Battle
         public void Focus_InitialFocus_IsOneHundred()
         {
             // Focus starts at full so units can immediately use the Focus skill.
-            var unit = MakeUnit(traits: new[] { BattleTrait.Focus });
+            var unit = MakeUnit(traits: new[] { BattleTrait.FocusUser });
             Assert.Equal(100, unit.InitialBars.TryGetValue("focus", out int v) ? v : 0);
         }
 
@@ -195,7 +195,7 @@ namespace GameCore.Tests.Battle
                                 Effects: new SkillEffect[] { new(EffectKind.GrantFocusedBuff, BattleSkillTarget.Ally, Array.Empty<DamageComponent>()) },
                                 Range: SkillRange.Self, FocusCost: 100, RefundsAction: true),
                         },
-                        Traits: new[] { BattleTrait.Focus }),
+                        Traits: new[] { BattleTrait.FocusUser }),
                 },
                 EnemyUnits = new List<BattleUnit>
                 {

@@ -4,7 +4,7 @@ level: 12
 str: 85
 wis: 55
 agi: 55
-traits: [MagicUser, Fury]
+traits: [ManaUser, FuryUser]
 equipmentType: Blunt
 skills:
   - id: mace-strike

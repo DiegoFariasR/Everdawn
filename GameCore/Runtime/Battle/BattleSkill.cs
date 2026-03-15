@@ -133,15 +133,15 @@ namespace GameCore.Battle
         /// </summary>
         int PassiveDisruptionResistance = 0,
         /// <summary>
-        /// If set, the unit must have all of these traits to use this skill.
-        /// For example, Spell skills may require <see cref="BattleTrait.MagicUser"/>.
+        /// If set, the unit must have at least one of these traits to use this skill.
+        /// For example, Spell skills may require <see cref="BattleTrait.ManaUser"/>.
         /// </summary>
-        IReadOnlyList<BattleTrait>? RequiredTraits = null,
+        IReadOnlyList<BattleTrait>? PermittedTraits = null,
         /// <summary>
         /// If set, the unit must be carrying one of these equipment types to use this skill.
         /// For example, a mace skill requires <see cref="EquipmentType.Blunt"/>.
         /// </summary>
-        IReadOnlyList<EquipmentType>? RequiredEquipmentTypes = null,
+        IReadOnlyList<EquipmentType>? PermittedEquipmentTypes = null,
         /// <summary>
         /// The trigger condition that causes this reaction skill to fire automatically.
         /// Null for non-reaction skills.
@@ -199,13 +199,14 @@ namespace GameCore.Battle
 
         /// <summary>
         /// Returns true if the given unit meets all requirements to use this skill.
-        /// A unit must have the required trait (if any) and one of the required equipment types (if any).
+        /// A unit must have at least one of the permitted traits (if any) and one of the permitted equipment types (if any).
+        /// Both groups are independent OR gates; if both are set, the unit must satisfy each independently.
         /// </summary>
         public bool MeetsRequirements(BattleUnit actor)
         {
-            if (RequiredTraits != null && RequiredTraits.Count > 0 && !RequiredTraits.All(t => actor.HasTrait(t)))
+            if (PermittedTraits != null && PermittedTraits.Count > 0 && !PermittedTraits.Any(t => actor.HasTrait(t)))
                 return false;
-            if (RequiredEquipmentTypes != null && !RequiredEquipmentTypes.Contains(actor.EquipmentType))
+            if (PermittedEquipmentTypes != null && !PermittedEquipmentTypes.Contains(actor.EquipmentType))
                 return false;
             return true;
         }

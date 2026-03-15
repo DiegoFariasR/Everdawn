@@ -149,15 +149,15 @@ namespace GameCore.Content.Raw
         /// </summary>
         public Dictionary<string, int> Resistance { get; set; } = new Dictionary<string, int>();
         /// <summary>
-        /// If set, the unit must have all of these traits to use this skill.
-        /// Values are <see cref="GameCore.Battle.BattleTrait"/> names (e.g. "MagicUser").
+        /// If set, the unit must have at least one of these traits to use this skill.
+        /// Values are <see cref="GameCore.Battle.BattleTrait"/> names (e.g. "ManaUser").
         /// </summary>
-        public List<string>? RequiredTraits { get; set; }
+        public List<string>? PermittedTraits { get; set; }
         /// <summary>
         /// If set, the unit must be carrying one of these equipment types to use this skill.
         /// Values are <see cref="GameCore.Battle.EquipmentType"/> names (e.g. "Blunt", "Slash").
         /// </summary>
-        public List<string>? RequiredEquipmentTypes { get; set; }
+        public List<string>? PermittedEquipmentTypes { get; set; }
         /// <summary>
         /// The trigger condition for a reaction skill. Only meaningful when Category is "Reaction".
         /// Value is a <see cref="GameCore.Battle.ReactionTrigger"/> name (e.g. "OnHitBy").

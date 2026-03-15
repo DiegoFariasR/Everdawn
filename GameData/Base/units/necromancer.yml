@@ -4,7 +4,7 @@ level: 15
 str: 80
 wis: 105
 agi: 65
-traits: [MagicUser]
+traits: [ManaUser]
 equipmentType: Staff
 skills:
   - id: necro-bolt

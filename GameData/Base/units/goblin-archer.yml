@@ -4,7 +4,7 @@ level: 14
 str: 55
 wis: 0
 agi: 100
-traits: [Focus]
+traits: [FocusUser]
 equipmentType: Bow
 skills:
   - id: bow-shot

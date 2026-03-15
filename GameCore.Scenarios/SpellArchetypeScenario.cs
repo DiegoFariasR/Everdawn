@@ -29,13 +29,13 @@ namespace GameCore.Scenarios
                 PlayerUnits = new List<BattleUnit>
                 {
                     // Pure WIS, 1 hit: baseline void damage.
-                    new BattleUnit("arch-bolt",     "Bolt Mage",     "player", Level: 10, Str: 30, Wis: 100, Agi: 5,  Skills: new[] { db.GetSkill("mage-bolt") },      Traits: new[] { BattleTrait.MagicUser }),
+                    new BattleUnit("arch-bolt",     "Bolt Mage",     "player", Level: 10, Str: 30, Wis: 100, Agi: 5,  Skills: new[] { db.GetSkill("mage-bolt") },      Traits: new[] { BattleTrait.ManaUser }),
                     // WIS + AGI: 0.5× WIS per hit, hits scale with AGI (1 per 100).
-                    new BattleUnit("arch-missiles", "Missile Mage",  "player", Level: 10, Str: 30, Wis: 60,  Agi: 40, Skills: new[] { db.GetSkill("spell-missiles") }, Traits: new[] { BattleTrait.MagicUser }),
+                    new BattleUnit("arch-missiles", "Missile Mage",  "player", Level: 10, Str: 30, Wis: 60,  Agi: 40, Skills: new[] { db.GetSkill("spell-missiles") }, Traits: new[] { BattleTrait.ManaUser }),
                     // WIS, 2 fixed hits: 0.6× WIS each. Same stats as bolt, different burst.
-                    new BattleUnit("arch-burst",    "Burst Mage",    "player", Level: 10, Str: 30, Wis: 100, Agi: 5,  Skills: new[] { db.GetSkill("spell-burst") },    Traits: new[] { BattleTrait.MagicUser }),
+                    new BattleUnit("arch-burst",    "Burst Mage",    "player", Level: 10, Str: 30, Wis: 100, Agi: 5,  Skills: new[] { db.GetSkill("spell-burst") },    Traits: new[] { BattleTrait.ManaUser }),
                     // WIS, 3 fixed hits: 0.4× WIS each. High hit count, lower per-hit.
-                    new BattleUnit("arch-volley",   "Volley Mage",   "player", Level: 10, Str: 30, Wis: 100, Agi: 5,  Skills: new[] { db.GetSkill("spell-volley") },   Traits: new[] { BattleTrait.MagicUser }),
+                    new BattleUnit("arch-volley",   "Volley Mage",   "player", Level: 10, Str: 30, Wis: 100, Agi: 5,  Skills: new[] { db.GetSkill("spell-volley") },   Traits: new[] { BattleTrait.ManaUser }),
                 },
                 EnemyUnits = db.GetUnits(EnemyUnitIds)
                                .Select(u => u with { Team = "enemy" }).ToList(),

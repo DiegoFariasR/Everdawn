@@ -4,7 +4,7 @@ level: 12
 str: 54
 wis: 0
 agi: 120
-traits: [Focus]
+traits: [FocusUser]
 equipmentType: Pierce
 skills:
   - id: dagger-strike

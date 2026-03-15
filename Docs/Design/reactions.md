@@ -107,7 +107,7 @@ Fields:
 - `cooldown` — rounds the reaction is unavailable after firing
 - `effects` — same effect system as regular skills; `sourceUnitId` from context is the default target
 
-Reactions can also declare `requiredEquipmentTypes` to restrict them to specific weapon users (e.g. a parry reaction only for shield users).
+Reactions can also declare `permittedEquipmentTypes` to restrict them to specific weapon users (e.g. a parry reaction only for shield users).
 
 ## Implemented Reactions
 

@@ -10,7 +10,7 @@ namespace GameCore.Battle
         /// The unit has a mana bar. MaxMp is derived from WIS (WIS × 10).
         /// Mana regenerates at the start of each round.
         /// </summary>
-        MagicUser,
+        ManaUser,
 
         /// <summary>
         /// The unit has a focus bar (max 100, starts at 50).
@@ -18,7 +18,7 @@ namespace GameCore.Battle
         /// When full, the next non-basic offensive skill is empowered (×1.5 damage)
         /// and focus resets to 50.
         /// </summary>
-        Focus,
+        FocusUser,
 
         /// <summary>
         /// The unit has a fury bar (max 100, starts at 0).
@@ -28,6 +28,6 @@ namespace GameCore.Battle
         /// Current Fury boosts the damage of STR-tagged skills dynamically.
         /// Full Fury means peak state; profile-specific passives define the exact payoff.
         /// </summary>
-        Fury,
+        FuryUser,
     }
 }

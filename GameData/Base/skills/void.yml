@@ -1,7 +1,7 @@
 - id: mage-bolt
   name: Magic Bolt
   iconDescription: "A bright orange fireball with trailing embers, compact and fast."
-  requiredTraits: [MagicUser]
+  permittedTraits: [ManaUser]
   effects:
     - kind: damage
       target: enemy
@@ -15,7 +15,7 @@
   name: Arcane Burst
   iconDescription: "A burst of fire exploding outward from a central point in a star pattern."
   cooldown: 3
-  requiredTraits: [MagicUser]
+  permittedTraits: [ManaUser]
   effects:
     - kind: damage
       target: enemy
@@ -31,7 +31,7 @@
   iconDescription: "A flaming rock plummeting from above with a fiery tail, striking multiple targets below."
   isAoe: true
   cooldown: 3
-  requiredTraits: [MagicUser]
+  permittedTraits: [ManaUser]
   effects:
     - kind: damage
       target: enemy
@@ -48,7 +48,7 @@
   isAoe: true
   cooldown: 4
   category: Spell
-  requiredTraits: [MagicUser]
+  permittedTraits: [ManaUser]
   effects:
     - kind: shield
       target: ally
@@ -63,7 +63,7 @@
   cooldown: 4
   range: Self
   category: Spell
-  requiredTraits: [MagicUser]
+  permittedTraits: [ManaUser]
   effects:
     - kind: restoreBar
       target: ally
@@ -73,7 +73,7 @@
 - id: necro-bolt
   name: Dark Bolt
   iconDescription: "A dark purple orb with a swirling void spiral inside it."
-  requiredTraits: [MagicUser]
+  permittedTraits: [ManaUser]
   effects:
     - kind: damage
       target: enemy
@@ -87,7 +87,7 @@
   name: Life Drain
   iconDescription: "A black tendril reaching from a skull toward a glowing red heart, draining it."
   cooldown: 3
-  requiredTraits: [MagicUser]
+  permittedTraits: [ManaUser]
   effects:
     - kind: damage
       target: enemy
@@ -102,7 +102,7 @@
   name: Soul Siphon
   iconDescription: "A ghostly soul being pulled out of a body into a dark vortex."
   cooldown: 3
-  requiredTraits: [MagicUser]
+  permittedTraits: [ManaUser]
   effects:
     - kind: damage
       target: enemy
@@ -124,7 +124,7 @@
 - id: spell-missiles
   name: Magic Missiles
   iconDescription: "Three small glowing bolts fanning outward in a spread."
-  requiredTraits: [MagicUser]
+  permittedTraits: [ManaUser]
   scalingHits:
     - stat: agi
       scale: 0.01
@@ -142,7 +142,7 @@
 - id: spell-burst
   name: Arcane Burst
   iconDescription: "Two concentric fire rings exploding outward simultaneously."
-  requiredTraits: [MagicUser]
+  permittedTraits: [ManaUser]
   baseHits: 2.0
   effects:
     - kind: damage
@@ -158,7 +158,7 @@
 - id: spell-volley
   name: Magic Volley
   iconDescription: "Three fire bolts stacked vertically, suggesting sequential rapid casts."
-  requiredTraits: [MagicUser]
+  permittedTraits: [ManaUser]
   baseHits: 3.0
   effects:
     - kind: damage

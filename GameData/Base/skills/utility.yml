@@ -1,6 +1,6 @@
 # Utility skills — Focus and other non-offensive actions.
 #
-# Focus: spends 100 Focus, grants the Focused buff, and immediately refunds the action.
+# Focus: spends 100 FocusUser, grants the Focused buff, and immediately refunds the action.
 # The next Focus-compatible skill used by this unit consumes Focused and is empowered.
 # Focused expires at turn end if no eligible skill is used.
 

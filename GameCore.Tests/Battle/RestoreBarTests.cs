@@ -88,7 +88,7 @@ namespace GameCore.Tests.Battle
             // Focus starts at 50. Restore 20 → 70 on the rogue's action.
             // Then enemy auto-advances (1 hit, Agi=1) → rogue loses 10 focus → 60.
             var rogue = new BattleUnit("rogue", "Rogue", "player", Level: 1, Str: 10, Wis: 0, Agi: 200,
-                Traits: new BattleTrait[] { BattleTrait.Focus },
+                Traits: new BattleTrait[] { BattleTrait.FocusUser },
                 Skills: new BattleSkill[] { MakeRestoreBarSkill("concentrate", "focus", 20) });
             var enemy = new BattleUnit("enemy", "Enemy", "enemy", Level: 1, Str: 1, Wis: 0, Agi: 1,
                 Skills: new BattleSkill[] { MakeDamageSkill("e-basic") });
@@ -108,7 +108,7 @@ namespace GameCore.Tests.Battle
             // Focus starts at 50. Restoring 100 clamps at 100. After enemy hits (−10): 90.
             // The key invariant: focus must not exceed 100 and must be higher than the 50 baseline.
             var rogue = new BattleUnit("rogue", "Rogue", "player", Level: 1, Str: 10, Wis: 0, Agi: 200,
-                Traits: new BattleTrait[] { BattleTrait.Focus },
+                Traits: new BattleTrait[] { BattleTrait.FocusUser },
                 Skills: new BattleSkill[] { MakeRestoreBarSkill("concentrate", "focus", 100) });
             var enemy = new BattleUnit("enemy", "Enemy", "enemy", Level: 1, Str: 1, Wis: 0, Agi: 1,
                 Skills: new BattleSkill[] { MakeDamageSkill("e-basic") });
@@ -131,7 +131,7 @@ namespace GameCore.Tests.Battle
             const int wis = 50;
             const int startMp = 200;
             var mage = new BattleUnit("mage", "Mage", "player", Level: 1, Str: 10, Wis: wis, Agi: 200,
-                Traits: new BattleTrait[] { BattleTrait.MagicUser },
+                Traits: new BattleTrait[] { BattleTrait.ManaUser },
                 Skills: new BattleSkill[] { MakeRestoreBarSkill("meditate", "mp", 100) });
             var enemy = new BattleUnit("enemy", "Enemy", "enemy", Level: 1, Str: 1, Wis: 0, Agi: 1,
                 Skills: new BattleSkill[] { MakeDamageSkill("e-basic") });
@@ -162,7 +162,7 @@ namespace GameCore.Tests.Battle
         {
             // Drain 200 focus from a unit that starts at 50 → clamp to 0.
             var rogue = new BattleUnit("rogue", "Rogue", "player", Level: 1, Str: 10, Wis: 0, Agi: 200,
-                Traits: new BattleTrait[] { BattleTrait.Focus },
+                Traits: new BattleTrait[] { BattleTrait.FocusUser },
                 Skills: new BattleSkill[] { MakeRestoreBarSkill("drain-focus", "focus", -200) });
             var enemy = new BattleUnit("enemy", "Enemy", "enemy", Level: 1, Str: 1, Wis: 0, Agi: 1,
                 Skills: new BattleSkill[] { MakeDamageSkill("e-basic") });
@@ -202,7 +202,7 @@ namespace GameCore.Tests.Battle
             // Unit at full focus (100) uses a RestoreBar skill — empowerment must NOT fire
             // (empowerment would reset focus to 50 and emit an "empowers" event).
             var rogue = new BattleUnit("rogue", "Rogue", "player", Level: 1, Str: 10, Wis: 0, Agi: 200,
-                Traits: new BattleTrait[] { BattleTrait.Focus },
+                Traits: new BattleTrait[] { BattleTrait.FocusUser },
                 Skills: new BattleSkill[] { MakeRestoreBarSkill("concentrate", "focus", 10) });
             var enemy = new BattleUnit("enemy", "Enemy", "enemy", Level: 1, Str: 1, Wis: 0, Agi: 1,
                 Skills: new BattleSkill[] { MakeDamageSkill("e-basic") });

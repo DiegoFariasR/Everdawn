@@ -64,7 +64,7 @@ namespace GameCore.Scenarios
                     // Grant MagicUser and a Blunt weapon so all benchmark skills are usable.
                     // This scenario is a sandbox for stat-vs-skill damage analysis, not a
                     // lore-accurate setup — requirements are intentionally satisfied broadly.
-                    Traits: new[] { BattleTrait.MagicUser },
+                    Traits: new[] { BattleTrait.ManaUser },
                     EquipmentType: EquipmentType.Blunt));
             }
 

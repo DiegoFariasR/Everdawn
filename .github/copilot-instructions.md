@@ -114,12 +114,12 @@ All projects in the solution use **C# 9.0**, set explicitly via `<LangVersion>9.
 
 ### Skill Requirements
 Skills can declare requirements a unit must meet to use them. Two kinds:
-- **`RequiredTraits`** (`IReadOnlyList<BattleTrait>?`) — unit must have all listed traits (e.g. `MagicUser` for spells).
-- **`RequiredEquipmentTypes`** (`IReadOnlyList<EquipmentType>?`) — unit must carry one of the listed equipment types (e.g. `[Blunt]` for mace skills, or `[Blunt, Slash]` to accept multiple).
+- **`PermittedTraits`** (`IReadOnlyList<BattleTrait>?`) — unit must have at least one of the listed traits (e.g. `ManaUser` for spells).
+- **`PermittedEquipmentTypes`** (`IReadOnlyList<EquipmentType>?`) — unit must carry one of the listed equipment types (e.g. `[Blunt]` for mace skills, or `[Blunt, Slash]` to accept multiple).
 
 `BattleSkill.MeetsRequirements(actor)` tests both. `InteractiveBattleSession` applies it to `AvailableSkillIds` and AI skill selection. `ValidationErrorCode.RequirementNotMet` is returned when a player submits a disqualified skill.
 
-`EquipmentType` values: `None`, `Blunt`, `Slash`, `Pierce`, `Bow`, `Staff`. Set per-unit in YAML via `equipmentType`; per-skill via `requiredEquipmentTypes` (list) and `requiredTraits` (list).
+`EquipmentType` values: `None`, `Blunt`, `Slash`, `Pierce`, `Bow`, `Staff`. Set per-unit in YAML via `equipmentType`; per-skill via `permittedEquipmentTypes` (list) and `permittedTraits` (list). If both are set, the unit must satisfy each independently (at least one match per group).
 
 ### Barrier System
 `EffectKind.Shield` skills grant a barrier that absorbs incoming damage before HP. Key rules:

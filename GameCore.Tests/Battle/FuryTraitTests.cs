@@ -13,14 +13,14 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void Fury_MaxFury_IsOneHundred()
         {
-            var unit = MakeUnit(traits: new[] { BattleTrait.Fury });
+            var unit = MakeUnit(traits: new[] { BattleTrait.FuryUser });
             Assert.Equal(100, unit.MaxBars.TryGetValue("fury", out int v) ? v : 0);
         }
 
         [Fact]
         public void Fury_InitialFury_IsZero()
         {
-            var unit = MakeUnit(traits: new[] { BattleTrait.Fury });
+            var unit = MakeUnit(traits: new[] { BattleTrait.FuryUser });
             Assert.Equal(0, unit.InitialBars.TryGetValue("fury", out int v) ? v : -1);
         }
 
@@ -304,7 +304,7 @@ namespace GameCore.Tests.Battle
                                 Effects: PhysEffect(),
                                 IsStrSkill: false),
                         },
-                        Traits: new[] { BattleTrait.Fury }),
+                        Traits: new[] { BattleTrait.FuryUser }),
                 },
                 EnemyUnits = new List<BattleUnit>
                 {

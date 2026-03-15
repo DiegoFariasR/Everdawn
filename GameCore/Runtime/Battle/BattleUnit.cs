@@ -130,10 +130,10 @@ namespace GameCore.Battle
             get
             {
                 var d = new Dictionary<string, int>();
-                int mp = HasTrait(BattleTrait.MagicUser) ? Wis * 10 : MaxMpOverride;
+                int mp = HasTrait(BattleTrait.ManaUser) ? Wis * 10 : MaxMpOverride;
                 if (mp > 0) d["mp"] = mp;
-                if (HasTrait(BattleTrait.Focus)) d["focus"] = 100;
-                if (HasTrait(BattleTrait.Fury)) d["fury"] = 100;
+                if (HasTrait(BattleTrait.FocusUser)) d["focus"] = 100;
+                if (HasTrait(BattleTrait.FuryUser)) d["fury"] = 100;
                 // Thermal bars: every unit can accumulate cold and burn.
                 d[ThermalSystem.BarCold] = ThermalSystem.MaxBar;
                 d[ThermalSystem.BarBurn] = ThermalSystem.MaxBar;
@@ -151,10 +151,10 @@ namespace GameCore.Battle
             get
             {
                 var d = new Dictionary<string, int>();
-                int mp = HasTrait(BattleTrait.MagicUser) ? Wis * 10 : MaxMpOverride;
+                int mp = HasTrait(BattleTrait.ManaUser) ? Wis * 10 : MaxMpOverride;
                 if (mp > 0) d["mp"] = mp;                         // mana starts full
-                if (HasTrait(BattleTrait.Focus)) d["focus"] = 100; // focus starts full; regenerates per turn
-                if (HasTrait(BattleTrait.Fury)) d["fury"] = 0;    // fury starts empty
+                if (HasTrait(BattleTrait.FocusUser)) d["focus"] = 100; // focus starts full; regenerates per turn
+                if (HasTrait(BattleTrait.FuryUser)) d["fury"] = 0;    // fury starts empty
                 d[ThermalSystem.BarCold] = 0;                      // thermal bars start empty
                 d[ThermalSystem.BarBurn] = 0;
                 d[DisruptionSystem.BarDisruption] = 0;             // disruption bar starts empty

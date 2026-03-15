@@ -65,8 +65,8 @@ namespace GameCore.Tests.Battle
                 Wis: (int)(budget * wisFrac),
                 Agi: (int)(budget * agiFrac),
                 Skills: new[] { skill },
-                EquipmentType: skill.RequiredEquipmentTypes?.Count > 0 ? skill.RequiredEquipmentTypes[0] : EquipmentType.None,
-                Traits: skill.RequiredTraits?.ToArray());
+                EquipmentType: skill.PermittedEquipmentTypes?.Count > 0 ? skill.PermittedEquipmentTypes[0] : EquipmentType.None,
+                Traits: skill.PermittedTraits?.ToArray());
 
         public static IEnumerable<object[]> AllCombinations()
         {
