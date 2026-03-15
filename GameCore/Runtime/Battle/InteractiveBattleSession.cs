@@ -23,6 +23,8 @@ namespace GameCore.Battle
         private string? _winningTeam;
         // Units that will lose their next turn due to the stunned status effect.
         private readonly HashSet<string> _stunnedUnits = new HashSet<string>();
+        // Units that will lose their next turn due to the concussed status effect.
+        private readonly HashSet<string> _concussedUnits = new HashSet<string>();
         // Active runtime effects: unitId → list of instances currently on that unit.
         private readonly Dictionary<string, List<ActiveEffectInstance>> _activeEffects =
             new Dictionary<string, List<ActiveEffectInstance>>();
@@ -171,6 +173,16 @@ namespace GameCore.Battle
                 return BuildResponse(newEvents);
             }
 
+            // If the player is concussed, their chosen action is skipped and the turn is consumed.
+            if (_concussedUnits.Contains(actor.Id))
+            {
+                _concussedUnits.Remove(actor.Id);
+                newEvents.Add(AddEvent(actor.Id, $"{actor.Name} is concussed and cannot act!", "status"));
+                if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
+                newEvents.AddRange(AutoAdvance());
+                return BuildResponse(newEvents);
+            }
+
             var skill = actor.ResolvedSkills.FirstOrDefault(s => s.Id == r.SkillId)
                          ?? throw new ArgumentException($"Unknown skill: {r.SkillId}");
 
@@ -241,6 +253,15 @@ namespace GameCore.Battle
                 return BuildResponse(newEvents);
             }
 
+            if (_concussedUnits.Contains(actor.Id))
+            {
+                _concussedUnits.Remove(actor.Id);
+                newEvents.Add(AddEvent(actor.Id, $"{actor.Name} is concussed and cannot act!", "status"));
+                if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
+                newEvents.AddRange(AutoAdvance());
+                return BuildResponse(newEvents);
+            }
+
             var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (s.FocusCost == 0 || GetBar(actor.Id, "focus") >= s.FocusCost)).LastOrDefault();
             if (skill == null)
             {
@@ -289,6 +310,15 @@ namespace GameCore.Battle
                 // Consume the stunned turn: skip the action and advance.
                 _stunnedUnits.Remove(actor.Id);
                 newEvents.Add(AddEvent(actor.Id, $"{actor.Name} is stunned and cannot act!", "status"));
+                if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
+                return BuildResponse(newEvents);
+            }
+
+            if (_concussedUnits.Contains(actor.Id))
+            {
+                // Consume the concussed turn: skip the action and advance.
+                _concussedUnits.Remove(actor.Id);
+                newEvents.Add(AddEvent(actor.Id, $"{actor.Name} is concussed and cannot act!", "status"));
                 if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
                 return BuildResponse(newEvents);
             }
@@ -346,7 +376,7 @@ namespace GameCore.Battle
 
         // ── Internals ────────────────────────────────────────────────────────
 
-        /// <summary>Auto-resolves enemy turns until it's a non-frozen, non-stunned player's turn or the battle ends.</summary>
+        /// <summary>Auto-resolves enemy turns until it's a non-frozen, non-stunned, non-concussed player's turn or the battle ends.</summary>
         private IReadOnlyList<BattleEvent> AutoAdvance()
         {
             var produced = new List<BattleEvent>();
@@ -355,9 +385,10 @@ namespace GameCore.Battle
                 var actor = _turnOrder[_turnIndex];
                 bool isFrozen = HasActiveEffect(actor.Id, ThermalSystem.StatusFrozen);
                 bool isStunned = _stunnedUnits.Contains(actor.Id);
+                bool isConcussed = _concussedUnits.Contains(actor.Id);
 
-                // Stop when it is a living, non-frozen, non-stunned player's turn — they need to provide input.
-                if (!isFrozen && !isStunned && actor.Team == "player") break;
+                // Stop when it is a living, non-frozen, non-stunned, non-concussed player's turn — they need to provide input.
+                if (!isFrozen && !isStunned && !isConcussed && actor.Team == "player") break;
 
                 // Process start-of-turn effects for this actor — only once per actual turn.
                 // When Focus refunds the action, the loop continues for the same actor without re-running these.
@@ -382,6 +413,15 @@ namespace GameCore.Battle
                     // Consume the stunned turn: skip the action and advance.
                     _stunnedUnits.Remove(actor.Id);
                     produced.Add(AddEvent(actor.Id, $"{actor.Name} is stunned and cannot act!", "status"));
+                    if (AdvanceTurn()) produced.AddRange(StartOfRound());
+                    continue;
+                }
+
+                if (isConcussed)
+                {
+                    // Consume the concussed turn: skip the action and advance.
+                    _concussedUnits.Remove(actor.Id);
+                    produced.Add(AddEvent(actor.Id, $"{actor.Name} is concussed and cannot act!", "status"));
                     if (AdvanceTurn()) produced.AddRange(StartOfRound());
                     continue;
                 }
@@ -556,6 +596,10 @@ namespace GameCore.Battle
             // Stunned actors don't reach ExecuteAction (turn is skipped), so no need to exclude them here.
             bool actorIsDizzy = GetBar(actor.Id, DisruptionSystem.BarDisruption) >= DisruptionSystem.DizzyThreshold;
 
+            // Dazed: actor's final damage output is reduced when their concussion bar is at/above the dazed threshold.
+            // Concussed actors don't reach ExecuteAction (turn is skipped), so no need to exclude them here.
+            bool actorIsDazed = GetBar(actor.Id, ConcussionSystem.BarConcussion) >= ConcussionSystem.DazedThreshold;
+
             foreach (var target in targets)
             {
                 // ApplyEffect: applies an active buff/debuff once per target, not per hit.
@@ -677,7 +721,9 @@ namespace GameCore.Battle
                         var components = effect?.DamagePerHit ?? System.Array.Empty<DamageComponent>();
                         // Pass all per-hit modifiers into the pipeline so the full audit trail
                         // in DamageResult.Steps explains the final number without external adjustments.
-                        double attackerOutputMult = actorIsDizzy ? DisruptionSystem.DizzyDamageMultiplier : 1.0;
+                        // Both dizzy (disruption) and dazed (concussion) apply their output penalty multiplicatively.
+                        double attackerOutputMult = (actorIsDizzy ? DisruptionSystem.DizzyDamageMultiplier : 1.0)
+                            * (actorIsDazed ? ConcussionSystem.DazedDamageMultiplier : 1.0);
                         double damageTakenMult = GetDamageTakenMultiplier(target.Id);
                         var hitResults = DamageCalc.Compute(actor, target, components, effectiveSkill.DamageMultiplier,
                             empowerMult * perHitHitsMult, _rng,
@@ -721,6 +767,9 @@ namespace GameCore.Battle
 
                         // Thermal buildup: fire and cold hits build opposing bars on the target.
                         produced.AddRange(ApplyThermalBuildup(target, hitResults));
+
+                        // Concussion buildup: blunt hits build the concussion bar on the target.
+                        produced.AddRange(ApplyConcussionBuildup(actor, target, hitResults));
 
                         // Disruption buildup: apply per-hit disruption power declared on the skill effect.
                         if (effect != null && effect.DisruptionPower > 0)
@@ -785,6 +834,7 @@ namespace GameCore.Battle
                     && t.ReactionSkill != null
                     && !HasActiveEffect(t.Id, ThermalSystem.StatusFrozen) // CC suppresses reactions
                     && !_stunnedUnits.Contains(t.Id)
+                    && !_concussedUnits.Contains(t.Id)
                     && GetCooldown(t.ReactionSkill!.Id) <= 0)       // not on cooldown
                 .OrderByDescending(t => t.Agi)
                 .ToList();
@@ -971,6 +1021,11 @@ namespace GameCore.Battle
             int newDisruption = DisruptionSystem.ApplyDecay(disruptionBar);
             if (newDisruption != disruptionBar) _bars[actor.Id][DisruptionSystem.BarDisruption] = newDisruption;
 
+            // Concussion bar decay.
+            int concussionBar = GetBar(actor.Id, ConcussionSystem.BarConcussion);
+            int newConcussion = ConcussionSystem.ApplyDecay(concussionBar);
+            if (newConcussion != concussionBar) _bars[actor.Id][ConcussionSystem.BarConcussion] = newConcussion;
+
             // Focus regeneration: each turn, units with a Focus bar regain FocusRegenPerTurn points.
             if (_bars[actor.Id].TryGetValue("focus", out int currentFocus))
             {
@@ -1071,9 +1126,43 @@ namespace GameCore.Battle
         }
 
         /// <summary>
+        /// Applies concussion buildup to <paramref name="target"/> from blunt hits in
+        /// <paramref name="hitResults"/>. Generates events for concussed procs.
+        /// Uses the target's physical resistance (capped at 90) to reduce buildup.
+        /// </summary>
+        private IReadOnlyList<BattleEvent> ApplyConcussionBuildup(BattleUnit actor, BattleUnit target, IReadOnlyList<DamageResult> hitResults)
+        {
+            var events = new List<BattleEvent>();
+            foreach (var r in hitResults)
+            {
+                if (r.BuildupPower <= 0) continue;
+                if (r.EffectType != EffectType.Blunt) continue;
+
+                int current = GetBar(target.Id, ConcussionSystem.BarConcussion);
+                // Concussion buildup is reduced by the target's physical resistance (Blunt is physical damage).
+                int physicalResistance = GetEffectiveResistance(target.Id, EffectType.Physical)
+                    - GetEffectivePenetration(actor.Id, EffectType.Physical);
+                int built = ConcussionSystem.ApplyConcussion(r.BuildupPower, physicalResistance, current, out int newBar);
+                _bars[target.Id][ConcussionSystem.BarConcussion] = newBar;
+
+                if (built > 0)
+                    events.Add(AddEvent(target.Id, $"{target.Name} takes {built} concussion.", "status"));
+
+                if (ConcussionSystem.CheckConcussedTriggered(ref newBar))
+                {
+                    _bars[target.Id][ConcussionSystem.BarConcussion] = newBar;
+                    _concussedUnits.Add(target.Id);
+                    events.Add(AddEvent(target.Id, $"{target.Name} is concussed!", "status"));
+                }
+            }
+            return events;
+        }
+
+        /// <summary>
         /// Returns the active status effect IDs for a unit, or null when none are active.
         /// Thermal effects (slow/frozen/burning) are tracked as active effects and appear here automatically.
         /// Disruption effects (dizzy/stunned) are derived from bars and the stunned set.
+        /// Concussion effects (dazed/concussed) are derived from bars and the concussed set.
         /// </summary>
         private IReadOnlyList<string>? BuildStatusEffects(string unitId)
         {
@@ -1083,13 +1172,18 @@ namespace GameCore.Battle
             bool isStunned = _stunnedUnits.Contains(unitId);
             var disruptionEffects = DisruptionSystem.GetDisruptionStatusEffects(disruptionBar, isStunned);
 
+            int concussionBar = GetBar(unitId, ConcussionSystem.BarConcussion);
+            bool isConcussed = _concussedUnits.Contains(unitId);
+            var concussionEffects = ConcussionSystem.GetConcussionStatusEffects(concussionBar, isConcussed);
+
             // Include the definition ID of each active runtime effect so the client can display icons.
             // Thermal status effects (slow, frozen, burning) are tracked as active effects.
             bool hasActiveEffects = _activeEffects.TryGetValue(unitId, out var effects) && effects.Count > 0;
 
-            if (disruptionEffects.Count == 0 && !hasActiveEffects) return null;
+            if (disruptionEffects.Count == 0 && concussionEffects.Count == 0 && !hasActiveEffects) return null;
 
             var all = new List<string>(disruptionEffects);
+            all.AddRange(concussionEffects);
             if (hasActiveEffects)
                 foreach (var e in effects!)
                     all.Add(e.DefinitionId);
@@ -1332,14 +1426,17 @@ namespace GameCore.Battle
         /// Returns the per-type outgoing damage multiplier for a unit and damage type from active effects.
         /// Feeds the "OutgoingTypeMult" pipeline step in <see cref="DamageCalc"/>.
         /// Base value is 1.0 (no change). Stacks multiplicatively across all active effect instances.
+        /// Blunt damage uses Physical multipliers — it is physical damage with concussion buildup.
         /// </summary>
         private double GetOutgoingTypeMultiplier(string unitId, EffectType effectType)
         {
             if (!_activeEffects.TryGetValue(unitId, out var effects) || effects.Count == 0)
                 return 1.0;
+            // Blunt is treated as Physical for all damage-dealt multiplier purposes.
+            var lookupType = effectType == EffectType.Blunt ? EffectType.Physical : effectType;
             double value = 1.0;
             foreach (var effect in effects)
-                if (effect.DamageDealtMultiplierByType != null && effect.DamageDealtMultiplierByType.TryGetValue(effectType, out double m))
+                if (effect.DamageDealtMultiplierByType != null && effect.DamageDealtMultiplierByType.TryGetValue(lookupType, out double m))
                     value *= m;
             return value;
         }
@@ -1348,14 +1445,17 @@ namespace GameCore.Battle
         /// Returns the per-type incoming damage multiplier for a unit and damage type from active effects.
         /// Feeds the "IncomingTypeMult" pipeline step in <see cref="DamageCalc"/>.
         /// Base value is 1.0 (no change). Values less than 1.0 reduce damage taken.
+        /// Blunt damage uses Physical multipliers — it is physical damage with concussion buildup.
         /// </summary>
         private double GetIncomingTypeMultiplier(string unitId, EffectType effectType)
         {
             if (!_activeEffects.TryGetValue(unitId, out var effects) || effects.Count == 0)
                 return 1.0;
+            // Blunt is treated as Physical for all damage-taken multiplier purposes.
+            var lookupType = effectType == EffectType.Blunt ? EffectType.Physical : effectType;
             double value = 1.0;
             foreach (var effect in effects)
-                if (effect.DamageTakenMultiplierByType != null && effect.DamageTakenMultiplierByType.TryGetValue(effectType, out double m))
+                if (effect.DamageTakenMultiplierByType != null && effect.DamageTakenMultiplierByType.TryGetValue(lookupType, out double m))
                     value *= m;
             return value;
         }
@@ -1375,14 +1475,17 @@ namespace GameCore.Battle
         /// <summary>
         /// Returns the effective resistance percentage for a unit and damage type, combining the
         /// unit's compiled base resistance with any runtime stat modifiers from active effects.
+        /// Blunt damage uses Physical resistance — it is physical damage with concussion buildup.
         /// </summary>
         private int GetEffectiveResistance(string unitId, EffectType effectType)
         {
+            // Blunt is treated as Physical for all resistance purposes.
+            var lookupType = effectType == EffectType.Blunt ? EffectType.Physical : effectType;
             var unit = _allUnits.First(u => u.Id == unitId);
-            int value = unit.GetResistance(effectType);
+            int value = unit.GetResistance(lookupType);
             if (_activeEffects.TryGetValue(unitId, out var effects))
                 foreach (var effect in effects)
-                    if (effect.ResistanceModifierByType != null && effect.ResistanceModifierByType.TryGetValue(effectType, out int r))
+                    if (effect.ResistanceModifierByType != null && effect.ResistanceModifierByType.TryGetValue(lookupType, out int r))
                         value += r;
             return value;
         }
@@ -1390,14 +1493,17 @@ namespace GameCore.Battle
         /// <summary>
         /// Returns the effective penetration percentage for a unit and damage type, combining the
         /// unit's compiled base penetration with any runtime stat modifiers from active effects.
+        /// Blunt damage uses Physical penetration — it is physical damage with concussion buildup.
         /// </summary>
         private int GetEffectivePenetration(string unitId, EffectType effectType)
         {
+            // Blunt is treated as Physical for all penetration purposes.
+            var lookupType = effectType == EffectType.Blunt ? EffectType.Physical : effectType;
             var unit = _allUnits.First(u => u.Id == unitId);
-            int value = unit.GetPenetration(effectType);
+            int value = unit.GetPenetration(lookupType);
             if (_activeEffects.TryGetValue(unitId, out var effects))
                 foreach (var effect in effects)
-                    if (effect.PenetrationModifierByType != null && effect.PenetrationModifierByType.TryGetValue(effectType, out int p))
+                    if (effect.PenetrationModifierByType != null && effect.PenetrationModifierByType.TryGetValue(lookupType, out int p))
                         value += p;
             return value;
         }
@@ -1555,7 +1661,8 @@ namespace GameCore.Battle
         /// <summary>
         /// Collects all effect IDs eligible for dispelling from a unit.
         /// Includes active effect instances with matching alignment plus bar-derived
-        /// disruption statuses (dizzy, stunned) when debuffs are targeted.
+        /// disruption statuses (dizzy, stunned) and concussion statuses (dazed, concussed)
+        /// when debuffs are targeted.
         /// </summary>
         private List<string> CollectDispelCandidates(string unitId, EffectAlignment? alignment)
         {
@@ -1581,6 +1688,14 @@ namespace GameCore.Battle
                     candidates.Add(DisruptionSystem.StatusStunned);
                 else if (disruptionBar >= DisruptionSystem.DizzyThreshold)
                     candidates.Add(DisruptionSystem.StatusDizzy);
+
+                // Concussion bar-derived statuses (not tracked as ActiveEffectInstances).
+                bool isConcussed = _concussedUnits.Contains(unitId);
+                int concussionBar = GetBar(unitId, ConcussionSystem.BarConcussion);
+                if (isConcussed)
+                    candidates.Add(ConcussionSystem.StatusConcussed);
+                else if (concussionBar >= ConcussionSystem.DazedThreshold)
+                    candidates.Add(ConcussionSystem.StatusDazed);
             }
 
             return candidates;
@@ -1604,7 +1719,7 @@ namespace GameCore.Battle
 
         /// <summary>
         /// Removes the named effect from a unit.
-        /// Bar-linked effects (slow, frozen, burning, dizzy, stunned) also reset
+        /// Bar-linked effects (slow, frozen, burning, dizzy, stunned, dazed, concussed) also reset
         /// their backing bar so the status cannot immediately reapply.
         /// </summary>
         private void DispelEffect(string unitId, string effectId)
@@ -1633,6 +1748,16 @@ namespace GameCore.Battle
             else if (effectId == DisruptionSystem.StatusDizzy)
             {
                 _bars[unitId][DisruptionSystem.BarDisruption] = 0;
+            }
+            // Concussion bar-derived statuses: reset the bar (and clear the concussed set if concussed).
+            else if (effectId == ConcussionSystem.StatusConcussed)
+            {
+                _concussedUnits.Remove(unitId);
+                _bars[unitId][ConcussionSystem.BarConcussion] = 0;
+            }
+            else if (effectId == ConcussionSystem.StatusDazed)
+            {
+                _bars[unitId][ConcussionSystem.BarConcussion] = 0;
             }
             // Regular active effects: remove directly.
             else

@@ -1,5 +1,7 @@
 # ── Mace ──────────────────────────────────────────────────────────────────────
 # Full STR base damage, single hit. Pure reliable power, no AGI interaction.
+# Mace skills deal blunt damage: treated as physical for all buffs/resistances,
+# but also builds the concussion CC bar.
 
 - id: mace-strike
   name: Mace Strike
@@ -10,7 +12,8 @@
     - kind: damage
       target: enemy
       damagePerHit:
-        - damageType: physical
+        - damageType: blunt
+          buildupPower: 20
           scaling:
             - stat: str
 
@@ -24,7 +27,8 @@
     - kind: damage
       target: enemy
       damagePerHit:
-        - damageType: physical
+        - damageType: blunt
+          buildupPower: 35
           scaling:
             - stat: str
               scale: 1.6
@@ -39,7 +43,8 @@
     - kind: damage
       target: enemy
       damagePerHit:
-        - damageType: physical
+        - damageType: blunt
+          buildupPower: 55
           scaling:
             - stat: str
               scale: 2.4
@@ -171,7 +176,8 @@
     - kind: damage
       target: enemy
       damagePerHit:
-        - damageType: physical
+        - damageType: blunt
+          buildupPower: 30
           scaling:
             - stat: str
               scale: 1.4

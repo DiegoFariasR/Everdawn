@@ -52,6 +52,10 @@ namespace GameCore.Battle
     /// Determines which attacker stat and defender resistance apply.
     /// <list type="bullet">
     ///   <item><see cref="Physical"/> — uses STR (PhysAttack)</item>
+    ///   <item><see cref="Blunt"/> — uses STR (PhysAttack); identical to Physical for all damage
+    ///     calculations, but also builds the <c>concussion</c> bar when
+    ///     <see cref="DamageComponent.BuildupPower"/> is set. Physical resistances, penetrations,
+    ///     and damage-dealt multipliers apply to Blunt hits.</item>
     ///   <item>All other types — use WIS (MagicAttack)</item>
     /// </list>
     /// </summary>
@@ -63,6 +67,14 @@ namespace GameCore.Battle
         Lightning,
         Holy,
         Void,
+        /// <summary>
+        /// Physical damage that also builds the concussion CC bar.
+        /// Treated as <see cref="Physical"/> for all damage calculations (STR-based, physical
+        /// resistance, physical penetration, physical damage-dealt multipliers).
+        /// Automatically applies concussion buildup per hit when
+        /// <see cref="DamageComponent.BuildupPower"/> is greater than zero.
+        /// </summary>
+        Blunt,
     }
 
     /// <summary>How a skill is delivered to its target.</summary>

@@ -16,6 +16,7 @@ namespace BattleSandbox.Web.Battle
         public static string DmgTypeCss(EffectType t) => t switch
         {
             EffectType.Physical => "badge-phys",
+            EffectType.Blunt => "badge-phys",
             EffectType.Fire => "badge-fire",
             EffectType.Cold => "badge-cold",
             EffectType.Lightning => "badge-lightning",
