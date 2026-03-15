@@ -72,11 +72,11 @@ namespace GameCore.Battle
         /// <c>actor.GetPenetration(type)</c> so that runtime active-effect penetration modifiers
         /// are applied. When null, falls back to the actor's compiled base penetrations.
         /// </param>
-        /// <param name="getEffectiveDamageDealtMultiplier">
-        /// Optional override for the per-type damage dealt multiplier lookup. When provided, called
-        /// with the component's damage type and the returned value multiplies the rolled damage for
-        /// that type. Stacks multiplicatively with <paramref name="extraMultiplier"/>.
-        /// When null, no per-type multiplier is applied (equivalent to 1.0 for all types).
+        /// <param name="getEffectiveDamageTakenMultiplier">
+        /// Optional override for the per-type damage taken multiplier lookup on the target.
+        /// When provided, called with the component's damage type and the returned value multiplies
+        /// the damage for that type (e.g. 0.8 = target takes 20% less). Stacks multiplicatively.
+        /// When null, no per-type taken multiplier is applied (equivalent to 1.0 for all types).
         /// </param>
         public static IReadOnlyList<DamageResult> Compute(
             BattleUnit actor,
@@ -87,7 +87,8 @@ namespace GameCore.Battle
             Random rng,
             Func<EffectType, int>? getEffectiveResistance = null,
             Func<EffectType, int>? getEffectivePenetration = null,
-            Func<EffectType, double>? getEffectiveDamageDealtMultiplier = null)
+            Func<EffectType, double>? getEffectiveDamageDealtMultiplier = null,
+            Func<EffectType, double>? getEffectiveDamageTakenMultiplier = null)
         {
             var results = new List<DamageResult>();
             foreach (var component in components)
@@ -136,6 +137,20 @@ namespace GameCore.Battle
                         int afterTypeMult = Math.Max(0, (int)(value * typeMult));
                         steps.Add(new DamageStep("TypeMultiplier", value, afterTypeMult));
                         value = afterTypeMult;
+                    }
+                }
+
+                // ── Layer 4: DamageTakenTypeMultiplier ───────────────────────────
+                // Multiply damage by the target's per-type damage taken multiplier.
+                // Values < 1.0 reduce damage (e.g. 0.8 = target takes 20% less).
+                if (getEffectiveDamageTakenMultiplier != null)
+                {
+                    double takenMult = getEffectiveDamageTakenMultiplier(component.DamageType.Value);
+                    if (takenMult != 1.0)
+                    {
+                        int afterTakenMult = Math.Max(0, (int)(value * takenMult));
+                        steps.Add(new DamageStep("DamageTakenTypeMultiplier", value, afterTakenMult));
+                        value = afterTakenMult;
                     }
                 }
 

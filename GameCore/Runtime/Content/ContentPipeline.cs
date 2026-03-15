@@ -535,11 +535,7 @@ namespace GameCore.Content
             var statModifiers = new List<RuntimeStatModifier>();
             var s = rawEffect.Stats;
 
-            // ── Flat (all-type) multipliers ───────────────────────────────────
-            if (s.DamageDealtMultiplier.HasValue)
-                statModifiers.Add(new RuntimeStatModifier(RuntimeStatKey.DamageDealtMultiplier, ModifierOperation.Multiply, s.DamageDealtMultiplier.Value));
-            if (s.DamageTakenMultiplier.HasValue)
-                statModifiers.Add(new RuntimeStatModifier(RuntimeStatKey.DamageTakenMultiplier, ModifierOperation.Multiply, s.DamageTakenMultiplier.Value));
+            // ── Flat healing / barrier multipliers ────────────────────────────
             if (s.ReceivingHealingMultiplier.HasValue)
                 statModifiers.Add(new RuntimeStatModifier(RuntimeStatKey.ReceivingHealingMultiplier, ModifierOperation.Multiply, s.ReceivingHealingMultiplier.Value));
             if (s.ReceivingBarrierMultiplier.HasValue)
@@ -547,13 +543,24 @@ namespace GameCore.Content
 
             // ── Per-type damage dealt multipliers ─────────────────────────────
             Dictionary<EffectType, double>? damageDealtByType = null;
-            if (s.DamageDealtMultiplierByType != null)
-                foreach (var entry in s.DamageDealtMultiplierByType)
+            if (s.DamageDealtMultiplier != null)
+                foreach (var entry in s.DamageDealtMultiplier)
                     foreach (var kvp in entry)
-                        if (Enum.TryParse<EffectType>(kvp.Key, ignoreCase: true, out var et))
+                        foreach (var et in ExpandDamageTypeKey(kvp.Key))
                         {
                             if (damageDealtByType == null) damageDealtByType = new Dictionary<EffectType, double>();
                             damageDealtByType[et] = damageDealtByType.TryGetValue(et, out double prev) ? prev * kvp.Value : kvp.Value;
+                        }
+
+            // ── Per-type damage taken multipliers ─────────────────────────────
+            Dictionary<EffectType, double>? damageTakenByType = null;
+            if (s.DamageTakenMultiplier != null)
+                foreach (var entry in s.DamageTakenMultiplier)
+                    foreach (var kvp in entry)
+                        foreach (var et in ExpandDamageTypeKey(kvp.Key))
+                        {
+                            if (damageTakenByType == null) damageTakenByType = new Dictionary<EffectType, double>();
+                            damageTakenByType[et] = damageTakenByType.TryGetValue(et, out double prev) ? prev * kvp.Value : kvp.Value;
                         }
 
             // ── Per-type resistance (additive flat %) ─────────────────────────
@@ -585,9 +592,32 @@ namespace GameCore.Content
                 Duration: rawEffect.Duration,
                 StackingPolicy: EffectStackingPolicy.RefreshDuration,
                 StatModifiers: statModifiers.Count > 0 ? statModifiers.ToArray() : null,
-                DamageDealtMultiplierByType: damageDealtByType,
+                DamageDealtMultiplier: damageDealtByType,
+                DamageTakenMultiplierByType: damageTakenByType,
                 ResistanceModifierByType: resistanceByType,
                 PenetrationModifierByType: penetrationByType);
+        }
+
+        /// <summary>
+        /// Expands a YAML damage type key (including group keywords) into the matching EffectType values.
+        /// Keywords: "allTypes" → all types; "elemental" → Fire, Cold, Lightning; "divine" → Holy, Void.
+        /// Any valid EffectType name expands to just that type. Unknown keys yield an empty sequence.
+        /// </summary>
+        private static System.Collections.Generic.IEnumerable<EffectType> ExpandDamageTypeKey(string key)
+        {
+            switch (key.ToLowerInvariant())
+            {
+                case "alltypes":
+                    return (EffectType[])Enum.GetValues(typeof(EffectType));
+                case "elemental":
+                    return new[] { EffectType.Fire, EffectType.Cold, EffectType.Lightning };
+                case "divine":
+                    return new[] { EffectType.Holy, EffectType.Void };
+                default:
+                    if (Enum.TryParse<EffectType>(key, ignoreCase: true, out var et))
+                        return new[] { et };
+                    return System.Array.Empty<EffectType>();
+            }
         }
 
         /// <summary>

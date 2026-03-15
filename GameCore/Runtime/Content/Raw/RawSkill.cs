@@ -63,22 +63,27 @@ namespace GameCore.Content.Raw
     /// </summary>
     public class RawEffectStats
     {
-        // ── Flat (all-type) multipliers ───────────────────────────────────────
-        /// <summary>Multiplier on all outgoing damage dealt. Stacks with per-type entries.</summary>
-        public double? DamageDealtMultiplier { get; set; }
-        /// <summary>Multiplier on all incoming damage taken.</summary>
-        public double? DamageTakenMultiplier { get; set; }
+        // ── Per-type dealt multiplier ─────────────────────────────────────────
+        /// <summary>
+        /// Per damage-type outgoing damage multipliers.
+        /// Each entry is a single-key dict: [{physical: 1.2}, {elemental: 1.5}].
+        /// Keywords: allTypes, elemental (fire/cold/lightning), divine (holy/void), or any EffectType name.
+        /// Value is a multiplier (1.2 = +20%).
+        /// </summary>
+        public List<Dictionary<string, double>>? DamageDealtMultiplier { get; set; }
+        // ── Per-type taken multiplier ─────────────────────────────────────────
+        /// <summary>
+        /// Per damage-type incoming damage multipliers.
+        /// Each entry is a single-key dict: [{allTypes: 0.8}, {physical: 0.5}].
+        /// Keywords: allTypes, elemental, divine, or any EffectType name.
+        /// Value is a multiplier (0.8 = take 20% less).
+        /// </summary>
+        public List<Dictionary<string, double>>? DamageTakenMultiplier { get; set; }
+        // ── Flat (all-type) healing / barrier ─────────────────────────────────
         /// <summary>Multiplier on all healing received.</summary>
         public double? ReceivingHealingMultiplier { get; set; }
         /// <summary>Multiplier on all barrier received.</summary>
         public double? ReceivingBarrierMultiplier { get; set; }
-        // ── Per-type dealt multiplier ─────────────────────────────────────────
-        /// <summary>
-        /// Per damage-type outgoing damage multipliers.
-        /// Each entry is a single-key dict: [{physical: 1.2}, {fire: 1.5}].
-        /// Value is a multiplier (1.2 = +20%).
-        /// </summary>
-        public List<Dictionary<string, double>>? DamageDealtMultiplierByType { get; set; }
         // ── Per-type resistance / penetration ─────────────────────────────────
         /// <summary>
         /// Per damage-type resistance adjustments.

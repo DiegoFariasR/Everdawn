@@ -545,15 +545,16 @@ namespace GameCore.Battle
                             empowerMult * perHitHitsMult, _rng,
                             et => GetEffectiveResistance(target.Id, et),
                             et => GetEffectivePenetration(actor.Id, et),
-                            et => GetDamageDealtMultiplierForType(actor.Id, et));
+                            et => GetDamageDealtMultiplierForType(actor.Id, et),
+                            et => GetDamageTakenMultiplierForType(target.Id, et));
                         int totalDamage = 0;
                         foreach (var r in hitResults) totalDamage += r.FinalDamage;
 
                         // Dizzy: reduce the actor's final damage output by 20%.
                         totalDamage = DisruptionSystem.ApplyDizzyReduction(totalDamage, actorIsDizzy);
 
-                        // DamageTakenMultiplier from target's active effects (e.g. Guard).
-                        // Applied after dizzy (dizzy is an actor debuff; Guard is a target buff).
+                        // DamageTakenMultiplier (flat, from StatModifiers) from target's active effects.
+                        // Applied after dizzy and after per-type taken multiplier.
                         double damageTakenMult = GetDamageTakenMultiplier(target.Id);
                         totalDamage = (int)(totalDamage * damageTakenMult);
 
@@ -731,7 +732,8 @@ namespace GameCore.Battle
                     perHitMult, _rng,
                     et => GetEffectiveResistance(target.Id, et),
                     et => GetEffectivePenetration(reactor.Id, et),
-                    et => GetDamageDealtMultiplierForType(reactor.Id, et));
+                    et => GetDamageDealtMultiplierForType(reactor.Id, et),
+                    et => GetDamageTakenMultiplierForType(target.Id, et));
 
                 int totalDamage = 0;
                 foreach (var r in hitResults) totalDamage += r.FinalDamage;
@@ -1053,7 +1055,8 @@ namespace GameCore.Battle
                 DurationKind: definition.DurationKind,
                 SkillModifier: definition.SkillModifier,
                 StatModifiers: definition.StatModifiers,
-                DamageDealtMultiplierByType: definition.DamageDealtMultiplierByType,
+                DamageDealtMultiplier: definition.DamageDealtMultiplier,
+                DamageTakenMultiplierByType: definition.DamageTakenMultiplierByType,
                 ResistanceModifierByType: definition.ResistanceModifierByType,
                 PenetrationModifierByType: definition.PenetrationModifierByType
             ));
@@ -1164,7 +1167,22 @@ namespace GameCore.Battle
                 return 1.0;
             double value = 1.0;
             foreach (var effect in effects)
-                if (effect.DamageDealtMultiplierByType != null && effect.DamageDealtMultiplierByType.TryGetValue(effectType, out double m))
+                if (effect.DamageDealtMultiplier != null && effect.DamageDealtMultiplier.TryGetValue(effectType, out double m))
+                    value *= m;
+            return value;
+        }
+
+        /// <summary>
+        /// Returns the effective per-type damage taken multiplier for a unit and damage type from active effects.
+        /// Base value is 1.0 (no change). Values less than 1.0 reduce damage taken.
+        /// </summary>
+        private double GetDamageTakenMultiplierForType(string unitId, EffectType effectType)
+        {
+            if (!_activeEffects.TryGetValue(unitId, out var effects) || effects.Count == 0)
+                return 1.0;
+            double value = 1.0;
+            foreach (var effect in effects)
+                if (effect.DamageTakenMultiplierByType != null && effect.DamageTakenMultiplierByType.TryGetValue(effectType, out double m))
                     value *= m;
             return value;
         }
