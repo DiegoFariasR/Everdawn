@@ -178,6 +178,18 @@ namespace GameCore.Content.Raw
         public string? FocusEffect { get; set; }
         /// <summary>Magnitude of the Focus effect (e.g. 1 = one extra hit, 25 = +25 crit chance).</summary>
         public double FocusEffectValue { get; set; }
+        // ── Fury system ────────────────────────────────────────────────────────
+        /// <summary>
+        /// When true, this skill is explicitly tagged as a STR/strength-based skill.
+        /// STR-tagged skills receive Fury-based damage bonuses and grant Fury on use.
+        /// </summary>
+        public bool IsStrSkill { get; set; }
+        /// <summary>
+        /// Maximum outgoing damage bonus multiplier granted by Fury at full Fury (100).
+        /// 0.0 = no bonus (default). 0.5 = up to +50% damage at max Fury.
+        /// Only applied when the actor has the Fury trait and <see cref="IsStrSkill"/> is true.
+        /// </summary>
+        public double FuryDamageScale { get; set; }
     }
 
     /// <summary>

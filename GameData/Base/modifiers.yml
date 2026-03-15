@@ -2,7 +2,8 @@
   name: Basic
   description: >
     The unit's basic action. Always available, costs no MP, never on cooldown.
-    Does not trigger Focus or Fury empowerment.
+    Does not trigger Focus empowerment. If tagged as a STR skill, still benefits
+    from the actor's current Fury level.
     Produces an "attack" event type.
   tags:
     - basic

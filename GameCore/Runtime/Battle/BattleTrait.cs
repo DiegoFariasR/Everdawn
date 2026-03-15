@@ -22,9 +22,11 @@ namespace GameCore.Battle
 
         /// <summary>
         /// The unit has a fury bar (max 100, starts at 0).
-        /// Gains 10–50 fury per attack action. Gains 10–20 fury per incoming hit.
-        /// When full, the next non-basic offensive skill is empowered (×1.5 damage)
-        /// and fury resets to 0.
+        /// Gains Fury when taking direct damage (flat + bonus based on % max HP lost).
+        /// Gains Fury once when using a STR-tagged skill.
+        /// Decays at the start of each turn.
+        /// Current Fury boosts the damage of STR-tagged skills dynamically.
+        /// Full Fury means peak state; profile-specific passives define the exact payoff.
         /// </summary>
         Fury,
     }

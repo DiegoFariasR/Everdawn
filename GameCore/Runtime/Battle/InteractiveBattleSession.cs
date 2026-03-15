@@ -476,22 +476,16 @@ namespace GameCore.Battle
                 _focusedUnits.Remove(actor.Id);
                 produced.Add(AddEvent(actor.Id, $"{actor.Name}'s Focus sharpens {effectiveSkill.Name}!", "skill"));
             }
-            // Fury empowerment: fires when fury is full and the actor uses a non-basic offensive skill
-            bool isFuryEmpowered = actor.HasTrait(BattleTrait.Fury)
-                && GetBar(actor.Id, "fury") == 100
-                && !effectiveSkill.IsBasic
-                && !effectiveSkill.IsHeal
-                && !effectiveSkill.IsShield
-                && !effectiveSkill.IsRestoreBar
-                && !effectiveSkill.IsApplyEffect;
-            if (isFuryEmpowered)
+            // Fury scaling: STR-tagged skills deal more damage based on the actor's current Fury.
+            // Scales continuously — no consumption. High Fury = stronger hits; low Fury = normal hits.
+            double furyDamageMult = 1.0;
+            if (actor.HasTrait(BattleTrait.Fury) && effectiveSkill.IsStrSkill && effectiveSkill.FuryDamageScale > 0)
             {
-                _bars[actor.Id]["fury"] = 0;
-                produced.Add(AddEvent(actor.Id, $"{actor.Name}'s Fury empowers their attack!", "skill"));
+                int currentFury = GetBar(actor.Id, FurySystem.BarFury);
+                furyDamageMult = FurySystem.ComputeDamageBonus(currentFury, effectiveSkill.FuryDamageScale);
             }
-            // Flat (global) DamageDealtMultiplier from active effects stacks with fury empowerment.
-            double empowerMult = GetFlatDamageDealtMultiplier(actor.Id);
-            if (isFuryEmpowered) empowerMult *= 1.5;
+            // Flat (global) DamageDealtMultiplier from active effects stacks multiplicatively.
+            double empowerMult = GetFlatDamageDealtMultiplier(actor.Id) * furyDamageMult;
 
             if (effectiveSkill.IsAoe && targets.Count > 1)
             {
@@ -661,7 +655,9 @@ namespace GameCore.Battle
                         int barrierAbsorbed = Math.Min(barrierCurrent, totalDamage);
                         if (barrierAbsorbed > 0)
                             _bars[target.Id]["barrier"] = barrierCurrent - barrierAbsorbed;
-                        _hp[target.Id] = Math.Max(0, _hp[target.Id] - (totalDamage - barrierAbsorbed));
+                        int hpBefore = _hp[target.Id];
+                        _hp[target.Id] = Math.Max(0, hpBefore - (totalDamage - barrierAbsorbed));
+                        int hpActuallyLost = hpBefore - _hp[target.Id];
 
                         string hitLabel = effectiveHits > 1 ? $" (hit {i + 1}/{effectiveHits})" : "";
                         produced.Add(AddEvent(actor.Id,
@@ -672,9 +668,14 @@ namespace GameCore.Battle
                             skillId: skill.Id, effectType: primaryType,
                             hitIndex: i, totalHits: effectiveHits));
 
-                        // Fury: target gains 10–20 per incoming hit
-                        if (target.HasTrait(BattleTrait.Fury))
-                            _bars[target.Id]["fury"] = Math.Min(100, GetBar(target.Id, "fury") + _rng.Next(10, 21));
+                        // Fury: target gains fury from taking direct damage (flat + HP% bonus).
+                        // Gain is per hit to reward tanking multiple strikes; HP% rewards low-armour builds.
+                        if (target.HasTrait(BattleTrait.Fury) && hpActuallyLost > 0)
+                        {
+                            int furyGain = FurySystem.ComputeHitGain(hpActuallyLost, target.MaxHp);
+                            _bars[target.Id][FurySystem.BarFury] = Math.Min(FurySystem.MaxBar,
+                                GetBar(target.Id, FurySystem.BarFury) + furyGain);
+                        }
 
                         // Thermal buildup: fire and cold hits build opposing bars on the target.
                         produced.AddRange(ApplyThermalBuildup(target, hitResults));
@@ -707,9 +708,11 @@ namespace GameCore.Battle
                 return produced;
             }
 
-            // Fury: actor gains 10–50 per action (excludes heals, shields, and bar restores)
-            if (actor.HasTrait(BattleTrait.Fury) && !effectiveSkill.IsHeal && !effectiveSkill.IsShield && !effectiveSkill.IsRestoreBar && !effectiveSkill.IsApplyEffect)
-                _bars[actor.Id]["fury"] = Math.Min(100, GetBar(actor.Id, "fury") + _rng.Next(10, 51));
+            // Fury: actor gains Fury once when using a STR-tagged skill.
+            // Granted once per skill execution, not per hit or per target.
+            if (actor.HasTrait(BattleTrait.Fury) && effectiveSkill.IsStrSkill)
+                _bars[actor.Id][FurySystem.BarFury] = Math.Min(FurySystem.MaxBar,
+                    GetBar(actor.Id, FurySystem.BarFury) + FurySystem.SkillUseGain);
 
             // Tick active effects: decrement durations and remove expired instances.
             produced.AddRange(TickActiveEffects(actor.Id));
@@ -929,6 +932,14 @@ namespace GameCore.Battle
                 int maxFocus = actor.MaxBars.TryGetValue("focus", out int mf) ? mf : 100;
                 int newFocus = Math.Min(currentFocus + FocusRegenPerTurn, maxFocus);
                 if (newFocus != currentFocus) _bars[actor.Id]["focus"] = newFocus;
+            }
+
+            // Fury decay: at the end of each turn Fury falls by a flat amount.
+            // Unconditional — applies regardless of what action was taken.
+            if (_bars[actor.Id].TryGetValue(FurySystem.BarFury, out int currentFury))
+            {
+                int newFury = FurySystem.ApplyDecay(currentFury);
+                if (newFury != currentFury) _bars[actor.Id][FurySystem.BarFury] = newFury;
             }
 
             return events;
