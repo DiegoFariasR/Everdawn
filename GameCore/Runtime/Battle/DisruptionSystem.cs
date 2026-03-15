@@ -48,6 +48,9 @@ namespace GameCore.Battle
 
         // ── Status effect IDs ────────────────────────────────────────────────
 
+        /// <summary>Status effect ID for Disruption bar &gt; 0 and &lt; 50 (precursor warning).</summary>
+        public const string StatusShaken = "shaken";
+
         /// <summary>Status effect ID for Disruption bar ≥ 50.</summary>
         public const string StatusDizzy = "dizzy";
 
@@ -122,6 +125,8 @@ namespace GameCore.Battle
                 effects.Add(StatusStunned);
             else if (bar >= DizzyThreshold)
                 effects.Add(StatusDizzy);
+            else if (bar > 0)
+                effects.Add(StatusShaken);
             return effects;
         }
 

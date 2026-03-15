@@ -28,11 +28,14 @@ namespace GameCore.Battle
             new Dictionary<string, List<ActiveEffectInstance>>();
         // Counter for generating unique runtime instance IDs within this session.
         private int _nextEffectId;
-        // Thermal status definitions (slow, frozen, burning). Loaded from content or created as fallbacks.
+        // Thermal status definitions (slow, frozen, burning, chilled, heated). Loaded from content or created as fallbacks.
         private readonly ActiveEffectDefinition _slowDef;
         private readonly ActiveEffectDefinition _frozenDef;
         private readonly ActiveEffectDefinition _burningDef;
+        private readonly ActiveEffectDefinition _chilledDef;
+        private readonly ActiveEffectDefinition _heatedDef;
         private readonly ActiveEffectDefinition _bleedingDef;
+        private readonly ActiveEffectDefinition _scratchedDef;
         // Units that currently carry the Focused buff (granted by the Focus skill).
         // Focused is consumed by the first IsFocusCompatible skill the unit uses, or expires when their turn ends.
         private readonly HashSet<string> _focusedUnits = new HashSet<string>();
@@ -66,7 +69,10 @@ namespace GameCore.Battle
             _slowDef = ResolveThermalDef(setup, ThermalSystem.StatusSlow, "Slow");
             _frozenDef = ResolveThermalDef(setup, ThermalSystem.StatusFrozen, "Frozen");
             _burningDef = ResolveThermalDef(setup, ThermalSystem.StatusBurning, "Burning");
+            _chilledDef = ResolveThermalDef(setup, ThermalSystem.StatusChilled, "Chilled");
+            _heatedDef = ResolveThermalDef(setup, ThermalSystem.StatusHeated, "Heated");
             _bleedingDef = ResolveThermalDef(setup, BleedSystem.StatusBleeding, "Bleeding");
+            _scratchedDef = ResolveThermalDef(setup, BleedSystem.StatusScratched, "Scratched");
         }
 
         private static ActiveEffectDefinition ResolveThermalDef(
@@ -1137,6 +1143,14 @@ namespace GameCore.Battle
         private void SyncBleedActiveEffects(string unitId)
         {
             int bleedBar = GetBar(unitId, BleedSystem.BarBleed);
+
+            // Scratched: active when bleed is building but below the bleeding threshold.
+            bool shouldBeScratched = bleedBar > 0 && bleedBar < BleedSystem.BleedingThreshold;
+            if (shouldBeScratched && !HasActiveEffect(unitId, BleedSystem.StatusScratched))
+                ApplyActiveEffect(unitId, _scratchedDef, unitId);
+            else if (!shouldBeScratched)
+                RemoveActiveEffect(unitId, BleedSystem.StatusScratched);
+
             bool shouldBeBleeding = bleedBar >= BleedSystem.BleedingThreshold;
             if (shouldBeBleeding && !HasActiveEffect(unitId, BleedSystem.StatusBleeding))
                 ApplyActiveEffect(unitId, _bleedingDef, unitId);
@@ -1682,6 +1696,8 @@ namespace GameCore.Battle
                     candidates.Add(DisruptionSystem.StatusStunned);
                 else if (disruptionBar >= DisruptionSystem.DizzyThreshold)
                     candidates.Add(DisruptionSystem.StatusDizzy);
+                else if (disruptionBar > 0)
+                    candidates.Add(DisruptionSystem.StatusShaken);
             }
 
             return candidates;
@@ -1710,9 +1726,10 @@ namespace GameCore.Battle
         /// </summary>
         private void DispelEffect(string unitId, string effectId)
         {
-            // Thermal bar-linked effects: reset the backing bar, then sync so the
-            // active-effect instances are removed automatically.
-            if (effectId == ThermalSystem.StatusSlow || effectId == ThermalSystem.StatusFrozen)
+            // Thermal cold bar-linked effects: reset the cold bar and sync.
+            if (effectId == ThermalSystem.StatusChilled
+                || effectId == ThermalSystem.StatusSlow
+                || effectId == ThermalSystem.StatusFrozen)
             {
                 _bars[unitId][ThermalSystem.BarCold] = 0;
                 SyncThermalActiveEffects(unitId);
@@ -1720,7 +1737,8 @@ namespace GameCore.Battle
                 if (effectId == ThermalSystem.StatusFrozen)
                     RemoveActiveEffect(unitId, ThermalSystem.StatusFrozen);
             }
-            else if (effectId == ThermalSystem.StatusBurning)
+            // Thermal burn bar-linked effects: reset the burn bar and sync.
+            else if (effectId == ThermalSystem.StatusHeated || effectId == ThermalSystem.StatusBurning)
             {
                 _bars[unitId][ThermalSystem.BarBurn] = 0;
                 SyncThermalActiveEffects(unitId);
@@ -1731,9 +1749,15 @@ namespace GameCore.Battle
                 _stunnedUnits.Remove(unitId);
                 _bars[unitId][DisruptionSystem.BarDisruption] = 0;
             }
-            else if (effectId == DisruptionSystem.StatusDizzy)
+            else if (effectId == DisruptionSystem.StatusDizzy || effectId == DisruptionSystem.StatusShaken)
             {
                 _bars[unitId][DisruptionSystem.BarDisruption] = 0;
+            }
+            // Bleed bar-linked effects: reset the bleed bar and sync.
+            else if (effectId == BleedSystem.StatusScratched || effectId == BleedSystem.StatusBleeding)
+            {
+                _bars[unitId][BleedSystem.BarBleed] = 0;
+                SyncBleedActiveEffects(unitId);
             }
             // Regular active effects: remove directly.
             else
@@ -1754,12 +1778,26 @@ namespace GameCore.Battle
             int burnBar = GetBar(unitId, ThermalSystem.BarBurn);
             bool isFrozen = HasActiveEffect(unitId, ThermalSystem.StatusFrozen);
 
+            // Chilled: active when cold is building but below the slow threshold and not frozen.
+            bool shouldBeChilled = coldBar > 0 && coldBar < ThermalSystem.SlowThreshold && !isFrozen;
+            if (shouldBeChilled && !HasActiveEffect(unitId, ThermalSystem.StatusChilled))
+                ApplyActiveEffect(unitId, _chilledDef, unitId);
+            else if (!shouldBeChilled)
+                RemoveActiveEffect(unitId, ThermalSystem.StatusChilled);
+
             // Slow: active when cold >= threshold AND the unit is not already frozen.
             bool shouldBeSlow = coldBar >= ThermalSystem.SlowThreshold && !isFrozen;
             if (shouldBeSlow && !HasActiveEffect(unitId, ThermalSystem.StatusSlow))
                 ApplyActiveEffect(unitId, _slowDef, unitId);
             else if (!shouldBeSlow)
                 RemoveActiveEffect(unitId, ThermalSystem.StatusSlow);
+
+            // Heated: active when burn is building but below the burning threshold.
+            bool shouldBeHeated = burnBar > 0 && burnBar < ThermalSystem.BurningThreshold;
+            if (shouldBeHeated && !HasActiveEffect(unitId, ThermalSystem.StatusHeated))
+                ApplyActiveEffect(unitId, _heatedDef, unitId);
+            else if (!shouldBeHeated)
+                RemoveActiveEffect(unitId, ThermalSystem.StatusHeated);
 
             // Burning: active when burn >= threshold (independent of cold/frozen).
             bool shouldBeBurning = burnBar >= ThermalSystem.BurningThreshold;

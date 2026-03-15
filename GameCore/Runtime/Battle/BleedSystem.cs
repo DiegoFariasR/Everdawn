@@ -23,7 +23,9 @@ namespace GameCore.Battle
         public const int DecayPerTurn = 10;
         public const double BleedDotPerBarPoint = 0.5;
 
-        // ── Status effect ID ─────────────────────────────────────────────────
+        // ── Status effect IDs ────────────────────────────────────────────────
+        /// <summary>Status effect ID for Bleed bar &gt; 0 and &lt; 50 (precursor warning).</summary>
+        public const string StatusScratched = "scratched";
         public const string StatusBleeding = "bleeding";
 
         // ── Bar key ──────────────────────────────────────────────────────────

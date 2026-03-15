@@ -58,8 +58,46 @@
   durationKind: Permanent
   stackingPolicy: RefreshDuration
 
+- id: chilled
+  name: Chilled
+  isDebuff: true
+  durationKind: Permanent
+  stackingPolicy: RefreshDuration
+
+- id: heated
+  name: Heated
+  isDebuff: true
+  durationKind: Permanent
+  stackingPolicy: RefreshDuration
+
 - id: burning
   name: Burning
+  isDebuff: true
+  durationKind: Permanent
+  stackingPolicy: RefreshDuration
+
+# ── Disruption status effects ─────────────────────────────────────────────────
+# Bar-driven: shaken at > 0, dizzy at ≥ 50, stunned at 100.
+# shaken/dizzy/stunned carry no stat modifiers — mechanics are in code.
+
+- id: shaken
+  name: Shaken
+  isDebuff: true
+  durationKind: Permanent
+  stackingPolicy: RefreshDuration
+
+# ── Bleed status effects ──────────────────────────────────────────────────────
+# Bar-driven: scratched at > 0, bleeding at ≥ 50.
+# bleeding applies DOT each turn (implemented in code).
+
+- id: scratched
+  name: Scratched
+  isDebuff: true
+  durationKind: Permanent
+  stackingPolicy: RefreshDuration
+
+- id: bleeding
+  name: Bleeding
   isDebuff: true
   durationKind: Permanent
   stackingPolicy: RefreshDuration

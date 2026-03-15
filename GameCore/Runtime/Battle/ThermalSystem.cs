@@ -51,11 +51,17 @@ namespace GameCore.Battle
 
         // ── Status effect IDs ────────────────────────────────────────────────
 
+        /// <summary>Status effect ID for Cold bar &gt; 0 and &lt; 50 (precursor warning).</summary>
+        public const string StatusChilled = "chilled";
+
         /// <summary>Status effect ID for Cold bar ≥ 50.</summary>
         public const string StatusSlow = "slow";
 
         /// <summary>Status effect ID while a unit is frozen (1 turn lost).</summary>
         public const string StatusFrozen = "frozen";
+
+        /// <summary>Status effect ID for Burn bar &gt; 0 and &lt; 50 (precursor warning).</summary>
+        public const string StatusHeated = "heated";
 
         /// <summary>Status effect ID for Burn bar ≥ 50.</summary>
         public const string StatusBurning = "burning";

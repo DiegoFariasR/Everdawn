@@ -126,6 +126,14 @@ namespace GameCore.Tests.Battle
         public void DisruptionSystem_GetStatusEffects_NoDizzyBelowThreshold()
         {
             var effects = DisruptionSystem.GetDisruptionStatusEffects(bar: 49, isStunned: false);
+            Assert.Contains(DisruptionSystem.StatusShaken, effects);
+            Assert.DoesNotContain(DisruptionSystem.StatusDizzy, effects);
+        }
+
+        [Fact]
+        public void DisruptionSystem_GetStatusEffects_NoStatusAtZeroBar()
+        {
+            var effects = DisruptionSystem.GetDisruptionStatusEffects(bar: 0, isStunned: false);
             Assert.Empty(effects);
         }
 
