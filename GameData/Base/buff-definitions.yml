@@ -36,3 +36,25 @@
   stats:
     resistance:
       - allTypes: -20
+
+# ── Thermal status effects ────────────────────────────────────────────────────
+# These are bar-driven: applied and removed automatically by the thermal system.
+# They carry no stat modifiers — the mechanical effects are implemented in code.
+# Duration is irrelevant (Permanent = never expires automatically).
+# stackingPolicy: RefreshDuration is a safe no-op here because SyncThermalActiveEffects
+# guards against re-applying an already-active effect (HasActiveEffect check first).
+
+- id: slow
+  name: Slow
+  durationKind: Permanent
+  stackingPolicy: RefreshDuration
+
+- id: frozen
+  name: Frozen
+  durationKind: Permanent
+  stackingPolicy: RefreshDuration
+
+- id: burning
+  name: Burning
+  durationKind: Permanent
+  stackingPolicy: RefreshDuration

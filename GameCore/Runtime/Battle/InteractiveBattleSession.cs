@@ -21,8 +21,6 @@ namespace GameCore.Battle
         private readonly Dictionary<string, int> _skillCooldowns = new();
         private bool _isOver;
         private string? _winningTeam;
-        // Units that will lose their next turn due to the frozen status effect.
-        private readonly HashSet<string> _frozenUnits = new HashSet<string>();
         // Units that will lose their next turn due to the stunned status effect.
         private readonly HashSet<string> _stunnedUnits = new HashSet<string>();
         // Active runtime effects: unitId → list of instances currently on that unit.
@@ -30,6 +28,10 @@ namespace GameCore.Battle
             new Dictionary<string, List<ActiveEffectInstance>>();
         // Counter for generating unique runtime instance IDs within this session.
         private int _nextEffectId;
+        // Thermal status definitions (slow, frozen, burning). Loaded from content or created as fallbacks.
+        private readonly ActiveEffectDefinition _slowDef;
+        private readonly ActiveEffectDefinition _frozenDef;
+        private readonly ActiveEffectDefinition _burningDef;
         // Units that currently carry the Focused buff (granted by the Focus skill).
         // Focused is consumed by the first IsFocusCompatible skill the unit uses, or expires when their turn ends.
         private readonly HashSet<string> _focusedUnits = new HashSet<string>();
@@ -58,6 +60,22 @@ namespace GameCore.Battle
                 if (u.ReactionSkill?.EffectiveInitialCooldown > 0)
                     _skillCooldowns[u.ReactionSkill.Id] = u.ReactionSkill.EffectiveInitialCooldown;
             }
+            // Load thermal buff definitions from content, falling back to minimal inline definitions
+            // so tests that omit BuffDefinitions still work.
+            _slowDef = ResolveThermalDef(setup, ThermalSystem.StatusSlow, "Slow");
+            _frozenDef = ResolveThermalDef(setup, ThermalSystem.StatusFrozen, "Frozen");
+            _burningDef = ResolveThermalDef(setup, ThermalSystem.StatusBurning, "Burning");
+        }
+
+        private static ActiveEffectDefinition ResolveThermalDef(
+            BattleSetup setup, string id, string fallbackName)
+        {
+            if (setup.BuffDefinitions != null
+                && setup.BuffDefinitions.TryGetValue(id, out var def))
+                return def;
+            return new ActiveEffectDefinition(
+                id, fallbackName, EffectDurationKind.Permanent, 0,
+                EffectStackingPolicy.RefreshDuration);
         }
 
         /// <summary>
@@ -98,6 +116,10 @@ namespace GameCore.Battle
                         if (_bars[us.UnitId].ContainsKey(kvp.Key))
                             _bars[us.UnitId][kvp.Key] = kvp.Value;
             }
+            // Restore thermal active effects (slow, burning) from bar values after state is applied.
+            // Frozen state is not persisted in snapshots, so it is intentionally not restored.
+            foreach (var u in _allUnits)
+                if (_hp[u.Id] > 0) SyncThermalActiveEffects(u.Id);
             _turnIndex = NextAliveIndexAfter(r.LastActorId);
 
             CheckEnd();
@@ -130,9 +152,9 @@ namespace GameCore.Battle
             }
 
             // If the player is frozen, their chosen action is skipped and the turn is consumed.
-            if (_frozenUnits.Contains(actor.Id))
+            if (HasActiveEffect(actor.Id, ThermalSystem.StatusFrozen))
             {
-                _frozenUnits.Remove(actor.Id);
+                RemoveActiveEffect(actor.Id, ThermalSystem.StatusFrozen);
                 newEvents.Add(AddEvent(actor.Id, $"{actor.Name} is frozen and cannot act!", "status"));
                 if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
                 newEvents.AddRange(AutoAdvance());
@@ -201,9 +223,9 @@ namespace GameCore.Battle
                 if (_isOver) return BuildResponse(newEvents);
             }
 
-            if (_frozenUnits.Contains(actor.Id))
+            if (HasActiveEffect(actor.Id, ThermalSystem.StatusFrozen))
             {
-                _frozenUnits.Remove(actor.Id);
+                RemoveActiveEffect(actor.Id, ThermalSystem.StatusFrozen);
                 newEvents.Add(AddEvent(actor.Id, $"{actor.Name} is frozen and cannot act!", "status"));
                 if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
                 newEvents.AddRange(AutoAdvance());
@@ -253,10 +275,10 @@ namespace GameCore.Battle
                 if (_isOver) return BuildResponse(newEvents);
             }
 
-            if (_frozenUnits.Contains(actor.Id))
+            if (HasActiveEffect(actor.Id, ThermalSystem.StatusFrozen))
             {
                 // Consume the frozen turn: skip the action and advance.
-                _frozenUnits.Remove(actor.Id);
+                RemoveActiveEffect(actor.Id, ThermalSystem.StatusFrozen);
                 newEvents.Add(AddEvent(actor.Id, $"{actor.Name} is frozen and cannot act!", "status"));
                 if (AdvanceTurn()) newEvents.AddRange(StartOfRound());
                 return BuildResponse(newEvents);
@@ -331,7 +353,7 @@ namespace GameCore.Battle
             while (!_isOver)
             {
                 var actor = _turnOrder[_turnIndex];
-                bool isFrozen = _frozenUnits.Contains(actor.Id);
+                bool isFrozen = HasActiveEffect(actor.Id, ThermalSystem.StatusFrozen);
                 bool isStunned = _stunnedUnits.Contains(actor.Id);
 
                 // Stop when it is a living, non-frozen, non-stunned player's turn — they need to provide input.
@@ -349,7 +371,7 @@ namespace GameCore.Battle
                 if (isFrozen)
                 {
                     // Consume the frozen turn: skip the action and advance.
-                    _frozenUnits.Remove(actor.Id);
+                    RemoveActiveEffect(actor.Id, ThermalSystem.StatusFrozen);
                     produced.Add(AddEvent(actor.Id, $"{actor.Name} is frozen and cannot act!", "status"));
                     if (AdvanceTurn()) produced.AddRange(StartOfRound());
                     continue;
@@ -518,8 +540,7 @@ namespace GameCore.Battle
             else
             {
                 // AGI-derived hit count, reduced by slow if active.
-                bool actorIsSlow = GetBar(actor.Id, ThermalSystem.BarCold) >= ThermalSystem.SlowThreshold
-                                   && !_frozenUnits.Contains(actor.Id);
+                bool actorIsSlow = HasActiveEffect(actor.Id, ThermalSystem.StatusSlow);
                 effectiveHits = (effectiveSkill.IsHeal || effectiveSkill.IsShield || effectiveSkill.IsRestoreBar) ? 1 : ThermalSystem.ResolveAgiHits(actor.Agi, actorIsSlow);
                 perHitHitsMult = 1.0;
             }
@@ -741,7 +762,7 @@ namespace GameCore.Battle
             var reactors = hitTargets
                 .Where(t => _hp[t.Id] > 0                          // must be alive after the action
                     && t.ReactionSkill != null
-                    && !_frozenUnits.Contains(t.Id)                 // CC suppresses reactions
+                    && !HasActiveEffect(t.Id, ThermalSystem.StatusFrozen) // CC suppresses reactions
                     && !_stunnedUnits.Contains(t.Id)
                     && GetCooldown(t.ReactionSkill!.Id) <= 0)       // not on cooldown
                 .OrderByDescending(t => t.Agi)
@@ -921,6 +942,9 @@ namespace GameCore.Battle
             if (newCold != coldBar) _bars[actor.Id][ThermalSystem.BarCold] = newCold;
             if (newBurn != burnBar) _bars[actor.Id][ThermalSystem.BarBurn] = newBurn;
 
+            // Sync thermal active effects after decay — bars may have dropped below thresholds.
+            SyncThermalActiveEffects(actor.Id);
+
             // Disruption bar decay.
             int disruptionBar = GetBar(actor.Id, DisruptionSystem.BarDisruption);
             int newDisruption = DisruptionSystem.ApplyDecay(disruptionBar);
@@ -971,7 +995,10 @@ namespace GameCore.Battle
                     if (ThermalSystem.CheckFreezeTriggered(ref newCold))
                     {
                         _bars[target.Id][ThermalSystem.BarCold] = newCold;
-                        _frozenUnits.Add(target.Id);
+                        // Apply the frozen active effect (replaces _frozenUnits.Add).
+                        ApplyActiveEffect(target.Id, _frozenDef, target.Id);
+                        // Frozen takes priority: remove slow if it was active.
+                        RemoveActiveEffect(target.Id, ThermalSystem.StatusSlow);
                         events.Add(AddEvent(target.Id, $"{target.Name} is frozen!", "status"));
                     }
                 }
@@ -988,6 +1015,8 @@ namespace GameCore.Battle
                     _bars[target.Id][ThermalSystem.BarBurn] = newBurn;
                 }
             }
+            // Sync slow and burning active effects for the target after all hits resolve.
+            SyncThermalActiveEffects(target.Id);
             return events;
         }
 
@@ -1022,28 +1051,24 @@ namespace GameCore.Battle
 
         /// <summary>
         /// Returns the active status effect IDs for a unit, or null when none are active.
-        /// Combines thermal (slow/frozen/burning), disruption (dizzy/stunned), and runtime active-effect IDs.
+        /// Thermal effects (slow/frozen/burning) are tracked as active effects and appear here automatically.
+        /// Disruption effects (dizzy/stunned) are derived from bars and the stunned set.
         /// </summary>
         private IReadOnlyList<string>? BuildStatusEffects(string unitId)
         {
             if (_hp[unitId] <= 0) return null;
-
-            int coldBar = GetBar(unitId, ThermalSystem.BarCold);
-            int burnBar = GetBar(unitId, ThermalSystem.BarBurn);
-            bool isFrozen = _frozenUnits.Contains(unitId);
-            var thermalEffects = ThermalSystem.GetThermalStatusEffects(coldBar, burnBar, isFrozen);
 
             int disruptionBar = GetBar(unitId, DisruptionSystem.BarDisruption);
             bool isStunned = _stunnedUnits.Contains(unitId);
             var disruptionEffects = DisruptionSystem.GetDisruptionStatusEffects(disruptionBar, isStunned);
 
             // Include the definition ID of each active runtime effect so the client can display icons.
+            // Thermal status effects (slow, frozen, burning) are tracked as active effects.
             bool hasActiveEffects = _activeEffects.TryGetValue(unitId, out var effects) && effects.Count > 0;
 
-            if (thermalEffects.Count == 0 && disruptionEffects.Count == 0 && !hasActiveEffects) return null;
+            if (disruptionEffects.Count == 0 && !hasActiveEffects) return null;
 
-            var all = new List<string>(thermalEffects);
-            all.AddRange(disruptionEffects);
+            var all = new List<string>(disruptionEffects);
             if (hasActiveEffects)
                 foreach (var e in effects!)
                     all.Add(e.DefinitionId);
@@ -1488,6 +1513,45 @@ namespace GameCore.Battle
                 if (e.DefinitionId == definitionId)
                     return e;
             return null;
+        }
+
+        /// <summary>Returns true when the unit currently has an active effect with the given definition ID.</summary>
+        private bool HasActiveEffect(string unitId, string definitionId) =>
+            _activeEffects.TryGetValue(unitId, out var list)
+            && list.Exists(e => e.DefinitionId == definitionId);
+
+        /// <summary>Removes all active effect instances with the given definition ID from a unit.</summary>
+        private void RemoveActiveEffect(string unitId, string definitionId)
+        {
+            if (_activeEffects.TryGetValue(unitId, out var list))
+                list.RemoveAll(e => e.DefinitionId == definitionId);
+        }
+
+        /// <summary>
+        /// Applies or removes the <c>slow</c> and <c>burning</c> active effects based on the
+        /// unit's current thermal bar values. Called after any thermal bar change (buildup or decay).
+        /// Does not touch the <c>frozen</c> effect — freeze is applied on trigger and consumed on
+        /// the unit's next turn, independent of bar values.
+        /// </summary>
+        private void SyncThermalActiveEffects(string unitId)
+        {
+            int coldBar = GetBar(unitId, ThermalSystem.BarCold);
+            int burnBar = GetBar(unitId, ThermalSystem.BarBurn);
+            bool isFrozen = HasActiveEffect(unitId, ThermalSystem.StatusFrozen);
+
+            // Slow: active when cold >= threshold AND the unit is not already frozen.
+            bool shouldBeSlow = coldBar >= ThermalSystem.SlowThreshold && !isFrozen;
+            if (shouldBeSlow && !HasActiveEffect(unitId, ThermalSystem.StatusSlow))
+                ApplyActiveEffect(unitId, _slowDef, unitId);
+            else if (!shouldBeSlow)
+                RemoveActiveEffect(unitId, ThermalSystem.StatusSlow);
+
+            // Burning: active when burn >= threshold (independent of cold/frozen).
+            bool shouldBeBurning = burnBar >= ThermalSystem.BurningThreshold;
+            if (shouldBeBurning && !HasActiveEffect(unitId, ThermalSystem.StatusBurning))
+                ApplyActiveEffect(unitId, _burningDef, unitId);
+            else if (!shouldBeBurning)
+                RemoveActiveEffect(unitId, ThermalSystem.StatusBurning);
         }
     }
 }

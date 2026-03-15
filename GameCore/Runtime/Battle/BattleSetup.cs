@@ -24,5 +24,12 @@ namespace GameCore.Battle
     {
         public IReadOnlyList<BattleUnit> PlayerUnits { get; init; } = Array.Empty<BattleUnit>();
         public IReadOnlyList<BattleUnit> EnemyUnits { get; init; } = Array.Empty<BattleUnit>();
+
+        /// <summary>
+        /// Optional buff definition lookup sourced from content (e.g. <c>ContentDatabase.AllBuffDefinitions</c>).
+        /// When provided, the session resolves thermal and other system-managed active effects from this table.
+        /// Tests that do not supply this will get minimal fallback definitions for the same IDs.
+        /// </summary>
+        public IReadOnlyDictionary<string, ActiveEffectDefinition>? BuffDefinitions { get; init; }
     }
 }
