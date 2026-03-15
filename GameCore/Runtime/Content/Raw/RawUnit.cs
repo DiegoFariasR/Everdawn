@@ -12,11 +12,11 @@ namespace GameCore.Content.Raw
         public int Agi { get; set; }
         public List<string> Traits { get; set; } = new List<string>();
         /// <summary>
-        /// The weapon type this unit is equipped with.
-        /// Value is a <see cref="GameCore.Battle.WeaponType"/> name (e.g. "Blunt", "Bow").
+        /// The equipment type this unit is carrying.
+        /// Value is a <see cref="GameCore.Battle.EquipmentType"/> name (e.g. "Blunt", "Bow").
         /// Defaults to "None" when not specified.
         /// </summary>
-        public string WeaponType { get; set; } = "None";
+        public string EquipmentType { get; set; } = "None";
         public List<RawUnitSkill> Skills { get; set; } = new List<RawUnitSkill>();  // resolved by ContentPipeline
         public Dictionary<string, int> Resistances { get; set; } = new Dictionary<string, int>();
 

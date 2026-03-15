@@ -154,10 +154,10 @@ namespace GameCore.Content.Raw
         /// </summary>
         public string? RequiredTrait { get; set; }
         /// <summary>
-        /// If set, the unit must be equipped with one of these weapon types to use this skill.
-        /// Values are <see cref="GameCore.Battle.WeaponType"/> names (e.g. "Blunt", "Slash").
+        /// If set, the unit must be carrying one of these equipment types to use this skill.
+        /// Values are <see cref="GameCore.Battle.EquipmentType"/> names (e.g. "Blunt", "Slash").
         /// </summary>
-        public List<string>? RequiredWeaponTypes { get; set; }
+        public List<string>? RequiredEquipmentTypes { get; set; }
         /// <summary>
         /// The trigger condition for a reaction skill. Only meaningful when Category is "Reaction".
         /// Value is a <see cref="GameCore.Battle.ReactionTrigger"/> name (e.g. "OnHitBy").

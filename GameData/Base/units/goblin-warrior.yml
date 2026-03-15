@@ -5,7 +5,7 @@ str: 70
 wis: 0
 agi: 50
 traits: [Fury]
-weaponType: Blunt
+equipmentType: Blunt
 skills:
   - id: mace-strike
     modifiers: [Basic]

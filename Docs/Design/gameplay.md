@@ -58,10 +58,10 @@ Skills can declare requirements that a unit must meet before the skill can be us
 
 ### Requirement Types
 - [x] **RequiredTrait** — the unit must have a specific `BattleTrait` (e.g. `MagicUser` for spells)
-- [x] **RequiredWeaponType** — the unit must carry one of the weapon types in the list (e.g. `[Blunt]` for mace skills, or `[Blunt, Slash]` to accept multiple types)
+- [x] **RequiredEquipmentType** — the unit must carry one of the equipment types in the list (e.g. `[Blunt]` for mace skills, or `[Blunt, Slash]` to accept multiple types)
 
-### Weapon Types
-- [x] `None` — unarmed or weapon type not relevant
+### Equipment Types
+- [x] `None` — no relevant equipment (unarmed, or equipment type not relevant)
 - [x] `Blunt` — maces, hammers (mace-strike, mace-crush, mace-shatter, shield-bash)
 - [x] `Slash` — swords, axes (sword-strike, sword-cleave)
 - [x] `Pierce` — daggers, spears (dagger-strike, dagger-flurry, rogue-mark)
@@ -73,7 +73,7 @@ Skills can declare requirements that a unit must meet before the skill can be us
 - Both requirements must be met simultaneously if both are specified.
 - Unmet requirements exclude the skill from `AvailableSkillIds` (player view) and from AI skill selection.
 - Attempting to use a skill with an unmet requirement returns `ValidationErrorCode.RequirementNotMet`.
-- Weapon type and required trait are authored in YAML (`requiredWeaponTypes` as a list, `requiredTrait`) and on `BattleUnit` (`weaponType`).
+- Equipment type and required trait are authored in YAML (`requiredEquipmentTypes` as a list, `requiredTrait`) and on `BattleUnit` (`equipmentType`).
 
 ## Barrier
 

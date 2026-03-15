@@ -107,7 +107,7 @@ Fields:
 - `cooldown` — rounds the reaction is unavailable after firing
 - `effects` — same effect system as regular skills; `sourceUnitId` from context is the default target
 
-Reactions can also declare `requiredWeaponTypes` to restrict them to specific weapon users (e.g. a parry reaction only for shield users).
+Reactions can also declare `requiredEquipmentTypes` to restrict them to specific weapon users (e.g. a parry reaction only for shield users).
 
 ## Implemented Reactions
 
@@ -150,7 +150,7 @@ When implementing, follow this order:
 | Question | Status |
 |---|---|
 | Do reactions consume Focus / Fury / Mana? Default: No — gated by CD only. Allow opt-in in future. | Open |
-| Can a reaction have its own `requiredWeaponType`? (e.g. parry only for shield users) | Lean Yes |
+| Can a reaction have its own `requiredEquipmentType`? (e.g. parry only for shield users) | Lean Yes |
 | Does the AI weight enemy reactions when choosing attack targets? | Start No, revisit during balancing |
 | Should reactions contribute to Focus / Fury buildup on the reacting unit? | Open |
 | Can a boss have multiple reaction-like behaviors (bypassing the 1-per-unit limit)? | Open — could be a special boss flag |

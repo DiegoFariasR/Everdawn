@@ -28,13 +28,13 @@ namespace GameCore.Scenarios
                 PlayerUnits = new List<BattleUnit>
                 {
                     // Pure STR: high damage per hit, highest HP.
-                    new BattleUnit("arch-warrior", "Warrior",  "player", Level: 10, Str: 100, Wis: 5, Agi: 5,   Skills: new[] { db.GetSkill("mace-strike") },   WeaponType: WeaponType.Blunt),
+                    new BattleUnit("arch-warrior", "Warrior",  "player", Level: 10, Str: 100, Wis: 5, Agi: 5,   Skills: new[] { db.GetSkill("mace-strike") },   EquipmentType: EquipmentType.Blunt),
                     // STR + AGI: moderate damage, extra hits from AGI.
-                    new BattleUnit("arch-knight",  "Knight",   "player", Level: 10, Str: 70,  Wis: 5, Agi: 30,  Skills: new[] { db.GetSkill("sword-strike") },  WeaponType: WeaponType.Slash),
+                    new BattleUnit("arch-knight",  "Knight",   "player", Level: 10, Str: 70,  Wis: 5, Agi: 30,  Skills: new[] { db.GetSkill("sword-strike") },  EquipmentType: EquipmentType.Slash),
                     // Pure AGI: fixed multi-hit (1.8×), damage scales with AGI. Low HP.
-                    new BattleUnit("arch-archer",  "Archer",   "player", Level: 10, Str: 30,  Wis: 5, Agi: 100, Skills: new[] { db.GetSkill("bow-shot") },      WeaponType: WeaponType.Bow),
+                    new BattleUnit("arch-archer",  "Archer",   "player", Level: 10, Str: 30,  Wis: 5, Agi: 100, Skills: new[] { db.GetSkill("bow-shot") },      EquipmentType: EquipmentType.Bow),
                     // AGI multihit: hits scale with AGI (1 per 100), half-AGI per hit.
-                    new BattleUnit("arch-rogue",   "Rogue",    "player", Level: 10, Str: 30,  Wis: 5, Agi: 100, Skills: new[] { db.GetSkill("dagger-strike") }, WeaponType: WeaponType.Pierce),
+                    new BattleUnit("arch-rogue",   "Rogue",    "player", Level: 10, Str: 30,  Wis: 5, Agi: 100, Skills: new[] { db.GetSkill("dagger-strike") }, EquipmentType: EquipmentType.Pierce),
                 },
                 EnemyUnits = db.GetUnits(EnemyUnitIds)
                                .Select(u => u with { Team = "enemy" }).ToList(),
