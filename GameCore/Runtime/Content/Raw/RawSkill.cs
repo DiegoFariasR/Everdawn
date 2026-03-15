@@ -149,10 +149,10 @@ namespace GameCore.Content.Raw
         /// </summary>
         public Dictionary<string, int> Resistance { get; set; } = new Dictionary<string, int>();
         /// <summary>
-        /// If set, the unit must have this trait to use this skill.
-        /// Value is a <see cref="GameCore.Battle.BattleTrait"/> name (e.g. "MagicUser").
+        /// If set, the unit must have all of these traits to use this skill.
+        /// Values are <see cref="GameCore.Battle.BattleTrait"/> names (e.g. "MagicUser").
         /// </summary>
-        public string? RequiredTrait { get; set; }
+        public List<string>? RequiredTraits { get; set; }
         /// <summary>
         /// If set, the unit must be carrying one of these equipment types to use this skill.
         /// Values are <see cref="GameCore.Battle.EquipmentType"/> names (e.g. "Blunt", "Slash").

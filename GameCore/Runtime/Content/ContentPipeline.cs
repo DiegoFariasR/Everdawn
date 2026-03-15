@@ -590,9 +590,7 @@ namespace GameCore.Content
                 PassiveDisruptionPenetration: passiveDisruptionPenetration,
                 PassiveResistances: passiveResistances,
                 PassiveDisruptionResistance: passiveDisruptionResistance,
-                RequiredTrait: raw.RequiredTrait != null
-                    ? Enum.Parse<BattleTrait>(raw.RequiredTrait, ignoreCase: true)
-                    : (BattleTrait?)null,
+                RequiredTraits: raw.RequiredTraits?.Select(t => Enum.Parse<BattleTrait>(t, ignoreCase: true)).ToArray(),
                 RequiredEquipmentTypes: raw.RequiredEquipmentTypes?.Select(t => Enum.Parse<EquipmentType>(t, ignoreCase: true)).ToArray(),
                 Trigger: raw.Trigger != null
                     ? Enum.Parse<ReactionTrigger>(raw.Trigger, ignoreCase: true)

@@ -489,7 +489,7 @@ namespace GameCore.Tests.Battle
                 },
                 Modifiers: new string[] { "basic" });
 
-            var session = BuildSession(bluntSkill, seed: 42);
+            var session = BuildSession(bluntSkill, playerAgi: 1, seed: 42);
             var result = session.TryExecute(new AdvanceTurnCommand());
             Assert.True(result.Accepted);
 

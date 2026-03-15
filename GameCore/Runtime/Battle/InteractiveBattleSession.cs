@@ -46,6 +46,9 @@ namespace GameCore.Battle
         private bool _startOfTurnDone;
         // Focus points regenerated at the start of each turn for units with a Focus bar.
         private const int FocusRegenPerTurn = 20;
+        // CC buildup diminishing returns: each successive hit within one action applies this much
+        // of the previous hit's buildup power (multiplicative). Hit 0 = full, hit 1 = 80%, etc.
+        private const double CcBuildupReductionPerHit = 0.8;
 
         public InteractiveBattleSession(BattleSetup setup, int seed)
         {
@@ -730,11 +733,16 @@ namespace GameCore.Battle
                         }
 
                         // Thermal, disruption, and bleed CC buildup from the damage hit results.
-                        produced.AddRange(ApplyCCBuildup(actor, target, hitResults));
+                        produced.AddRange(ApplyCCBuildup(actor, target, hitResults, i));
 
-                        // Disruption buildup: apply per-hit disruption power declared on the skill effect.
+                        // Disruption buildup: apply per-hit disruption power declared on the skill effect,
+                        // with the same multi-hit diminishing returns as CC buildup from damage.
                         if (effect != null && effect.DisruptionPower > 0)
-                            produced.AddRange(ApplyDisruptionBuildup(actor, target, effect.DisruptionPower));
+                        {
+                            int scaledDisruption = (int)(effect.DisruptionPower * Math.Pow(CcBuildupReductionPerHit, i));
+                            if (scaledDisruption > 0)
+                                produced.AddRange(ApplyDisruptionBuildup(actor, target, scaledDisruption));
+                        }
 
                         if (_hp[target.Id] <= 0)
                         {
@@ -1028,12 +1036,16 @@ namespace GameCore.Battle
         /// Fire/Cold → thermal bars, Blunt → disruption bar, Slash → bleed bar.
         /// Generates status events when CC thresholds are crossed.
         /// </summary>
-        private IReadOnlyList<BattleEvent> ApplyCCBuildup(BattleUnit actor, BattleUnit target, IReadOnlyList<DamageResult> hitResults)
+        private IReadOnlyList<BattleEvent> ApplyCCBuildup(BattleUnit actor, BattleUnit target, IReadOnlyList<DamageResult> hitResults, int hitIndex = 0)
         {
             var events = new List<BattleEvent>();
+            // Diminishing returns: each successive hit within one action contributes less CC buildup.
+            // scaledPower = floor(basePower × 0.8^hitIndex). hitIndex 0 = full power.
             foreach (var r in hitResults)
             {
                 if (r.BuildupPower <= 0) continue;
+                int scaledPower = (int)(r.BuildupPower * Math.Pow(CcBuildupReductionPerHit, hitIndex));
+                if (scaledPower <= 0) continue;
                 if (r.EffectType == EffectType.Cold)
                 {
                     int currentCold = GetBar(target.Id, ThermalSystem.BarCold);
@@ -1041,7 +1053,7 @@ namespace GameCore.Battle
                     int effectiveColdResistance = GetEffectiveResistance(target.Id, EffectType.Cold);
                     int thermalProtection = GetEffectiveThermalProtection(target.Id);
                     int boostedColdResistance = (int)(effectiveColdResistance * (1.0 + thermalProtection / 100.0));
-                    ThermalSystem.ApplyCold(r.BuildupPower, boostedColdResistance,
+                    ThermalSystem.ApplyCold(scaledPower, boostedColdResistance,
                         currentBurn, currentCold, out int newBurn, out int newCold);
                     _bars[target.Id][ThermalSystem.BarBurn] = newBurn;
                     _bars[target.Id][ThermalSystem.BarCold] = newCold;
@@ -1063,7 +1075,7 @@ namespace GameCore.Battle
                     int effectiveFireResistance = GetEffectiveResistance(target.Id, EffectType.Fire);
                     int thermalProtection = GetEffectiveThermalProtection(target.Id);
                     int boostedFireResistance = (int)(effectiveFireResistance * (1.0 + thermalProtection / 100.0));
-                    ThermalSystem.ApplyFire(r.BuildupPower, boostedFireResistance,
+                    ThermalSystem.ApplyFire(scaledPower, boostedFireResistance,
                         currentCold, currentBurn, out int newCold, out int newBurn);
                     _bars[target.Id][ThermalSystem.BarCold] = newCold;
                     _bars[target.Id][ThermalSystem.BarBurn] = newBurn;
@@ -1071,12 +1083,12 @@ namespace GameCore.Battle
                 else if (r.EffectType == EffectType.Blunt)
                 {
                     // Blunt damage builds disruption bar using DisruptionResistance/Penetration.
-                    events.AddRange(ApplyDisruptionBuildup(actor, target, r.BuildupPower));
+                    events.AddRange(ApplyDisruptionBuildup(actor, target, scaledPower));
                 }
                 else if (r.EffectType == EffectType.Slash)
                 {
                     // Slash damage builds bleed bar using the target's effective Slash resistance.
-                    events.AddRange(ApplyBleedBuildup(target, r.BuildupPower));
+                    events.AddRange(ApplyBleedBuildup(target, scaledPower));
                 }
             }
             // Sync thermal active effects for the target after all hits resolve.

@@ -114,12 +114,12 @@ All projects in the solution use **C# 9.0**, set explicitly via `<LangVersion>9.
 
 ### Skill Requirements
 Skills can declare requirements a unit must meet to use them. Two kinds:
-- **`RequiredTrait`** (`BattleTrait?`) — unit must have this trait (e.g. `MagicUser` for spells).
+- **`RequiredTraits`** (`IReadOnlyList<BattleTrait>?`) — unit must have all listed traits (e.g. `MagicUser` for spells).
 - **`RequiredEquipmentTypes`** (`IReadOnlyList<EquipmentType>?`) — unit must carry one of the listed equipment types (e.g. `[Blunt]` for mace skills, or `[Blunt, Slash]` to accept multiple).
 
 `BattleSkill.MeetsRequirements(actor)` tests both. `InteractiveBattleSession` applies it to `AvailableSkillIds` and AI skill selection. `ValidationErrorCode.RequirementNotMet` is returned when a player submits a disqualified skill.
 
-`EquipmentType` values: `None`, `Blunt`, `Slash`, `Pierce`, `Bow`, `Staff`. Set per-unit in YAML via `equipmentType`; per-skill via `requiredEquipmentTypes` (list) and `requiredTrait`.
+`EquipmentType` values: `None`, `Blunt`, `Slash`, `Pierce`, `Bow`, `Staff`. Set per-unit in YAML via `equipmentType`; per-skill via `requiredEquipmentTypes` (list) and `requiredTraits` (list).
 
 ### Barrier System
 `EffectKind.Shield` skills grant a barrier that absorbs incoming damage before HP. Key rules:

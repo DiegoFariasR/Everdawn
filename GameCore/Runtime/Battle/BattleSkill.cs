@@ -133,10 +133,10 @@ namespace GameCore.Battle
         /// </summary>
         int PassiveDisruptionResistance = 0,
         /// <summary>
-        /// If set, the unit must have this trait to use this skill.
+        /// If set, the unit must have all of these traits to use this skill.
         /// For example, Spell skills may require <see cref="BattleTrait.MagicUser"/>.
         /// </summary>
-        BattleTrait? RequiredTrait = null,
+        IReadOnlyList<BattleTrait>? RequiredTraits = null,
         /// <summary>
         /// If set, the unit must be carrying one of these equipment types to use this skill.
         /// For example, a mace skill requires <see cref="EquipmentType.Blunt"/>.
@@ -203,7 +203,7 @@ namespace GameCore.Battle
         /// </summary>
         public bool MeetsRequirements(BattleUnit actor)
         {
-            if (RequiredTrait.HasValue && !actor.HasTrait(RequiredTrait.Value))
+            if (RequiredTraits != null && RequiredTraits.Count > 0 && !RequiredTraits.All(t => actor.HasTrait(t)))
                 return false;
             if (RequiredEquipmentTypes != null && !RequiredEquipmentTypes.Contains(actor.EquipmentType))
                 return false;

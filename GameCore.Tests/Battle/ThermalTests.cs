@@ -770,14 +770,14 @@ namespace GameCore.Tests.Battle
             var sessionNoProtection = BuildSession(
                 MassiveColdSkill(), TinyPhysicalSkill(),
                 enemyResistances: coldResistances,
-                enemyStr: 10000, playerWis: 5, playerAgi: 200, seed: 10);
+                enemyStr: 10000, playerWis: 5, playerAgi: 1, seed: 10);
             var r0 = sessionNoProtection.TryExecute(new AdvanceTurnCommand());
             int coldBarNoProtection = r0.View.Units.First(u => u.UnitId == "enemy").GetBar(ThermalSystem.BarCold);
 
             var sessionWithProtection = BuildSession(
                 MassiveColdSkill(), TinyPhysicalSkill(),
                 enemyResistances: coldResistances,
-                enemyStr: 10000, playerWis: 5, playerAgi: 200, seed: 10,
+                enemyStr: 10000, playerWis: 5, playerAgi: 1, seed: 10,
                 enemyThermalProtection: 20);
             var r1 = sessionWithProtection.TryExecute(new AdvanceTurnCommand());
             int coldBarWithProtection = r1.View.Units.First(u => u.UnitId == "enemy").GetBar(ThermalSystem.BarCold);

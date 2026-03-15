@@ -227,7 +227,7 @@
   iconDescription: "A closed eye with a focused beam of light emanating from the brow."
   cooldown: 4
   range: Self
-  requiredTrait: Focus
+  requiredTraits: [Focus]
   effects:
     - kind: restoreBar
       target: ally
