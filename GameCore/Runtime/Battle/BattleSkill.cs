@@ -151,6 +151,20 @@ namespace GameCore.Battle
         /// </summary>
         IReadOnlyList<TriggerCondition>? TriggerConditions = null,
         /// <summary>
+        /// When true, this skill is explicitly tagged as a STR/strength-based skill.
+        /// STR-tagged skills receive Fury-based damage bonuses when the actor has the Fury trait,
+        /// and using them grants Fury to the actor.
+        /// Must be set explicitly in data — never inferred from scaling or damage type.
+        /// </summary>
+        bool IsStrSkill = false,
+        /// <summary>
+        /// Maximum outgoing damage bonus granted by Fury at full Fury (100).
+        /// At current Fury <c>f</c>, the multiplier bonus = FuryDamageScale × (f / 100).
+        /// 0.0 = no Fury damage bonus (default). 0.5 = up to +50% damage at max Fury.
+        /// Only applied when the actor has the Fury trait and <see cref="IsStrSkill"/> is true.
+        /// </summary>
+        double FuryDamageScale = 0.0,
+        /// <summary>
         /// When true, using this skill spends <see cref="FocusCost"/> Focus from the actor's Focus bar.
         /// Any skill with a non-zero FocusCost is unavailable when the actor's Focus bar is below that cost.
         /// </summary>

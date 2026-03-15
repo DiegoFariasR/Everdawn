@@ -602,7 +602,9 @@ namespace GameCore.Content
                 IsFocusCompatible: raw.IsFocusCompatible,
                 FocusEffect: raw.FocusEffect != null && Enum.TryParse<FocusEffectKind>(raw.FocusEffect, ignoreCase: true, out var fek)
                     ? fek : (FocusEffectKind?)null,
-                FocusEffectValue: raw.FocusEffectValue);
+                FocusEffectValue: raw.FocusEffectValue,
+                IsStrSkill: raw.IsStrSkill,
+                FuryDamageScale: raw.FuryDamageScale);
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────
