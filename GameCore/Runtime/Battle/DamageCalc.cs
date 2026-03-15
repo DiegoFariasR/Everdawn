@@ -72,11 +72,15 @@ namespace GameCore.Battle
         /// <c>actor.GetPenetration(type)</c> so that runtime active-effect penetration modifiers
         /// are applied. When null, falls back to the actor's compiled base penetrations.
         /// </param>
-        /// <param name="getEffectiveDamageTakenMultiplier">
-        /// Optional override for the per-type damage taken multiplier lookup on the target.
-        /// When provided, called with the component's damage type and the returned value multiplies
-        /// the damage for that type (e.g. 0.8 = target takes 20% less). Stacks multiplicatively.
-        /// When null, no per-type taken multiplier is applied (equivalent to 1.0 for all types).
+        /// <param name="getOutgoingTypeMult">
+        /// Optional resolver for the actor's per-type outgoing damage multiplier (the "OutgoingTypeMult" step).
+        /// Called with the component's damage type; the returned value multiplies the damage for that type
+        /// (e.g. 1.3 = actor deals 30% more). Stacks multiplicatively. Null = 1.0 for all types (no change).
+        /// </param>
+        /// <param name="getIncomingTypeMult">
+        /// Optional resolver for the target's per-type incoming damage multiplier (the "IncomingTypeMult" step).
+        /// Called with the component's damage type; the returned value multiplies the damage for that type
+        /// (e.g. 0.8 = target takes 20% less). Stacks multiplicatively. Null = 1.0 for all types (no change).
         /// </param>
         public static IReadOnlyList<DamageResult> Compute(
             BattleUnit actor,
@@ -87,8 +91,8 @@ namespace GameCore.Battle
             Random rng,
             Func<EffectType, int>? getEffectiveResistance = null,
             Func<EffectType, int>? getEffectivePenetration = null,
-            Func<EffectType, double>? getEffectiveDamageDealtMultiplier = null,
-            Func<EffectType, double>? getEffectiveDamageTakenMultiplier = null)
+            Func<EffectType, double>? getOutgoingTypeMult = null,
+            Func<EffectType, double>? getIncomingTypeMult = null)
         {
             var results = new List<DamageResult>();
             foreach (var component in components)
@@ -130,12 +134,12 @@ namespace GameCore.Battle
                 // Multiply the current damage by the actor's per-type outgoing damage multiplier
                 // from active effects (e.g. Attack Up → ×1.3 for all types).
                 // Base value is 1.0 (no change). Values > 1.0 increase damage; < 1.0 decrease it.
-                if (getEffectiveDamageDealtMultiplier != null)
+                if (getOutgoingTypeMult != null)
                 {
-                    double outgoingTypeMult = getEffectiveDamageDealtMultiplier(component.DamageType.Value);
-                    if (outgoingTypeMult != 1.0)
+                    double outgoingMult = getOutgoingTypeMult(component.DamageType.Value);
+                    if (outgoingMult != 1.0)
                     {
-                        int afterOutgoingTypeMult = Math.Max(0, (int)(value * outgoingTypeMult));
+                        int afterOutgoingTypeMult = Math.Max(0, (int)(value * outgoingMult));
                         steps.Add(new DamageStep("OutgoingTypeMult", value, afterOutgoingTypeMult));
                         value = afterOutgoingTypeMult;
                     }
@@ -145,12 +149,12 @@ namespace GameCore.Battle
                 // Multiply damage by the target's per-type incoming damage multiplier
                 // from active effects (e.g. Defense Up → ×0.75 for all types).
                 // Values < 1.0 reduce damage; values > 1.0 amplify it.
-                if (getEffectiveDamageTakenMultiplier != null)
+                if (getIncomingTypeMult != null)
                 {
-                    double incomingTypeMult = getEffectiveDamageTakenMultiplier(component.DamageType.Value);
-                    if (incomingTypeMult != 1.0)
+                    double incomingMult = getIncomingTypeMult(component.DamageType.Value);
+                    if (incomingMult != 1.0)
                     {
-                        int afterIncomingTypeMult = Math.Max(0, (int)(value * incomingTypeMult));
+                        int afterIncomingTypeMult = Math.Max(0, (int)(value * incomingMult));
                         steps.Add(new DamageStep("IncomingTypeMult", value, afterIncomingTypeMult));
                         value = afterIncomingTypeMult;
                     }

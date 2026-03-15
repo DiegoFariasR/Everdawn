@@ -567,8 +567,8 @@ namespace GameCore.Battle
                             empowerMult * perHitHitsMult, _rng,
                             et => GetEffectiveResistance(target.Id, et),
                             et => GetEffectivePenetration(actor.Id, et),
-                            et => GetDamageDealtMultiplierForType(actor.Id, et),
-                            et => GetDamageTakenMultiplierForType(target.Id, et));
+                            et => GetOutgoingTypeMultiplier(actor.Id, et),
+                            et => GetIncomingTypeMultiplier(target.Id, et));
                         int totalDamage = 0;
                         foreach (var r in hitResults) totalDamage += r.FinalDamage;
 
@@ -754,8 +754,8 @@ namespace GameCore.Battle
                     perHitMult, _rng,
                     et => GetEffectiveResistance(target.Id, et),
                     et => GetEffectivePenetration(reactor.Id, et),
-                    et => GetDamageDealtMultiplierForType(reactor.Id, et),
-                    et => GetDamageTakenMultiplierForType(target.Id, et));
+                    et => GetOutgoingTypeMultiplier(reactor.Id, et),
+                    et => GetIncomingTypeMultiplier(target.Id, et));
 
                 int totalDamage = 0;
                 foreach (var r in hitResults) totalDamage += r.FinalDamage;
@@ -1181,9 +1181,10 @@ namespace GameCore.Battle
 
         /// <summary>
         /// Returns the per-type outgoing damage multiplier for a unit and damage type from active effects.
+        /// Feeds the "OutgoingTypeMult" pipeline step in <see cref="DamageCalc"/>.
         /// Base value is 1.0 (no change). Stacks multiplicatively across all active effect instances.
         /// </summary>
-        private double GetDamageDealtMultiplierForType(string unitId, EffectType effectType)
+        private double GetOutgoingTypeMultiplier(string unitId, EffectType effectType)
         {
             if (!_activeEffects.TryGetValue(unitId, out var effects) || effects.Count == 0)
                 return 1.0;
@@ -1195,10 +1196,11 @@ namespace GameCore.Battle
         }
 
         /// <summary>
-        /// Returns the effective per-type damage taken multiplier for a unit and damage type from active effects.
+        /// Returns the per-type incoming damage multiplier for a unit and damage type from active effects.
+        /// Feeds the "IncomingTypeMult" pipeline step in <see cref="DamageCalc"/>.
         /// Base value is 1.0 (no change). Values less than 1.0 reduce damage taken.
         /// </summary>
-        private double GetDamageTakenMultiplierForType(string unitId, EffectType effectType)
+        private double GetIncomingTypeMultiplier(string unitId, EffectType effectType)
         {
             if (!_activeEffects.TryGetValue(unitId, out var effects) || effects.Count == 0)
                 return 1.0;
