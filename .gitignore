@@ -59,9 +59,7 @@ crashlytics-build.properties
 sysinfo.txt
 
 # Unity3D generated meta files
-*.pidb.meta
-*.pdb.meta
-*.mdb.meta
+*.meta
 
 # TextMeshPro
 [Aa]ssets/TextMesh*Pro/
