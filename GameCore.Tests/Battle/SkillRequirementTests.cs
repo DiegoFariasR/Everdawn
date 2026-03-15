@@ -8,7 +8,7 @@ using Xunit;
 namespace GameCore.Tests.Battle
 {
     /// <summary>
-    /// Tests for skill trait and weapon-type requirements.
+    /// Tests for skill trait and equipment-type requirements.
     /// Verifies that <see cref="BattleSkill.MeetsRequirements"/> gates skill availability correctly
     /// and that the battle session exposes matching <see cref="PendingInputView.AvailableSkillIds"/>.
     /// </summary>
@@ -24,10 +24,10 @@ namespace GameCore.Tests.Battle
             };
 
         private static BattleUnit MakeUnit(
-            WeaponType weaponType = WeaponType.None,
+            EquipmentType equipmentType = EquipmentType.None,
             IReadOnlyList<BattleTrait>? traits = null) =>
             new BattleUnit("u1", "Unit", "player", Level: 1, Str: 50, Wis: 50, Agi: 50,
-                WeaponType: weaponType, Traits: traits);
+                EquipmentType: equipmentType, Traits: traits);
 
         // ── MeetsRequirements unit tests ──────────────────────────────────────
 
@@ -40,29 +40,29 @@ namespace GameCore.Tests.Battle
         }
 
         [Fact]
-        public void MeetsRequirements_RequiredWeaponType_TrueWhenMatches()
+        public void MeetsRequirements_RequiredEquipmentType_TrueWhenMatches()
         {
             var skill = new BattleSkill("mace", "Mace Strike", Cost: 0, DamageMultiplier: 1.0,
-                Effects: PhysEffect(), RequiredWeaponTypes: new[] { WeaponType.Blunt });
-            var unit = MakeUnit(weaponType: WeaponType.Blunt);
+                Effects: PhysEffect(), RequiredEquipmentTypes: new[] { EquipmentType.Blunt });
+            var unit = MakeUnit(equipmentType: EquipmentType.Blunt);
             Assert.True(skill.MeetsRequirements(unit));
         }
 
         [Fact]
-        public void MeetsRequirements_RequiredWeaponType_FalseWhenMismatch()
+        public void MeetsRequirements_RequiredEquipmentType_FalseWhenMismatch()
         {
             var skill = new BattleSkill("mace", "Mace Strike", Cost: 0, DamageMultiplier: 1.0,
-                Effects: PhysEffect(), RequiredWeaponTypes: new[] { WeaponType.Blunt });
-            var unit = MakeUnit(weaponType: WeaponType.Slash);
+                Effects: PhysEffect(), RequiredEquipmentTypes: new[] { EquipmentType.Blunt });
+            var unit = MakeUnit(equipmentType: EquipmentType.Slash);
             Assert.False(skill.MeetsRequirements(unit));
         }
 
         [Fact]
-        public void MeetsRequirements_RequiredWeaponType_FalseWhenNone()
+        public void MeetsRequirements_RequiredEquipmentType_FalseWhenNone()
         {
             var skill = new BattleSkill("mace", "Mace Strike", Cost: 0, DamageMultiplier: 1.0,
-                Effects: PhysEffect(), RequiredWeaponTypes: new[] { WeaponType.Blunt });
-            var unit = MakeUnit(weaponType: WeaponType.None);
+                Effects: PhysEffect(), RequiredEquipmentTypes: new[] { EquipmentType.Blunt });
+            var unit = MakeUnit(equipmentType: EquipmentType.None);
             Assert.False(skill.MeetsRequirements(unit));
         }
 
@@ -94,11 +94,11 @@ namespace GameCore.Tests.Battle
         }
 
         [Fact]
-        public void MeetsRequirements_BothRequirements_FalseWhenOnlyWeaponMet()
+        public void MeetsRequirements_BothRequirements_FalseWhenOnlyEquipmentMet()
         {
             var skill = new BattleSkill("s", "S", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(),
-                RequiredTrait: BattleTrait.MagicUser, RequiredWeaponTypes: new[] { WeaponType.Staff });
-            var unit = MakeUnit(weaponType: WeaponType.Staff);
+                RequiredTrait: BattleTrait.MagicUser, RequiredEquipmentTypes: new[] { EquipmentType.Staff });
+            var unit = MakeUnit(equipmentType: EquipmentType.Staff);
             Assert.False(skill.MeetsRequirements(unit));
         }
 
@@ -106,7 +106,7 @@ namespace GameCore.Tests.Battle
         public void MeetsRequirements_BothRequirements_FalseWhenOnlyTraitMet()
         {
             var skill = new BattleSkill("s", "S", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(),
-                RequiredTrait: BattleTrait.MagicUser, RequiredWeaponTypes: new[] { WeaponType.Staff });
+                RequiredTrait: BattleTrait.MagicUser, RequiredEquipmentTypes: new[] { EquipmentType.Staff });
             var unit = MakeUnit(traits: new[] { BattleTrait.MagicUser });
             Assert.False(skill.MeetsRequirements(unit));
         }
@@ -115,24 +115,24 @@ namespace GameCore.Tests.Battle
         public void MeetsRequirements_BothRequirements_TrueWhenBothMet()
         {
             var skill = new BattleSkill("s", "S", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(),
-                RequiredTrait: BattleTrait.MagicUser, RequiredWeaponTypes: new[] { WeaponType.Staff });
-            var unit = MakeUnit(weaponType: WeaponType.Staff, traits: new[] { BattleTrait.MagicUser });
+                RequiredTrait: BattleTrait.MagicUser, RequiredEquipmentTypes: new[] { EquipmentType.Staff });
+            var unit = MakeUnit(equipmentType: EquipmentType.Staff, traits: new[] { BattleTrait.MagicUser });
             Assert.True(skill.MeetsRequirements(unit));
         }
 
         // ── AvailableSkillIds integration tests ───────────────────────────────
 
         [Fact]
-        public void AvailableSkillIds_ExcludesSkillWithUnmetWeaponRequirement()
+        public void AvailableSkillIds_ExcludesSkillWithUnmetEquipmentRequirement()
         {
             var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, DamageMultiplier: 1.0,
                 Effects: PhysEffect(), Modifiers: new[] { "basic" });
             var maceSkill = new BattleSkill("mace-strike", "Mace Strike", Cost: 0, DamageMultiplier: 1.0,
-                Effects: PhysEffect(), RequiredWeaponTypes: new[] { WeaponType.Blunt });
+                Effects: PhysEffect(), RequiredEquipmentTypes: new[] { EquipmentType.Blunt });
 
             // Unit with Slash weapon — cannot use mace-strike.
             var player = new BattleUnit("p", "Player", "player", Level: 1, Str: 100, Wis: 0, Agi: 50,
-                WeaponType: WeaponType.Slash, Skills: new[] { basicSkill, maceSkill });
+                EquipmentType: EquipmentType.Slash, Skills: new[] { basicSkill, maceSkill });
             var enemy = new BattleUnit("e", "Enemy", "enemy", Level: 1, Str: 50, Wis: 0, Agi: 10,
                 Skills: new[] { basicSkill });
 
@@ -148,16 +148,16 @@ namespace GameCore.Tests.Battle
         }
 
         [Fact]
-        public void AvailableSkillIds_IncludesSkillWithMetWeaponRequirement()
+        public void AvailableSkillIds_IncludesSkillWithMetEquipmentRequirement()
         {
             var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, DamageMultiplier: 1.0,
                 Effects: PhysEffect(), Modifiers: new[] { "basic" });
             var maceSkill = new BattleSkill("mace-strike", "Mace Strike", Cost: 0, DamageMultiplier: 1.0,
-                Effects: PhysEffect(), RequiredWeaponTypes: new[] { WeaponType.Blunt });
+                Effects: PhysEffect(), RequiredEquipmentTypes: new[] { EquipmentType.Blunt });
 
             // Unit with Blunt weapon — can use mace-strike.
             var player = new BattleUnit("p", "Player", "player", Level: 1, Str: 100, Wis: 0, Agi: 50,
-                WeaponType: WeaponType.Blunt, Skills: new[] { basicSkill, maceSkill });
+                EquipmentType: EquipmentType.Blunt, Skills: new[] { basicSkill, maceSkill });
             var enemy = new BattleUnit("e", "Enemy", "enemy", Level: 1, Str: 50, Wis: 0, Agi: 10,
                 Skills: new[] { basicSkill });
 
@@ -203,11 +203,11 @@ namespace GameCore.Tests.Battle
             var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, DamageMultiplier: 1.0,
                 Effects: PhysEffect(), Modifiers: new[] { "basic" });
             var maceSkill = new BattleSkill("mace-strike", "Mace Strike", Cost: 0, DamageMultiplier: 1.0,
-                Effects: PhysEffect(), RequiredWeaponTypes: new[] { WeaponType.Blunt });
+                Effects: PhysEffect(), RequiredEquipmentTypes: new[] { EquipmentType.Blunt });
 
             // Unit without Blunt weapon tries to use mace-strike.
             var player = new BattleUnit("p", "Player", "player", Level: 1, Str: 100, Wis: 0, Agi: 50,
-                WeaponType: WeaponType.Slash, Skills: new[] { basicSkill, maceSkill });
+                EquipmentType: EquipmentType.Slash, Skills: new[] { basicSkill, maceSkill });
             var enemy = new BattleUnit("e", "Enemy", "enemy", Level: 1, Str: 50, Wis: 0, Agi: 10,
                 Skills: new[] { basicSkill });
 

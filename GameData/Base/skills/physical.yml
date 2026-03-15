@@ -3,7 +3,7 @@
 
 - id: mace-strike
   name: Mace Strike
-  requiredWeaponTypes: [Blunt]
+  requiredEquipmentTypes: [Blunt]
   isStrSkill: true
   furyDamageScale: 0.4
   effects:
@@ -17,7 +17,7 @@
 - id: mace-crush
   name: Crushing Blow
   cooldown: 3
-  requiredWeaponTypes: [Blunt]
+  requiredEquipmentTypes: [Blunt]
   isStrSkill: true
   furyDamageScale: 0.4
   effects:
@@ -32,7 +32,7 @@
 - id: mace-shatter
   name: Shattering Blow
   cooldown: 3
-  requiredWeaponTypes: [Blunt]
+  requiredEquipmentTypes: [Blunt]
   isStrSkill: true
   furyDamageScale: 0.4
   effects:
@@ -49,7 +49,7 @@
 
 - id: sword-strike
   name: Sword Strike
-  requiredWeaponTypes: [Slash]
+  requiredEquipmentTypes: [Slash]
   isStrSkill: true
   furyDamageScale: 0.3
   scalingHits:
@@ -66,7 +66,7 @@
 - id: sword-cleave
   name: Cleave
   cooldown: 3
-  requiredWeaponTypes: [Slash]
+  requiredEquipmentTypes: [Slash]
   isStrSkill: true
   furyDamageScale: 0.3
   scalingHits:
@@ -86,7 +86,7 @@
 
 - id: bow-shot
   name: Arrow Shot
-  requiredWeaponTypes: [Bow]
+  requiredEquipmentTypes: [Bow]
   baseHits: 1.8
   effects:
     - kind: damage
@@ -99,7 +99,7 @@
 - id: bow-precise
   name: Precise Shot
   cooldown: 3
-  requiredWeaponTypes: [Bow]
+  requiredEquipmentTypes: [Bow]
   baseHits: 2.2
   effects:
     - kind: damage
@@ -112,7 +112,7 @@
 - id: bow-volley
   name: Volley
   cooldown: 3
-  requiredWeaponTypes: [Bow]
+  requiredEquipmentTypes: [Bow]
   baseHits: 3.0
   effects:
     - kind: damage
@@ -128,7 +128,7 @@
 
 - id: dagger-strike
   name: Dagger Strike
-  requiredWeaponTypes: [Pierce]
+  requiredEquipmentTypes: [Pierce]
   baseHits: 2.0
   scalingHits:
     - stat: agi
@@ -145,7 +145,7 @@
 - id: dagger-flurry
   name: Flurry
   cooldown: 3
-  requiredWeaponTypes: [Pierce]
+  requiredEquipmentTypes: [Pierce]
   baseHits: 3.0
   scalingHits:
     - stat: agi
@@ -164,7 +164,7 @@
 - id: shield-bash
   name: Shield Bash
   cooldown: 3
-  requiredWeaponTypes: [Blunt]
+  requiredEquipmentTypes: [Blunt]
   isStrSkill: true
   furyDamageScale: 0.35
   effects:
@@ -190,7 +190,7 @@
 - id: rogue-mark
   name: Death Mark
   cooldown: 3
-  requiredWeaponTypes: [Pierce]
+  requiredEquipmentTypes: [Pierce]
   baseHits: 2.5
   scalingHits:
     - stat: agi

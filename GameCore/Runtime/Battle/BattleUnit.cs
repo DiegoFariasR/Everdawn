@@ -44,10 +44,10 @@ namespace GameCore.Battle
         /// </summary>
         int ThermalProtection = 0,
         /// <summary>
-        /// The type of weapon this unit is equipped with.
-        /// Determines which weapon-gated skills the unit can use.
+        /// The type of equipment this unit is carrying.
+        /// Determines which equipment-gated skills the unit can use.
         /// </summary>
-        WeaponType WeaponType = WeaponType.None,
+        EquipmentType EquipmentType = EquipmentType.None,
         /// <summary>
         /// The unit's reaction skill, if any. Fires automatically when the trigger condition is met.
         /// Not included in <see cref="ResolvedSkills"/> — it is never chosen as a battle action.

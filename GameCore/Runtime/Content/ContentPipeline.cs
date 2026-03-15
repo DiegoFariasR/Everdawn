@@ -510,7 +510,7 @@ namespace GameCore.Content
                 Penetrations: penetrations,
                 DisruptionPenetration: disruptionPenetration,
                 ThermalProtection: thermalProtection,
-                WeaponType: Enum.Parse<WeaponType>(raw.WeaponType, ignoreCase: true),
+                EquipmentType: Enum.Parse<EquipmentType>(raw.EquipmentType, ignoreCase: true),
                 ReactionSkill: reactionSkill);
         }
 
@@ -593,7 +593,7 @@ namespace GameCore.Content
                 RequiredTrait: raw.RequiredTrait != null
                     ? Enum.Parse<BattleTrait>(raw.RequiredTrait, ignoreCase: true)
                     : (BattleTrait?)null,
-                RequiredWeaponTypes: raw.RequiredWeaponTypes?.Select(t => Enum.Parse<WeaponType>(t, ignoreCase: true)).ToArray(),
+                RequiredEquipmentTypes: raw.RequiredEquipmentTypes?.Select(t => Enum.Parse<EquipmentType>(t, ignoreCase: true)).ToArray(),
                 Trigger: raw.Trigger != null
                     ? Enum.Parse<ReactionTrigger>(raw.Trigger, ignoreCase: true)
                     : (ReactionTrigger?)null,

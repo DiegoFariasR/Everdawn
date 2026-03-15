@@ -65,7 +65,7 @@ namespace GameCore.Scenarios
                     // This scenario is a sandbox for stat-vs-skill damage analysis, not a
                     // lore-accurate setup — requirements are intentionally satisfied broadly.
                     Traits: new[] { BattleTrait.MagicUser },
-                    WeaponType: WeaponType.Blunt));
+                    EquipmentType: EquipmentType.Blunt));
             }
 
             return new BattleSetup

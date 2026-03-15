@@ -5,7 +5,7 @@ str: 62
 wis: 110
 agi: 70
 traits: [MagicUser]
-weaponType: Staff
+equipmentType: Staff
 skills:
   - id: mage-bolt
     modifiers: [Basic]

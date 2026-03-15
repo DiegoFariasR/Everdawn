@@ -1,13 +1,13 @@
 namespace GameCore.Battle
 {
     /// <summary>
-    /// The type of weapon a unit is equipped with.
-    /// Used to gate weapon-specific skills — a skill with a <see cref="WeaponType"/> requirement
-    /// can only be used by a unit carrying a matching weapon.
+    /// The type of equipment a unit is carrying.
+    /// Used to gate equipment-specific skills — a skill with an <see cref="EquipmentType"/> requirement
+    /// can only be used by a unit carrying matching equipment.
     /// </summary>
-    public enum WeaponType
+    public enum EquipmentType
     {
-        /// <summary>No weapon (unarmed, or weapon type not relevant).</summary>
+        /// <summary>No relevant equipment (unarmed, or equipment type not relevant).</summary>
         None,
 
         /// <summary>Maces, hammers, clubs — blunt-force weapons.</summary>
