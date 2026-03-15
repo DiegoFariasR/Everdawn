@@ -21,11 +21,8 @@ flowchart TD
         B --> FC{"Actor has Focused buff AND skill is Attack or Spell?"}
         FC -- yes --> FE["Consume Focused buff<br/>Emit 'sharpens' event<br/>effectiveHits += FocusEffectValue<br/>(ExtraHit or ExtraProjectile)"]
         FC -- no  --> GM
-        FE --> GM["Compute empowerMult<br/>= DamageDealtMultiplier from active effects"]
-        GM --> D{"Fury empowered?<br/>(bar = 100, non-basic skill)"}
-        D -- yes --> E["empowerMult × 1.5 · Fury bar → 0"]
-        D -- no  --> F
-        E --> F["Snapshot actorIsDizzy (Disruption bar ≥ 50)<br/>Snapshot damageTakenMult (target's DamageTakenMultiplier)"]
+        FE --> GM["Compute empowerMult<br/>= DamageDealtMultiplier from active effects<br/>× furyDamageMult (FuryUser: 1.0 + FuryDamageScale × fury/100; else 1.0)"]
+        GM --> F["Snapshot actorIsDizzy (Disruption bar ≥ 50)<br/>Snapshot damageTakenMult (target's DamageTakenMultiplier)"]
     end
 
     F --> LOOP
@@ -72,7 +69,7 @@ pipeline, update the matching row here and the Mermaid above.
 | RefundsAction branch | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `if (skill.RefundsAction)` early-return block |
 | Hit count (AGI / BaseHits) | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `effectiveHits` resolution block |
 | Focus ExtraHit/ExtraProjectile | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `if (isFocusEmpowered && ...)` |
-| Fury empowerment | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `isFuryEmpowered` block |
+| Fury scaling | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `furyDamageMult` block (continuous: `1.0 + FuryDamageScale × fury/100`; no drain) |
 | Dizzy snapshot | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `actorIsDizzy` + `attackerOutputMult` |
 | DamageTaken snapshot | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `GetDamageTakenMultiplier` + `defenderDamageTakenMult` |
 | **Layer 1 — Base** | `"Base"` | `DamageCalc.cs` — Layer 1 block |
