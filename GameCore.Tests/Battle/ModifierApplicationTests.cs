@@ -7,15 +7,10 @@ using Xunit;
 
 namespace GameCore.Tests.Battle
 {
-    /// <summary>
-    /// Unit tests for the modifier action group ordering: Set → Modify → Add.
-    /// Uses an in-memory content source to isolate behaviour from the GameData files.
-    /// </summary>
     public class ModifierApplicationTests
     {
         // ── In-memory content source ─────────────────────────────────────────
 
-        /// <summary>Minimal in-memory <see cref="IContentSource"/> for pipeline tests.</summary>
         private sealed class InMemoryContentSource : IContentSource
         {
             private readonly Dictionary<string, string> _files;

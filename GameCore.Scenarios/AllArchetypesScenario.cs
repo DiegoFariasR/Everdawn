@@ -6,12 +6,6 @@ using GameCore.Content;
 
 namespace GameCore.Scenarios
 {
-    /// <summary>
-    /// All 13 stat archetypes as player units, each equipped with every weapon and spell skill.
-    /// Mirrors the archetype table in the balancing report — useful for testing any stat build
-    /// with any skill combination interactively.
-    /// Budget: 100 stat points per archetype, Level 10.
-    /// </summary>
     public sealed class AllArchetypesScenario : IBattleScenario
     {
         public string Id => "all-archetypes";

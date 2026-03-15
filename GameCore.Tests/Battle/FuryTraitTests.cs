@@ -241,9 +241,7 @@ namespace GameCore.Tests.Battle
 
         // ── Helpers ───────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Runs a STR skill action and returns the total damage dealt at the given injected Fury.
-        /// </summary>
+        // Runs a STR skill action and returns total damage at the given injected Fury.
         private static int RunStrSkillDamage(int injectedFury)
         {
             var session = StartFuryBattle(seed: 42);
@@ -276,12 +274,7 @@ namespace GameCore.Tests.Battle
             return result.Events.Where(e => e.TargetId == "target" && e.Value > 0).Sum(e => e.Value);
         }
 
-        /// <summary>
-        /// Builds a battle with a Fury-capable player unit vs. a weak dummy enemy.
-        /// Player has:
-        ///   "str-skill" (isStrSkill: true, FuryDamageScale: 0.4),
-        ///   "non-str-skill" (IsStrSkill: false).
-        /// </summary>
+        // Player: str-skill (IsStrSkill=true, FuryDamageScale=0.4), non-str-skill (IsStrSkill=false).
         private static BattleSession StartFuryBattle(
             bool enemyGoesFirst = false,
             int playerAgi = 50,

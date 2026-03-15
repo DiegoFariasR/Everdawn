@@ -7,11 +7,6 @@ using Xunit;
 
 namespace GameCore.Tests.Battle
 {
-    /// <summary>
-    /// Tests for skill trait and equipment-type requirements.
-    /// Verifies that <see cref="BattleSkill.MeetsRequirements"/> gates skill availability correctly
-    /// and that the battle session exposes matching <see cref="PendingInputView.AvailableSkillIds"/>.
-    /// </summary>
     public class SkillRequirementTests
     {
         // ── Helpers ──────────────────────────────────────────────────────────

@@ -4,12 +4,6 @@ using GameCore.Content;
 
 namespace GameCore.Scenarios
 {
-    /// <summary>
-    /// A sample battle: three heroes vs four enemies, mirroring the reference battle image.
-    /// Seed 42 is fixed — same inputs always produce the same battle.
-    /// <para>Also implements <see cref="IRegressionScenario"/>: expected outcomes are declared here
-    /// and validated automatically by the test suite.</para>
-    /// </summary>
     public class SampleScenario : IBattleScenario, IRegressionScenario
     {
         public string Id => "sample-scenario";

@@ -6,23 +6,6 @@ using Xunit;
 
 namespace GameCore.Tests.Battle
 {
-    /// <summary>
-    /// Tests for the disruption buildup bar system.
-    /// Covers:
-    /// 1.  Disruption bar can be added from an effect/skill source.
-    /// 2.  Disruption buildup is reduced by DisruptionResistance.
-    /// 3.  Disruption >= 50 applies "dizzy" status effect.
-    /// 4.  Dizzy reduces the actor's final damage dealt by 20%.
-    /// 5.  Disruption >= 100 applies "stunned" status effect.
-    /// 6.  Stunned causes the unit to lose exactly 1 turn.
-    /// 7.  After stun triggers, disruption bar becomes 40 (StunRetainedBar).
-    /// 8.  Lightning skills can build disruption when DisruptionPower is set.
-    /// 9.  Impact/blunt (physical) skills can build disruption when DisruptionPower is set.
-    /// 10. Disruption bar is visible in runtime state / unit bars.
-    /// 11. StatusEffects contains "dizzy" and "stunned" correctly.
-    /// 12. Behavior remains deterministic with the same seed.
-    /// 13. Disruption bar decays by DisruptionSystem.DecayPerTurn each unit turn.
-    /// </summary>
     public class DisruptionTests
     {
         // ─────────────────────────────────────────────────────────────────────
@@ -167,11 +150,7 @@ namespace GameCore.Tests.Battle
 
         // ── Helpers ───────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Builds a session where the player skill has a specified disruption power.
-        /// Enemy has massive STR so it survives all hits.
-        /// Player always goes first (Agi=200 vs enemy Agi=1).
-        /// </summary>
+        // Player always goes first (Agi=200 vs enemy Agi=1).
         private static BattleSession BuildSession(
             BattleSkill playerSkill,
             BattleSkill? enemySkill = null,
@@ -201,7 +180,6 @@ namespace GameCore.Tests.Battle
             return session;
         }
 
-        /// <summary>Harmless physical attack with no disruption power.</summary>
         private static BattleSkill TinyPhysicalSkill(string id = "tiny") =>
             new BattleSkill(id, "Tiny", Cost: 0, DamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
@@ -214,7 +192,7 @@ namespace GameCore.Tests.Battle
                 },
                 Modifiers: new string[] { "basic" });
 
-        /// <summary>Blunt skill with BuildupPower=100 — guarantees stun in one hit.</summary>
+        // BuildupPower=100 — guarantees stun in one hit.
         private static BattleSkill MassiveDisruptionSkill(string id = "mass-disrupt") =>
             new BattleSkill(id, "Massive Disruption", Cost: 0, DamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
@@ -228,7 +206,7 @@ namespace GameCore.Tests.Battle
                 },
                 Modifiers: new string[] { "basic" });
 
-        /// <summary>Blunt strike with BuildupPower exactly at DizzyThreshold — sets bar to exactly 50 (dizzy, not stun).</summary>
+        // BuildupPower exactly at DizzyThreshold — sets bar to exactly 50 (dizzy, not stun).
         private static BattleSkill DizzySkill(string id = "dizzy-skill") =>
             new BattleSkill(id, "Dizzying Strike", Cost: 0, DamageMultiplier: 1.0,
                 Effects: new SkillEffect[]

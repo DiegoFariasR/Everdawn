@@ -7,11 +7,6 @@ using Xunit;
 
 namespace GameCore.Tests.Battle
 {
-    /// <summary>
-    /// Structural, invariant, and determinism tests for BattleEngine.Run().
-    /// These tests assert properties that must hold for any valid battle result,
-    /// regardless of seed or scenario content.
-    /// </summary>
     public class BattleEngineTests
     {
         private static readonly IBattleScenario Sample = new SampleScenario();

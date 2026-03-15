@@ -8,28 +8,6 @@ using Xunit;
 
 namespace GameCore.Tests.Battle
 {
-    /// <summary>
-    /// Tests for the opposed thermal (cold / burn) status system.
-    /// Covers:
-    /// 1.  Cold removes Burn bar before building Cold bar.
-    /// 2.  Fire removes Cold bar before building Burn bar.
-    /// 3.  Opposite-bar removal ignores resistance.
-    /// 4.  Cold resistance reduces only Cold buildup, not Burn removal.
-    /// 5.  Fire resistance reduces only Burn buildup, not Cold removal.
-    /// 6.  Cold bar >= 50 → "slow" status effect.
-    /// 7.  Burn bar >= 50 → "burning" status effect.
-    /// 8.  Cold bar = 100 → frozen, unit loses exactly 1 turn.
-    /// 9.  Freeze retains Cold bar at 40 after trigger.
-    /// 10. Burning deals deterministic start-of-turn DOT.
-    /// 11. Burning DOT scales with higher Burn bar.
-    /// 12. Fire can thaw a nearly-frozen target before building Burn.
-    /// 13. Cold can extinguish a burning target before building Cold.
-    /// 14. Thermal bars (cold, burn) are present in runtime state / snapshots.
-    /// 15. StatusEffects list contains the correct IDs.
-    /// 16. Session path and full-run path stay aligned after the refactor.
-    /// 17. Determinism still holds with the same seed.
-    /// 18. ThermalProtection amplifies fire and cold resistance for buildup purposes.
-    /// </summary>
     public class ThermalTests
     {
         // ─────────────────────────────────────────────────────────────────────
@@ -315,29 +293,20 @@ namespace GameCore.Tests.Battle
                     })
             };
 
-        /// <summary>
-        /// A cold skill that guarantees the cold bar reaches 100 in a single hit
-        /// (buildupPower=100 fills the bar exactly, triggering freeze).
-        /// </summary>
+        // buildupPower=100 fills the cold bar exactly, triggering freeze.
         private static BattleSkill MassiveColdSkill(string id = "massive-cold") =>
             new(id, "Massive Cold", Cost: 0, DamageMultiplier: 1.0,
                 Effects: ColdDamageEffect(wisScale: 1.0, buildupPower: 100));
 
-        /// <summary>A fire skill that reliably fills the burn bar in one hit (buildupPower=100).</summary>
         private static BattleSkill MassiveFireSkill(string id = "massive-fire") =>
             new(id, "Massive Fire", Cost: 0, DamageMultiplier: 1.0,
                 Effects: FireDamageEffect(wisScale: 1.0, buildupPower: 100));
 
-        /// <summary>Harmless physical attack that deals negligible damage.</summary>
         private static BattleSkill TinyPhysicalSkill(string id = "tiny") =>
             new(id, "Tiny", Cost: 0, DamageMultiplier: 1.0,
                 Effects: PhysicalDamageEffect(strScale: 0.001));
 
-        /// <summary>
-        /// Creates a session with one player (high WIS, high AGI, high HP) and one enemy
-        /// (very tanky, configurable resistances). The player always goes first.
-        /// enemyStr=10000 → MaxHP=1,000,000 so massive elemental skills do not kill it.
-        /// </summary>
+        // Player always goes first (high WIS/AGI/HP); enemy is tanky (str=10000) with configurable resistances.
         private static BattleSession BuildSession(
             BattleSkill playerSkill,
             BattleSkill enemySkill,

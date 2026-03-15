@@ -3,11 +3,6 @@ using GameCore.Content;
 
 namespace GameCore.Scenarios
 {
-    /// <summary>
-    /// A watch-only (non-interactive) wrapper around any <see cref="IBattleScenario"/>.
-    /// The battle runs automatically — the player observes the replay but does not control it.
-    /// Use this to expose an existing scenario in the sandbox's replay/observe mode.
-    /// </summary>
     public sealed class WatchScenario : IBattleScenario
     {
         private readonly IBattleScenario _source;

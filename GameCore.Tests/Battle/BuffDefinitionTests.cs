@@ -6,12 +6,6 @@ using Xunit;
 
 namespace GameCore.Tests.Battle
 {
-    /// <summary>
-    /// Tests for the reusable buff definition system.
-    /// Verifies that buff-definitions.yml is loaded correctly, that skills can reference
-    /// buff definitions by ID via <c>effectRef</c>, and that the compiled effect stats
-    /// are correct.
-    /// </summary>
     public class BuffDefinitionTests
     {
         private static readonly ContentDatabase Content =

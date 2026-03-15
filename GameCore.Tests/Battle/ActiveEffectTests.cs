@@ -6,29 +6,6 @@ using Xunit;
 
 namespace GameCore.Tests.Battle
 {
-    /// <summary>
-    /// Tests for the runtime active-effect (buff/debuff) system.
-    /// Covers:
-    ///  1.  Runtime active effect can be applied to a unit.
-    ///  2.  Active effect duration decreases on the correct turn timing (ForTargetTurns).
-    ///  3.  Expired effects are removed cleanly.
-    ///  4.  Attack Up buff increases outgoing damage.
-    ///  5.  Guard (DamageTakenMultiplier) reduces incoming damage.
-    ///  6.  Temporary fire resistance reduces fire damage and fire buildup.
-    ///  7.  Temporary cold resistance reduces cold buildup.
-    ///  8.  Temporary disruption resistance reduces disruption buildup.
-    ///  9.  Multiple active modifiers resolve in deterministic Set→Add→Multiply order.
-    /// 10.  Set/Add/Multiply ordering is tested explicitly.
-    /// 11.  Active effects are visible in runtime state (UnitState.ActiveEffects and StatusEffects).
-    /// 12.  Repeated runs with the same seed remain deterministic.
-    /// 13.  Runtime buff effects do not permanently mutate the base compiled skill definition.
-    /// 14.  Stacking policies: RefreshDuration and ReplaceIfStronger behave as intended.
-    /// 15.  ForSourceTurns duration ticks on the source unit's turns.
-    /// 16.  UntilNextAction expires after the target's next action.
-    /// 17.  StackIntensity increments the stack count on re-application.
-    /// 18.  IndependentInstances creates separate instances on each application.
-    /// 19.  Per-type damage dealt multiplier increases only the matching damage type and stacks with global multiplier.
-    /// </summary>
     public class ActiveEffectTests
     {
         // ── Common skill / unit factories ────────────────────────────────────
@@ -1030,12 +1007,7 @@ namespace GameCore.Tests.Battle
                 "ReceivingBarrierMultiplier should increase barrier received");
         }
 
-        /// <summary>
-        /// Executes a basic attack (to let the enemy damage the player), applies an optional buff,
-        /// then executes the heal skill. Returns the player's HP after both actions (including the
-        /// two enemy counter-attacks in AutoAdvance). Both sessions use the same seed so enemy
-        /// damage values are identical, isolating the healing difference.
-        /// </summary>
+        // Runs attack (enemy damages player), applies optional buff, then executes heal; returns player HP. Same seed isolates healing difference.
         private static int MeasureHpAfterHeal(BattleUnit player, BattleUnit enemy,
             string healSkillId, ActiveEffectDefinition? applyBuff, int seed)
         {

@@ -5,13 +5,6 @@ using GameCore.Content;
 
 namespace GameCore.Scenarios
 {
-    /// <summary>
-    /// A scenario showcasing the four spell archetype attack patterns:
-    /// pure-WIS single-hit (Bolt), WIS/AGI multi-hit (Missiles),
-    /// WIS fixed-2hit (Burst), WIS fixed-3hit (Volley)
-    /// vs a standard enemy party.
-    /// Useful for observing how spell archetypes behave and comparing hit-pattern output.
-    /// </summary>
     public sealed class SpellArchetypeScenario : IBattleScenario
     {
         public string Id => "spell-archetypes";

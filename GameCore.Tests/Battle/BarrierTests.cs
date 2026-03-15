@@ -5,13 +5,6 @@ using Xunit;
 
 namespace GameCore.Tests.Battle
 {
-    /// <summary>
-    /// Tests for the barrier (energy shield) system:
-    /// - Barrier absorbs damage before HP.
-    /// - Shield skills grant barrier using the same scaling as damage/heal.
-    /// - Barrier decays each round based on the unit's WIS.
-    /// - Barrier cannot be healed (HP heal does not restore barrier).
-    /// </summary>
     public class BarrierTests
     {
         // ── IsShield property ────────────────────────────────────────────────
@@ -313,10 +306,7 @@ namespace GameCore.Tests.Battle
         private static BattleSkill MakeHealSkill(string id, double wisScale = 1.0) =>
             new(id, id, Cost: 0, DamageMultiplier: 1.0, Effects: HealEffect(wisScale));
 
-        /// <summary>
-        /// Casts a shield on a single player (who is also the only target for the enemy),
-        /// then reads the state after the enemy attack (which happens inside AutoAdvance).
-        /// </summary>
+        // Player casts shield; enemy attacks in AutoAdvance; returns view after both actions.
         private static BattleView CastShieldAndLetEnemyAttack(double shieldWisScale, double damageWisScale)
         {
             var player = new BattleUnit("player", "Player", "player", Level: 1, Str: 10, Wis: 50, Agi: 100,
@@ -337,12 +327,7 @@ namespace GameCore.Tests.Battle
             return result.View;
         }
 
-        /// <summary>
-        /// Builds a session where a mage (agi=100) casts a large one-time barrier on all allies
-        /// (the shield has a 100-turn cooldown so it's cast exactly once) and then uses a basic
-        /// attack for subsequent turns. Runs until the first round transition so barrier has
-        /// already decayed once when the session is returned.
-        /// </summary>
+        // Mage casts one-time barrier (cooldown=100) on all allies; runs to first round transition so barrier has already decayed once.
         private static BattleSession BuildDecayObservationSession(int wisOnShieldedUnit)
         {
             // Shield has Cooldown=100 so it's only usable on the first turn.

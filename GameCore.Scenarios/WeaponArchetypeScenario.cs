@@ -5,12 +5,6 @@ using GameCore.Content;
 
 namespace GameCore.Scenarios
 {
-    /// <summary>
-    /// A scenario showcasing the four weapon archetype attacker patterns:
-    /// pure-STR (Mace), STR/AGI (Sword), pure-AGI (Bow), AGI-multihit (Dagger)
-    /// vs a standard enemy party.
-    /// Useful for observing how weapon archetypes behave and comparing their output.
-    /// </summary>
     public sealed class WeaponArchetypeScenario : IBattleScenario
     {
         public string Id => "weapon-archetypes";

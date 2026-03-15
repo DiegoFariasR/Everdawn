@@ -4,10 +4,6 @@ using Xunit;
 
 namespace GameCore.Tests.Battle
 {
-    /// <summary>
-    /// Pure unit tests for BattleUnit stat derivations and skill resolution rules.
-    /// No RNG or scenario setup needed — just constructed units.
-    /// </summary>
     public class BattleRulesTests
     {
         [Fact]

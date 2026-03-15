@@ -4,14 +4,6 @@ using GameCore.Battle;
 using GameCore.Content;
 namespace GameCore.Scenarios
 {
-    /// <summary>
-    /// Concrete implementation of <see cref="IBattleSandboxEngine"/>.
-    /// <para>
-    /// Constructed with an <see cref="IContentSource"/> (supplied by the host, e.g. HTTP for Blazor WASM
-    /// or the file system for tests). All GameCore concerns — content loading, scenario resolution,
-    /// and session lifecycle — are handled here so the presentation layer never touches them directly.
-    /// </para>
-    /// </summary>
     public sealed class BattleSandboxEngine : IBattleSandboxEngine
     {
         private readonly IContentSource _source;

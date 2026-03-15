@@ -5,20 +5,6 @@ using Xunit;
 
 namespace GameCore.Tests.Battle
 {
-    /// <summary>
-    /// Tests for the Reaction mechanic.
-    /// Covers:
-    /// 1.  Counter-strike fires after a melee hit and deals damage back.
-    /// 2.  Counter-strike does NOT fire after a ranged/spell hit.
-    /// 3.  Counter-strike does NOT fire when it is on cooldown.
-    /// 4.  Counter-strike does NOT fire when the target is killed by the attack.
-    /// 5.  Counter-strike can kill the original attacker.
-    /// 6.  Counter-strike goes on cooldown after firing and skips the next trigger.
-    /// 7.  Frozen units do not react.
-    /// 8.  Stunned units do not react.
-    /// 9.  OnHitBy with no conditions triggers on any damaging hit.
-    /// 10. OnHitBy with damageType condition triggers only on matching damage type.
-    /// </summary>
     public class ReactionTests
     {
         // ── Helpers ──────────────────────────────────────────────────────────
@@ -66,10 +52,7 @@ namespace GameCore.Tests.Battle
                         }),
                 });
 
-        /// <summary>
-        /// Builds a session with a player attacker and an enemy that has a counter-strike reaction.
-        /// Player hits first (AGI = 200). Enemy has low HP (str=1) and high str for survivability (str=500).
-        /// </summary>
+        // Player hits first (attackerAgi=200). Enemy has configurable reaction skill; high STR for survivability.
         private static BattleSession BuildSession(
             BattleSkill attackerSkill,
             BattleSkill? enemyReactionSkill = null,

@@ -173,11 +173,7 @@ namespace GameCore.Tests.Battle
 
         // ── Helpers ───────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Sets up a battle with a focus-capable player unit vs a weak dummy enemy.
-        /// Player has: basic (incompatible), compatible (ExtraHit +1, IsFocusCompatible), focus-skill (IsFocusSkill).
-        /// playerAgi controls HitCount (HitCount = 1 + Agi/100). Default Agi 50 → 1 hit.
-        /// </summary>
+        // Player: basic (incompatible), compatible (ExtraHit +1, IsFocusCompatible), focus-skill. playerAgi controls HitCount (1 + Agi/100).
         private static BattleSession StartFocusBattle(int playerAgi = 50)
         {
             var setup = new BattleSetup
@@ -211,7 +207,7 @@ namespace GameCore.Tests.Battle
         private static BattleUnit MakeUnit(IReadOnlyList<BattleTrait>? traits) =>
             new("unit", "Unit", "player", Level: 1, Str: 50, Wis: 50, Agi: 50, Traits: traits);
 
-        /// <summary>Minimal physical/str effect list for test skill construction.</summary>
+        // Minimal physical/str effect list for test skill construction.
         private static SkillEffect[] PhysEffect(double mult = 1.0) =>
             new SkillEffect[] { new(EffectKind.Damage, BattleSkillTarget.Enemy,
                 new DamageComponent[] { new(EffectType.Physical, new DamageScaling[] { new("str", mult) }) }) };

@@ -5,22 +5,6 @@ using Xunit;
 
 namespace GameCore.Tests.Battle
 {
-    /// <summary>
-    /// Tests for the dispel system.
-    /// Covers:
-    ///  1.  Dispel removes a debuff from the target.
-    ///  2.  Dispel removes a buff from the target.
-    ///  3.  Dispel targeting debuffs does not remove buffs.
-    ///  4.  Dispel targeting buffs does not remove debuffs.
-    ///  5.  When no matching effects are present the dispel produces a "no X to dispel" event.
-    ///  6.  Dispelling a thermal debuff (slow) resets the cold bar below the threshold.
-    ///  7.  Dispelling frozen also resets the cold bar so the unit is no longer frozen.
-    ///  8.  Dispelling burning resets the burn bar below the threshold.
-    ///  9.  Dispelling stunned clears the stun and resets the disruption bar.
-    /// 10.  Dispelling dizzy resets the disruption bar below the dizzy threshold.
-    /// 11.  ActiveEffectView.IsDebuff is true for debuffs and false for buffs.
-    /// 12.  Buff definitions loaded from content have the correct alignment.
-    /// </summary>
     public class DispelTests
     {
         // ── Factories ────────────────────────────────────────────────────────

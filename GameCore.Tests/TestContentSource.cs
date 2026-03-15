@@ -4,23 +4,11 @@ using GameCore.Content;
 
 namespace GameCore.Tests
 {
-    /// <summary>
-    /// Provides a pre-configured <see cref="IContentSource"/> for use in tests.
-    /// <para>
-    /// The content root is a host-local path inside the test output directory.
-    /// <c>GameData/Base/</c> is copied into the output during build
-    /// (see <c>GameCore.Tests.csproj</c> Content items), so no repository-relative
-    /// path math is needed at runtime.
-    /// </para>
-    /// </summary>
     public static class TestContentSource
     {
         private static readonly Lazy<IContentSource> _default = new(CreateDefault);
 
-        /// <summary>
-        /// A shared default source that reads from <c>GameData/Base/</c> in the test output.
-        /// Resolved once and cached for the lifetime of the test process.
-        /// </summary>
+        // Shared default content source from GameData/Base; resolved once and cached per test process.
         public static IContentSource Default => _default.Value;
 
         private static IContentSource CreateDefault()

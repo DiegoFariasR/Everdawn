@@ -7,10 +7,6 @@ using Xunit;
 
 namespace GameCore.Tests.Battle
 {
-    /// <summary>
-    /// Tests for BattleSession / IBattleEngine — the public contract that UnityClient
-    /// depends on to drive battles step by step.
-    /// </summary>
     public class BattleSessionTests
     {
         private static (BattleSession engine, BattleView view) CreateStartedSession()

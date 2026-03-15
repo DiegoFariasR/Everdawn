@@ -3,14 +3,8 @@ using GameCore.Battle;
 
 namespace BattleSandbox.Web.Battle
 {
-    /// <summary>A floating damage/heal number spawned over a unit card.</summary>
     public record FloatNumber(string UnitId, int Value, bool IsHeal, int OffsetPct, int Key);
 
-    /// <summary>
-    /// Stateless helpers shared by all battle sub-components.
-    /// To add a new damage type: add a case to DmgTypeCss and a .badge-xxx rule in app.css.
-    /// To add a new skill slot style: add a case to SkillSlotClass.
-    /// </summary>
     public static class BattleHelpers
     {
         public static string DmgTypeCss(EffectType t) => t switch

@@ -124,7 +124,7 @@ namespace GameCore.Tests.Battle
         }
         // ── Helpers ───────────────────────────────────────────────────────────
 
-        /// <summary>Minimal physical/str effect list for test skill construction.</summary>
+        // Minimal physical/str effect list for test skill construction.
         private static SkillEffect[] PhysEffect(double mult = 1.0) =>
             new SkillEffect[] { new(EffectKind.Damage, BattleSkillTarget.Enemy,
                 new DamageComponent[] { new(EffectType.Physical, new DamageScaling[] { new("str", mult) }) }) };

@@ -5,16 +5,6 @@ using Xunit;
 
 namespace GameCore.Tests.Battle
 {
-    /// <summary>
-    /// Tests for the RestoreBar effect kind:
-    /// - EffectKind.RestoreBar adds a fixed amount to a named secondary bar on the target.
-    /// - Positive BarAmount restores; negative drains.
-    /// - Bar values are clamped to [0, max].
-    /// - RestoreBar skills do not trigger Focus or Fury empowerment.
-    /// - Fury does not gain from RestoreBar actions.
-    /// - Range: Self resolves auto-targeting to the actor.
-    /// - mage-meditate and rogue-concentrate load correctly from content.
-    /// </summary>
     public class RestoreBarTests
     {
         // ── Helpers ──────────────────────────────────────────────────────────

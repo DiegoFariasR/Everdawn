@@ -7,13 +7,6 @@ using Xunit;
 
 namespace GameCore.Tests.Battle
 {
-    /// <summary>
-    /// Tests for the shared scenario layer (GameCore.Scenarios).
-    /// Structural rules run automatically over every scenario in <see cref="ScenarioRegistry"/>.
-    /// Regression anchors run automatically over every <see cref="IRegressionScenario"/> in the registry.
-    /// To add coverage for a new scenario: add it to <see cref="ScenarioRegistry"/> — no additional
-    /// test code is needed for structural or regression checks.
-    /// </summary>
     public class BattleScenarioTests
     {
         // ── MemberData sources ───────────────────────────────────────────────
