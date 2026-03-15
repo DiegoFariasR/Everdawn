@@ -9,6 +9,7 @@ namespace GameCore.Battle
         EffectDurationKind DurationKind,
         int Duration,
         EffectStackingPolicy StackingPolicy = EffectStackingPolicy.RefreshDuration,
+        int ExtraHits = 0,                                       // extra hits added to effectiveHits when actor is focus-empowered
         RuntimeSkillModifier? SkillModifier = null,              // temporarily adjusts outgoing skill behavior
         IReadOnlyList<RuntimeStatModifier>? StatModifiers = null, // outgoing/incoming damage and disruption resistance
         IReadOnlyDictionary<EffectType, double>? DamageDealtMultiplierByType = null,  // per-type outgoing damage multipliers

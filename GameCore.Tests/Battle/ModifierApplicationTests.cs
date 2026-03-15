@@ -37,7 +37,7 @@ namespace GameCore.Tests.Battle
 - id: sword-strike
   name: Sword Strike
   cost: 3
-  damageMultiplier: 1.5
+  TotalDamageMultiplier: 1.5
   cooldown: 2
   initialCooldown: 1
   effects:
@@ -88,7 +88,7 @@ skills:
 ", string.Format(UnitYaml, "test-mod"));
 
             var skill = GetSkill(db, "test-unit", "sword-strike");
-            Assert.Equal(2.5, skill.DamageMultiplier);
+            Assert.Equal(2.5, skill.TotalDamageMultiplier);
         }
 
         [Fact]

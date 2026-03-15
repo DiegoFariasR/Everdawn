@@ -11,7 +11,7 @@ namespace GameCore.Tests.Battle
 
         private static BattleSkill MakeDamageSkill(string id, int disruptionPower = 0,
             EffectType effectType = EffectType.Physical) =>
-            new BattleSkill(id, id, Cost: 0, DamageMultiplier: 1.0,
+            new BattleSkill(id, id, Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
@@ -25,7 +25,7 @@ namespace GameCore.Tests.Battle
                 });
 
         private static BattleSkill MakeDispelSkill(string id, BattleSkillTarget target, EffectAlignment alignment) =>
-            new BattleSkill(id, id, Cost: 0, DamageMultiplier: 1.0,
+            new BattleSkill(id, id, Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Dispel, target,
@@ -321,7 +321,7 @@ namespace GameCore.Tests.Battle
             // After the disruption decay at start of player's turn (80 - 20 = 60 ≥ 50), still dizzy.
             // Cooldown=3 on slam prevents the enemy from reapplying dizzy immediately after the dispel.
             var dispelSkill = MakeDispelSkill("purify", BattleSkillTarget.Ally, EffectAlignment.Debuff);
-            var slamSkill = new BattleSkill("slam", "Slam", Cost: 0, DamageMultiplier: 1.0,
+            var slamSkill = new BattleSkill("slam", "Slam", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,

@@ -18,7 +18,7 @@ flowchart TD
 
     subgraph PRE["Pre-hit resolution  (once per action)"]
         B["Resolve effective hit count<br/>· AGI-derived  OR  skill BaseHits<br/>· Slow status: AGI hits halved"]
-        B --> FC{"Actor has Focused buff AND skill is IsFocusCompatible?"}
+        B --> FC{"Actor has Focused buff AND skill is Attack or Spell?"}
         FC -- yes --> FE["Consume Focused buff<br/>Emit 'sharpens' event<br/>effectiveHits += FocusEffectValue<br/>(ExtraHit or ExtraProjectile)"]
         FC -- no  --> GM
         FE --> GM["Compute empowerMult<br/>= DamageDealtMultiplier from active effects"]

@@ -105,13 +105,13 @@ namespace GameCore.Tests.Battle
                 PlayerUnits = new List<BattleUnit>
                 {
                     new("hero", "Hero", "player", Level: 1, Str: 200, Wis: 100, Agi: 50,
-                        Skills: new BattleSkill[] { new("basic", "Strike", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect()) },
+                        Skills: new BattleSkill[] { new("basic", "Strike", Cost: 0, TotalDamageMultiplier: 1.0, Effects: PhysEffect()) },
                         Traits: new[] { BattleTrait.ManaUser, BattleTrait.FocusUser }),
                 },
                 EnemyUnits = new List<BattleUnit>
                 {
                     new("dummy", "Dummy", "enemy", Level: 1, Str: 1, Wis: 0, Agi: 1,
-                        Skills: new BattleSkill[] { new("e-basic", "Hit", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect()) }),
+                        Skills: new BattleSkill[] { new("e-basic", "Hit", Cost: 0, TotalDamageMultiplier: 1.0, Effects: PhysEffect()) }),
                 },
             };
             var session = new BattleSession(seed: 0);

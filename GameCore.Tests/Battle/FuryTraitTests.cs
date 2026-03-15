@@ -220,14 +220,14 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void BattleSkill_IsStrSkill_DefaultIsFalse()
         {
-            var skill = new BattleSkill("id", "Name", Cost: 0, DamageMultiplier: 1.0, Effects: Array.Empty<SkillEffect>());
+            var skill = new BattleSkill("id", "Name", Cost: 0, TotalDamageMultiplier: 1.0, Effects: Array.Empty<SkillEffect>());
             Assert.False(skill.IsStrSkill);
         }
 
         [Fact]
         public void BattleSkill_IsStrSkill_CanBeSetTrue()
         {
-            var skill = new BattleSkill("id", "Name", Cost: 0, DamageMultiplier: 1.0,
+            var skill = new BattleSkill("id", "Name", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: Array.Empty<SkillEffect>(), IsStrSkill: true);
             Assert.True(skill.IsStrSkill);
         }
@@ -235,7 +235,7 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void BattleSkill_FuryDamageScale_DefaultIsZero()
         {
-            var skill = new BattleSkill("id", "Name", Cost: 0, DamageMultiplier: 1.0, Effects: Array.Empty<SkillEffect>());
+            var skill = new BattleSkill("id", "Name", Cost: 0, TotalDamageMultiplier: 1.0, Effects: Array.Empty<SkillEffect>());
             Assert.Equal(0.0, skill.FuryDamageScale);
         }
 
@@ -289,11 +289,11 @@ namespace GameCore.Tests.Battle
                     new("fury-unit", "Barbarian", "player", Level: 1, Str: 100, Wis: 0, Agi: playerAgiForOrder,
                         Skills: new BattleSkill[]
                         {
-                            new("str-skill", "Mace Strike", Cost: 0, DamageMultiplier: 1.0,
+                            new("str-skill", "Mace Strike", Cost: 0, TotalDamageMultiplier: 1.0,
                                 Effects: PhysEffect(),
                                 IsStrSkill: true, FuryDamageScale: 0.4,
                                 Modifiers: new[] { "basic" }, ModifierTags: new[] { "basic" }),
-                            new("non-str-skill", "Support Bash", Cost: 0, DamageMultiplier: 1.0,
+                            new("non-str-skill", "Support Bash", Cost: 0, TotalDamageMultiplier: 1.0,
                                 Effects: PhysEffect(),
                                 IsStrSkill: false),
                         },
@@ -304,7 +304,7 @@ namespace GameCore.Tests.Battle
                     new("target", "Dummy", "enemy", Level: 1, Str: enemyStr, Wis: 0, Agi: enemyGoesFirst ? 200 : 1,
                         Skills: new BattleSkill[]
                         {
-                            new("def-basic", "Slam", Cost: 0, DamageMultiplier: 1.0,
+                            new("def-basic", "Slam", Cost: 0, TotalDamageMultiplier: 1.0,
                                 Effects: PhysEffect(),
                                 IsStrSkill: true,
                                 Modifiers: new[] { "basic" }, ModifierTags: new[] { "basic" }),

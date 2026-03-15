@@ -6,7 +6,7 @@ namespace GameCore.Battle
         string Id,
         string Name,
         int Cost,
-        double DamageMultiplier,
+        double TotalDamageMultiplier,
         bool IsAoe,
         bool IsHeal,
         int Cooldown,

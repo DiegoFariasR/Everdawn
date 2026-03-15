@@ -2,12 +2,11 @@ namespace GameCore.Battle
 {
     public enum EffectKind
     {
-        Damage,
-        Heal,
-        Shield,
+        Damage,          // deals damage to one or more targets
+        Heal,            // restores HP to the target
+        Shield,          // grants a barrier that absorbs damage before HP
         RestoreBar,      // adds/drains a named bar (MP, Focus, Fury…); positive = restore
         ApplyEffect,     // applies a buff or debuff once per target (not per hit)
-        GrantFocusedBuff, // grants Focused to actor for use with a refunded follow-up action
         Dispel,          // removes one buff or debuff; bar-linked statuses also eligible
     }
 
@@ -23,28 +22,28 @@ namespace GameCore.Battle
     // All other types use WIS.
     public enum EffectType
     {
-        Physical,
+        Physical,  // generic physical (STR); parent type for Blunt and Slash
         Blunt,     // Physical sub-type (STR). Inherits Physical resistance. Builds disruption bar.
         Slash,     // Physical sub-type (STR). Inherits Physical resistance. Builds bleed bar.
-        Fire,
-        Cold,
-        Lightning,
-        Holy,
-        Void,
+        Fire,      // elemental (WIS). Builds burn bar.
+        Cold,      // elemental (WIS). Builds cold bar.
+        Lightning, // elemental (WIS).
+        Holy,      // elemental (WIS).
+        Void,      // elemental (WIS).
     }
 
     public enum SkillRange
     {
-        Melee,
-        Ranged,
-        Self,
+        Melee,   // targets an adjacent unit
+        Ranged,  // targets any enemy regardless of position
+        Self,    // targets only the caster
     }
 
     public enum SkillCategory
     {
-        Attack,
-        Spell,
-        Passive,
+        Attack,      // standard physical attack skill
+        Spell,       // magical skill (typically WIS-scaling)
+        Passive,     // permanent stat bonuses; never an action choice
         Reaction,    // fires on trigger, never chosen; at most one per unit
         Preparation, // refunds action; at most one Preparation buff active per unit at a time
     }

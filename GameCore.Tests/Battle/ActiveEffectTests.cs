@@ -12,7 +12,7 @@ namespace GameCore.Tests.Battle
 
         private static BattleSkill MakeDamageSkill(string id, double wisScale = 1.0,
             EffectType effectType = EffectType.Physical, string statKey = "str") =>
-            new BattleSkill(id, id, Cost: 0, DamageMultiplier: 1.0,
+            new BattleSkill(id, id, Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
@@ -304,7 +304,7 @@ namespace GameCore.Tests.Battle
             var enemy = new BattleUnit("enemy", "enemy", "enemy", Level: 1, Str: 50, Wis: 50, Agi: 1,
                 Skills: new BattleSkill[]
                 {
-                    new BattleSkill("fire-atk", "Fire", Cost: 0, DamageMultiplier: 1.0,
+                    new BattleSkill("fire-atk", "Fire", Cost: 0, TotalDamageMultiplier: 1.0,
                         Effects: new SkillEffect[]
                         {
                             new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
@@ -345,7 +345,7 @@ namespace GameCore.Tests.Battle
             var enemy = new BattleUnit("enemy", "enemy", "enemy", Level: 1, Str: 50, Wis: 5, Agi: 1,
                 Skills: new BattleSkill[]
                 {
-                    new BattleSkill("cold-atk", "Blizzard", Cost: 0, DamageMultiplier: 1.0,
+                    new BattleSkill("cold-atk", "Blizzard", Cost: 0, TotalDamageMultiplier: 1.0,
                         Effects: new SkillEffect[]
                         {
                             new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
@@ -397,7 +397,7 @@ namespace GameCore.Tests.Battle
             var enemy = new BattleUnit("enemy", "enemy", "enemy", Level: 1, Str: 50, Wis: 0, Agi: 1,
                 Skills: new BattleSkill[]
                 {
-                    new BattleSkill("slam", "Slam", Cost: 0, DamageMultiplier: 1.0,
+                    new BattleSkill("slam", "Slam", Cost: 0, TotalDamageMultiplier: 1.0,
                         Effects: new SkillEffect[]
                         {
                             new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
@@ -596,7 +596,7 @@ namespace GameCore.Tests.Battle
         public void RuntimeBuff_DoesNotMutateBaseSkillDefinition()
         {
             var skill = MakeDamageSkill("test-skill");
-            double originalMultiplier = skill.DamageMultiplier;
+            double originalMultiplier = skill.TotalDamageMultiplier;
 
             var player = MakePlayer(skills: new BattleSkill[] { skill });
             var enemy = MakeEnemy();
@@ -608,8 +608,8 @@ namespace GameCore.Tests.Battle
             session.TryExecute(new PlayerActionCommand("test-skill", "enemy"));
 
             // The original skill object must be completely unchanged.
-            Assert.Equal(originalMultiplier, skill.DamageMultiplier);
-            Assert.Equal(originalMultiplier, player.ResolvedSkills[0].DamageMultiplier);
+            Assert.Equal(originalMultiplier, skill.TotalDamageMultiplier);
+            Assert.Equal(originalMultiplier, player.ResolvedSkills[0].TotalDamageMultiplier);
         }
 
         // ────────────────────────────────────────────────────────────────────
@@ -941,7 +941,7 @@ namespace GameCore.Tests.Battle
         public void ReceivingHealingMultiplier_ScalesHealingReceived()
         {
             var basicAtk = MakeDamageSkill("basic-atk");
-            var healSkill = new BattleSkill("heal", "heal", Cost: 0, DamageMultiplier: 1.0,
+            var healSkill = new BattleSkill("heal", "heal", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Heal, BattleSkillTarget.Ally,
@@ -981,7 +981,7 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void ReceivingBarrierMultiplier_ScalesBarrierReceived()
         {
-            var shieldSkill = new BattleSkill("shield", "shield", Cost: 0, DamageMultiplier: 1.0,
+            var shieldSkill = new BattleSkill("shield", "shield", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Shield, BattleSkillTarget.Ally,

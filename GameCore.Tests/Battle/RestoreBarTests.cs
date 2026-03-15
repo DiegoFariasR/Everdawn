@@ -11,7 +11,7 @@ namespace GameCore.Tests.Battle
 
         private static BattleSkill MakeRestoreBarSkill(string id, string barKey, int barAmount,
             SkillRange range = SkillRange.Self) =>
-            new BattleSkill(id, id, Cost: 0, DamageMultiplier: 1.0,
+            new BattleSkill(id, id, Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.RestoreBar, BattleSkillTarget.Ally,
@@ -21,7 +21,7 @@ namespace GameCore.Tests.Battle
                 Range: range);
 
         private static BattleSkill MakeDamageSkill(string id) =>
-            new BattleSkill(id, id, Cost: 0, DamageMultiplier: 1.0,
+            new BattleSkill(id, id, Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
@@ -58,7 +58,7 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void IsRestoreBar_ReturnsFalseForHealSkill()
         {
-            var skill = new BattleSkill("h", "h", Cost: 0, DamageMultiplier: 1.0,
+            var skill = new BattleSkill("h", "h", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Heal, BattleSkillTarget.Ally,

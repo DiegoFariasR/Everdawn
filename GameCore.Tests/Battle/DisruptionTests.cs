@@ -181,7 +181,7 @@ namespace GameCore.Tests.Battle
         }
 
         private static BattleSkill TinyPhysicalSkill(string id = "tiny") =>
-            new BattleSkill(id, "Tiny", Cost: 0, DamageMultiplier: 1.0,
+            new BattleSkill(id, "Tiny", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
@@ -194,7 +194,7 @@ namespace GameCore.Tests.Battle
 
         // BuildupPower=100 — guarantees stun in one hit.
         private static BattleSkill MassiveDisruptionSkill(string id = "mass-disrupt") =>
-            new BattleSkill(id, "Massive Disruption", Cost: 0, DamageMultiplier: 1.0,
+            new BattleSkill(id, "Massive Disruption", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
@@ -208,7 +208,7 @@ namespace GameCore.Tests.Battle
 
         // BuildupPower exactly at DizzyThreshold — sets bar to exactly 50 (dizzy, not stun).
         private static BattleSkill DizzySkill(string id = "dizzy-skill") =>
-            new BattleSkill(id, "Dizzying Strike", Cost: 0, DamageMultiplier: 1.0,
+            new BattleSkill(id, "Dizzying Strike", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
@@ -295,7 +295,7 @@ namespace GameCore.Tests.Battle
             // then the player attacks and we verify their output is reduced.
 
             // Build player with normal attack (str=50 → physAttack=400; expected raw damage ~400).
-            var playerAttack = new BattleSkill("atk", "Attack", Cost: 0, DamageMultiplier: 1.0,
+            var playerAttack = new BattleSkill("atk", "Attack", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
@@ -307,7 +307,7 @@ namespace GameCore.Tests.Battle
                 Modifiers: new string[] { "basic" });
 
             // Enemy attacks player with a blunt skill to get player's bar to 50.
-            var enemyDisruptSkill = new BattleSkill("edisrupt", "Enemy Disrupt", Cost: 0, DamageMultiplier: 1.0,
+            var enemyDisruptSkill = new BattleSkill("edisrupt", "Enemy Disrupt", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
@@ -428,7 +428,7 @@ namespace GameCore.Tests.Battle
         public void Integration_LightningSkillWithDisruptionPower_BuildsDisruption()
         {
             // A lightning skill with explicit DisruptionPower should build the disruption bar.
-            var lightningSkill = new BattleSkill("lightning", "Lightning", Cost: 0, DamageMultiplier: 1.0,
+            var lightningSkill = new BattleSkill("lightning", "Lightning", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
@@ -455,7 +455,7 @@ namespace GameCore.Tests.Battle
         public void Integration_BluntSkill_BuildsDisruptionViaType()
         {
             // A blunt skill with BuildupPower=40 builds disruption through the type-driven path.
-            var bluntSkill = new BattleSkill("slam", "Slam", Cost: 0, DamageMultiplier: 1.0,
+            var bluntSkill = new BattleSkill("slam", "Slam", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,

@@ -10,7 +10,7 @@ namespace GameCore.Tests.Battle
         // ── Helpers ──────────────────────────────────────────────────────────
 
         private static BattleSkill MeleeSkill(string id = "melee-hit") =>
-            new BattleSkill(id, "Melee Hit", Cost: 0, DamageMultiplier: 1.0,
+            new BattleSkill(id, "Melee Hit", Cost: 0, TotalDamageMultiplier: 1.0,
                 Range: SkillRange.Melee,
                 Effects: new SkillEffect[]
                 {
@@ -23,7 +23,7 @@ namespace GameCore.Tests.Battle
                 });
 
         private static BattleSkill RangedSkill(string id = "ranged-hit") =>
-            new BattleSkill(id, "Ranged Hit", Cost: 0, DamageMultiplier: 1.0,
+            new BattleSkill(id, "Ranged Hit", Cost: 0, TotalDamageMultiplier: 1.0,
                 Range: SkillRange.Ranged,
                 Effects: new SkillEffect[]
                 {
@@ -36,7 +36,7 @@ namespace GameCore.Tests.Battle
                 });
 
         private static BattleSkill CounterStrikeSkill(int cooldown = 2) =>
-            new BattleSkill("counter-strike", "Counter Strike", Cost: 0, DamageMultiplier: 1.0,
+            new BattleSkill("counter-strike", "Counter Strike", Cost: 0, TotalDamageMultiplier: 1.0,
                 Range: SkillRange.Melee,
                 Category: SkillCategory.Reaction,
                 Trigger: ReactionTrigger.OnHitBy,
@@ -64,7 +64,7 @@ namespace GameCore.Tests.Battle
         {
             var reaction = enemyReactionSkill ?? CounterStrikeSkill();
             var reactorSkills = new BattleSkill[] { new BattleSkill("enemy-attack", "Attack", Cost: 0,
-                DamageMultiplier: 1.0,
+                TotalDamageMultiplier: 1.0,
                 Effects: new SkillEffect[]
                 {
                     new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
@@ -221,7 +221,7 @@ namespace GameCore.Tests.Battle
         {
             // Reaction with OnHitBy and no TriggerConditions — fires on both melee and ranged.
             var unconditionalReaction = new BattleSkill("any-counter", "Any Counter",
-                Cost: 0, DamageMultiplier: 1.0,
+                Cost: 0, TotalDamageMultiplier: 1.0,
                 Range: SkillRange.Melee,
                 Category: SkillCategory.Reaction,
                 Trigger: ReactionTrigger.OnHitBy,
@@ -252,7 +252,7 @@ namespace GameCore.Tests.Battle
         {
             // Reaction that only fires on Fire damage.
             var fireCounter = new BattleSkill("fire-counter", "Fire Counter",
-                Cost: 0, DamageMultiplier: 1.0,
+                Cost: 0, TotalDamageMultiplier: 1.0,
                 Range: SkillRange.Melee,
                 Category: SkillCategory.Reaction,
                 Trigger: ReactionTrigger.OnHitBy,
@@ -284,7 +284,7 @@ namespace GameCore.Tests.Battle
         {
             // Reaction that only fires on Physical damage.
             var physCounter = new BattleSkill("phys-counter", "Phys Counter",
-                Cost: 0, DamageMultiplier: 1.0,
+                Cost: 0, TotalDamageMultiplier: 1.0,
                 Range: SkillRange.Melee,
                 Category: SkillCategory.Reaction,
                 Trigger: ReactionTrigger.OnHitBy,

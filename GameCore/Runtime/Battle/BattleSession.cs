@@ -300,8 +300,8 @@ namespace GameCore.Battle
         }
 
         private static SkillView ToSkillView(BattleSkill s, BattleUnit actor) =>
-            new SkillView(s.Id, s.Name, s.Cost, s.DamageMultiplier, s.IsAoe, s.IsHeal, s.Cooldown, s.Target,
-                s.PrimaryEffectType, s.IsBasic, s.IsUltimate, s.EffectiveInitialCooldown,
+            new SkillView(s.Id, s.Name, s.Cost, s.TotalDamageMultiplier, s.IsAoe, s.IsHeal, s.Cooldown, s.Target,
+                s.PrimaryEffectType, s.IsBasic, s.IsUltimate, s.InitialCooldown,
                 s.EstimateBaseDmg(actor),
                 s.BaseHits,
                 s.ScalingHits ?? System.Array.Empty<DamageScaling>(),
@@ -335,13 +335,13 @@ namespace GameCore.Battle
                 IsBasic: sk.IsBasic,
                 IsUltimate: sk.IsUltimate,
                 PrimaryEffectType: sk.PrimaryEffectType,
-                DamageMultiplier: sk.DamageMultiplier,
+                TotalDamageMultiplier: sk.TotalDamageMultiplier,
                 BaseHits: sk.BaseHits,
                 Cost: sk.Cost,
                 IsAoe: sk.IsAoe,
                 Target: sk.Target,
                 Cooldown: sk.Cooldown,
-                EffectiveInitialCooldown: sk.EffectiveInitialCooldown,
+                EffectiveInitialCooldown: sk.InitialCooldown,
                 BaseDmg: sk.EstimateBaseDmg(u),
                 Range: sk.Range
             );

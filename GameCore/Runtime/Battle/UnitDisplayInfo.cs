@@ -39,7 +39,7 @@ namespace GameCore.Battle
         bool IsBasic,
         bool IsUltimate,
         EffectType? PrimaryEffectType,
-        double DamageMultiplier,
+        double TotalDamageMultiplier,
         double BaseHits,
         int Cost,
         bool IsAoe,

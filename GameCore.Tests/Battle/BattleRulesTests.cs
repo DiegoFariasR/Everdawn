@@ -98,7 +98,7 @@ namespace GameCore.Tests.Battle
         {
             var effects = new[] { new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
                 new[] { new DamageComponent(EffectType.Physical, new[] { new DamageScaling("str", 1.0) }) }) };
-            var skills = new[] { new BattleSkill("custom", "Custom", Cost: 0, DamageMultiplier: 1.5, Effects: effects) };
+            var skills = new[] { new BattleSkill("custom", "Custom", Cost: 0, TotalDamageMultiplier: 1.5, Effects: effects) };
             var unit = new BattleUnit("u1", "Test", "player", Level: 1, Str: 70, Wis: 0, Agi: 50, Skills: skills);
             Assert.Single(unit.ResolvedSkills);
             Assert.Equal("custom", unit.ResolvedSkills[0].Id);
@@ -108,7 +108,7 @@ namespace GameCore.Tests.Battle
         public void DefaultAttackSkill_MultiplierIsOne()
         {
             var unit = new BattleUnit("u1", "Test", "player", Level: 1, Str: 70, Wis: 0, Agi: 50);
-            Assert.Equal(1.0, unit.ResolvedSkills[0].DamageMultiplier);
+            Assert.Equal(1.0, unit.ResolvedSkills[0].TotalDamageMultiplier);
         }
     }
 }

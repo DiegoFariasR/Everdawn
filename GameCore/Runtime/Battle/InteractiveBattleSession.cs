@@ -36,9 +36,6 @@ namespace GameCore.Battle
         private readonly ActiveEffectDefinition _heatedDef;
         private readonly ActiveEffectDefinition _bleedingDef;
         private readonly ActiveEffectDefinition _scratchedDef;
-        // Units that currently carry the Focused buff (granted by the Focus skill).
-        // Focused is consumed by the first IsFocusCompatible skill the unit uses, or expires when their turn ends.
-        private readonly HashSet<string> _focusedUnits = new HashSet<string>();
         // Units that have used a Preparation skill this turn.
         // Cleared when the unit's turn ends. Blocks additional Preparation skills until next turn.
         private readonly HashSet<string> _preparedUnits = new HashSet<string>();
@@ -60,15 +57,15 @@ namespace GameCore.Battle
             _hp = _allUnits.ToDictionary(u => u.Id, u => u.MaxHp);
             _bars = _allUnits.ToDictionary(u => u.Id, u => new Dictionary<string, int>(u.InitialBars));
             _rng = new Random(seed);
-            // Apply initial cooldowns (Ultimate modifier auto-supplies 1 round if not set higher)
+            // Apply initial cooldowns.
             foreach (var u in _allUnits)
             {
                 foreach (var s in u.ResolvedSkills)
-                    if (s.EffectiveInitialCooldown > 0)
-                        _skillCooldowns[s.Id] = s.EffectiveInitialCooldown;
+                    if (s.InitialCooldown > 0)
+                        _skillCooldowns[s.Id] = s.InitialCooldown;
                 // Reaction skills have their own CD slot.
-                if (u.ReactionSkill?.EffectiveInitialCooldown > 0)
-                    _skillCooldowns[u.ReactionSkill.Id] = u.ReactionSkill.EffectiveInitialCooldown;
+                if (u.ReactionSkill?.InitialCooldown > 0)
+                    _skillCooldowns[u.ReactionSkill.Id] = u.ReactionSkill.InitialCooldown;
             }
             // Load thermal buff definitions from content, falling back to minimal inline definitions
             // so tests that omit BuffDefinitions still work.
@@ -491,15 +488,12 @@ namespace GameCore.Battle
             string evType = (effectiveSkill.IsHeal || effectiveSkill.IsShield || effectiveSkill.IsRestoreBar) ? "skill"
                            : effectiveSkill.IsBasic ? "attack" : effectiveSkill.IsUltimate ? "soulburn" : "skill";
 
-            // Focused buff: consumed by the first IsFocusCompatible skill used after a Focus action.
-            // Grants the skill's configured effect (extra hit, extra projectile, etc.).
+            // Focused buff: consumed by the first Attack or Spell skill used after a Focus action.
+            // Grants ExtraHits from the buff definition (data-driven via buff-definitions.yml).
             // Does not modify damage multipliers — Focus is a precision layer, not a raw damage boost.
-            bool isFocusEmpowered = (_focusedUnits.Contains(actor.Id) || HasActiveEffect(actor.Id, "focused")) && effectiveSkill.IsFocusCompatible;
+            bool isFocusEmpowered = HasActiveEffect(actor.Id, "focused") && effectiveSkill.IsFocusCompatible;
             if (isFocusEmpowered)
-            {
-                _focusedUnits.Remove(actor.Id);
                 produced.Add(AddEvent(actor.Id, $"{actor.Name}'s Focus sharpens {effectiveSkill.Name}!", "skill"));
-            }
             // Fury scaling: STR-tagged skills deal more damage based on the actor's current Fury.
             // Scales continuously — no consumption. High Fury = stronger hits; low Fury = normal hits.
             double furyDamageMult = 1.0;
@@ -522,8 +516,8 @@ namespace GameCore.Battle
             // Determine effective hit count and per-hit damage multiplier.
             // When skill.BaseHits != 1.0 or ScalingHits is set, the skill controls hit count:
             //   raw = clamp(BaseHits + Σ scalingHits, min 0.5)
-            //   floor(raw) hits, each dealing DamageMultiplier × (raw / floor(raw)) × base.
-            //   At raw = 0.5: 1 hit at 50% power. Total damage = DamageMultiplier × raw × base.
+            //   floor(raw) hits, each dealing TotalDamageMultiplier × (raw / floor(raw)) × base.
+            //   At raw = 0.5: 1 hit at 50% power. Total damage = TotalDamageMultiplier × raw × base.
             // When BaseHits is 1.0 and ScalingHits is empty, the AGI-derived count applies,
             // subject to the slow debuff (slow halves the base-hit contribution).
             int effectiveHits;
@@ -547,10 +541,13 @@ namespace GameCore.Battle
                 perHitHitsMult = 1.0;
             }
 
-            // Focus ExtraHit / ExtraProjectile: add the configured number of extra hits.
-            // Extra hits share the same per-hit power as the base hits (perHitHitsMult unchanged).
-            if (isFocusEmpowered && (effectiveSkill.FocusEffect == FocusEffectKind.ExtraHit || effectiveSkill.FocusEffect == FocusEffectKind.ExtraProjectile))
-                effectiveHits += Math.Max(1, (int)effectiveSkill.FocusEffectValue);
+            // Focus ExtraHit: add extra hits from the focused buff definition when focus-empowered.
+            if (isFocusEmpowered && _activeEffects.TryGetValue(actor.Id, out var fxList))
+            {
+                var focusedEfx = fxList.FirstOrDefault(e => e.DefinitionId == "focused");
+                if (focusedEfx != null && focusedEfx.ExtraHits > 0)
+                    effectiveHits += focusedEfx.ExtraHits;
+            }
 
             var effect = effectiveSkill.Effects.Count > 0 ? effectiveSkill.Effects[0] : null;
 
@@ -571,14 +568,8 @@ namespace GameCore.Battle
                     continue;
                 }
 
-                // GrantFocusedBuff: self-targeting setup effect. Adds actor to _focusedUnits.
-                // Applied once per target (which is Self), not per hit. No damage is dealt.
-                if (effect?.Kind == EffectKind.GrantFocusedBuff)
-                {
-                    _focusedUnits.Add(actor.Id);
-                    produced.Add(AddEvent(actor.Id, $"{actor.Name} focuses intently!", "skill", skillId: skill.Id));
-                    continue;
-                }
+                // GrantFocusedBuff was the old pre-active-effect path; removed. Focus skill now
+                // uses ApplyEffect with effectRef: focused, which is handled by the ApplyEffect branch above.
 
                 // Dispel: removes one random buff or debuff from the target.
                 // Applied once per target, not per hit. No damage is dealt.
@@ -610,7 +601,7 @@ namespace GameCore.Battle
                         foreach (var comp in effect.DamagePerHit)
                             foreach (var s in comp.Scaling)
                                 healRaw += actor.GetStat(s.Stat) * s.Scale;
-                        healRaw *= effectiveSkill.DamageMultiplier * empowerMult;
+                        healRaw *= effectiveSkill.TotalDamageMultiplier * empowerMult;
                         int healVariance = Math.Max(1, (int)healRaw / 5);
                         int amount = Math.Max(0, (int)healRaw + _rng.Next(-healVariance, healVariance + 1));
                         amount = (int)(amount * GetReceivingHealingMultiplier(target.Id));
@@ -630,7 +621,7 @@ namespace GameCore.Battle
                         foreach (var comp in effect.DamagePerHit)
                             foreach (var s in comp.Scaling)
                                 shieldRaw += actor.GetStat(s.Stat) * s.Scale;
-                        shieldRaw *= effectiveSkill.DamageMultiplier * empowerMult;
+                        shieldRaw *= effectiveSkill.TotalDamageMultiplier * empowerMult;
                         int shieldVariance = Math.Max(1, (int)shieldRaw / 5);
                         int amount = Math.Max(0, (int)shieldRaw + _rng.Next(-shieldVariance, shieldVariance + 1));
                         amount = (int)(amount * GetReceivingBarrierMultiplier(target.Id));
@@ -681,7 +672,7 @@ namespace GameCore.Battle
                         // in DamageResult.Steps explains the final number without external adjustments.
                         double attackerOutputMult = actorIsDizzy ? DisruptionSystem.DizzyDamageMultiplier : 1.0;
                         double damageTakenMult = GetDamageTakenMultiplier(target.Id);
-                        var hitResults = DamageCalc.Compute(actor, target, components, effectiveSkill.DamageMultiplier,
+                        var hitResults = DamageCalc.Compute(actor, target, components, effectiveSkill.TotalDamageMultiplier,
                             empowerMult * perHitHitsMult, _rng,
                             et => GetEffectiveResistance(target.Id, et),
                             et => GetEffectivePenetration(actor.Id, et),
@@ -884,7 +875,7 @@ namespace GameCore.Battle
             for (int i = 0; i < hits; i++)
             {
                 var hitResults = DamageCalc.Compute(reactor, target, effect.DamagePerHit,
-                    reaction.DamageMultiplier,
+                    reaction.TotalDamageMultiplier,
                     perHitMult, _rng,
                     et => GetEffectiveResistance(target.Id, et),
                     et => GetEffectivePenetration(reactor.Id, et),
@@ -921,9 +912,8 @@ namespace GameCore.Battle
         private bool AdvanceTurn()
         {
             if (_isOver) return false;
-            // Clear the Focused buff and turn-start flag for the actor whose turn just ended.
+            // Clear the turn-start flag and prepared-unit lock for the actor whose turn just ended.
             string endingActorId = _turnOrder[_turnIndex].Id;
-            _focusedUnits.Remove(endingActorId);
             RemoveActiveEffect(endingActorId, "focused");
             _preparedUnits.Remove(endingActorId);
             _startOfTurnDone = false;
@@ -1315,6 +1305,7 @@ namespace GameCore.Battle
                 RemainingDuration: definition.Duration,
                 DurationKind: definition.DurationKind,
                 SkillModifier: definition.SkillModifier,
+                ExtraHits: definition.ExtraHits,
                 StatModifiers: definition.StatModifiers,
                 DamageDealtMultiplierByType: definition.DamageDealtMultiplierByType,
                 DamageTakenMultiplierByType: definition.DamageTakenMultiplierByType,
@@ -1350,7 +1341,7 @@ namespace GameCore.Battle
             if (modifiers.Count == 0) return skill;
 
             // ── Phase 1: Set (last modifier with a given key wins) ───────────
-            double damageMultiplier = skill.DamageMultiplier;
+            double damageMultiplier = skill.TotalDamageMultiplier;
             int cost = skill.Cost;
             bool isAoe = skill.IsAoe;
             int cooldown = skill.Cooldown;
@@ -1406,7 +1397,7 @@ namespace GameCore.Battle
 
             return skill with
             {
-                DamageMultiplier = Math.Max(0.0, damageMultiplier),
+                TotalDamageMultiplier = Math.Max(0.0, damageMultiplier),
                 Cost = Math.Max(0, cost),
                 IsAoe = isAoe,
                 Cooldown = Math.Max(0, cooldown),

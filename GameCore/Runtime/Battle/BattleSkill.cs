@@ -6,16 +6,6 @@ namespace GameCore.Battle
 {
     public enum BattleSkillTarget { Enemy, Ally }
 
-    // What Focus empowerment does to a skill when the actor has the Focused buff.
-    public enum FocusEffectKind
-    {
-        ExtraHit,
-        ExtraProjectile,
-        BonusCrit,          // reserved — requires a future crit system
-        BonusStatusChance,  // reserved — not yet implemented
-        IgnoreEvasion,      // reserved — requires a future evasion system
-    }
-
     public record DamageScaling(string Stat, double Scale = 1.0);
 
     public record DamageComponent(
@@ -37,31 +27,34 @@ namespace GameCore.Battle
     public record BattleSkill(
         string Id,
         string Name,
-        int Cost,
-        double DamageMultiplier,               // multiplies entire skill output; 1.0 = identity
-        IReadOnlyList<SkillEffect> Effects,
-        bool IsAoe = false,
+        IReadOnlyList<SkillEffect> Effects,    // ordered list of effects; first effect drives targeting and damage type
+        int Cost = 0,                          // MP or focus cost; bar determined by CostBarKey        
+        double TotalDamageMultiplier = 1.0,    // multiplies entire skill output; 1.0 = identity
+
+        bool IsAoe = false,                    // true = all valid targets are hit simultaneously
+        SkillRange Range = SkillRange.Melee,   // Melee or Ranged; governs targeting and reaction trigger matching
+
+        double BaseHits = 1.0,                 // floor(n) hits at TotalDamageMultiplier×(n/floor(n)); at 1.0 uses AGI HitCount
+        IReadOnlyList<DamageScaling>? ScalingHits = null,  // stat-based bonus added to BaseHits
+
         int Cooldown = 0,                      // turns to wait before reuse
         int InitialCooldown = 0,               // cooldown the skill starts battle with
-        IReadOnlyList<string>? Modifiers = null,
-        IReadOnlyList<string>? ModifierTags = null,  // tags from applied modifiers (e.g. "basic", "ultimate")
-        double BaseHits = 1.0,                 // floor(n) hits at DamageMultiplier×(n/floor(n)); at 1.0 uses AGI HitCount
-        IReadOnlyList<DamageScaling>? ScalingHits = null,  // stat-based bonus added to BaseHits
-        SkillRange Range = SkillRange.Melee,
-        SkillCategory Category = SkillCategory.Attack,
-        IReadOnlyDictionary<EffectType, int>? PassivePenetrations = null,    // passive-only
-        int PassiveDisruptionPenetration = 0,                                 // passive-only
-        IReadOnlyDictionary<EffectType, int>? PassiveResistances = null,     // passive-only
-        int PassiveDisruptionResistance = 0,                                  // passive-only
+
+        SkillCategory Category = SkillCategory.Attack,     // Attack, Spell, Passive, Reaction, Preparation
+
+        IReadOnlyList<string>? Modifiers = null,           // IDs of modifiers applied by the content pipeline; null = unmodified
+        IReadOnlyList<string>? ModifierTags = null,        // tags from applied modifiers (e.g. "basic", "ultimate")
+
         IReadOnlyList<BattleTrait>? PermittedTraits = null,           // unit needs at least one
         IReadOnlyList<EquipmentType>? PermittedEquipmentTypes = null, // unit needs one of these
-        ReactionTrigger? Trigger = null,
-        IReadOnlyList<TriggerCondition>? TriggerConditions = null,
+
+        ActiveEffectDefinition? PassiveEffect = null,      // non-null for Passive skills; carries penetration/resistance bonuses
+
+        ReactionTrigger? Trigger = null,                   // non-null only on Reaction skills; event kind that fires the reaction
+        IReadOnlyList<TriggerCondition>? TriggerConditions = null,    // optional filters on Trigger; null/empty = any qualifying hit triggers
+
         bool IsStrSkill = false,       // must be set explicitly; never inferred from scaling
-        double FuryDamageScale = 0.0,  // max damage bonus at full Fury; bonus = scale × (fury/100)
-        bool IsFocusCompatible = false,
-        FocusEffectKind? FocusEffect = null,
-        double FocusEffectValue = 0.0
+        double FuryDamageScale = 0.0   // max damage bonus at full Fury; bonus = scale × (fury/100)
     )
     {
         public bool HasModifier(string id) =>
@@ -81,7 +74,6 @@ namespace GameCore.Battle
         public bool IsShield => Effects.Count > 0 && Effects[0].Kind == EffectKind.Shield;
         public bool IsRestoreBar => Effects.Count > 0 && Effects[0].Kind == EffectKind.RestoreBar;
         public bool IsApplyEffect => Effects.Count > 0 && Effects[0].Kind == EffectKind.ApplyEffect;
-        public bool IsGrantFocusedBuff => Effects.Count > 0 && Effects[0].Kind == EffectKind.GrantFocusedBuff;
         public bool IsDispel => Effects.Count > 0 && Effects[0].Kind == EffectKind.Dispel;
         public BattleSkillTarget Target => Effects.Count > 0 ? Effects[0].Target : BattleSkillTarget.Enemy;
         public EffectType? PrimaryEffectType =>
@@ -91,12 +83,10 @@ namespace GameCore.Battle
         public bool IsBasic => ModifierTags?.Any(t => string.Equals(t, "basic", StringComparison.OrdinalIgnoreCase)) ?? false;
         public bool IsUltimate => ModifierTags?.Any(t => string.Equals(t, "ultimate", StringComparison.OrdinalIgnoreCase)) ?? false;
         public bool IsReaction => Category == SkillCategory.Reaction;
+        public bool IsFocusCompatible => Category == SkillCategory.Attack || Category == SkillCategory.Spell;
         // Bar that Cost is deducted from: FocusUser-gated skills use the focus bar, all others use mp.
         public string CostBarKey =>
             PermittedTraits != null && PermittedTraits.Contains(BattleTrait.FocusUser) ? "focus" : "mp";
-        // ultimates automatically start with at least 1 round of cooldown
-        public int EffectiveInitialCooldown => IsUltimate ? Math.Max(1, InitialCooldown) : InitialCooldown;
-
         public int EstimateBaseDmg(BattleUnit actor)
         {
             if (Effects.Count == 0) return 0;
@@ -109,7 +99,7 @@ namespace GameCore.Battle
                 foreach (var s in ScalingHits)
                     hits += actor.GetStat(s.Stat) * s.Scale;
             hits = Math.Max(0.5, hits);
-            return (int)(total * DamageMultiplier * hits);
+            return (int)(total * TotalDamageMultiplier * hits);
         }
     }
 }

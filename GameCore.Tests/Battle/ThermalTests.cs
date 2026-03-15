@@ -295,15 +295,15 @@ namespace GameCore.Tests.Battle
 
         // buildupPower=100 fills the cold bar exactly, triggering freeze.
         private static BattleSkill MassiveColdSkill(string id = "massive-cold") =>
-            new(id, "Massive Cold", Cost: 0, DamageMultiplier: 1.0,
+            new(id, "Massive Cold", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: ColdDamageEffect(wisScale: 1.0, buildupPower: 100));
 
         private static BattleSkill MassiveFireSkill(string id = "massive-fire") =>
-            new(id, "Massive Fire", Cost: 0, DamageMultiplier: 1.0,
+            new(id, "Massive Fire", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: FireDamageEffect(wisScale: 1.0, buildupPower: 100));
 
         private static BattleSkill TinyPhysicalSkill(string id = "tiny") =>
-            new(id, "Tiny", Cost: 0, DamageMultiplier: 1.0,
+            new(id, "Tiny", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: PhysicalDamageEffect(strScale: 0.001));
 
         // Player always goes first (high WIS/AGI/HP); enemy is tanky (str=10000) with configurable resistances.
@@ -374,7 +374,7 @@ namespace GameCore.Tests.Battle
         {
             // buildupPower: 60 → cold bar = 60 after hit (no resistance, no variance).
             // AdvanceTurnCommand processes only the player's turn so no enemy decay applies yet.
-            var coldSkill = new BattleSkill("cold-med", "Cold", Cost: 0, DamageMultiplier: 1.0,
+            var coldSkill = new BattleSkill("cold-med", "Cold", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: ColdDamageEffect(wisScale: 1.0, buildupPower: 60));
 
             // playerAgi: 50 → HitCount = 1 (single hit), still goes before enemy (agi=1).
@@ -803,7 +803,7 @@ namespace GameCore.Tests.Battle
             // ThermalProtection must NOT reduce fire/cold damage taken — only buildup accumulation.
             // Use a cold skill that deals damage and also builds the cold bar.
             // HP loss should be identical with or without thermal protection.
-            var coldSkill = new BattleSkill("cold-small", "Cold", Cost: 0, DamageMultiplier: 1.0,
+            var coldSkill = new BattleSkill("cold-small", "Cold", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: ColdDamageEffect(wisScale: 0.1, buildupPower: 60));
 
             var sessionNoProtection = BuildSession(

@@ -11,7 +11,7 @@ namespace GameCore.Content.Raw
         public int Duration { get; set; }
         public string DurationKind { get; set; } = "ForTargetTurns";
         public string StackingPolicy { get; set; } = "RefreshDuration";
-        public RawEffectStats Stats { get; set; } = new RawEffectStats();
+        public RawEffectStats Modify { get; set; } = new RawEffectStats();
         /// <summary>
         /// When true, this effect is classified as a debuff (harmful).
         /// When false (default), it is a buff (beneficial).

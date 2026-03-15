@@ -165,7 +165,7 @@ namespace GameCore.Content
         {
             var durationKind = Enum.Parse<EffectDurationKind>(raw.DurationKind, ignoreCase: true);
             var stackingPolicy = Enum.Parse<EffectStackingPolicy>(raw.StackingPolicy, ignoreCase: true);
-            var s = raw.Stats;
+            var s = raw.Modify;
 
             var statModifiers = new List<RuntimeStatModifier>();
             if (s.ReceivingHealingMultiplier.HasValue)
@@ -219,6 +219,7 @@ namespace GameCore.Content
                 DurationKind: durationKind,
                 Duration: raw.Duration,
                 StackingPolicy: stackingPolicy,
+                ExtraHits: s.ExtraHits,
                 StatModifiers: statModifiers.Count > 0 ? statModifiers.ToArray() : null,
                 DamageDealtMultiplierByType: damageDealt,
                 DamageTakenMultiplierByType: damageTaken,
@@ -318,7 +319,7 @@ namespace GameCore.Content
                     // Apply modifier action groups in deterministic order: Set → Modify → Add.
                     // Set: last modifier with a given key wins (override/replace).
                     var setCost = GetLastSet<int>(compiledMods, ModifierVariable.Cost, sk.Cost);
-                    var setDmgMult = GetLastSet<double>(compiledMods, ModifierVariable.DamageMultiplier, sk.DamageMultiplier);
+                    var setDmgMult = GetLastSet<double>(compiledMods, ModifierVariable.DamageMultiplier, sk.TotalDamageMultiplier);
                     var setIsAoe = GetLastSet<bool>(compiledMods, ModifierVariable.IsAoe, sk.IsAoe);
                     var setCooldown = GetLastSet<int>(compiledMods, ModifierVariable.Cooldown, sk.Cooldown);
                     var setInitCd = GetLastSet<int>(compiledMods, ModifierVariable.InitialCooldown, sk.InitialCooldown);
@@ -339,7 +340,7 @@ namespace GameCore.Content
                         Trigger = compiledMods.Select(m => m.Trigger).FirstOrDefault(t => t != null) ?? sk.Trigger,
                         TriggerConditions = compiledMods.Select(m => m.TriggerConditions).FirstOrDefault(tc => tc != null) ?? sk.TriggerConditions,
                         Cost = setCost + SumModifyInt(compiledMods, ModifierVariable.Cost),
-                        DamageMultiplier = setDmgMult + SumModify(compiledMods, ModifierVariable.DamageMultiplier),
+                        TotalDamageMultiplier = setDmgMult + SumModify(compiledMods, ModifierVariable.DamageMultiplier),
                         IsAoe = setIsAoe,
                         Cooldown = setCooldown + SumModifyInt(compiledMods, ModifierVariable.Cooldown),
                         InitialCooldown = setInitCd + SumModifyInt(compiledMods, ModifierVariable.InitialCooldown),
@@ -423,34 +424,40 @@ namespace GameCore.Content
             }
 
             // ── Apply passive skill bonuses ───────────────────────────────────
-            // Passive skills in the unit's skill list contribute penetrations and
-            // resistances directly to the compiled unit stats.
+            // Passive skills carry an ActiveEffectDefinition (PassiveEffect) with their
+            // penetration/resistance contributions. Merged additively into the unit at compile time.
             foreach (var skill in skills)
             {
-                if (skill.Category != Battle.SkillCategory.Passive)
+                if (skill.Category != Battle.SkillCategory.Passive || skill.PassiveEffect == null)
                     continue;
 
-                if (skill.PassivePenetrations != null && skill.PassivePenetrations.Count > 0)
+                var pe = skill.PassiveEffect;
+                if (pe.PenetrationModifierByType != null)
                 {
                     var merged = penetrations != null
                         ? new Dictionary<EffectType, int>(penetrations)
                         : new Dictionary<EffectType, int>();
-                    foreach (var kvp in skill.PassivePenetrations)
+                    foreach (var kvp in pe.PenetrationModifierByType)
                         merged[kvp.Key] = (merged.TryGetValue(kvp.Key, out int existing) ? existing : 0) + kvp.Value;
                     penetrations = merged;
                 }
-                disruptionPenetration += skill.PassiveDisruptionPenetration;
-
-                if (skill.PassiveResistances != null && skill.PassiveResistances.Count > 0)
+                if (pe.ResistanceModifierByType != null)
                 {
                     var merged = resistances != null
                         ? new Dictionary<EffectType, int>(resistances)
                         : new Dictionary<EffectType, int>();
-                    foreach (var kvp in skill.PassiveResistances)
+                    foreach (var kvp in pe.ResistanceModifierByType)
                         merged[kvp.Key] = (merged.TryGetValue(kvp.Key, out int existing) ? existing : 0) + kvp.Value;
                     resistances = merged;
                 }
-                disruptionResistance += skill.PassiveDisruptionResistance;
+                if (pe.StatModifiers != null)
+                    foreach (var mod in pe.StatModifiers)
+                    {
+                        if (mod.StatKey == RuntimeStatKey.DisruptionPenetration)
+                            disruptionPenetration += (int)mod.Value;
+                        else if (mod.StatKey == RuntimeStatKey.DisruptionResistance)
+                            disruptionResistance += (int)mod.Value;
+                    }
             }
 
             // ── Validate modifier tag counts per unit ─────────────────────────
@@ -539,10 +546,12 @@ namespace GameCore.Content
             }
 
             // ── Passive stat bonuses ──────────────────────────────────────────
+            // Parsed into an ActiveEffectDefinition so the data lives in the buff-layer types.
+            // Applied at compile time into BattleUnit stats by CompileUnit.
+            ActiveEffectDefinition? passiveEffect = null;
             IReadOnlyDictionary<EffectType, int>? passivePenetrations = null;
-            int passiveDisruptionPenetration = 0;
             IReadOnlyDictionary<EffectType, int>? passiveResistances = null;
-            int passiveDisruptionResistance = 0;
+            var disruptionStatMods = new List<RuntimeStatModifier>();
 
             if (raw.Penetration.Count > 0)
             {
@@ -550,7 +559,7 @@ namespace GameCore.Content
                 foreach (var kvp in raw.Penetration)
                 {
                     if (kvp.Key.Equals("disruption", StringComparison.OrdinalIgnoreCase))
-                        passiveDisruptionPenetration = kvp.Value;
+                        disruptionStatMods.Add(new RuntimeStatModifier(RuntimeStatKey.DisruptionPenetration, ModifierOperation.Add, kvp.Value));
                     else if (Enum.TryParse<EffectType>(kvp.Key, ignoreCase: true, out var t))
                         pen[t] = kvp.Value;
                 }
@@ -564,7 +573,7 @@ namespace GameCore.Content
                 foreach (var kvp in raw.Resistance)
                 {
                     if (kvp.Key.Equals("disruption", StringComparison.OrdinalIgnoreCase))
-                        passiveDisruptionResistance = kvp.Value;
+                        disruptionStatMods.Add(new RuntimeStatModifier(RuntimeStatKey.DisruptionResistance, ModifierOperation.Add, kvp.Value));
                     else if (Enum.TryParse<EffectType>(kvp.Key, ignoreCase: true, out var t))
                         res[t] = kvp.Value;
                 }
@@ -572,10 +581,21 @@ namespace GameCore.Content
                     passiveResistances = res;
             }
 
+            if (passivePenetrations != null || passiveResistances != null || disruptionStatMods.Count > 0)
+                passiveEffect = new ActiveEffectDefinition(
+                    Id: raw.Id,
+                    Name: raw.Name,
+                    DurationKind: EffectDurationKind.Permanent,
+                    Duration: 0,
+                    PenetrationModifierByType: passivePenetrations,
+                    ResistanceModifierByType: passiveResistances,
+                    StatModifiers: disruptionStatMods.Count > 0 ? disruptionStatMods.ToArray() : null,
+                    Alignment: EffectAlignment.Buff);
+
             return new BattleSkill(
                 raw.Id, raw.Name,
                 Cost: raw.Cost,
-                DamageMultiplier: raw.DamageMultiplier,
+                TotalDamageMultiplier: raw.DamageMultiplier,
                 Effects: effects,
                 IsAoe: raw.IsAoe,
                 Cooldown: raw.Cooldown,
@@ -586,10 +606,7 @@ namespace GameCore.Content
                     : raw.ScalingHits.Select(s => new DamageScaling(s.Stat, s.Scale)).ToArray<DamageScaling>(),
                 Range: Enum.Parse<SkillRange>(raw.Range, ignoreCase: true),
                 Category: Enum.Parse<SkillCategory>(raw.Category, ignoreCase: true),
-                PassivePenetrations: passivePenetrations,
-                PassiveDisruptionPenetration: passiveDisruptionPenetration,
-                PassiveResistances: passiveResistances,
-                PassiveDisruptionResistance: passiveDisruptionResistance,
+                PassiveEffect: passiveEffect,
                 PermittedTraits: raw.PermittedTraits?.Select(t => Enum.Parse<BattleTrait>(t, ignoreCase: true)).ToArray(),
                 PermittedEquipmentTypes: raw.PermittedEquipmentTypes?.Select(t => Enum.Parse<EquipmentType>(t, ignoreCase: true)).ToArray(),
                 Trigger: raw.Trigger != null
@@ -599,10 +616,6 @@ namespace GameCore.Content
                     Range: c.Range != null ? Enum.Parse<SkillRange>(c.Range, ignoreCase: true) : (SkillRange?)null,
                     DamageType: c.DamageType != null ? Enum.Parse<EffectType>(c.DamageType, ignoreCase: true) : (EffectType?)null
                 )).ToArray(),
-                IsFocusCompatible: raw.IsFocusCompatible,
-                FocusEffect: raw.FocusEffect != null && Enum.TryParse<FocusEffectKind>(raw.FocusEffect, ignoreCase: true, out var fek)
-                    ? fek : (FocusEffectKind?)null,
-                FocusEffectValue: raw.FocusEffectValue,
                 IsStrSkill: raw.IsStrSkill,
                 FuryDamageScale: raw.FuryDamageScale);
         }

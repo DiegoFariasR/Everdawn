@@ -29,7 +29,7 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void MeetsRequirements_NoRequirements_AlwaysTrue()
         {
-            var skill = new BattleSkill("s", "S", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect());
+            var skill = new BattleSkill("s", "S", Cost: 0, TotalDamageMultiplier: 1.0, Effects: PhysEffect());
             var unit = MakeUnit();
             Assert.True(skill.MeetsRequirements(unit));
         }
@@ -37,7 +37,7 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void MeetsRequirements_RequiredEquipmentType_TrueWhenMatches()
         {
-            var skill = new BattleSkill("mace", "Mace Strike", Cost: 0, DamageMultiplier: 1.0,
+            var skill = new BattleSkill("mace", "Mace Strike", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: PhysEffect(), PermittedEquipmentTypes: new[] { EquipmentType.Blunt });
             var unit = MakeUnit(equipmentType: EquipmentType.Blunt);
             Assert.True(skill.MeetsRequirements(unit));
@@ -46,7 +46,7 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void MeetsRequirements_RequiredEquipmentType_FalseWhenMismatch()
         {
-            var skill = new BattleSkill("mace", "Mace Strike", Cost: 0, DamageMultiplier: 1.0,
+            var skill = new BattleSkill("mace", "Mace Strike", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: PhysEffect(), PermittedEquipmentTypes: new[] { EquipmentType.Blunt });
             var unit = MakeUnit(equipmentType: EquipmentType.Slash);
             Assert.False(skill.MeetsRequirements(unit));
@@ -55,7 +55,7 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void MeetsRequirements_RequiredEquipmentType_FalseWhenNone()
         {
-            var skill = new BattleSkill("mace", "Mace Strike", Cost: 0, DamageMultiplier: 1.0,
+            var skill = new BattleSkill("mace", "Mace Strike", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: PhysEffect(), PermittedEquipmentTypes: new[] { EquipmentType.Blunt });
             var unit = MakeUnit(equipmentType: EquipmentType.None);
             Assert.False(skill.MeetsRequirements(unit));
@@ -64,7 +64,7 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void MeetsRequirements_RequiredTrait_TrueWhenUnitHasTrait()
         {
-            var skill = new BattleSkill("bolt", "Magic Bolt", Cost: 10, DamageMultiplier: 1.0,
+            var skill = new BattleSkill("bolt", "Magic Bolt", Cost: 10, TotalDamageMultiplier: 1.0,
                 Effects: PhysEffect(), PermittedTraits: new[] { BattleTrait.ManaUser });
             var unit = MakeUnit(traits: new[] { BattleTrait.ManaUser });
             Assert.True(skill.MeetsRequirements(unit));
@@ -73,7 +73,7 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void MeetsRequirements_RequiredTrait_FalseWhenUnitLacksTrait()
         {
-            var skill = new BattleSkill("bolt", "Magic Bolt", Cost: 10, DamageMultiplier: 1.0,
+            var skill = new BattleSkill("bolt", "Magic Bolt", Cost: 10, TotalDamageMultiplier: 1.0,
                 Effects: PhysEffect(), PermittedTraits: new[] { BattleTrait.ManaUser });
             var unit = MakeUnit(traits: new[] { BattleTrait.FuryUser });
             Assert.False(skill.MeetsRequirements(unit));
@@ -82,7 +82,7 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void MeetsRequirements_RequiredTrait_FalseWhenNoTraits()
         {
-            var skill = new BattleSkill("bolt", "Magic Bolt", Cost: 10, DamageMultiplier: 1.0,
+            var skill = new BattleSkill("bolt", "Magic Bolt", Cost: 10, TotalDamageMultiplier: 1.0,
                 Effects: PhysEffect(), PermittedTraits: new[] { BattleTrait.ManaUser });
             var unit = MakeUnit();
             Assert.False(skill.MeetsRequirements(unit));
@@ -91,7 +91,7 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void MeetsRequirements_BothRequirements_FalseWhenOnlyEquipmentMet()
         {
-            var skill = new BattleSkill("s", "S", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(),
+            var skill = new BattleSkill("s", "S", Cost: 0, TotalDamageMultiplier: 1.0, Effects: PhysEffect(),
                 PermittedTraits: new[] { BattleTrait.ManaUser }, PermittedEquipmentTypes: new[] { EquipmentType.Staff });
             var unit = MakeUnit(equipmentType: EquipmentType.Staff);
             Assert.False(skill.MeetsRequirements(unit));
@@ -100,7 +100,7 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void MeetsRequirements_BothRequirements_FalseWhenOnlyTraitMet()
         {
-            var skill = new BattleSkill("s", "S", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(),
+            var skill = new BattleSkill("s", "S", Cost: 0, TotalDamageMultiplier: 1.0, Effects: PhysEffect(),
                 PermittedTraits: new[] { BattleTrait.ManaUser }, PermittedEquipmentTypes: new[] { EquipmentType.Staff });
             var unit = MakeUnit(traits: new[] { BattleTrait.ManaUser });
             Assert.False(skill.MeetsRequirements(unit));
@@ -109,7 +109,7 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void MeetsRequirements_BothRequirements_TrueWhenBothMet()
         {
-            var skill = new BattleSkill("s", "S", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(),
+            var skill = new BattleSkill("s", "S", Cost: 0, TotalDamageMultiplier: 1.0, Effects: PhysEffect(),
                 PermittedTraits: new[] { BattleTrait.ManaUser }, PermittedEquipmentTypes: new[] { EquipmentType.Staff });
             var unit = MakeUnit(equipmentType: EquipmentType.Staff, traits: new[] { BattleTrait.ManaUser });
             Assert.True(skill.MeetsRequirements(unit));
@@ -120,9 +120,9 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void AvailableSkillIds_ExcludesSkillWithUnmetEquipmentRequirement()
         {
-            var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, DamageMultiplier: 1.0,
+            var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: PhysEffect(), Modifiers: new[] { "basic" });
-            var maceSkill = new BattleSkill("mace-strike", "Mace Strike", Cost: 0, DamageMultiplier: 1.0,
+            var maceSkill = new BattleSkill("mace-strike", "Mace Strike", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: PhysEffect(), PermittedEquipmentTypes: new[] { EquipmentType.Blunt });
 
             // Unit with Slash weapon — cannot use mace-strike.
@@ -145,9 +145,9 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void AvailableSkillIds_IncludesSkillWithMetEquipmentRequirement()
         {
-            var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, DamageMultiplier: 1.0,
+            var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: PhysEffect(), Modifiers: new[] { "basic" });
-            var maceSkill = new BattleSkill("mace-strike", "Mace Strike", Cost: 0, DamageMultiplier: 1.0,
+            var maceSkill = new BattleSkill("mace-strike", "Mace Strike", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: PhysEffect(), PermittedEquipmentTypes: new[] { EquipmentType.Blunt });
 
             // Unit with Blunt weapon — can use mace-strike.
@@ -170,9 +170,9 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void AvailableSkillIds_ExcludesSkillWithUnmetTraitRequirement()
         {
-            var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, DamageMultiplier: 1.0,
+            var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: PhysEffect(), Modifiers: new[] { "basic" });
-            var spellSkill = new BattleSkill("bolt", "Bolt", Cost: 0, DamageMultiplier: 1.0,
+            var spellSkill = new BattleSkill("bolt", "Bolt", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: PhysEffect(), PermittedTraits: new[] { BattleTrait.ManaUser });
 
             // Non-magic unit — cannot use bolt.
@@ -195,9 +195,9 @@ namespace GameCore.Tests.Battle
         [Fact]
         public void PlayerAction_RequirementNotMet_ReturnsRequirementNotMetError()
         {
-            var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, DamageMultiplier: 1.0,
+            var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: PhysEffect(), Modifiers: new[] { "basic" });
-            var maceSkill = new BattleSkill("mace-strike", "Mace Strike", Cost: 0, DamageMultiplier: 1.0,
+            var maceSkill = new BattleSkill("mace-strike", "Mace Strike", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: PhysEffect(), PermittedEquipmentTypes: new[] { EquipmentType.Blunt });
 
             // Unit without Blunt weapon tries to use mace-strike.
@@ -229,7 +229,7 @@ namespace GameCore.Tests.Battle
         public void Content_RogueConcentrate_UnavailableWithoutFocusTrait()
         {
             var db = ContentPipeline.Load(TestContentSource.Default);
-            var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, DamageMultiplier: 1.0,
+            var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: PhysEffect(), Modifiers: new[] { "basic" });
             var concentrateSkill = db.GetSkill("rogue-concentrate");
 
@@ -251,7 +251,7 @@ namespace GameCore.Tests.Battle
         public void Content_RogueConcentrate_AvailableWithFocusTrait()
         {
             var db = ContentPipeline.Load(TestContentSource.Default);
-            var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, DamageMultiplier: 1.0,
+            var basicSkill = new BattleSkill("basic", "Attack", Cost: 0, TotalDamageMultiplier: 1.0,
                 Effects: PhysEffect(), Modifiers: new[] { "basic" });
             var concentrateSkill = db.GetSkill("rogue-concentrate");
 

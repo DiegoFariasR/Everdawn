@@ -173,7 +173,7 @@ Authored in YAML via unit modifier dicts (`set: { physicalResistance: 20 }`) and
 ### Passive Skills
 Skills with `category: Passive` grant permanent battle stats for the duration of a battle:
 - YAML fields: `penetration` and `resistance` dicts (plus `disruption` key for disruption resistance/penetration).
-- `CompileSkill` parses the dicts into `BattleSkill.PassivePenetrations`, `PassiveResistances`, etc.
+- `CompileSkill` parses the `penetration` and `resistance` dicts into an `ActiveEffectDefinition` stored as `BattleSkill.PassiveEffect` (with `PenetrationModifierByType`, `ResistanceModifierByType`, and disruption in `StatModifiers`).
 - `CompileUnit` merges passive stats additively into the compiled `BattleUnit` after unit-level modifiers.
 - Passive skills are never treated as battle actions: filtered from AI skill selection and `BattlePendingInput`.
 

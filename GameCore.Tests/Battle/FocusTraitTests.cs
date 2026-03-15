@@ -67,7 +67,7 @@ namespace GameCore.Tests.Battle
         {
             var session = StartFocusBattle();
             var result = session.TryExecute(new PlayerActionCommand("focus-skill", null));
-            Assert.Contains(result.Events, e => e.Description.Contains("focuses intently"));
+            Assert.Contains(result.Events, e => e.Description.Contains("Focused"));
         }
 
         [Fact]
@@ -127,24 +127,25 @@ namespace GameCore.Tests.Battle
         }
 
         [Fact]
-        public void Focused_OnIncompatibleSkill_NoSharpenEvent()
+        public void Focused_OnBasicAttack_AlsoSharpens()
         {
-            // Using an incompatible skill during the refunded action should not trigger Focus empowerment.
+            // All Attack skills are focus-compatible — basic attacks also trigger Focus empowerment.
             var session = StartFocusBattle();
             session.TryExecute(new PlayerActionCommand("focus-skill", null));
             var result = session.TryExecute(new PlayerActionCommand("basic", "target"));
-            Assert.DoesNotContain(result.Events, e => e.Description.Contains("sharpens"));
+            Assert.Contains(result.Events, e => e.Description.Contains("sharpens"));
         }
 
         [Fact]
-        public void Focused_OnIncompatibleSkill_NoExtraHit_BaseHitCount()
+        public void Focused_OnBasicAttack_GetsExtraHit()
         {
-            // Player Agi 50 → HitCount = 1. Basic skill is incompatible → no extra hit.
-            var session = StartFocusBattle(playerAgi: 50);
+            // Player Agi 100 → HitCount = 2. Basic attack (Attack category) also gets +1 hit = 3 total.
+            var session = StartFocusBattle(playerAgi: 100);
             session.TryExecute(new PlayerActionCommand("focus-skill", null));
             var result = session.TryExecute(new PlayerActionCommand("basic", "target"));
-            int damageEvents = result.Events.Count(e => e.TargetId == "target" && e.Value > 0);
-            Assert.Equal(1, damageEvents);
+            var hit = result.Events.FirstOrDefault(e => e.TargetId == "target" && e.Value > 0);
+            Assert.NotNull(hit);
+            Assert.Equal(3, hit!.TotalHits);
         }
 
         // ── Focus regen ───────────────────────────────────────────────────────
@@ -173,9 +174,17 @@ namespace GameCore.Tests.Battle
 
         // ── Helpers ───────────────────────────────────────────────────────────
 
-        // Player: basic (incompatible), compatible (ExtraHit +1, IsFocusCompatible), focus-skill. playerAgi controls HitCount (1 + Agi/100).
+        // Player: basic (Attack), compatible (Attack), focus-skill (grants Focused buff with ExtraHits:1). playerAgi controls HitCount (1 + Agi/100).
         private static BattleSession StartFocusBattle(int playerAgi = 50)
         {
+            var focusedDef = new ActiveEffectDefinition(
+                Id: "focused",
+                Name: "Focused",
+                DurationKind: EffectDurationKind.UntilNextAction,
+                Duration: 1,
+                StackingPolicy: EffectStackingPolicy.RefreshDuration,
+                ExtraHits: 1);
+
             var setup = new BattleSetup
             {
                 PlayerUnits = new List<BattleUnit>
@@ -183,12 +192,11 @@ namespace GameCore.Tests.Battle
                     new("focus-unit", "Fighter", "player", Level: 1, Str: 200, Wis: 0, Agi: playerAgi,
                         Skills: new BattleSkill[]
                         {
-                            new("basic",      "Strike",      Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(),
+                            new("basic",      "Strike",      Cost: 0, TotalDamageMultiplier: 1.0, Effects: PhysEffect(),
                                 Modifiers: new[] { "basic" }, ModifierTags: new[] { "basic" }),
-                            new("compatible", "Power Strike", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect(),
-                                IsFocusCompatible: true, FocusEffect: FocusEffectKind.ExtraHit, FocusEffectValue: 1),
-                            new("focus-skill", "Focus",       Cost: 100, DamageMultiplier: 1.0,
-                                Effects: new SkillEffect[] { new(EffectKind.GrantFocusedBuff, BattleSkillTarget.Ally, Array.Empty<DamageComponent>()) },
+                            new("compatible", "Power Strike", Cost: 0, TotalDamageMultiplier: 1.0, Effects: PhysEffect()),
+                            new("focus-skill", "Focus",       Cost: 100, TotalDamageMultiplier: 1.0,
+                                Effects: new SkillEffect[] { new(EffectKind.ApplyEffect, BattleSkillTarget.Ally, Array.Empty<DamageComponent>(), EffectDefinition: focusedDef) },
                                 Range: SkillRange.Self, Category: SkillCategory.Preparation,
                                 PermittedTraits: new[] { BattleTrait.FocusUser }),
                         },
@@ -197,7 +205,7 @@ namespace GameCore.Tests.Battle
                 EnemyUnits = new List<BattleUnit>
                 {
                     new("target", "Dummy", "enemy", Level: 1, Str: 10, Wis: 0, Agi: 1,
-                        Skills: new BattleSkill[] { new("def-basic", "Slash", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect()) }),
+                        Skills: new BattleSkill[] { new("def-basic", "Slash", Cost: 0, TotalDamageMultiplier: 1.0, Effects: PhysEffect()) }),
                 },
             };
             var session = new BattleSession(seed: 0);

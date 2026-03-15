@@ -66,7 +66,7 @@
                     @if (sk.IsBasic)    { <span class="info-badge badge-basic">Basic</span> }
                     @if (sk.IsUltimate) { <span class="info-badge badge-ult">Ult</span>   }
                     @if (sk.PrimaryEffectType.HasValue) { <span class="info-badge @BattleHelpers.DmgTypeCss(sk.PrimaryEffectType.Value)">@sk.PrimaryEffectType</span> }
-                    <span class="info-skill-stat">x@(sk.DamageMultiplier.ToString("0.##"))</span>
+                    <span class="info-skill-stat">x@(sk.TotalDamageMultiplier.ToString("0.##"))</span>
                     @if (sk.BaseHits != 1.0) { <span class="info-skill-stat">@(sk.BaseHits.ToString("0.##"))hits</span> }
                     <span class="info-skill-stat">~@sk.BaseDmg</span>
                     @if (sk.Cost > 0)                    { <span class="info-skill-stat">@sk.Cost MP</span> }

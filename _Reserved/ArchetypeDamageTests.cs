@@ -42,7 +42,7 @@ namespace GameCore.Tests.Battle
         // private static readonly string[] WeaponModifierIds = { "enchant-fire", "enchant-holy" };
 
         private static readonly BattleSkill TauntSkill = new BattleSkill(
-            "boss-taunt", "Taunt", Cost: 0, DamageMultiplier: 1.0,
+            "boss-taunt", "Taunt", Cost: 0, TotalDamageMultiplier: 1.0,
             Effects: Array.Empty<SkillEffect>());
 
         private static BattleUnit BuildBoss(int budget) => new BattleUnit(

@@ -234,7 +234,7 @@ namespace GameCore.Tests.Battle
                 Level: 1, Str: 500, Wis: 0, Agi: 1,
                 Skills: new BattleSkill[]
                 {
-                    new("dummy-attack", "Attack", Cost: 0, DamageMultiplier: 0.0,
+                    new("dummy-attack", "Attack", Cost: 0, TotalDamageMultiplier: 0.0,
                         Effects: DamageEffect(wisScale: 0.001))
                 });
 
@@ -295,16 +295,16 @@ namespace GameCore.Tests.Battle
             };
 
         private static BattleSkill MakeDamageSkill(string id, double wisScale = 0.01) =>
-            new(id, id, Cost: 0, DamageMultiplier: 1.0, Effects: DamageEffect(wisScale));
+            new(id, id, Cost: 0, TotalDamageMultiplier: 1.0, Effects: DamageEffect(wisScale));
 
         private static BattleSkill MakeShieldSkill(string id, double wisScale = 1.0) =>
-            new(id, id, Cost: 0, DamageMultiplier: 1.0, Effects: ShieldEffect(wisScale));
+            new(id, id, Cost: 0, TotalDamageMultiplier: 1.0, Effects: ShieldEffect(wisScale));
 
         private static BattleSkill MakeAoeShieldSkill(string id, double wisScale = 1.0) =>
-            new(id, id, Cost: 0, DamageMultiplier: 1.0, IsAoe: true, Effects: ShieldEffect(wisScale));
+            new(id, id, Cost: 0, TotalDamageMultiplier: 1.0, IsAoe: true, Effects: ShieldEffect(wisScale));
 
         private static BattleSkill MakeHealSkill(string id, double wisScale = 1.0) =>
-            new(id, id, Cost: 0, DamageMultiplier: 1.0, Effects: HealEffect(wisScale));
+            new(id, id, Cost: 0, TotalDamageMultiplier: 1.0, Effects: HealEffect(wisScale));
 
         // Player casts shield; enemy attacks in AutoAdvance; returns view after both actions.
         private static BattleView CastShieldAndLetEnemyAttack(double shieldWisScale, double damageWisScale)
@@ -332,7 +332,7 @@ namespace GameCore.Tests.Battle
         {
             // Shield has Cooldown=100 so it's only usable on the first turn.
             var oneTimeShield = new BattleSkill("shield", "Shield",
-                Cost: 0, DamageMultiplier: 1.0, Cooldown: 100, IsAoe: true,
+                Cost: 0, TotalDamageMultiplier: 1.0, Cooldown: 100, IsAoe: true,
                 Effects: ShieldEffect(wisScale: 500.0));
 
             var mage = new BattleUnit("mage", "Mage", "player",

@@ -62,10 +62,10 @@ namespace GameCore.Tests.Battle
                     new("player-unit", "Fighter", "player", Level: 1, Str: 200, Wis: 0, Agi: playerAgi,
                         Skills: new BattleSkill[]
                         {
-                            new("basic", "Strike", Cost: 0, DamageMultiplier: 1.0,
+                            new("basic", "Strike", Cost: 0, TotalDamageMultiplier: 1.0,
                                 Effects: PhysEffect(),
                                 Modifiers: new[] { "basic" }, ModifierTags: new[] { "basic" }),
-                            new("prep-skill", "Prepare", Cost: 0, DamageMultiplier: 1.0,
+                            new("prep-skill", "Prepare", Cost: 0, TotalDamageMultiplier: 1.0,
                                 Effects: Array.Empty<SkillEffect>(),
                                 Range: SkillRange.Self,
                                 Category: SkillCategory.Preparation),
@@ -74,7 +74,7 @@ namespace GameCore.Tests.Battle
                 EnemyUnits = new List<BattleUnit>
                 {
                     new("target", "Dummy", "enemy", Level: 1, Str: 10, Wis: 0, Agi: 1,
-                        Skills: new BattleSkill[] { new("def-basic", "Slash", Cost: 0, DamageMultiplier: 1.0, Effects: PhysEffect()) }),
+                        Skills: new BattleSkill[] { new("def-basic", "Slash", Cost: 0, TotalDamageMultiplier: 1.0, Effects: PhysEffect()) }),
                 },
             };
             var session = new BattleSession(seed: 0);

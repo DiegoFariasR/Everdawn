@@ -35,6 +35,9 @@ namespace GameCore.Battle
         /// <summary>Stack count. Incremented when <see cref="EffectStackingPolicy.StackIntensity"/> re-applies the same definition.</summary>
         int Stacks = 1,
 
+        /// <summary>Extra hits added to effectiveHits when the actor is focus-empowered and this effect is active.</summary>
+        int ExtraHits = 0,
+
         /// <summary>Optional skill modifier contributed by this instance. Null when the effect only modifies stats.</summary>
         RuntimeSkillModifier? SkillModifier = null,
 

@@ -45,6 +45,8 @@ namespace GameCore.Content.Raw
         // ── Per-type resistance / penetration ─────────────────────────────────
         public List<Dictionary<string, int>>? Resistance { get; set; }
         public List<Dictionary<string, int>>? Penetration { get; set; }
+        // ── Skill modifiers ───────────────────────────────────────────────────
+        public int ExtraHits { get; set; }
     }
 
     public class RawSkill
@@ -67,9 +69,6 @@ namespace GameCore.Content.Raw
         public List<string>? PermittedEquipmentTypes { get; set; } // unit needs one of these
         public string? Trigger { get; set; }               // ReactionTrigger name (e.g. "OnHitBy")
         public List<RawTriggerCondition>? TriggerConditions { get; set; }
-        public bool IsFocusCompatible { get; set; }
-        public string? FocusEffect { get; set; }
-        public double FocusEffectValue { get; set; }
         public string? IconDescription { get; set; } // authoring note for icon generation; not used at runtime
         // ── Fury system ────────────────────────────────────────────────────────
         public bool IsStrSkill { get; set; }    // must be set explicitly; never inferred

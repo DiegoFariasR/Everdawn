@@ -109,7 +109,7 @@ namespace GameCore.Battle
             new BattleSkill[]
             {
                 new BattleSkill(
-                    "attack", "Attack", Cost: 0, DamageMultiplier: 1.0,
+                    "attack", "Attack", Cost: 0, TotalDamageMultiplier: 1.0,
                     Effects: new SkillEffect[]
                     {
                         new SkillEffect(EffectKind.Damage, BattleSkillTarget.Enemy,
