@@ -1,0 +1,23 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="1" y="1" width="62" height="62" rx="8" fill="#1a0800" stroke="#aa4400" stroke-width="2"/>
+  <rect x="4" y="4" width="56" height="56" rx="6" fill="none" stroke="#662200" stroke-width="1" opacity="0.6"/>
+  <!-- Flame base glow -->
+  <ellipse cx="32" cy="54" rx="20" ry="6" fill="#e64a19" opacity="0.6"/>
+  <!-- Main flame body -->
+  <path d="M 20,56 Q 16,46 20,38 Q 16,34 22,24 Q 26,30 24,34 Q 30,22 28,12 Q 36,20 32,30 Q 38,18 44,22 Q 40,30 44,36 Q 50,24 48,20 Q 54,32 46,40 Q 52,42 48,56 Z"
+        fill="#bf360c" stroke="#e64a19" stroke-width="1"/>
+  <!-- Inner hotter region -->
+  <path d="M 24,56 Q 20,48 26,40 Q 22,36 26,28 Q 30,34 28,38 Q 34,28 34,20 Q 38,28 36,36 Q 40,28 44,32 Q 40,38 44,44 Q 46,48 44,56 Z"
+        fill="#e64a19"/>
+  <!-- Core yellow-orange -->
+  <path d="M 26,56 Q 26,48 30,42 Q 28,38 32,32 Q 36,38 34,42 Q 38,46 36,56 Z"
+        fill="#ff6d00"/>
+  <path d="M 28,56 Q 28,50 32,44 Q 36,50 36,56 Z" fill="#ff9100"/>
+  <!-- Ember sparks -->
+  <circle cx="22" cy="22" r="1.5" fill="#ffa726" opacity="0.8"/>
+  <circle cx="42" cy="18" r="1.5" fill="#ffa726" opacity="0.8"/>
+  <circle cx="14" cy="38" r="1.2" fill="#ff7043" opacity="0.7"/>
+  <circle cx="52" cy="36" r="1.2" fill="#ff7043" opacity="0.7"/>
+  <circle cx="18" cy="48" r="1"   fill="#ffd740" opacity="0.6"/>
+  <circle cx="50" cy="48" r="1"   fill="#ffd740" opacity="0.6"/>
+</svg>

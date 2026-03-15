@@ -1,0 +1,14 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="1" y="1" width="62" height="62" rx="8" fill="#0a1a0a" stroke="#2a7040" stroke-width="2"/>
+  <rect x="4" y="4" width="56" height="56" rx="6" fill="none" stroke="#1a4a28" stroke-width="1" opacity="0.6"/>
+  <!-- Shield -->
+  <path d="M 10,14 L 54,14 Q 54,44 32,60 Q 10,44 10,14 Z" fill="#1b5e20" stroke="#43a047" stroke-width="2"/>
+  <path d="M 14,18 L 50,18 Q 50,44 32,56 Q 14,44 14,18 Z" fill="none" stroke="#66bb6a" stroke-width="1.2"/>
+  <!-- Up arrow inside shield -->
+  <polygon points="32,22 40,34 36,34 36,48 28,48 28,34 24,34" fill="#2e7d32" stroke="#81c784" stroke-width="1.2"/>
+  <!-- Sparkles on top corners of shield -->
+  <line x1="10" y1="8"  x2="14" y2="12" stroke="#a5d6a7" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+  <line x1="54" y1="8"  x2="50" y2="12" stroke="#a5d6a7" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+  <circle cx="10" cy="8"  r="2" fill="#4caf50" opacity="0.6"/>
+  <circle cx="54" cy="8"  r="2" fill="#4caf50" opacity="0.6"/>
+</svg>

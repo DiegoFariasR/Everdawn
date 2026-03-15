@@ -1,0 +1,16 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="1" y="1" width="62" height="62" rx="8" fill="#1a0800" stroke="#aa4400" stroke-width="2"/>
+  <rect x="4" y="4" width="56" height="56" rx="6" fill="none" stroke="#662200" stroke-width="1" opacity="0.6"/>
+  <!-- Heat shimmer waves (rising heat lines) -->
+  <path d="M 16,56 Q 12,48 16,40 Q 20,32 16,24 Q 12,16 16,8" fill="none" stroke="#ff7043" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M 26,56 Q 22,48 26,40 Q 30,32 26,24 Q 22,16 26,8" fill="none" stroke="#ff8a65" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M 36,56 Q 32,48 36,40 Q 40,32 36,24 Q 32,16 36,8" fill="none" stroke="#ff7043" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M 46,56 Q 42,48 46,40 Q 50,32 46,24 Q 42,16 46,8" fill="none" stroke="#ff8a65" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Hot glow at bottom -->
+  <ellipse cx="32" cy="56" rx="26" ry="6" fill="#bf360c" opacity="0.5"/>
+  <ellipse cx="32" cy="56" rx="18" ry="4" fill="#e64a19" opacity="0.6"/>
+  <!-- Orange exclamation thermometer dot -->
+  <circle cx="32" cy="34" r="10" fill="#3e1000" stroke="#ff5722" stroke-width="1.5"/>
+  <circle cx="32" cy="34" r="6"  fill="#ff5722" opacity="0.7"/>
+  <circle cx="32" cy="34" r="3"  fill="#ff9100"/>
+</svg>

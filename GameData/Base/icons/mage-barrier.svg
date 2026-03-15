@@ -1,0 +1,18 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="1" y="1" width="62" height="62" rx="8" fill="#0e1520" stroke="#3a6080" stroke-width="2"/>
+  <rect x="4" y="4" width="56" height="56" rx="6" fill="none" stroke="#2a5070" stroke-width="1" opacity="0.6"/>
+  <!-- Hexagonal force shield -->
+  <polygon points="32,8 54,20 54,44 32,56 10,44 10,20" fill="#0d1a30" stroke="#29b6f6" stroke-width="2.5"/>
+  <!-- Inner hex -->
+  <polygon points="32,14 50,24 50,40 32,50 14,40 14,24" fill="none" stroke="#4dd0e1" stroke-width="1.5" opacity="0.7"/>
+  <!-- Energy hex (innermost) -->
+  <polygon points="32,20 44,28 44,38 32,44 20,38 20,28" fill="#0a2040" stroke="#81d4fa" stroke-width="1" opacity="0.6"/>
+  <!-- Lightning-like fractures on shield surface -->
+  <polyline points="32,8  36,20 30,24 34,35" fill="none" stroke="#29b6f6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+  <polyline points="10,20 22,24 18,32      " fill="none" stroke="#4dd0e1" stroke-width="1"   stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  <polyline points="54,44 44,40 48,32      " fill="none" stroke="#4dd0e1" stroke-width="1"   stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  <!-- Center glowing orb (power source) -->
+  <circle cx="32" cy="33" r="7"  fill="#01579b" stroke="#29b6f6" stroke-width="1.5"/>
+  <circle cx="32" cy="33" r="3.5" fill="#81d4fa" opacity="0.8"/>
+  <circle cx="30" cy="31" r="1.5" fill="#ffffff" opacity="0.6"/>
+</svg>

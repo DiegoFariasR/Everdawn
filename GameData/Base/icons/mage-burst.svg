@@ -1,0 +1,28 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="1" y="1" width="62" height="62" rx="8" fill="#1a0800" stroke="#aa4400" stroke-width="2"/>
+  <rect x="4" y="4" width="56" height="56" rx="6" fill="none" stroke="#662200" stroke-width="1" opacity="0.6"/>
+  <!-- Outer explosion ring -->
+  <circle cx="32" cy="32" r="26" fill="none" stroke="#bf360c" stroke-width="2" opacity="0.4"/>
+  <circle cx="32" cy="32" r="20" fill="none" stroke="#e64a19" stroke-width="2.5" opacity="0.6"/>
+  <!-- Hot core -->
+  <circle cx="32" cy="32" r="13" fill="#bf360c"/>
+  <circle cx="32" cy="32" r="9"  fill="#e64a19"/>
+  <circle cx="32" cy="32" r="5"  fill="#ff9100"/>
+  <circle cx="32" cy="32" r="2.5" fill="#ffd740"/>
+  <!-- 8 flame rays -->
+  <line x1="32" y1="4"  x2="32" y2="14" stroke="#ff6d00" stroke-width="3" stroke-linecap="round"/>
+  <line x1="32" y1="50" x2="32" y2="60" stroke="#ff6d00" stroke-width="3" stroke-linecap="round"/>
+  <line x1="4"  y1="32" x2="14" y2="32" stroke="#ff6d00" stroke-width="3" stroke-linecap="round"/>
+  <line x1="50" y1="32" x2="60" y2="32" stroke="#ff6d00" stroke-width="3" stroke-linecap="round"/>
+  <line x1="12" y1="12" x2="19" y2="19" stroke="#ff7043" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="52" y1="12" x2="45" y2="19" stroke="#ff7043" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="12" y1="52" x2="19" y2="45" stroke="#ff7043" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="52" y1="52" x2="45" y2="45" stroke="#ff7043" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Ember sparks -->
+  <circle cx="24" cy="10" r="1.5" fill="#ffa726" opacity="0.8"/>
+  <circle cx="40" cy="8"  r="1.2" fill="#ff7043" opacity="0.7"/>
+  <circle cx="10" cy="22" r="1.5" fill="#ffa726" opacity="0.6"/>
+  <circle cx="8"  cy="40" r="1.2" fill="#ff7043" opacity="0.6"/>
+  <circle cx="56" cy="24" r="1.5" fill="#ffa726" opacity="0.7"/>
+  <circle cx="54" cy="44" r="1.2" fill="#ff7043" opacity="0.6"/>
+</svg>

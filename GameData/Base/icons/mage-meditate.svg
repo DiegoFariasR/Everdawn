@@ -1,0 +1,34 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="1" y="1" width="62" height="62" rx="8" fill="#0e1520" stroke="#3a6080" stroke-width="2"/>
+  <rect x="4" y="4" width="56" height="56" rx="6" fill="none" stroke="#2a5070" stroke-width="1" opacity="0.6"/>
+  <!-- Staff (vertical, slightly diagonal) -->
+  <line x1="32" y1="56" x2="28" y2="14" stroke="#8d6e63" stroke-width="5" stroke-linecap="round"/>
+  <line x1="32" y1="56" x2="28" y2="14" stroke="#5d4037" stroke-width="2" stroke-linecap="round"/>
+  <!-- Staff orb at top -->
+  <circle cx="28" cy="13" r="7"  fill="#311b92" stroke="#9575cd" stroke-width="1.8"/>
+  <circle cx="28" cy="13" r="4"  fill="#4527a0" stroke="#b39ddb" stroke-width="1"/>
+  <circle cx="26" cy="11" r="1.5" fill="#ede7f6" opacity="0.7"/>
+  <!-- Swirling sparkle runes/particles around center -->
+  <!-- ring of 8 small diamonds at r~18 -->
+  <circle cx="50" cy="32" r="2.5" fill="#9575cd" opacity="0.9"/>
+  <circle cx="46" cy="46" r="2"   fill="#7e57c2" opacity="0.8"/>
+  <circle cx="32" cy="50" r="2.5" fill="#9575cd" opacity="0.8"/>
+  <circle cx="18" cy="46" r="2"   fill="#7e57c2" opacity="0.7"/>
+  <circle cx="14" cy="32" r="2.5" fill="#9575cd" opacity="0.7"/>
+  <circle cx="18" cy="18" r="2"   fill="#7e57c2" opacity="0.6"/>
+  <circle cx="46" cy="18" r="2"   fill="#7e57c2" opacity="0.7"/>
+  <!-- Dim orbit ring -->
+  <circle cx="32" cy="34" r="18" fill="none" stroke="#7e57c2" stroke-width="1" opacity="0.3" stroke-dasharray="4,5"/>
+  <!-- Connecting arc bits -->
+  <path d="M 50,32 Q 50,50 32,50" fill="none" stroke="#9575cd" stroke-width="1" opacity="0.4"/>
+  <path d="M 14,32 Q 14,18 32,18" fill="none" stroke="#9575cd" stroke-width="1" opacity="0.4"/>
+  <!-- Floating rune glyphs (simple lines in rough letter shapes) -->
+  <g opacity="0.55" stroke="#ce93d8" stroke-width="1.2" stroke-linecap="round" fill="none">
+    <line x1="48" y1="26" x2="52" y2="22"/>
+    <line x1="50" y1="22" x2="50" y2="28"/>
+    <line x1="12" y1="38" x2="16" y2="42"/>
+    <line x1="12" y1="42" x2="16" y2="38"/>
+    <line x1="38" y1="56" x2="44" y2="56"/>
+    <line x1="41" y1="54" x2="41" y2="58"/>
+  </g>
+</svg>

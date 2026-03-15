@@ -1,0 +1,25 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="1" y="1" width="62" height="62" rx="8" fill="#0e1520" stroke="#3a6080" stroke-width="2"/>
+  <rect x="4" y="4" width="56" height="56" rx="6" fill="none" stroke="#2a5070" stroke-width="1" opacity="0.6"/>
+  <!-- Three daggers in a tight spread pattern (like throwing daggers) -->
+  <!-- Dagger 1: straight horizontal, center -->
+  <circle cx="12" cy="32" r="4" fill="#546e7a" stroke="#78909c" stroke-width="1"/>
+  <rect x="14" y="29" width="7" height="6" rx="2" fill="#5d4037" stroke="#4e342e" stroke-width="0.8"/>
+  <rect x="20" y="26" width="3" height="12" rx="1" fill="#546e7a"/>
+  <polygon points="58,32 23,24 23,40" fill="#c8d6dc" stroke="#90a4ae" stroke-width="0.8"/>
+  <line x1="57" y1="31" x2="25" y2="25" stroke="#eceff1" stroke-width="0.8" opacity="0.5"/>
+  <!-- Dagger 2: angled up-right, above -->
+  <circle cx="10" cy="18" r="3.5" fill="#455a64" stroke="#607d8b" stroke-width="1"/>
+  <rect x="12" y="16" width="6" height="5" rx="2" fill="#5d4037" stroke="#4e342e" stroke-width="0.8"/>
+  <rect x="17" y="13" width="3" height="10" rx="1" fill="#455a64"/>
+  <polygon points="55,12 20,14 20,22" fill="#b0c4cc" stroke="#78909c" stroke-width="0.8" opacity="0.85"/>
+  <!-- Dagger 3: angled down-right, below -->
+  <circle cx="10" cy="46" r="3.5" fill="#455a64" stroke="#607d8b" stroke-width="1"/>
+  <rect x="12" y="43" width="6" height="5" rx="2" fill="#5d4037" stroke="#4e342e" stroke-width="0.8"/>
+  <rect x="17" y="41" width="3" height="10" rx="1" fill="#455a64"/>
+  <polygon points="55,52 20,42 20,50" fill="#b0c4cc" stroke="#78909c" stroke-width="0.8" opacity="0.85"/>
+  <!-- Speed/blur lines -->
+  <line x1="22" y1="28" x2="28" y2="26" stroke="#b0bec5" stroke-width="1" opacity="0.4"/>
+  <line x1="22" y1="32" x2="30" y2="32" stroke="#b0bec5" stroke-width="1" opacity="0.4"/>
+  <line x1="22" y1="36" x2="28" y2="38" stroke="#b0bec5" stroke-width="1" opacity="0.4"/>
+</svg>

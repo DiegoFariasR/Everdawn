@@ -1,0 +1,21 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="1" y="1" width="62" height="62" rx="8" fill="#0e1520" stroke="#3a6080" stroke-width="2"/>
+  <rect x="4" y="4" width="56" height="56" rx="6" fill="none" stroke="#2a5070" stroke-width="1" opacity="0.6"/>
+  <!-- Spellbook -->
+  <rect x="10" y="10" width="44" height="44" rx="4" fill="#1a237e" stroke="#3949ab" stroke-width="1.5"/>
+  <!-- Spine -->
+  <rect x="10" y="10" width="8"  height="44" rx="3" fill="#0d1440" stroke="#283593" stroke-width="1"/>
+  <!-- Pages edge -->
+  <rect x="18" y="12" width="33" height="40" rx="1" fill="#e8eaf6"/>
+  <line x1="18" y1="16" x2="50" y2="16" stroke="#9fa8da" stroke-width="0.8" opacity="0.6"/>
+  <line x1="18" y1="20" x2="50" y2="20" stroke="#9fa8da" stroke-width="0.8" opacity="0.6"/>
+  <!-- Pentacle / arcane star on open page -->
+  <!-- 5-pointed star at center of page (cx=34,cy=36,r=13) -->
+  <!-- Points: top, upper-right, lower-right, lower-left, upper-left -->
+  <polygon points="34,24 37,33 46,33 39,38 42,47 34,42 26,47 29,38 22,33 31,33"
+           fill="none" stroke="#7986cb" stroke-width="1.5" stroke-linejoin="round"/>
+  <circle cx="34" cy="36" r="5" fill="none" stroke="#5c6bc0" stroke-width="1"/>
+  <!-- Binding clasp -->
+  <rect x="14" y="28" width="4" height="8" rx="2" fill="#7986cb" stroke="#9fa8da" stroke-width="1"/>
+  <circle cx="14" cy="32" r="1.5" fill="#c5cae9"/>
+</svg>

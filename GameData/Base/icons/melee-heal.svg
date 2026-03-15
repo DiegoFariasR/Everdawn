@@ -1,0 +1,22 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="1" y="1" width="62" height="62" rx="8" fill="#0e1520" stroke="#3a6080" stroke-width="2"/>
+  <rect x="4" y="4" width="56" height="56" rx="6" fill="none" stroke="#2a5070" stroke-width="1" opacity="0.6"/>
+  <!-- Sword (left half of icon) -->
+  <polygon points="38,10 42,14 28,28 24,24" fill="#b0bec5" stroke="#78909c" stroke-width="0.8"/>
+  <!-- Crossguard -->
+  <line x1="20" y1="32" x2="32" y2="20" stroke="#607d8b" stroke-width="5" stroke-linecap="round"/>
+  <line x1="20" y1="32" x2="32" y2="20" stroke="#90a4ae" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Grip -->
+  <line x1="14" y1="40" x2="21" y2="33" stroke="#5d4037" stroke-width="4" stroke-linecap="round"/>
+  <!-- Pommel -->
+  <circle cx="11" cy="43" r="4.5" fill="#545e64" stroke="#78909c" stroke-width="1.2"/>
+  <circle cx="11" cy="43" r="2"   fill="#37474f"/>
+  <!-- Healing cross (right half) -->
+  <rect x="38" y="26" width="20" height="7" rx="3" fill="#4caf50" stroke="#81c784" stroke-width="1.2"/>
+  <rect x="43" y="21" width="10" height="17" rx="3" fill="#4caf50" stroke="#81c784" stroke-width="1.2"/>
+  <!-- Green glow aura -->
+  <circle cx="48" cy="43" r="9" fill="#1b5e20" opacity="0.45"/>
+  <circle cx="48" cy="43" r="5" fill="#2e7d32" opacity="0.6"/>
+  <line x1="44" y1="39" x2="52" y2="47" stroke="#81c784" stroke-width="1.5" opacity="0.7"/>
+  <line x1="52" y1="39" x2="44" y2="47" stroke="#81c784" stroke-width="1.5" opacity="0.7"/>
+</svg>

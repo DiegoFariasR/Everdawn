@@ -1,0 +1,39 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="1" y="1" width="62" height="62" rx="8" fill="#1a0800" stroke="#aa4400" stroke-width="2"/>
+  <rect x="4" y="4" width="56" height="56" rx="6" fill="none" stroke="#662200" stroke-width="1" opacity="0.6"/>
+  <!-- Cast hand / origin point on left -->
+  <circle cx="10" cy="32" r="7" fill="#3e1200" stroke="#bf360c" stroke-width="1.5"/>
+  <circle cx="10" cy="32" r="4" fill="#ff6d00" opacity="0.8"/>
+  <circle cx="10" cy="32" r="2" fill="#ffd740"/>
+  <!-- 5 missiles fanning out to the right -->
+  <!-- Bolt 1: top -->
+  <line x1="16" y1="26" x2="48" y2="12" stroke="#ff6d00" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="16" y1="26" x2="48" y2="12" stroke="#ffd740" stroke-width="1"   stroke-linecap="round"/>
+  <circle cx="52" cy="10" r="4.5" fill="#e64a19"/>
+  <circle cx="52" cy="10" r="2.5" fill="#ff9100"/>
+  <circle cx="52" cy="10" r="1"   fill="#ffd740"/>
+  <!-- Bolt 2: slightly up -->
+  <line x1="17" y1="29" x2="50" y2="22" stroke="#ff6d00" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="17" y1="29" x2="50" y2="22" stroke="#ffd740" stroke-width="1"   stroke-linecap="round"/>
+  <circle cx="54" cy="20" r="4.5" fill="#e64a19"/>
+  <circle cx="54" cy="20" r="2.5" fill="#ff9100"/>
+  <circle cx="54" cy="20" r="1"   fill="#ffd740"/>
+  <!-- Bolt 3: straight right -->
+  <line x1="17" y1="32" x2="52" y2="32" stroke="#ff6d00" stroke-width="3"   stroke-linecap="round"/>
+  <line x1="17" y1="32" x2="52" y2="32" stroke="#ffd740" stroke-width="1.2" stroke-linecap="round"/>
+  <circle cx="57" cy="32" r="5"   fill="#bf360c"/>
+  <circle cx="57" cy="32" r="3"   fill="#e64a19"/>
+  <circle cx="57" cy="32" r="1.5" fill="#ffd740"/>
+  <!-- Bolt 4: slightly down -->
+  <line x1="17" y1="35" x2="50" y2="42" stroke="#ff6d00" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="17" y1="35" x2="50" y2="42" stroke="#ffd740" stroke-width="1"   stroke-linecap="round"/>
+  <circle cx="54" cy="44" r="4.5" fill="#e64a19"/>
+  <circle cx="54" cy="44" r="2.5" fill="#ff9100"/>
+  <circle cx="54" cy="44" r="1"   fill="#ffd740"/>
+  <!-- Bolt 5: bottom -->
+  <line x1="16" y1="38" x2="48" y2="52" stroke="#ff6d00" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="16" y1="38" x2="48" y2="52" stroke="#ffd740" stroke-width="1"   stroke-linecap="round"/>
+  <circle cx="52" cy="54" r="4.5" fill="#e64a19"/>
+  <circle cx="52" cy="54" r="2.5" fill="#ff9100"/>
+  <circle cx="52" cy="54" r="1"   fill="#ffd740"/>
+</svg>

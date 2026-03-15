@@ -1,0 +1,25 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="1" y="1" width="62" height="62" rx="8" fill="#0e0818" stroke="#5500aa" stroke-width="2"/>
+  <rect x="4" y="4" width="56" height="56" rx="6" fill="none" stroke="#330066" stroke-width="1" opacity="0.6"/>
+  <!-- Void shadow trail -->
+  <path d="M 6,46 Q 12,34 20,38 Q 16,28 24,22" fill="none" stroke="#4a0080" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
+  <path d="M 6,46 Q 14,36 22,40 Q 18,30 26,24" fill="none" stroke="#7b1fa2" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 7,44 Q 16,36 24,40 Q 20,30 28,24" fill="none" stroke="#ce93d8" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
+  <!-- Bolt core (dark purple lightning) -->
+  <polyline points="14,50 22,36 18,32 28,18 34,22 46,10 52,14"
+            fill="none" stroke="#4a0080" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  <polyline points="14,50 22,36 18,32 28,18 34,22 46,10 52,14"
+            fill="none" stroke="#9c27b0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="14,50 22,36 18,32 28,18 34,22 46,10 52,14"
+            fill="none" stroke="#e040fb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Impact void orb at tip -->
+  <circle cx="52" cy="14" r="9"  fill="#1a0030" opacity="0.8"/>
+  <circle cx="52" cy="14" r="6"  fill="#4a0080"/>
+  <circle cx="52" cy="14" r="3.5" fill="#7b1fa2"/>
+  <circle cx="52" cy="14" r="1.5" fill="#e040fb"/>
+  <!-- Void particles -->
+  <circle cx="44" cy="8"  r="1.5" fill="#ce93d8" opacity="0.7"/>
+  <circle cx="58" cy="8"  r="1"   fill="#ba68c8" opacity="0.6"/>
+  <circle cx="60" cy="20" r="1.2" fill="#ce93d8" opacity="0.5"/>
+  <circle cx="44" cy="24" r="1"   fill="#9c27b0" opacity="0.6"/>
+</svg>

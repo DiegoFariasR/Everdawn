@@ -1,0 +1,36 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="1" y="1" width="62" height="62" rx="8" fill="#0e1520" stroke="#3a6080" stroke-width="2"/>
+  <rect x="4" y="4" width="56" height="56" rx="6" fill="none" stroke="#2a5070" stroke-width="1" opacity="0.6"/>
+  <!-- Handle -->
+  <rect x="30" y="36" width="5" height="20" rx="2" fill="#6d4c41" stroke="#4e342e" stroke-width="0.8"/>
+  <line x1="31" y1="42" x2="34" y2="42" stroke="#4e342e" stroke-width="1.2"/>
+  <line x1="31" y1="48" x2="34" y2="48" stroke="#4e342e" stroke-width="1.2"/>
+  <ellipse cx="32" cy="58" rx="6" ry="4" fill="#546e7a" stroke="#607d8b" stroke-width="1"/>
+  <!-- Collar -->
+  <rect x="25" y="33" width="15" height="5" rx="1.5" fill="#78909c"/>
+  <!-- Head body (very wide) -->
+  <rect x="10" y="7" width="45" height="26" rx="3" fill="#37474f" stroke="#546e7a" stroke-width="1.5"/>
+  <rect x="12" y="8" width="40" height="7" rx="2" fill="#455a64" opacity="0.5"/>
+  <!-- 3 top spikes -->
+  <polygon points="21,3 18,7 24,7" fill="#607d8b" stroke="#78909c" stroke-width="1"/>
+  <polygon points="32,3 29,7 35,7" fill="#607d8b" stroke="#78909c" stroke-width="1"/>
+  <polygon points="43,3 40,7 46,7" fill="#607d8b" stroke="#78909c" stroke-width="1"/>
+  <!-- Flanges left (4) -->
+  <rect x="3"  y="9"  width="8" height="4" rx="1.5" fill="#546e7a" stroke="#607d8b" stroke-width="1"/>
+  <rect x="3"  y="15" width="8" height="4" rx="1.5" fill="#546e7a" stroke="#607d8b" stroke-width="1"/>
+  <rect x="3"  y="21" width="8" height="4" rx="1.5" fill="#546e7a" stroke="#607d8b" stroke-width="1"/>
+  <rect x="3"  y="27" width="8" height="4" rx="1.5" fill="#546e7a" stroke="#607d8b" stroke-width="1"/>
+  <!-- Flanges right (4) -->
+  <rect x="54" y="9"  width="8" height="4" rx="1.5" fill="#546e7a" stroke="#607d8b" stroke-width="1"/>
+  <rect x="54" y="15" width="8" height="4" rx="1.5" fill="#546e7a" stroke="#607d8b" stroke-width="1"/>
+  <rect x="54" y="21" width="8" height="4" rx="1.5" fill="#546e7a" stroke="#607d8b" stroke-width="1"/>
+  <rect x="54" y="27" width="8" height="4" rx="1.5" fill="#546e7a" stroke="#607d8b" stroke-width="1"/>
+  <!-- Shockwave ellipse -->
+  <ellipse cx="32" cy="34" rx="22" ry="6" fill="none" stroke="#ffd54f" stroke-width="2" opacity="0.7"/>
+  <ellipse cx="32" cy="34" rx="30" ry="8" fill="none" stroke="#ffd54f" stroke-width="1" opacity="0.35"/>
+  <!-- Debris -->
+  <line x1="12" y1="46" x2="8"  y2="52" stroke="#ffd54f" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+  <line x1="22" y1="48" x2="18" y2="56" stroke="#ffd54f" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <line x1="44" y1="48" x2="48" y2="56" stroke="#ffd54f" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <line x1="54" y1="46" x2="58" y2="52" stroke="#ffd54f" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+</svg>

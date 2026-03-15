@@ -1,0 +1,12 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="1" y="1" width="62" height="62" rx="8" fill="#1a0808" stroke="#882222" stroke-width="2"/>
+  <rect x="4" y="4" width="56" height="56" rx="6" fill="none" stroke="#5a1010" stroke-width="1" opacity="0.6"/>
+  <!-- Cracked shield -->
+  <path d="M 10,14 L 54,14 Q 54,44 32,60 Q 10,44 10,14 Z" fill="#3e1212" stroke="#c62828" stroke-width="2"/>
+  <path d="M 14,18 L 50,18 Q 50,44 32,56 Q 14,44 14,18 Z" fill="none" stroke="#ef5350" stroke-width="1.2" opacity="0.6"/>
+  <!-- Cracks across shield face -->
+  <polyline points="32,14 28,26 36,30 26,46" fill="none" stroke="#f44336" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="40,16 38,24 44,32"       fill="none" stroke="#e53935" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Down arrow inside cracked shield -->
+  <polygon points="32,42 38,34 35,34 35,22 29,22 29,34 26,34" fill="#c62828" opacity="0.7"/>
+</svg>

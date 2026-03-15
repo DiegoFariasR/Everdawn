@@ -1,0 +1,17 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="1" y="1" width="62" height="62" rx="8" fill="#0e1520" stroke="#3a6080" stroke-width="2"/>
+  <rect x="4" y="4" width="56" height="56" rx="6" fill="none" stroke="#2a5070" stroke-width="1" opacity="0.6"/>
+  <!-- Dark orb being shattered -->
+  <circle cx="32" cy="32" r="18" fill="#1a0030" stroke="#7b1fa2" stroke-width="1.5"/>
+  <circle cx="32" cy="32" r="12" fill="#12001e" stroke="#9c27b0" stroke-width="1"/>
+  <!-- Buff aura being torn off (fragments) -->
+  <path d="M 50,14 L 44,22 L 52,20 Z" fill="#ce93d8" opacity="0.7"/>
+  <path d="M 54,30 L 46,28 L 50,36 Z" fill="#ce93d8" opacity="0.6"/>
+  <path d="M 14,14 L 18,22 L 12,20 Z" fill="#ce93d8" opacity="0.5"/>
+  <path d="M 10,38 L 18,36 L 14,44 Z" fill="#ce93d8" opacity="0.4"/>
+  <!-- Ban / strikethrough X -->
+  <line x1="18" y1="18" x2="46" y2="46" stroke="#f44336" stroke-width="4" stroke-linecap="round"/>
+  <line x1="46" y1="18" x2="18" y2="46" stroke="#f44336" stroke-width="4" stroke-linecap="round"/>
+  <line x1="18" y1="18" x2="46" y2="46" stroke="#ff8a80" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="46" y1="18" x2="18" y2="46" stroke="#ff8a80" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

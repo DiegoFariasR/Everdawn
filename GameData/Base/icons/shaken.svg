@@ -1,0 +1,32 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="1" y="1" width="62" height="62" rx="8" fill="#1a0808" stroke="#882222" stroke-width="2"/>
+  <rect x="4" y="4" width="56" height="56" rx="6" fill="none" stroke="#5a1010" stroke-width="1" opacity="0.6"/>
+  <!-- Head (simplified circle) -->
+  <circle cx="32" cy="26" r="14" fill="#3e2020" stroke="#8d3030" stroke-width="1.5"/>
+  <!-- Dizzy spiral eyes -->
+  <path d="M 26,23 Q 28,20 30,23 Q 28,26 26,23"  fill="none" stroke="#ff5252" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 34,23 Q 36,20 38,23 Q 36,26 34,23"  fill="none" stroke="#ff5252" stroke-width="2" stroke-linecap="round"/>
+  <!-- Stars / sparkles circling head (concussion) -->
+  <!-- 5 small stars arranged around head at ~r=20 -->
+  <!-- star at 0Â° -->
+  <polygon points="32,5 33,8 36,8 34,10 35,13 32,11 29,13 30,10 28,8 31,8" fill="#ffd740" opacity="0.9" transform="scale(0.7) translate(13,0)"/>
+  <!-- Use simple circles with lines as stars -->
+  <circle cx="32" cy="6"  r="2.5" fill="#ffd740" opacity="0.9"/>
+  <line x1="32" y1="4"  x2="32" y2="2"  stroke="#ffd740" stroke-width="1.2"/>
+  <line x1="34" y1="4"  x2="36" y2="2"  stroke="#ffd740" stroke-width="1.2"/>
+  <line x1="30" y1="4"  x2="28" y2="2"  stroke="#ffd740" stroke-width="1.2"/>
+  <circle cx="52" cy="16" r="2.5" fill="#ffd740" opacity="0.8"/>
+  <line x1="54" y1="14" x2="56" y2="12" stroke="#ffd740" stroke-width="1.2"/>
+  <line x1="54" y1="18" x2="57" y2="18" stroke="#ffd740" stroke-width="1.2"/>
+  <circle cx="48" cy="44" r="2.5" fill="#ff8f00" opacity="0.8"/>
+  <line x1="50" y1="42" x2="52" y2="40" stroke="#ff8f00" stroke-width="1.2"/>
+  <line x1="50" y1="46" x2="52" y2="48" stroke="#ff8f00" stroke-width="1.2"/>
+  <circle cx="16" cy="44" r="2.5" fill="#ff8f00" opacity="0.8"/>
+  <line x1="14" y1="42" x2="12" y2="40" stroke="#ff8f00" stroke-width="1.2"/>
+  <line x1="14" y1="46" x2="12" y2="48" stroke="#ff8f00" stroke-width="1.2"/>
+  <circle cx="12" cy="16" r="2.5" fill="#ffd740" opacity="0.8"/>
+  <line x1="10" y1="14" x2="8"  y2="12" stroke="#ffd740" stroke-width="1.2"/>
+  <line x1="10" y1="18" x2="7"  y2="18" stroke="#ffd740" stroke-width="1.2"/>
+  <!-- Body line (listing sideways) -->
+  <rect x="26" y="40" width="12" height="16" rx="4" fill="#3e2020" stroke="#8d3030" stroke-width="1.5" transform="rotate(8,32,48)"/>
+</svg>
