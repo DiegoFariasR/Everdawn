@@ -151,13 +151,8 @@ namespace GameCore.Battle
         /// </summary>
         IReadOnlyList<TriggerCondition>? TriggerConditions = null,
         /// <summary>
-        /// When true, using this skill spends <see cref="FocusCost"/> Focus, grants the Focused buff,
-        /// and refunds the actor's action so they act again immediately.
-        /// </summary>
-        bool IsFocusSkill = false,
-        /// <summary>
-        /// Amount of Focus consumed when <see cref="IsFocusSkill"/> is true.
-        /// Validated against the actor's Focus bar before the skill may be selected.
+        /// When true, using this skill spends <see cref="FocusCost"/> Focus from the actor's Focus bar.
+        /// Any skill with a non-zero FocusCost is unavailable when the actor's Focus bar is below that cost.
         /// </summary>
         int FocusCost = 0,
         /// <summary>
@@ -207,6 +202,9 @@ namespace GameCore.Battle
 
         /// <summary>True if this skill applies an active buff or debuff to its target.</summary>
         public bool IsApplyEffect => Effects.Count > 0 && Effects[0].Kind == EffectKind.ApplyEffect;
+
+        /// <summary>True if this skill grants the Focused buff (Self-targeting setup action, no damage).</summary>
+        public bool IsGrantFocusedBuff => Effects.Count > 0 && Effects[0].Kind == EffectKind.GrantFocusedBuff;
 
         /// <summary>Target side of the first effect. Defaults to Enemy if Effects is empty.</summary>
         public BattleSkillTarget Target => Effects.Count > 0 ? Effects[0].Target : BattleSkillTarget.Enemy;

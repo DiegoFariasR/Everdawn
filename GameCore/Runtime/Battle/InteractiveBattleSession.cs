@@ -219,7 +219,7 @@ namespace GameCore.Battle
                 return BuildResponse(newEvents);
             }
 
-            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (!s.IsFocusSkill || GetBar(actor.Id, "focus") >= s.FocusCost)).LastOrDefault();
+            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (s.FocusCost == 0 || GetBar(actor.Id, "focus") >= s.FocusCost)).LastOrDefault();
             if (skill == null)
             {
                 newEvents.Add(AddEvent(actor.Id, $"{actor.Name} waits.", "status"));
@@ -271,7 +271,7 @@ namespace GameCore.Battle
                 return BuildResponse(newEvents);
             }
 
-            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (!s.IsFocusSkill || GetBar(actor.Id, "focus") >= s.FocusCost)).LastOrDefault();
+            var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (s.FocusCost == 0 || GetBar(actor.Id, "focus") >= s.FocusCost)).LastOrDefault();
             if (skill == null)
             {
                 newEvents.Add(AddEvent(actor.Id, $"{actor.Name} waits.", "status"));
@@ -300,7 +300,7 @@ namespace GameCore.Battle
                 pending = new BattlePendingInput(
                     Actor: actor,
                     Skills: skills,
-                    AvailableSkillIds: skills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (!s.IsFocusSkill || GetBar(actor.Id, "focus") >= s.FocusCost)).Select(s => s.Id).ToArray(),
+                    AvailableSkillIds: skills.Where(s => GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (s.FocusCost == 0 || GetBar(actor.Id, "focus") >= s.FocusCost)).Select(s => s.Id).ToArray(),
                     EnemyTargets: _allUnits.Where(u => u.Team != actor.Team && _hp[u.Id] > 0).ToArray(),
                     AllyTargets: _allUnits.Where(u => u.Team == actor.Team && _hp[u.Id] > 0).ToArray(),
                     SkillCooldowns: skills.Where(s => GetCooldown(s.Id) > 0)
@@ -365,7 +365,7 @@ namespace GameCore.Battle
                 }
 
                 // Auto-resolve enemy action.
-                var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (!s.IsFocusSkill || GetBar(actor.Id, "focus") >= s.FocusCost)).LastOrDefault();
+                var skill = actor.ResolvedSkills.Where(s => s.Category != SkillCategory.Passive && GetBar(actor.Id, "mp") >= s.Cost && GetCooldown(s.Id) <= 0 && s.MeetsRequirements(actor) && (s.FocusCost == 0 || GetBar(actor.Id, "focus") >= s.FocusCost)).LastOrDefault();
                 if (skill == null)
                 {
                     produced.Add(AddEvent(actor.Id, $"{actor.Name} waits.", "status"));
@@ -441,9 +441,10 @@ namespace GameCore.Battle
             if (actor.ReactionSkill != null && _skillCooldowns.TryGetValue(actor.ReactionSkill.Id, out int rcd) && rcd > 0)
                 _skillCooldowns[actor.ReactionSkill.Id] = rcd - 1;
 
-            // Focus skill: spend Focus, grant Focused buff, refund the action.
-            // The actor does not advance in the turn order — they immediately get another action.
-            if (skill.IsFocusSkill)
+            // Deduct focus cost for any skill that requires Focus.
+            // Availability is already filtered in BuildResponse and BattleSession, but we guard
+            // here too in case the engine is driven directly (e.g. tests, AI).
+            if (skill.FocusCost > 0)
             {
                 int currentFocus = GetBar(actor.Id, "focus");
                 if (currentFocus < skill.FocusCost)
@@ -452,11 +453,6 @@ namespace GameCore.Battle
                     return produced;
                 }
                 _bars[actor.Id]["focus"] = currentFocus - skill.FocusCost;
-                _focusedUnits.Add(actor.Id);
-                produced.Add(AddEvent(actor.Id, $"{actor.Name} focuses intently!", "skill"));
-                if (skill.Cooldown > 0) _skillCooldowns[skill.Id] = skill.Cooldown;
-                _actionRefunded = true;
-                return produced;
             }
 
             // Resolve the effective skill for this action: applies any runtime skill modifiers
@@ -555,6 +551,15 @@ namespace GameCore.Battle
                         ? $"{actor.Name} gains {effect.EffectDefinition.Name}!"
                         : $"{actor.Name} grants {effect.EffectDefinition.Name} to {target.Name}!";
                     produced.Add(AddEvent(actor.Id, gainMsg, evType, target.Id, skillId: skill.Id));
+                    continue;
+                }
+
+                // GrantFocusedBuff: self-targeting setup effect. Adds actor to _focusedUnits.
+                // Applied once per target (which is Self), not per hit. No damage is dealt.
+                if (effect?.Kind == EffectKind.GrantFocusedBuff)
+                {
+                    _focusedUnits.Add(actor.Id);
+                    produced.Add(AddEvent(actor.Id, $"{actor.Name} focuses intently!", "skill", skillId: skill.Id));
                     continue;
                 }
 
@@ -691,6 +696,17 @@ namespace GameCore.Battle
             // so that runtime cooldown modifiers do not permanently alter the session's cooldown state).
             if (skill.Cooldown > 0)
                 _skillCooldowns[skill.Id] = skill.Cooldown;
+
+            // RefundsAction: the actor gets another action immediately without advancing turn order.
+            // Skip post-action processing (fury gain, active-effect ticking, reactions) — those belong
+            // to the follow-up action so they are not applied twice in the same logical turn.
+            if (skill.RefundsAction)
+            {
+                _actionRefunded = true;
+                CheckEnd();
+                return produced;
+            }
+
             // Fury: actor gains 10–50 per action (excludes heals, shields, and bar restores)
             if (actor.HasTrait(BattleTrait.Fury) && !effectiveSkill.IsHeal && !effectiveSkill.IsShield && !effectiveSkill.IsRestoreBar && !effectiveSkill.IsApplyEffect)
                 _bars[actor.Id]["fury"] = Math.Min(100, GetBar(actor.Id, "fury") + _rng.Next(10, 51));

@@ -6,8 +6,9 @@
 
 - id: focus
   name: Focus
-  isFocusSkill: true
   focusCost: 100
   refundsAction: true
   range: Self
-  effects: []
+  effects:
+    - kind: grantFocusedBuff
+      target: Ally

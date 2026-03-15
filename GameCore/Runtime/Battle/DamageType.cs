@@ -19,6 +19,12 @@ namespace GameCore.Battle
         /// Applied once per target (not per hit). No damage is dealt.
         /// </summary>
         ApplyEffect,
+        /// <summary>
+        /// Grants the Focused buff to the actor (Self-targeting).
+        /// Used by the Focus skill to set up the Focused state before the refunded follow-up action.
+        /// Applied once per target, not per hit. No damage is dealt.
+        /// </summary>
+        GrantFocusedBuff,
     }
 
     /// <summary>

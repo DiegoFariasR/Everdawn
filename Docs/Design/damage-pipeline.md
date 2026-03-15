@@ -9,23 +9,23 @@ HP reduction. Every node maps to a specific piece of code — update both togeth
 
 ```mermaid
 flowchart TD
-    A([Actor's turn]) --> FS{"Action is\na Focus skill?"}
+    A([Actor's turn]) --> FS{"skill.RefundsAction = true?"}
 
-    FS -- yes --> FK["Deduct FocusCost from Focus bar\nGrant Focused buff\nAction refunded → player acts again"]
+    FS -- yes --> FK["Deduct skill.FocusCost from Focus bar (if > 0)<br/>Execute skill effects (e.g. GrantFocusedBuff)<br/>Action refunded → player acts again"]
     FK --> A
 
     FS -- no --> B
 
     subgraph PRE["Pre-hit resolution  (once per action)"]
-        B["Resolve effective hit count\n· AGI-derived  OR  skill BaseHits\n· Slow status: AGI hits halved"]
-        B --> FC{"Actor has Focused buff\nAND skill is IsFocusCompatible?"}
-        FC -- yes --> FE["Consume Focused buff\nEmit 'sharpens' event\neffectiveHits += FocusEffectValue\n(ExtraHit or ExtraProjectile)"]
+        B["Resolve effective hit count<br/>· AGI-derived  OR  skill BaseHits<br/>· Slow status: AGI hits halved"]
+        B --> FC{"Actor has Focused buff AND skill is IsFocusCompatible?"}
+        FC -- yes --> FE["Consume Focused buff<br/>Emit 'sharpens' event<br/>effectiveHits += FocusEffectValue<br/>(ExtraHit or ExtraProjectile)"]
         FC -- no  --> GM
-        FE --> GM["Compute empowerMult\n= DamageDealtMultiplier from active effects"]
-        GM --> D{"Fury empowered?\n(bar = 100, non-basic skill)"}
+        FE --> GM["Compute empowerMult<br/>= DamageDealtMultiplier from active effects"]
+        GM --> D{"Fury empowered?<br/>(bar = 100, non-basic skill)"}
         D -- yes --> E["empowerMult × 1.5 · Fury bar → 0"]
         D -- no  --> F
-        E --> F["Snapshot actorIsDizzy\n(Disruption bar ≥ 50)\n\nSnapshot damageTakenMult\n(target's DamageTakenMultiplier\nfrom active effects)"]
+        E --> F["Snapshot actorIsDizzy (Disruption bar ≥ 50)<br/>Snapshot damageTakenMult (target's DamageTakenMultiplier)"]
     end
 
     F --> LOOP
@@ -33,17 +33,17 @@ flowchart TD
     subgraph LOOP["Per-hit loop  (repeated effectiveHits times)"]
 
         subgraph PIPE["DamageCalc.Compute  — full audit trail in DamageResult.Steps"]
-            L1["Layer 1 — Base\nΣ (stat × scaling) × DamageMultiplier × empowerMult × perHitMult\n± variance (±20 % of stat base)"]
-            L1 --> L2["Layer 2 — Resistance\neffectiveResistance = target.Resistance − actor.Penetration\ncapped at 90  →  always ≥ 10 % damage lands\n× (1 − resistance / 100)"]
-            L2 --> L3["Layer 3 — OutgoingTypeMult\nactor's per-type dealt multiplier from active effects\nskipped when = 1.0"]
-            L3 --> L4["Layer 4 — IncomingTypeMult\ntarget's per-type taken multiplier from active effects\nskipped when = 1.0"]
-            L4 --> L5["Layer 5 — AttackerOutput\nDizzy → × 0.8\nskipped when = 1.0"]
-            L5 --> L6["Layer 6 — DamageTaken\nflat defender-side multiplier from active effects\nskipped when = 1.0"]
-            L6 --> SUM["totalDamage = Σ FinalDamage\nacross all DamageComponents"]
+            L1["Layer 1 — Base<br/>Σ (stat × scaling) × DamageMultiplier × empowerMult × perHitMult<br/>± variance (±20 % of stat base)"]
+            L1 --> L2["Layer 2 — Resistance<br/>effectiveResistance = target.Resistance − actor.Penetration<br/>capped at 90  →  always ≥ 10 % damage lands<br/>× (1 − resistance / 100)"]
+            L2 --> L3["Layer 3 — OutgoingTypeMult<br/>actor's per-type dealt multiplier from active effects<br/>skipped when = 1.0"]
+            L3 --> L4["Layer 4 — IncomingTypeMult<br/>target's per-type taken multiplier from active effects<br/>skipped when = 1.0"]
+            L4 --> L5["Layer 5 — AttackerOutput<br/>Dizzy → × 0.8<br/>skipped when = 1.0"]
+            L5 --> L6["Layer 6 — DamageTaken<br/>flat defender-side multiplier from active effects<br/>skipped when = 1.0"]
+            L6 --> SUM["totalDamage = Σ FinalDamage across all DamageComponents"]
         end
 
         SUM --> BAR{"Target has Barrier?"}
-        BAR -- yes --> BABSORB["Barrier absorbs min(barrier, totalDamage)\nRemainder applied to HP"]
+        BAR -- yes --> BABSORB["Barrier absorbs min(barrier, totalDamage)<br/>Remainder applied to HP"]
         BAR -- no  --> HP["Full totalDamage applied to HP"]
         BABSORB --> DEAD
         HP --> DEAD{"Target HP ≤ 0?"}
@@ -53,7 +53,7 @@ flowchart TD
         MORE -- no  --> POST
     end
 
-    POST([End of action]) --> W["Post-action\nTick active effects · Fury gain\nThermal & Disruption buildup · Reactions"]
+    POST([End of action]) --> W["Post-action<br/>Tick active effects · Fury gain<br/>Thermal & Disruption buildup · Reactions"]
 
     style PRE  fill:#1a1a2e,stroke:#4e4e8f,color:#ccc
     style LOOP fill:#12232e,stroke:#4e8f6e,color:#ccc
@@ -69,7 +69,7 @@ pipeline, update the matching row here and the Mermaid above.
 
 | Diagram node | `DamageStep` name in `DamageResult.Steps` | Code location |
 |---|---|---|
-| Focus skill branch | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `if (skill.IsFocusSkill)` block |
+| RefundsAction branch | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `if (skill.RefundsAction)` early-return block |
 | Hit count (AGI / BaseHits) | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `effectiveHits` resolution block |
 | Focus ExtraHit/ExtraProjectile | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `if (isFocusEmpowered && ...)` |
 | Fury empowerment | *(not in pipeline)* | `InteractiveBattleSession.ExecuteAction` — `isFuryEmpowered` block |

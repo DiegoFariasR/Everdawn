@@ -597,7 +597,6 @@ namespace GameCore.Content
                     Range: c.Range != null ? Enum.Parse<SkillRange>(c.Range, ignoreCase: true) : (SkillRange?)null,
                     DamageType: c.DamageType != null ? Enum.Parse<EffectType>(c.DamageType, ignoreCase: true) : (EffectType?)null
                 )).ToArray(),
-                IsFocusSkill: raw.IsFocusSkill,
                 FocusCost: raw.FocusCost,
                 RefundsAction: raw.RefundsAction,
                 IsFocusCompatible: raw.IsFocusCompatible,

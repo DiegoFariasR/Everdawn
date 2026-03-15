@@ -165,11 +165,7 @@ namespace GameCore.Content.Raw
         /// </summary>
         public List<RawTriggerCondition>? TriggerConditions { get; set; }
         /// <summary>
-        /// When true, using this skill spends <see cref="FocusCost"/> Focus, grants the Focused buff,
-        /// and refunds the actor's action so they may act again immediately.
-        /// </summary>
-        public bool IsFocusSkill { get; set; }
-        /// <summary>Focus bar cost when <see cref="IsFocusSkill"/> is true. Not an MP cost.</summary>
+        /// <summary>Focus bar cost. Any skill with a non-zero value requires that much Focus to use.</summary>
         public int FocusCost { get; set; }
         /// <summary>When true, the turn does not advance after this skill resolves — the actor acts again.</summary>
         public bool RefundsAction { get; set; }
