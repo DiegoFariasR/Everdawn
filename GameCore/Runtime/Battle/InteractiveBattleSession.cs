@@ -424,8 +424,8 @@ namespace GameCore.Battle
                 _bars[actor.Id]["fury"] = 0;
                 produced.Add(AddEvent(actor.Id, $"{actor.Name}'s Fury empowers their attack!", "skill"));
             }
-            // DamageDealtMultiplier from active effects stacks with focus/fury empowerment.
-            double empowerMult = GetDamageDealtMultiplier(actor.Id);
+            // Flat (global) DamageDealtMultiplier from active effects stacks with focus/fury empowerment.
+            double empowerMult = GetFlatDamageDealtMultiplier(actor.Id);
             if (isFocusEmpowered) empowerMult *= 1.5;
             if (isFuryEmpowered) empowerMult *= 1.5;
 
@@ -1077,7 +1077,7 @@ namespace GameCore.Battle
                 DurationKind: definition.DurationKind,
                 SkillModifier: definition.SkillModifier,
                 StatModifiers: definition.StatModifiers,
-                DamageDealtMultiplier: definition.DamageDealtMultiplier,
+                DamageDealtMultiplierByType: definition.DamageDealtMultiplierByType,
                 DamageTakenMultiplierByType: definition.DamageTakenMultiplierByType,
                 ResistanceModifierByType: definition.ResistanceModifierByType,
                 PenetrationModifierByType: definition.PenetrationModifierByType
@@ -1175,12 +1175,12 @@ namespace GameCore.Battle
             };
         }
 
-        /// <summary>Returns the effective damage-dealt multiplier for a unit from active effects.</summary>
-        private double GetDamageDealtMultiplier(string unitId) =>
+        /// <summary>Returns the flat (global, all-types) damage-dealt multiplier for a unit from active effects' StatModifiers.</summary>
+        private double GetFlatDamageDealtMultiplier(string unitId) =>
             ResolveStatModifier(unitId, RuntimeStatKey.DamageDealtMultiplier, baseValue: 1.0);
 
         /// <summary>
-        /// Returns the effective per-type damage dealt multiplier for a unit and damage type from active effects.
+        /// Returns the per-type outgoing damage multiplier for a unit and damage type from active effects.
         /// Base value is 1.0 (no change). Stacks multiplicatively across all active effect instances.
         /// </summary>
         private double GetDamageDealtMultiplierForType(string unitId, EffectType effectType)
@@ -1189,7 +1189,7 @@ namespace GameCore.Battle
                 return 1.0;
             double value = 1.0;
             foreach (var effect in effects)
-                if (effect.DamageDealtMultiplier != null && effect.DamageDealtMultiplier.TryGetValue(effectType, out double m))
+                if (effect.DamageDealtMultiplierByType != null && effect.DamageDealtMultiplierByType.TryGetValue(effectType, out double m))
                     value *= m;
             return value;
         }

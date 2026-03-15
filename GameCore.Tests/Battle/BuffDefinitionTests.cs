@@ -42,14 +42,14 @@ namespace GameCore.Tests.Battle
         public void AttackUp_AppliesToAllDamageTypes()
         {
             var def = Content.GetBuffDefinition("attack-up");
-            Assert.NotNull(def.DamageDealtMultiplier);
+            Assert.NotNull(def.DamageDealtMultiplierByType);
 
             foreach (var effectType in System.Enum.GetValues(typeof(EffectType)))
             {
                 var et = (EffectType)effectType;
                 Assert.True(
-                    def.DamageDealtMultiplier!.TryGetValue(et, out var mult),
-                    $"attack-up should have a DamageDealtMultiplier for {et}");
+                    def.DamageDealtMultiplierByType!.TryGetValue(et, out var mult),
+                    $"attack-up should have a DamageDealtMultiplierByType for {et}");
                 Assert.Equal(1.3, mult, precision: 6);
             }
         }
@@ -74,14 +74,14 @@ namespace GameCore.Tests.Battle
         public void AttackDown_ReducesDamageDealtForAllTypes()
         {
             var def = Content.GetBuffDefinition("attack-down");
-            Assert.NotNull(def.DamageDealtMultiplier);
+            Assert.NotNull(def.DamageDealtMultiplierByType);
 
             foreach (var effectType in System.Enum.GetValues(typeof(EffectType)))
             {
                 var et = (EffectType)effectType;
                 Assert.True(
-                    def.DamageDealtMultiplier!.TryGetValue(et, out var mult),
-                    $"attack-down should have a DamageDealtMultiplier for {et}");
+                    def.DamageDealtMultiplierByType!.TryGetValue(et, out var mult),
+                    $"attack-down should have a DamageDealtMultiplierByType for {et}");
                 Assert.Equal(0.7, mult, precision: 6);
             }
         }
@@ -121,11 +121,11 @@ namespace GameCore.Tests.Battle
             var battleCry = Content.GetSkill("battle-cry");
             var def = battleCry.Effects.Single(e => e.Kind == EffectKind.ApplyEffect).EffectDefinition!;
 
-            Assert.NotNull(def.DamageDealtMultiplier);
+            Assert.NotNull(def.DamageDealtMultiplierByType);
             foreach (var effectType in System.Enum.GetValues(typeof(EffectType)))
             {
                 var et = (EffectType)effectType;
-                Assert.True(def.DamageDealtMultiplier!.ContainsKey(et),
+                Assert.True(def.DamageDealtMultiplierByType!.ContainsKey(et),
                     $"battle-cry's attack-up effect should cover {et}");
             }
         }

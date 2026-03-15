@@ -873,7 +873,7 @@ namespace GameCore.Tests.Battle
 
             var fireBoost = new ActiveEffectDefinition("fireboost", "Fire Boost",
                 EffectDurationKind.ForTargetTurns, Duration: 5,
-                DamageDealtMultiplier: new System.Collections.Generic.Dictionary<EffectType, double> { { EffectType.Fire, 2.0 } });
+                DamageDealtMultiplierByType: new System.Collections.Generic.Dictionary<EffectType, double> { { EffectType.Fire, 2.0 } });
             int fireDamageNoBuff = MeasureTypeDamage(player, enemy, "fire-skill", applyBuff: null, seed: 42);
 
             // Measure fire damage WITH fire buff.
@@ -906,7 +906,7 @@ namespace GameCore.Tests.Battle
 
             var fireBoost = new ActiveEffectDefinition("fireboost", "Fire Boost",
                 EffectDurationKind.ForTargetTurns, Duration: 5,
-                DamageDealtMultiplier: new System.Collections.Generic.Dictionary<EffectType, double> { { EffectType.Fire, 2.0 } });
+                DamageDealtMultiplierByType: new System.Collections.Generic.Dictionary<EffectType, double> { { EffectType.Fire, 2.0 } });
 
             int damageNoBuff = MeasureTypeDamage(player, enemy, "fire-skill", applyBuff: null, seed: 7);
             int damageGlobalOnly = MeasureTypeDamage(player, enemy, "fire-skill", applyBuff: globalBoost, seed: 7);

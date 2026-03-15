@@ -220,7 +220,7 @@ namespace GameCore.Content
                 Duration: raw.Duration,
                 StackingPolicy: stackingPolicy,
                 StatModifiers: statModifiers.Count > 0 ? statModifiers.ToArray() : null,
-                DamageDealtMultiplier: damageDealt,
+                DamageDealtMultiplierByType: damageDealt,
                 DamageTakenMultiplierByType: damageTaken,
                 ResistanceModifierByType: resistance,
                 PenetrationModifierByType: penetration);
@@ -683,7 +683,7 @@ namespace GameCore.Content
                 Duration: rawEffect.Duration,
                 StackingPolicy: EffectStackingPolicy.RefreshDuration,
                 StatModifiers: statModifiers.Count > 0 ? statModifiers.ToArray() : null,
-                DamageDealtMultiplier: damageDealtByType,
+                DamageDealtMultiplierByType: damageDealtByType,
                 DamageTakenMultiplierByType: damageTakenByType,
                 ResistanceModifierByType: resistanceByType,
                 PenetrationModifierByType: penetrationByType);

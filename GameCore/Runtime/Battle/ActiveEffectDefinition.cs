@@ -46,7 +46,7 @@ namespace GameCore.Battle
         /// Per-damage-type outgoing damage multipliers. Each entry multiplies the actor's damage
         /// for that type (e.g. Physical → 1.2 for +20% physical damage dealt).
         /// </summary>
-        IReadOnlyDictionary<EffectType, double>? DamageDealtMultiplier = null,
+        IReadOnlyDictionary<EffectType, double>? DamageDealtMultiplierByType = null,
 
         /// <summary>
         /// Per-damage-type incoming damage multipliers applied to the target

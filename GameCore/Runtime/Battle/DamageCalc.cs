@@ -126,31 +126,33 @@ namespace GameCore.Battle
                 steps.Add(new DamageStep("Resistance", value, afterResistance));
                 value = afterResistance;
 
-                // ── Layer 3: TypeMultiplier ──────────────────────────────────────
-                // Multiply the current damage by the actor's per-type damage dealt multiplier.
+                // ── Layer 3: OutgoingTypeMult ────────────────────────────────────
+                // Multiply the current damage by the actor's per-type outgoing damage multiplier
+                // from active effects (e.g. Attack Up → ×1.3 for all types).
                 // Base value is 1.0 (no change). Values > 1.0 increase damage; < 1.0 decrease it.
                 if (getEffectiveDamageDealtMultiplier != null)
                 {
-                    double typeMult = getEffectiveDamageDealtMultiplier(component.DamageType.Value);
-                    if (typeMult != 1.0)
+                    double outgoingTypeMult = getEffectiveDamageDealtMultiplier(component.DamageType.Value);
+                    if (outgoingTypeMult != 1.0)
                     {
-                        int afterTypeMult = Math.Max(0, (int)(value * typeMult));
-                        steps.Add(new DamageStep("TypeMultiplier", value, afterTypeMult));
-                        value = afterTypeMult;
+                        int afterOutgoingTypeMult = Math.Max(0, (int)(value * outgoingTypeMult));
+                        steps.Add(new DamageStep("OutgoingTypeMult", value, afterOutgoingTypeMult));
+                        value = afterOutgoingTypeMult;
                     }
                 }
 
-                // ── Layer 4: DamageTakenTypeMultiplier ───────────────────────────
-                // Multiply damage by the target's per-type damage taken multiplier.
-                // Values < 1.0 reduce damage (e.g. 0.8 = target takes 20% less).
+                // ── Layer 4: IncomingTypeMult ────────────────────────────────────
+                // Multiply damage by the target's per-type incoming damage multiplier
+                // from active effects (e.g. Defense Up → ×0.75 for all types).
+                // Values < 1.0 reduce damage; values > 1.0 amplify it.
                 if (getEffectiveDamageTakenMultiplier != null)
                 {
-                    double takenMult = getEffectiveDamageTakenMultiplier(component.DamageType.Value);
-                    if (takenMult != 1.0)
+                    double incomingTypeMult = getEffectiveDamageTakenMultiplier(component.DamageType.Value);
+                    if (incomingTypeMult != 1.0)
                     {
-                        int afterTakenMult = Math.Max(0, (int)(value * takenMult));
-                        steps.Add(new DamageStep("DamageTakenTypeMultiplier", value, afterTakenMult));
-                        value = afterTakenMult;
+                        int afterIncomingTypeMult = Math.Max(0, (int)(value * incomingTypeMult));
+                        steps.Add(new DamageStep("IncomingTypeMult", value, afterIncomingTypeMult));
+                        value = afterIncomingTypeMult;
                     }
                 }
 
